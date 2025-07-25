@@ -41,19 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _screens[_selectedIndex],
 
-      /* 
-
-        bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          children: [
-            _buildNavItem(0, Constants.mapLocationIconPath, 'Map'),
-            _buildNavItem(1, Constants.lineGraphIconPath, 'Summary'),
-          ],
-        ),
-      ),
-      
-      */
+   
       bottomNavigationBar: SizedBox(
         height: 56, // Standard height
         child: Row(
@@ -64,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
               'Map',
               primaryColor,
             ),
-            // 👉 Vertical divider between tabs
+            // Vertical divider between tabs
             Container(
               width: 1,
               height: double.infinity,
@@ -133,54 +121,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // Widget _buildNavItem(int index, String iconPath, String label) {
-  //   final isSelected = _selectedIndex == index;
-  //   final primaryColor = Color(Constants.primaryColor);
-
-  //   return Expanded(
-  //     child: GestureDetector(
-  //       onTap: () {
-  //         setState(() {
-  //           _selectedIndex = index;
-  //         });
-  //       },
-  //       child: Container(
-  //         padding: const EdgeInsets.symmetric(vertical: 10),
-  //         decoration: BoxDecoration(
-  //           border: Border(
-  //             top: BorderSide(
-  //               color: isSelected ? primaryColor : Colors.transparent,
-  //               width: 2.0,
-  //             ),
-  //           ),
-  //         ),
-  //         child: Center(
-  //           child: Row(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               SvgPicture.asset(
-  //                 iconPath,
-  //                 width: 24,
-  //                 height: 24,
-  //                 colorFilter: ColorFilter.mode(
-  //                   isSelected ? primaryColor : Colors.grey.shade400,
-  //                   BlendMode.srcIn,
-  //                 ),
-  //               ),
-  //               8.w,
-  //               Text(
-  //                 label,
-  //                 style: TextStyle(
-  //                   color: isSelected ? primaryColor : Colors.grey.shade400,
-  //                   fontWeight: FontWeight.w500,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }

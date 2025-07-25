@@ -14,4 +14,5 @@ class Constants {
       'assets/json/subblocks-2025-coverage.json';
   static const String mapLocationIconPath = 'assets/icons/map_location.svg';
   static const String lineGraphIconPath = 'assets/icons/line_graph.svg';
+  static const String filterIconPath = 'assets/icons/filter_data.svg';
 }
