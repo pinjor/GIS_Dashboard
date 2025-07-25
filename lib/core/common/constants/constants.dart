@@ -15,4 +15,6 @@ class Constants {
   static const String mapLocationIconPath = 'assets/icons/map_location.svg';
   static const String lineGraphIconPath = 'assets/icons/line_graph.svg';
   static const String filterIconPath = 'assets/icons/filter_data.svg';
+  static const String childrenIconPath = 'assets/icons/children.svg';
+  static const String dosesIconPath = 'assets/icons/doses.svg';
 }

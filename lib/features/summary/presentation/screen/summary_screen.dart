@@ -1,7 +1,12 @@
 // 📁 screens/summary_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gis_dashboard/core/utils/utils.dart';
+import 'package:gis_dashboard/features/summary/presentation/widget/summary_card_widget.dart';
 
+import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/header_title_icon_filter_widget.dart';
+import '../widget/line_chart_achievements_widget.dart';
+import '../widget/vaccine_donut_chart_widget.dart';
 
 class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});
@@ -19,44 +24,34 @@ class SummaryScreen extends StatelessWidget {
             vaccine: 'Penta-1',
           ),
           const SizedBox(height: 16),
-          // Row(
-          //   children: const [
-          //     Expanded(
-          //       child: SummaryCard(
-          //         iconPath: 'assets/icons/children.svg',
-          //         label: 'Total Children\n(0-11 month)',
-          //         value: '153,543',
-          //       ),
-          //     ),
-          //     SizedBox(width: 12),
-          //     Expanded(
-          //       child: SummaryCard(
-          //         iconPath: 'assets/icons/doses.svg',
-          //         label: 'Doses Administered\n(0-11 month)',
-          //         value: '103,543',
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          const SizedBox(height: 24),
-          const Text(
-            'Vaccine Coverage',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          Row(
+            children: const [
+              Expanded(
+                child: SummaryCardWidget(
+                  iconPath: Constants.childrenIconPath,
+                  label: 'Total Children',
+                  duration: '0-11 month',
+                  value: '153,543',
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: SummaryCardWidget(
+                  iconPath: Constants.dosesIconPath,
+                  label: 'Doses Administered',
+                  duration: '0-11 month',
+                  value: '103,543',
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          // const VaccineDonutChart(),
-          const SizedBox(height: 24),
-          const Text(
-            'Penta-1 Vaccine Achievements',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          // const LineChartAchievements(),
+          16.h,
+          const VaccineDonutChartWidget(),
+          16.h,
+
+          const LineChartAchievementsWidget(),
         ],
       ),
     );
   }
 }
-
-// NOTE: Assume `FilterPanel`, `SummaryCard`, `VaccineDonutChart`, and `LineChartAchievements`
-// are implemented in their respective widget files.
