@@ -1,0 +1,1605 @@
+{
+    "metadata": {
+        "year": 2025,
+        "area_type": "ward",
+        "generated_at": "2025-07-16 12:10:24",
+        "data_structure": "gender_specific",
+        "parent_area": {
+            "area_uid": "yWv0Pnf9IjD",
+            "area_name": "Kulla",
+            "area_type": "union"
+        }
+    },
+    "vaccines": [
+        {
+            "vaccine_uid": "HOq1Ax6xB19",
+            "vaccine_name": "Penta - 1st",
+            "total_target": 224,
+            "total_target_male": 110,
+            "total_target_female": 114,
+            "total_coverage": 128,
+            "total_coverage_male": 54,
+            "total_coverage_female": 74,
+            "total_coverage_percentage": 57.14,
+            "total_coverage_percentage_male": 49.09,
+            "total_coverage_percentage_female": 64.91,
+            "areas": [
+                {
+                    "name": "Ward-2",
+                    "uid": "nse5klZ6bqA",
+                    "target": 224,
+                    "target_male": 110,
+                    "target_female": 114,
+                    "coverage": 128,
+                    "coverage_male": 54,
+                    "coverage_female": 74,
+                    "coverage_percentage": 57.14,
+                    "coverage_percentage_male": 48.98,
+                    "coverage_percentage_female": 65.05,
+                    "dropout": 96,
+                    "dropout_male": 56.25,
+                    "dropout_female": 39.75,
+                    "monthly_coverages": {
+                        "1": {
+                            "coverage": 36,
+                            "coverage_male": 18,
+                            "coverage_female": 18,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "2": {
+                            "coverage": 20,
+                            "coverage_male": 11,
+                            "coverage_female": 9,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 94.94
+                        },
+                        "3": {
+                            "coverage": 18,
+                            "coverage_male": 7,
+                            "coverage_female": 11,
+                            "coverage_percentage": 96.41,
+                            "coverage_percentage_male": 76.17,
+                            "coverage_percentage_female": 100
+                        },
+                        "4": {
+                            "coverage": 17,
+                            "coverage_male": 10,
+                            "coverage_female": 7,
+                            "coverage_percentage": 91.06,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 73.84
+                        },
+                        "5": {
+                            "coverage": 29,
+                            "coverage_male": 15,
+                            "coverage_female": 14,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "6": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "7": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "8": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "9": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "10": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "11": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "12": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        }
+                    }
+                }
+            ],
+            "month_wise_total_coverages": {
+                "1": {
+                    "coverage": 36,
+                    "coverage_male": 18,
+                    "coverage_female": 18,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "2": {
+                    "coverage": 20,
+                    "coverage_male": 11,
+                    "coverage_female": 9,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 94.74
+                },
+                "3": {
+                    "coverage": 18,
+                    "coverage_male": 7,
+                    "coverage_female": 11,
+                    "coverage_percentage": 96.43,
+                    "coverage_percentage_male": 76.36,
+                    "coverage_percentage_female": 100
+                },
+                "4": {
+                    "coverage": 17,
+                    "coverage_male": 10,
+                    "coverage_female": 7,
+                    "coverage_percentage": 91.07,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 73.68
+                },
+                "5": {
+                    "coverage": 29,
+                    "coverage_male": 15,
+                    "coverage_female": 14,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "6": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "7": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "8": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "9": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "10": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "11": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "12": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                }
+            },
+            "performance": {
+                "highest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 128,
+                        "coverage_male": 54,
+                        "coverage_female": 74,
+                        "coverage_percentage": 57.14,
+                        "coverage_percentage_male": 48.98,
+                        "coverage_percentage_female": 65.05,
+                        "dropout": 96,
+                        "dropout_male": 56.25,
+                        "dropout_female": 39.75
+                    }
+                ],
+                "lowest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 128,
+                        "coverage_male": 54,
+                        "coverage_female": 74,
+                        "coverage_percentage": 57.14,
+                        "coverage_percentage_male": 48.98,
+                        "coverage_percentage_female": 65.05,
+                        "dropout": 96,
+                        "dropout_male": 56.25,
+                        "dropout_female": 39.75
+                    }
+                ]
+            }
+        },
+        {
+            "vaccine_uid": "NCu55gLH6Te",
+            "vaccine_name": "Penta - 2nd",
+            "total_target": 224,
+            "total_target_male": 110,
+            "total_target_female": 114,
+            "total_coverage": 138,
+            "total_coverage_male": 64,
+            "total_coverage_female": 74,
+            "total_coverage_percentage": 61.61,
+            "total_coverage_percentage_male": 58.18,
+            "total_coverage_percentage_female": 64.91,
+            "areas": [
+                {
+                    "name": "Ward-2",
+                    "uid": "nse5klZ6bqA",
+                    "target": 224,
+                    "target_male": 110,
+                    "target_female": 114,
+                    "coverage": 138,
+                    "coverage_male": 64,
+                    "coverage_female": 74,
+                    "coverage_percentage": 61.61,
+                    "coverage_percentage_male": 58.05,
+                    "coverage_percentage_female": 65.05,
+                    "dropout": 86,
+                    "dropout_male": 46.25,
+                    "dropout_female": 39.75,
+                    "monthly_coverages": {
+                        "1": {
+                            "coverage": 33,
+                            "coverage_male": 16,
+                            "coverage_female": 17,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "2": {
+                            "coverage": 20,
+                            "coverage_male": 10,
+                            "coverage_female": 10,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "3": {
+                            "coverage": 22,
+                            "coverage_male": 13,
+                            "coverage_female": 9,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 94.94
+                        },
+                        "4": {
+                            "coverage": 26,
+                            "coverage_male": 12,
+                            "coverage_female": 14,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "5": {
+                            "coverage": 23,
+                            "coverage_male": 11,
+                            "coverage_female": 12,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "6": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "7": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "8": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "9": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "10": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "11": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "12": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        }
+                    }
+                }
+            ],
+            "month_wise_total_coverages": {
+                "1": {
+                    "coverage": 33,
+                    "coverage_male": 16,
+                    "coverage_female": 17,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "2": {
+                    "coverage": 20,
+                    "coverage_male": 10,
+                    "coverage_female": 10,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "3": {
+                    "coverage": 22,
+                    "coverage_male": 13,
+                    "coverage_female": 9,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 94.74
+                },
+                "4": {
+                    "coverage": 26,
+                    "coverage_male": 12,
+                    "coverage_female": 14,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "5": {
+                    "coverage": 23,
+                    "coverage_male": 11,
+                    "coverage_female": 12,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "6": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "7": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "8": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "9": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "10": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "11": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "12": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                }
+            },
+            "performance": {
+                "highest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 138,
+                        "coverage_male": 64,
+                        "coverage_female": 74,
+                        "coverage_percentage": 61.61,
+                        "coverage_percentage_male": 58.05,
+                        "coverage_percentage_female": 65.05,
+                        "dropout": 86,
+                        "dropout_male": 46.25,
+                        "dropout_female": 39.75
+                    }
+                ],
+                "lowest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 138,
+                        "coverage_male": 64,
+                        "coverage_female": 74,
+                        "coverage_percentage": 61.61,
+                        "coverage_percentage_male": 58.05,
+                        "coverage_percentage_female": 65.05,
+                        "dropout": 86,
+                        "dropout_male": 46.25,
+                        "dropout_female": 39.75
+                    }
+                ]
+            }
+        },
+        {
+            "vaccine_uid": "b3FM2S2oaAd",
+            "vaccine_name": "Penta - 3rd",
+            "total_target": 224,
+            "total_target_male": 110,
+            "total_target_female": 114,
+            "total_coverage": 132,
+            "total_coverage_male": 60,
+            "total_coverage_female": 72,
+            "total_coverage_percentage": 58.93,
+            "total_coverage_percentage_male": 54.55,
+            "total_coverage_percentage_female": 63.16,
+            "areas": [
+                {
+                    "name": "Ward-2",
+                    "uid": "nse5klZ6bqA",
+                    "target": 224,
+                    "target_male": 110,
+                    "target_female": 114,
+                    "coverage": 132,
+                    "coverage_male": 60,
+                    "coverage_female": 72,
+                    "coverage_percentage": 58.93,
+                    "coverage_percentage_male": 54.42,
+                    "coverage_percentage_female": 63.3,
+                    "dropout": 92,
+                    "dropout_male": 50.25,
+                    "dropout_female": 41.75,
+                    "monthly_coverages": {
+                        "1": {
+                            "coverage": 23,
+                            "coverage_male": 12,
+                            "coverage_female": 11,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "2": {
+                            "coverage": 25,
+                            "coverage_male": 14,
+                            "coverage_female": 11,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "3": {
+                            "coverage": 45,
+                            "coverage_male": 19,
+                            "coverage_female": 26,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "4": {
+                            "coverage": 16,
+                            "coverage_male": 10,
+                            "coverage_female": 6,
+                            "coverage_percentage": 85.7,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 63.29
+                        },
+                        "5": {
+                            "coverage": 30,
+                            "coverage_male": 17,
+                            "coverage_female": 13,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "6": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "7": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "8": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "9": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "10": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "11": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "12": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        }
+                    }
+                }
+            ],
+            "month_wise_total_coverages": {
+                "1": {
+                    "coverage": 23,
+                    "coverage_male": 12,
+                    "coverage_female": 11,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "2": {
+                    "coverage": 25,
+                    "coverage_male": 14,
+                    "coverage_female": 11,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "3": {
+                    "coverage": 45,
+                    "coverage_male": 19,
+                    "coverage_female": 26,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "4": {
+                    "coverage": 16,
+                    "coverage_male": 10,
+                    "coverage_female": 6,
+                    "coverage_percentage": 85.71,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 63.16
+                },
+                "5": {
+                    "coverage": 30,
+                    "coverage_male": 17,
+                    "coverage_female": 13,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "6": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "7": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "8": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "9": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "10": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "11": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "12": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                }
+            },
+            "performance": {
+                "highest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 132,
+                        "coverage_male": 60,
+                        "coverage_female": 72,
+                        "coverage_percentage": 58.93,
+                        "coverage_percentage_male": 54.42,
+                        "coverage_percentage_female": 63.3,
+                        "dropout": 92,
+                        "dropout_male": 50.25,
+                        "dropout_female": 41.75
+                    }
+                ],
+                "lowest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 132,
+                        "coverage_male": 60,
+                        "coverage_female": 72,
+                        "coverage_percentage": 58.93,
+                        "coverage_percentage_male": 54.42,
+                        "coverage_percentage_female": 63.3,
+                        "dropout": 92,
+                        "dropout_male": 50.25,
+                        "dropout_female": 41.75
+                    }
+                ]
+            }
+        },
+        {
+            "vaccine_uid": "xyVY5CmifZP",
+            "vaccine_name": "MR - 1st",
+            "total_target": 224,
+            "total_target_male": 110,
+            "total_target_female": 114,
+            "total_coverage": 120,
+            "total_coverage_male": 60,
+            "total_coverage_female": 60,
+            "total_coverage_percentage": 53.57,
+            "total_coverage_percentage_male": 54.55,
+            "total_coverage_percentage_female": 52.63,
+            "areas": [
+                {
+                    "name": "Ward-2",
+                    "uid": "nse5klZ6bqA",
+                    "target": 224,
+                    "target_male": 110,
+                    "target_female": 114,
+                    "coverage": 120,
+                    "coverage_male": 60,
+                    "coverage_female": 60,
+                    "coverage_percentage": 53.57,
+                    "coverage_percentage_male": 54.42,
+                    "coverage_percentage_female": 52.75,
+                    "dropout": 104,
+                    "dropout_male": 50.25,
+                    "dropout_female": 53.75,
+                    "monthly_coverages": {
+                        "1": {
+                            "coverage": 33,
+                            "coverage_male": 11,
+                            "coverage_female": 22,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "2": {
+                            "coverage": 35,
+                            "coverage_male": 22,
+                            "coverage_female": 13,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "3": {
+                            "coverage": 17,
+                            "coverage_male": 6,
+                            "coverage_female": 11,
+                            "coverage_percentage": 91.06,
+                            "coverage_percentage_male": 65.29,
+                            "coverage_percentage_female": 100
+                        },
+                        "4": {
+                            "coverage": 14,
+                            "coverage_male": 8,
+                            "coverage_female": 6,
+                            "coverage_percentage": 74.99,
+                            "coverage_percentage_male": 87.05,
+                            "coverage_percentage_female": 63.29
+                        },
+                        "5": {
+                            "coverage": 24,
+                            "coverage_male": 13,
+                            "coverage_female": 11,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "6": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "7": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "8": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "9": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "10": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "11": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "12": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        }
+                    }
+                }
+            ],
+            "month_wise_total_coverages": {
+                "1": {
+                    "coverage": 33,
+                    "coverage_male": 11,
+                    "coverage_female": 22,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "2": {
+                    "coverage": 35,
+                    "coverage_male": 22,
+                    "coverage_female": 13,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "3": {
+                    "coverage": 17,
+                    "coverage_male": 6,
+                    "coverage_female": 11,
+                    "coverage_percentage": 91.07,
+                    "coverage_percentage_male": 65.45,
+                    "coverage_percentage_female": 100
+                },
+                "4": {
+                    "coverage": 14,
+                    "coverage_male": 8,
+                    "coverage_female": 6,
+                    "coverage_percentage": 75,
+                    "coverage_percentage_male": 87.27,
+                    "coverage_percentage_female": 63.16
+                },
+                "5": {
+                    "coverage": 24,
+                    "coverage_male": 13,
+                    "coverage_female": 11,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "6": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "7": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "8": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "9": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "10": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "11": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "12": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                }
+            },
+            "performance": {
+                "highest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 120,
+                        "coverage_male": 60,
+                        "coverage_female": 60,
+                        "coverage_percentage": 53.57,
+                        "coverage_percentage_male": 54.42,
+                        "coverage_percentage_female": 52.75,
+                        "dropout": 104,
+                        "dropout_male": 50.25,
+                        "dropout_female": 53.75
+                    }
+                ],
+                "lowest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 120,
+                        "coverage_male": 60,
+                        "coverage_female": 60,
+                        "coverage_percentage": 53.57,
+                        "coverage_percentage_male": 54.42,
+                        "coverage_percentage_female": 52.75,
+                        "dropout": 104,
+                        "dropout_male": 50.25,
+                        "dropout_female": 53.75
+                    }
+                ]
+            }
+        },
+        {
+            "vaccine_uid": "nHwxXPJziO2",
+            "vaccine_name": "MR - 2nd",
+            "total_target": 224,
+            "total_target_male": 110,
+            "total_target_female": 114,
+            "total_coverage": 135,
+            "total_coverage_male": 62,
+            "total_coverage_female": 73,
+            "total_coverage_percentage": 60.27,
+            "total_coverage_percentage_male": 56.36,
+            "total_coverage_percentage_female": 64.04,
+            "areas": [
+                {
+                    "name": "Ward-2",
+                    "uid": "nse5klZ6bqA",
+                    "target": 224,
+                    "target_male": 110,
+                    "target_female": 114,
+                    "coverage": 135,
+                    "coverage_male": 62,
+                    "coverage_female": 73,
+                    "coverage_percentage": 60.27,
+                    "coverage_percentage_male": 56.24,
+                    "coverage_percentage_female": 64.18,
+                    "dropout": 89,
+                    "dropout_male": 48.25,
+                    "dropout_female": 40.75,
+                    "monthly_coverages": {
+                        "1": {
+                            "coverage": 43,
+                            "coverage_male": 22,
+                            "coverage_female": 21,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "2": {
+                            "coverage": 21,
+                            "coverage_male": 10,
+                            "coverage_female": 11,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "3": {
+                            "coverage": 29,
+                            "coverage_male": 15,
+                            "coverage_female": 14,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "4": {
+                            "coverage": 19,
+                            "coverage_male": 7,
+                            "coverage_female": 12,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 76.17,
+                            "coverage_percentage_female": 100
+                        },
+                        "5": {
+                            "coverage": 35,
+                            "coverage_male": 20,
+                            "coverage_female": 15,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "6": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "7": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "8": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "9": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "10": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "11": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "12": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        }
+                    }
+                }
+            ],
+            "month_wise_total_coverages": {
+                "1": {
+                    "coverage": 43,
+                    "coverage_male": 22,
+                    "coverage_female": 21,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "2": {
+                    "coverage": 21,
+                    "coverage_male": 10,
+                    "coverage_female": 11,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "3": {
+                    "coverage": 29,
+                    "coverage_male": 15,
+                    "coverage_female": 14,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "4": {
+                    "coverage": 19,
+                    "coverage_male": 7,
+                    "coverage_female": 12,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 76.36,
+                    "coverage_percentage_female": 100
+                },
+                "5": {
+                    "coverage": 35,
+                    "coverage_male": 20,
+                    "coverage_female": 15,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "6": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "7": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "8": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "9": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "10": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "11": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "12": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                }
+            },
+            "performance": {
+                "highest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 135,
+                        "coverage_male": 62,
+                        "coverage_female": 73,
+                        "coverage_percentage": 60.27,
+                        "coverage_percentage_male": 56.24,
+                        "coverage_percentage_female": 64.18,
+                        "dropout": 89,
+                        "dropout_male": 48.25,
+                        "dropout_female": 40.75
+                    }
+                ],
+                "lowest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 135,
+                        "coverage_male": 62,
+                        "coverage_female": 73,
+                        "coverage_percentage": 60.27,
+                        "coverage_percentage_male": 56.24,
+                        "coverage_percentage_female": 64.18,
+                        "dropout": 89,
+                        "dropout_male": 48.25,
+                        "dropout_female": 40.75
+                    }
+                ]
+            }
+        },
+        {
+            "vaccine_uid": "x3aIDdpR65a",
+            "vaccine_name": "BCG",
+            "total_target": 224,
+            "total_target_male": 110,
+            "total_target_female": 114,
+            "total_coverage": 128,
+            "total_coverage_male": 63,
+            "total_coverage_female": 65,
+            "total_coverage_percentage": 57.14,
+            "total_coverage_percentage_male": 57.27,
+            "total_coverage_percentage_female": 57.02,
+            "areas": [
+                {
+                    "name": "Ward-2",
+                    "uid": "nse5klZ6bqA",
+                    "target": 224,
+                    "target_male": 110,
+                    "target_female": 114,
+                    "coverage": 128,
+                    "coverage_male": 63,
+                    "coverage_female": 65,
+                    "coverage_percentage": 57.14,
+                    "coverage_percentage_male": 57.14,
+                    "coverage_percentage_female": 57.14,
+                    "dropout": 96,
+                    "dropout_male": 47.25,
+                    "dropout_female": 48.75,
+                    "monthly_coverages": {
+                        "1": {
+                            "coverage": 34,
+                            "coverage_male": 18,
+                            "coverage_female": 16,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "2": {
+                            "coverage": 33,
+                            "coverage_male": 21,
+                            "coverage_female": 12,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 100
+                        },
+                        "3": {
+                            "coverage": 26,
+                            "coverage_male": 18,
+                            "coverage_female": 8,
+                            "coverage_percentage": 100,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 84.39
+                        },
+                        "4": {
+                            "coverage": 17,
+                            "coverage_male": 10,
+                            "coverage_female": 7,
+                            "coverage_percentage": 91.06,
+                            "coverage_percentage_male": 100,
+                            "coverage_percentage_female": 73.84
+                        },
+                        "5": {
+                            "coverage": 18,
+                            "coverage_male": 7,
+                            "coverage_female": 11,
+                            "coverage_percentage": 96.41,
+                            "coverage_percentage_male": 76.17,
+                            "coverage_percentage_female": 100
+                        },
+                        "6": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "7": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "8": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "9": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "10": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "11": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        },
+                        "12": {
+                            "coverage": 0,
+                            "coverage_male": 0,
+                            "coverage_female": 0,
+                            "coverage_percentage": 0,
+                            "coverage_percentage_male": 0,
+                            "coverage_percentage_female": 0
+                        }
+                    }
+                }
+            ],
+            "month_wise_total_coverages": {
+                "1": {
+                    "coverage": 34,
+                    "coverage_male": 18,
+                    "coverage_female": 16,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "2": {
+                    "coverage": 33,
+                    "coverage_male": 21,
+                    "coverage_female": 12,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 100
+                },
+                "3": {
+                    "coverage": 26,
+                    "coverage_male": 18,
+                    "coverage_female": 8,
+                    "coverage_percentage": 100,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 84.21
+                },
+                "4": {
+                    "coverage": 17,
+                    "coverage_male": 10,
+                    "coverage_female": 7,
+                    "coverage_percentage": 91.07,
+                    "coverage_percentage_male": 100,
+                    "coverage_percentage_female": 73.68
+                },
+                "5": {
+                    "coverage": 18,
+                    "coverage_male": 7,
+                    "coverage_female": 11,
+                    "coverage_percentage": 96.43,
+                    "coverage_percentage_male": 76.36,
+                    "coverage_percentage_female": 100
+                },
+                "6": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "7": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "8": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "9": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "10": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "11": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                },
+                "12": {
+                    "coverage": 0,
+                    "coverage_male": 0,
+                    "coverage_female": 0,
+                    "coverage_percentage": 0,
+                    "coverage_percentage_male": 0,
+                    "coverage_percentage_female": 0
+                }
+            },
+            "performance": {
+                "highest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 128,
+                        "coverage_male": 63,
+                        "coverage_female": 65,
+                        "coverage_percentage": 57.14,
+                        "coverage_percentage_male": 57.14,
+                        "coverage_percentage_female": 57.14,
+                        "dropout": 96,
+                        "dropout_male": 47.25,
+                        "dropout_female": 48.75
+                    }
+                ],
+                "lowest": [
+                    {
+                        "name": "Ward-2",
+                        "uid": "nse5klZ6bqA",
+                        "target": 224,
+                        "target_male": 110,
+                        "target_female": 114,
+                        "coverage": 128,
+                        "coverage_male": 63,
+                        "coverage_female": 65,
+                        "coverage_percentage": 57.14,
+                        "coverage_percentage_male": 57.14,
+                        "coverage_percentage_female": 57.14,
+                        "dropout": 96,
+                        "dropout_male": 47.25,
+                        "dropout_female": 48.75
+                    }
+                ]
+            }
+        }
+    ]
+}
