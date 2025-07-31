@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/common/constants/constants.dart';
+
 class SummaryCardWidget extends StatelessWidget {
   final String iconPath;
   final String label;
@@ -18,6 +20,7 @@ class SummaryCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Color(Constants.cardColor),
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(

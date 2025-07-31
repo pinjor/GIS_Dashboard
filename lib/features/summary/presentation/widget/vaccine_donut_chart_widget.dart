@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 
+import '../../../../core/common/constants/constants.dart';
+
 class VaccineDonutChartWidget extends StatelessWidget {
   const VaccineDonutChartWidget({super.key});
 
@@ -35,6 +37,7 @@ class VaccineDonutChartWidget extends StatelessWidget {
     ];
 
     return Card(
+      color: Color(Constants.cardColor),
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(

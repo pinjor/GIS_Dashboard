@@ -50,6 +50,7 @@ class HeaderTitleIconFilterWidget extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (_) => const Dialog(
+                    backgroundColor: Color(Constants.cardColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),

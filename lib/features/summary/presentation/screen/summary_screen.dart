@@ -13,44 +13,47 @@ class SummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          HeaderTitleIconFilterWidget(
-            region: 'Bangladesh',
-            year: '2015',
-            vaccine: 'Penta-1',
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: const [
-              Expanded(
-                child: SummaryCardWidget(
-                  iconPath: Constants.childrenIconPath,
-                  label: 'Total Children',
-                  duration: '0-11 month',
-                  value: '153,543',
+    return Scaffold(
+      backgroundColor: Color(Constants.scaffoldBackgroundColor),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            HeaderTitleIconFilterWidget(
+              region: 'Bangladesh',
+              year: '2015',
+              vaccine: 'Penta-1',
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: const [
+                Expanded(
+                  child: SummaryCardWidget(
+                    iconPath: Constants.childrenIconPath,
+                    label: 'Total Children',
+                    duration: '0-11 month',
+                    value: '153,543',
+                  ),
                 ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: SummaryCardWidget(
-                  iconPath: Constants.dosesIconPath,
-                  label: 'Doses Administered',
-                  duration: '0-11 month',
-                  value: '103,543',
+                SizedBox(width: 12),
+                Expanded(
+                  child: SummaryCardWidget(
+                    iconPath: Constants.dosesIconPath,
+                    label: 'Doses Administered',
+                    duration: '0-11 month',
+                    value: '103,543',
+                  ),
                 ),
-              ),
-            ],
-          ),
-          16.h,
-          const VaccineDonutChartWidget(),
-          16.h,
+              ],
+            ),
+            16.h,
+            const VaccineDonutChartWidget(),
+            16.h,
 
-          const LineChartAchievementsWidget(),
-        ],
+            const LineChartAchievementsWidget(),
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 class Constants {
-  static const int primaryColor =
-      0xFF1CB0EA; // use this by Color(Constants.primaryColor)
+  static const int primaryColor = 0xFF1CB0EA;
+  static const int scaffoldBackgroundColor = 0xFFF5F5F5;
+  static const int cardColor = 0xFFEAEAEA;
+  
   static const String bdMapLogoPath = 'assets/icons/bd_map_logo.png';
 
   static const String districtGeoJsonPath =

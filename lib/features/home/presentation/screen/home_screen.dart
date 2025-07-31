@@ -15,7 +15,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static final List<Widget> _screens = [MapScreen(), SummaryScreen()];
+  // Create screens once and reuse them
+  static final List<Widget> _screens = [
+    const MapScreen(),
+    const SummaryScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +43,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: _screens[_selectedIndex],
-
-   
+      // Replace this line with IndexedStack
+      body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: SizedBox(
-        height: 56, // Standard height
+        height: 56,
         child: Row(
           children: [
             _buildNavItem(
@@ -52,11 +55,10 @@ class _HomeScreenState extends State<HomeScreen> {
               'Map',
               primaryColor,
             ),
-            // Vertical divider between tabs
             Container(
               width: 1,
               height: double.infinity,
-              color: Colors.grey.shade300, // subtle light gray line
+              color: Colors.grey.shade300,
             ),
             _buildNavItem(
               1,
