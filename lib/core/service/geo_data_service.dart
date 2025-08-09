@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../../features/map/domain/area_polygon.dart';
 import '../common/constants/constants.dart';
 import '../utils/load_json.dart';
 
@@ -213,21 +214,4 @@ class GeoDataService {
     }
     return false;
   }
-}
-
-/// Class to represent a polygon with associated area data
-class AreaPolygon {
-  final Polygon polygon;
-  final String areaId;
-  final String areaName;
-  final String level;
-  final double coveragePercentage;
-
-  AreaPolygon({
-    required this.polygon,
-    required this.areaId,
-    required this.areaName,
-    required this.level,
-    required this.coveragePercentage,
-  });
 }
