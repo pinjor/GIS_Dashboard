@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 
-class FilterWidget extends StatefulWidget {
-  const FilterWidget({super.key});
+class FilterDialogBoxWidget extends StatefulWidget {
+  const FilterDialogBoxWidget({super.key});
 
   @override
-  State<FilterWidget> createState() => _FilterWidgetState();
+  State<FilterDialogBoxWidget> createState() => _FilterDialogBoxWidgetState();
 }
 
-class _FilterWidgetState extends State<FilterWidget> {
+class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
   String _selectedAreaType = 'district';
 
   /// Tracks selected radio button
@@ -205,7 +205,9 @@ class _FilterWidgetState extends State<FilterWidget> {
                             ), // Makes it perfectly square
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pop(); // for closing the dialog
+                        },
                         child: const Text(
                           'Clear',
                           style: TextStyle(color: Colors.black),

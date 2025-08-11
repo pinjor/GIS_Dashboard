@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
 
-import '../../../features/map/presentation/widget/filter_widget.dart';
+import '../../../features/map/presentation/widget/filter_dialog_box_widget.dart';
 
 class HeaderTitleIconFilterWidget extends StatelessWidget {
   final String region;
@@ -55,7 +55,7 @@ class HeaderTitleIconFilterWidget extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                     insetPadding: EdgeInsets.symmetric(horizontal: 16),
-                    child: FilterWidget(),
+                    child: FilterDialogBoxWidget(),
                   ),
                 );
               },
