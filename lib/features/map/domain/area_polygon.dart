@@ -6,13 +6,13 @@ class AreaPolygon {
   final String areaId;
   final String areaName;
   final String level;
-  final double coveragePercentage;
+  final double? coveragePercentage;
 
   AreaPolygon({
     required this.polygon,
     required this.areaId,
     required this.areaName,
     required this.level,
-    required this.coveragePercentage,
+    this.coveragePercentage,
   });
 }

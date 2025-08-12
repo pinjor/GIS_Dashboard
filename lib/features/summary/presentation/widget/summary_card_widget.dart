@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -16,6 +17,16 @@ class SummaryCardWidget extends StatelessWidget {
     required this.duration,
     required this.value,
   });
+  // Add this method to your class:
+  String _formatNumber(String value) {
+    try {
+      final num parsedValue = num.parse(value);
+      final NumberFormat formatter = NumberFormat('#,###');
+      return formatter.format(parsedValue);
+    } catch (e) {
+      return value; // Return original if not a valid number
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +81,9 @@ class SummaryCardWidget extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                value,
+                // In your widget:
+                _formatNumber(value),
+
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,

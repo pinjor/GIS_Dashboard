@@ -1,24 +1,72 @@
 // 📁 widgets/filter_panel.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
+import 'package:gis_dashboard/core/providers/filter_provider.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 
-class FilterDialogBoxWidget extends StatefulWidget {
+class FilterDialogBoxWidget extends ConsumerStatefulWidget {
   const FilterDialogBoxWidget({super.key});
 
   @override
-  State<FilterDialogBoxWidget> createState() => _FilterDialogBoxWidgetState();
+  ConsumerState<FilterDialogBoxWidget> createState() =>
+      _FilterDialogBoxWidgetState();
 }
 
-class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
-  String _selectedAreaType = 'district';
-
-  /// Tracks selected radio button
-  String _selectedVaccine = 'Penta-1';
-
-  /// Tracks selected vaccine
+class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
+  // Local state for temporary selections (until user clicks Filter)
+  late String _selectedAreaType;
+  late String _selectedVaccine;
+  late String _selectedDivision;
+  String? _selectedCityCorporation;
 
   final _formKey = GlobalKey<FormState>();
+
+  // Bangladesh Divisions
+  final List<String> _divisions = [
+    'All',
+    'Dhaka Division',
+    'Barishal Division',
+    'Rajshahi Division',
+    'Rangpur Division',
+    'Sylhet Division',
+    // 'Chattogram Division',
+    // 'Khulna Division',
+    // 'Mymensingh Division',
+  ];
+
+  // Bangladesh City Corporations
+  final List<String> _cityCorporations = [
+    'Dhaka North CC',
+    'Dhaka South CC',
+    'Gazipur CC',
+    'Narayanganj CC',
+    'Chattogram CC',
+    'Khulna CC',
+    'Sylhet CC',
+    'Rangpur CC',
+    // 'Rajshahi CC',
+    // 'Barishal CC',
+    // 'Cumilla CC',
+    // 'Mymensingh CC',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with current filter state - will be set on first build
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize with current filter state
+    final currentFilter = ref.read(filterProvider);
+    _selectedAreaType = currentFilter.selectedAreaType;
+    _selectedVaccine = currentFilter.selectedVaccine;
+    _selectedDivision = currentFilter.selectedDivision;
+    _selectedCityCorporation = currentFilter.selectedCityCorporation;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +155,7 @@ class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
                     border: OutlineInputBorder(),
                   ),
                   value: '2025',
-                  items: ['2025', '2024', '2023']
+                  items: ['2025', '2024']
                       .map(
                         (year) =>
                             DropdownMenuItem(value: year, child: Text(year)),
@@ -116,29 +164,70 @@ class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
                   onChanged: (value) {},
                 ),
                 16.h,
-                const Text(
-                  'Division',
-                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
-                ),
-                8.h,
-                TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Search Division',
-                    border: OutlineInputBorder(),
+                if (_selectedAreaType == 'district') ...[
+                  const Text(
+                    'Division',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
                   ),
-                ),
-                16.h,
-                const Text(
-                  'District',
-                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
-                ),
-                8.h,
-                TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Search District',
-                    border: OutlineInputBorder(),
+                  8.h,
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    value: _selectedDivision,
+                    items: _divisions
+                        .map(
+                          (division) => DropdownMenuItem(
+                            value: division,
+                            child: Text(division),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedDivision = value!;
+                      });
+                    },
                   ),
-                ),
+                  16.h,
+                  const Text(
+                    'District',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                  ),
+                  8.h,
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      hintText: 'Search District',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ] else if (_selectedAreaType == 'city_corporation') ...[
+                  const Text(
+                    'City Corporation',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                  ),
+                  8.h,
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    value: _selectedCityCorporation,
+                    hint: const Text('Select City Corporation'),
+                    items: _cityCorporations
+                        .map(
+                          (corporation) => DropdownMenuItem(
+                            value: corporation,
+                            child: Text(corporation),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCityCorporation = value;
+                      });
+                    },
+                  ),
+                ],
                 16.h,
                 const Text(
                   'Select Vaccine',
@@ -154,9 +243,9 @@ class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 4,
                         children: [
-                          _buildRadio('Penta-1', primaryColor),
-                          _buildRadio('Penta-2', primaryColor),
-                          _buildRadio('Penta-3', primaryColor),
+                          _buildRadio('Penta - 1st', primaryColor),
+                          _buildRadio('Penta - 2nd', primaryColor),
+                          _buildRadio('Penta - 3rd', primaryColor),
                         ],
                       ),
                     ),
@@ -166,8 +255,8 @@ class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 4,
                         children: [
-                          _buildRadio('MR-1', primaryColor),
-                          _buildRadio('MR-2', primaryColor),
+                          _buildRadio('MR - 1st', primaryColor),
+                          _buildRadio('MR - 2nd', primaryColor),
                           _buildRadio('BCG', primaryColor),
                         ],
                       ),
@@ -188,7 +277,22 @@ class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
                           ),
                         ),
 
-                        onPressed: () {},
+                        onPressed: () {
+                          // Apply filters to global state
+                          ref
+                              .read(filterProvider.notifier)
+                              .updateVaccine(_selectedVaccine);
+                          // ref
+                          //     .read(filterProvider.notifier)
+                          //     .updateAreaType(_selectedAreaType);
+                          // ref
+                          //     .read(filterProvider.notifier)
+                          //     .updateDivision(_selectedDivision);
+                          // ref
+                          //     .read(filterProvider.notifier)
+                          //     .updateCityCorporation(_selectedCityCorporation);
+                          Navigator.of(context).pop();
+                        },
                         child: const Text(
                           'Filter',
                           style: TextStyle(color: Colors.white),
@@ -206,10 +310,12 @@ class _FilterDialogBoxWidgetState extends State<FilterDialogBoxWidget> {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.of(context).pop(); // for closing the dialog
+                          // Reset filters to default
+                          ref.read(filterProvider.notifier).resetFilters();
+                          Navigator.of(context).pop();
                         },
                         child: const Text(
-                          'Clear',
+                          'Reset',
                           style: TextStyle(color: Colors.black),
                         ),
                       ),

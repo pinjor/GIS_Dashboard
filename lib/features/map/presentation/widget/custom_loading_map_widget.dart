@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CustomLoadingMapWidget extends ConsumerStatefulWidget {
-  const CustomLoadingMapWidget({super.key});
+  const CustomLoadingMapWidget({
+    super.key,
+    this.loadingText = 'Loading map...',
+  });
+  final String loadingText;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -35,8 +39,6 @@ class _CustomLoadingMapWidgetState extends ConsumerState<CustomLoadingMapWidget>
 
   @override
   Widget build(BuildContext context) {
-    const loadingText = 'Loading map...';
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -88,8 +90,8 @@ class _CustomLoadingMapWidgetState extends ConsumerState<CustomLoadingMapWidget>
         ),
         const SizedBox(height: 12),
         // Loading text
-        const Text(
-          loadingText,
+        Text(
+          widget.loadingText,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/network/dio_client_provider.dart';
 
 import '../../../core/utils/utils.dart';
-import '../domain/vaccine_coverage.dart';
+import '../domain/vaccine_coverage_response.dart';
 
 final mapRepositoryProvider = Provider<MapRepository>((ref) {
   return MapRepository(client: ref.watch(dioClientProvider));
@@ -33,29 +33,17 @@ class MapRepository {
     }
   }
 
-  Future<List<VaccineCoverage>> fetchVaccinationCoverage({
+  Future<VaccineCoverageResponse> fetchVaccinationCoverage({
     required String urlPath,
   }) async {
     try {
       logg.i("Fetching vaccination coverage from $urlPath");
       final response = await _client.get(urlPath);
-      final data = response.data as Map<String, dynamic>;
+      final vaccineCoverageData = response.data as Map<String, dynamic>;
+      logg.i('Vaccination coverage data: $vaccineCoverageData');
 
-      // Parse according to the API structure you provided
-      final vaccines = data['vaccines'] as List<dynamic>;
-      if (vaccines.isEmpty) {
-        throw Exception('No vaccines found in coverage data');
-      }
-
-      // Take the first vaccine's area data
-      final firstVaccine = vaccines[0] as Map<String, dynamic>;
-      final areas = firstVaccine['areas'] as List<dynamic>;
-
-      logg.i("Found ${areas.length} areas in coverage data");
-
-      return areas
-          .map((json) => VaccineCoverage.fromJson(json as Map<String, dynamic>))
-          .toList();
+      logg.i('Parsed vaccination coverage data: ${vaccineCoverageData.toString()}');
+      return VaccineCoverageResponse.fromJson(vaccineCoverageData);
     } catch (e) {
       logg.e("Error fetching vaccination coverage: $e");
       throw Exception('Failed to fetch vaccination coverage: $e');

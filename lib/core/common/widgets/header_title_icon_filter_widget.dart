@@ -1,26 +1,21 @@
 // 📁 widgets/header_title_with_filter.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
+import 'package:gis_dashboard/core/providers/filter_provider.dart';
 
 import '../../../features/map/presentation/widget/filter_dialog_box_widget.dart';
 
-class HeaderTitleIconFilterWidget extends StatelessWidget {
-  final String region;
-  final String year;
-  final String vaccine;
+class HeaderTitleIconFilterWidget extends ConsumerWidget {
   final VoidCallback? onFilterTap;
 
-  const HeaderTitleIconFilterWidget({
-    super.key,
-    required this.region,
-    required this.year,
-    required this.vaccine,
-    this.onFilterTap,
-  });
+  const HeaderTitleIconFilterWidget({super.key, this.onFilterTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filterState = ref.watch(filterProvider);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -28,11 +23,11 @@ class HeaderTitleIconFilterWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "$region, $year",
+              "Bangladesh, ${filterState.selectedYear}",
               style: TextStyle(fontSize: 15, color: Colors.grey[700]),
             ),
             Text(
-              vaccine,
+              filterState.selectedVaccine,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w400),
             ),
           ],

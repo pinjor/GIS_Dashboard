@@ -4,41 +4,78 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../config/coverage_colors.dart';
 import '../../../core/utils/utils.dart';
 import '../domain/area_polygon.dart';
-import '../domain/vaccine_coverage.dart';
+import '../domain/vaccine_coverage_response.dart';
 
 List<AreaPolygon> parseGeoJsonToPolygons(
   String geoJson,
-  List<VaccineCoverage> coverageData,
+  VaccineCoverageResponse coverageData,
+  String selectedVaccine,
 ) {
   final decoded = jsonDecode(geoJson) as Map<String, dynamic>;
   final features = decoded['features'] as List<dynamic>;
 
+  // Find the selected vaccine data
+  final vaccines = coverageData.vaccines ?? [];
+  final selectedVaccineData = vaccines.isNotEmpty
+      ? vaccines.firstWhere(
+          (vaccine) => vaccine.vaccineName == selectedVaccine,
+          orElse: () => vaccines.first,
+        )
+      : null;
+
+  if (selectedVaccineData == null) {
+    logg.e("No vaccine data found for $selectedVaccine");
+    return [];
+  }
+
+  // Create a map for quick coverage lookup by UID
+  final Map<String, Area> coverageMap = {};
+  final areas = selectedVaccineData.areas ?? [];
+  for (final area in areas) {
+    if (area.uid != null) {
+      coverageMap[area.uid!] = area;
+    }
+  }
+
   logg.i(
-    "Parsing ${features.length} GeoJSON features with ${coverageData.length} coverage areas",
+    "Coverage data available for ${coverageMap.length} districts for vaccine: $selectedVaccine",
   );
+  logg.i("Total GeoJSON features: ${features.length}");
 
-  return features
+  int matchedCount = 0;
+  int noDataCount = 0;
+
+  final polygonList = features
       .map((feature) {
-        final props = feature['properties'] ?? {};
-        final String areaName = props['name'] ?? 'Unknown Area';
-        final String areaId = props['uid'] ?? props['id'] ?? areaName;
-
-        // Find coverage data for this area using UID
-        final coverage = coverageData.firstWhere(
-          (c) =>
-              c.uid == areaId || c.name.toLowerCase() == areaName.toLowerCase(),
-          orElse: () => VaccineCoverage(
-            uid: areaId,
-            name: areaName,
-            coveragePercentage: 0,
-          ),
-        );
-
         final geometry = feature['geometry'];
-        final type = geometry['type'];
+        final info = feature['info'];
 
+        // Extract district information from GeoJSON
+        final String areaName = info?['name'] ?? 'Unknown Area';
+        final String? orgUid = info?['org_uid'];
+
+        // Find matching coverage data using org_uid from GeoJSON and uid from coverage
+        Area? matchedCoverage;
+        double? coveragePercentage;
+
+        if (orgUid != null && coverageMap.containsKey(orgUid)) {
+          matchedCoverage = coverageMap[orgUid];
+          coveragePercentage = matchedCoverage?.coveragePercentage;
+          matchedCount++;
+          logg.d(
+            "Found coverage for $areaName: ${coveragePercentage?.toStringAsFixed(1)}%",
+          );
+        } else {
+          noDataCount++;
+          logg.w(
+            "No coverage data found for district: $areaName (org_uid: $orgUid)",
+          );
+        }
+
+        final type = geometry['type'];
         List<LatLng> points = [];
 
         if (type == 'Polygon') {
@@ -92,24 +129,33 @@ List<AreaPolygon> parseGeoJsonToPolygons(
           return null;
         }
 
+        // Get color based on coverage percentage
+        final polygonColor = CoverageColors.getCoverageColor(
+          coveragePercentage,
+        );
+
         return AreaPolygon(
           polygon: Polygon(
             points: points,
-            color: Colors.white.withValues(
-              alpha: 0.3,
-            ), // Very transparent white so underlying names show through
-            borderColor: const Color(
-              0xFF333333,
-            ), // Darker border for visibility
+            color: polygonColor.withValues(
+              alpha:
+                  0.6, // Semi-transparent so underlying map labels show through
+            ),
+            borderColor: const Color(0xFF333333), // Dark border for visibility
             borderStrokeWidth: 1.0,
           ),
-          areaId: areaId,
+          areaId: orgUid ?? areaName,
           areaName: areaName,
           level: 'district',
-          coveragePercentage: coverage.coveragePercentage,
+          coveragePercentage: coveragePercentage ?? 0.0,
         );
       })
       .where((areaPolygon) => areaPolygon != null)
       .cast<AreaPolygon>()
       .toList();
+
+  logg.i(
+    "Processed $matchedCount districts with coverage data, $noDataCount without data",
+  );
+  return polygonList;
 }
