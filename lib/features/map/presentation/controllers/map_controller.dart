@@ -36,6 +36,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           geoJson: geoJson,
           coverageData: cachedCoverageData,
           isLoading: false,
+          error: null, // Clear any previous error
         );
         return;
       }
@@ -64,6 +65,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         geoJson: geoJson,
         coverageData: coverageData,
         isLoading: false,
+        error: null, // Clear any previous error
       );
     } catch (e) {
       logg.e("Error loading initial data: $e");

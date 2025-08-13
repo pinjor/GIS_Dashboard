@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gis_dashboard/core/common/widgets/connectivity_status_widget.dart';
 
 import '../../../../core/common/constants/constants.dart';
 import '../../../map/presentation/screen/map_screen.dart';
 import '../../../summary/presentation/screen/summary_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
   // Create screens once and reuse them
@@ -43,8 +45,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      // Replace this line with IndexedStack
-      body: IndexedStack(index: _selectedIndex, children: _screens),
+      body: Column(
+        children: [
+          // Connectivity status bar
+          const ConnectivityStatusWidget(),
+          // Main content
+          Expanded(
+            child: IndexedStack(index: _selectedIndex, children: _screens),
+          ),
+        ],
+      ),
       bottomNavigationBar: SizedBox(
         height: 56,
         child: Row(

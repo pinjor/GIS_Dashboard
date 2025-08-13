@@ -7,6 +7,9 @@ final dioClientProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: '${ApiConstants.baseUrlStaging}${ApiConstants.urlCommonPath}',
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 15),
     ),
   );
 

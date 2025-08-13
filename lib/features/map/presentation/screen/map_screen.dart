@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/config/coverage_colors.dart';
 import 'package:gis_dashboard/core/common/widgets/header_title_icon_filter_widget.dart';
+import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
 import 'package:gis_dashboard/core/providers/filter_provider.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/custom_loading_map_widget.dart';
@@ -73,31 +74,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       child: const Center(child: CustomLoadingMapWidget()),
                     ),
                   if (mapState.error != null && !mapState.isLoading)
-                    Container(
-                      color: Colors.white,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.error,
-                              size: 64,
-                              color: Colors.red,
-                            ),
-                            const SizedBox(height: 16),
-                            Text('Error: ${mapState.error}'),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                ref
-                                    .read(mapControllerProvider.notifier)
-                                    .refreshMapData();
-                              },
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      ),
+                    NetworkErrorWidget(
+                      error: mapState.error!,
+                      onRetry: () {
+                        ref
+                            .read(mapControllerProvider.notifier)
+                            .refreshMapData();
+                      },
                     ),
                   if (areaPolygons.isNotEmpty &&
                       !mapState.isLoading &&

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
 import 'package:gis_dashboard/core/providers/filter_provider.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/custom_loading_map_widget.dart';
@@ -50,21 +51,13 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
               ),
             )
           : summaryState.error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: ${summaryState.error}'),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref
-                          .read(summaryControllerProvider.notifier)
-                          .refreshSummaryData();
-                    },
-                    child: Text('Retry'),
-                  ),
-                ],
-              ),
+          ? NetworkErrorWidget(
+              error: summaryState.error!,
+              onRetry: () {
+                ref
+                    .read(summaryControllerProvider.notifier)
+                    .refreshSummaryData();
+              },
             )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(12),

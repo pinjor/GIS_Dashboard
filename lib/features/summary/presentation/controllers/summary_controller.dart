@@ -28,7 +28,11 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
       final cachedData = _dataService.getCachedCoverageData();
       if (cachedData != null && !forceRefresh) {
         logg.i("Using cached summary data");
-        state = state.copyWith(coverageData: cachedData, isLoading: false);
+        state = state.copyWith(
+          coverageData: cachedData,
+          isLoading: false,
+          error: null,
+        );
         return;
       }
 
@@ -41,7 +45,11 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
         "Loaded summary data for ${coverageData.vaccines?.first.vaccineName} and ${coverageData.vaccines?.first.areas?.length} coverage areas",
       );
 
-      state = state.copyWith(coverageData: coverageData, isLoading: false);
+      state = state.copyWith(
+        coverageData: coverageData,
+        isLoading: false,
+        error: null,
+      );
     } catch (e) {
       logg.e("Error loading summary data: $e");
       state = state.copyWith(
@@ -53,5 +61,18 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
 
   Future<void> refreshSummaryData() async {
     await loadSummaryData(forceRefresh: true);
+  }
+
+  /// Initialize with cached data without triggering a new load
+  void initializeWithCachedData() {
+    final cachedData = _dataService.getCachedCoverageData();
+    if (cachedData != null) {
+      logg.i("Initializing summary with cached data");
+      state = state.copyWith(
+        coverageData: cachedData,
+        isLoading: false,
+        error: null,
+      );
+    }
   }
 }
