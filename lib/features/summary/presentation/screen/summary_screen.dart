@@ -9,7 +9,7 @@ import 'package:gis_dashboard/features/summary/presentation/widget/summary_card_
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/header_title_icon_filter_widget.dart';
 import '../controllers/summary_controller.dart';
-import '../widget/line_chart_achievements_widget.dart';
+import '../widget/vaccine_performance_graph_widget.dart';
 
 class SummaryScreen extends ConsumerStatefulWidget {
   const SummaryScreen({super.key});
@@ -96,7 +96,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                   // performance table needed here
                   16.h,
 
-                  const LineChartAchievementsWidget(),
+                  const VaccinePerformanceGraphWidget(),
                 ],
               ),
             ),
