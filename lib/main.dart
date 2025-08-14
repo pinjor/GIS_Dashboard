@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
-import 'package:gis_dashboard/features/home/presentation/screen/home_screen.dart';
+import 'package:gis_dashboard/core/common/screens/splash_screen.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: Constants.envFileName);
   } catch (e) {
@@ -27,8 +28,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      title: 'GIS Dashboard',
-      home: const HomeScreen(),
+      title: Constants.appTitle,
+      home: const SplashScreen(),
     );
   }
 }

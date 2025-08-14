@@ -3,7 +3,11 @@ class Constants {
   static const int scaffoldBackgroundColor = 0xFFF5F5F5;
   static const int cardColor = 0xFFEAEAEA;
   static const String envFileName = '.env';
+  static const String appTitle = 'GIS Dashboard';
   static const String bdMapLogoPath = 'assets/icons/bd_map_logo.png';
+  static const String eqmsLogoPath = 'assets/icons/eqms_logo.png';
+  static const String unicefLogoPath = 'assets/icons/unicef_logo.png';
+  static const String poweredByLeftLogosPath = 'assets/icons/powered_by_left_logos.png';
 
   static const String districtGeoJsonPath =
       'assets/json/districts-2025-coverage.json';
