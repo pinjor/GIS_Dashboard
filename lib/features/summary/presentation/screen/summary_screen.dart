@@ -4,12 +4,13 @@ import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
 import 'package:gis_dashboard/core/providers/filter_provider.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/custom_loading_map_widget.dart';
-import 'package:gis_dashboard/features/summary/presentation/widget/summary_card_widget.dart';
+import 'package:gis_dashboard/features/summary/presentation/widget/summary_card_widget_new.dart';
 
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/header_title_icon_filter_widget.dart';
 import '../controllers/summary_controller.dart';
 import '../widget/vaccine_performance_graph_widget.dart';
+import '../widget/vaccine_coverage_performance_table_widget.dart';
 
 class SummaryScreen extends ConsumerStatefulWidget {
   const SummaryScreen({super.key});
@@ -66,36 +67,31 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                 children: [
                   HeaderTitleIconFilterWidget(),
                   const SizedBox(height: 16),
-                  Row(
+                  Column(
                     children: [
-                      Expanded(
-                        child: SummaryCardWidget(
-                          iconPath: Constants.childrenIconPath,
-                          label: 'Total Children',
-                          duration: '0-11 month',
-                          value:
-                              selectedVaccineData?.totalTarget?.toString() ??
-                              'Unknown',
-                        ),
+                      SummaryCardWidgetNew(
+                        label: 'Total Children (0-11 m)',
+                        value:
+                            selectedVaccineData?.totalTarget?.toString() ??
+                            'Unknown',
+                        boysCount: selectedVaccineData?.totalTargetMale ?? 0,
+                        girlsCount: selectedVaccineData?.totalTargetFemale ?? 0,
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: SummaryCardWidget(
-                          iconPath: Constants.dosesIconPath,
-                          label: 'Doses Administered',
-                          duration: '0-11 month',
-                          value:
-                              selectedVaccineData?.totalCoverage?.toString() ??
-                              'Unknown',
-                        ),
+                      10.h,
+                      SummaryCardWidgetNew(
+                        label: 'Vaccinated Children',
+                        value:
+                            selectedVaccineData?.totalCoverage?.toString() ??
+                            'Unknown',
+                        boysCount: selectedVaccineData?.totalCoverageMale ?? 0,
+                        girlsCount:
+                            selectedVaccineData?.totalCoverageFemale ?? 0,
                       ),
                     ],
                   ),
-                  // 16.h,
-                  // const VaccineDonutChartWidget(),
-                  // performance table needed here
                   16.h,
-
+                  const VaccineCoveragePerformanceTableWidget(),
+                  16.h,
                   const VaccinePerformanceGraphWidget(),
                 ],
               ),

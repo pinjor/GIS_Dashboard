@@ -4,20 +4,20 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/common/constants/constants.dart';
 
-class SummaryCardWidget extends StatelessWidget {
+class SummaryCardWidgetOld extends StatelessWidget {
   final String iconPath;
   final String label;
   final String value;
   final String duration;
 
-  const SummaryCardWidget({
+  const SummaryCardWidgetOld({
     super.key,
     required this.iconPath,
     required this.label,
     required this.duration,
     required this.value,
   });
-  // Add this method to your class:
+
   String _formatNumber(String value) {
     try {
       final num parsedValue = num.parse(value);
