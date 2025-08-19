@@ -83,9 +83,11 @@ List<AreaPolygon> parseGeoJsonToPolygons(
     final geometry = feature['geometry'];
     final info = feature['info'];
 
-    // Extract district information from GeoJSON
+    // Extract area information from GeoJSON
     final String areaName = info?['name'] ?? 'Unknown Area';
     final String? orgUid = info?['org_uid'];
+    final String? slug = info?['slug'];
+    final String? parentSlug = info?['parent_slug'];
 
     // Skip features without geometry
     if (geometry == null) {
@@ -122,6 +124,8 @@ List<AreaPolygon> parseGeoJsonToPolygons(
         areaName,
         orgUid,
         coveragePercentage,
+        slug: slug,
+        parentSlug: parentSlug,
       );
       if (polygonData != null) {
         polygonList.add(polygonData);
@@ -134,6 +138,8 @@ List<AreaPolygon> parseGeoJsonToPolygons(
         areaName,
         orgUid,
         coveragePercentage,
+        slug: slug,
+        parentSlug: parentSlug,
       );
       polygonList.addAll(multiPolygons);
       processedPolygons += multiPolygons.length;
@@ -177,8 +183,10 @@ AreaPolygon? _processPolygonGeometry(
   Map<String, dynamic> geometry,
   String areaName,
   String? orgUid,
-  double? coveragePercentage,
-) {
+  double? coveragePercentage, {
+  String? slug,
+  String? parentSlug,
+}) {
   try {
     final coordinatesArray = geometry['coordinates'] as List<dynamic>;
 
@@ -209,7 +217,14 @@ AreaPolygon? _processPolygonGeometry(
       points.add(points.last);
     }
 
-    return _createAreaPolygon(areaName, orgUid, coveragePercentage, points);
+    return _createAreaPolygon(
+      areaName,
+      orgUid,
+      coveragePercentage,
+      points,
+      slug: slug,
+      parentSlug: parentSlug,
+    );
   } catch (e) {
     logg.e("Error processing polygon for $areaName: $e");
     // Try to extract coordinate information for debugging
@@ -234,8 +249,10 @@ List<AreaPolygon> _processMultiPolygonGeometry(
   Map<String, dynamic> geometry,
   String areaName,
   String? orgUid,
-  double? coveragePercentage,
-) {
+  double? coveragePercentage, {
+  String? slug,
+  String? parentSlug,
+}) {
   final List<AreaPolygon> polygons = [];
 
   try {
@@ -267,6 +284,8 @@ List<AreaPolygon> _processMultiPolygonGeometry(
             orgUid,
             coveragePercentage,
             points,
+            slug: slug,
+            parentSlug: parentSlug,
           );
           if (polygon != null) {
             polygons.add(polygon);
@@ -279,6 +298,8 @@ List<AreaPolygon> _processMultiPolygonGeometry(
             orgUid,
             coveragePercentage,
             points,
+            slug: slug,
+            parentSlug: parentSlug,
           );
           if (polygon != null) {
             polygons.add(polygon);
@@ -362,8 +383,10 @@ AreaPolygon? _createAreaPolygon(
   String areaName,
   String? orgUid,
   double? coveragePercentage,
-  List<LatLng> points,
-) {
+  List<LatLng> points, {
+  String? slug,
+  String? parentSlug,
+}) {
   try {
     // Get color based on coverage percentage
     final polygonColor = CoverageColors.getCoverageColor(coveragePercentage);
@@ -381,6 +404,9 @@ AreaPolygon? _createAreaPolygon(
       areaName: areaName,
       level: 'district',
       coveragePercentage: coveragePercentage ?? 0.0,
+      slug: slug,
+      parentSlug: parentSlug,
+      canDrillDown: slug != null && slug.isNotEmpty,
     );
   } catch (e) {
     logg.e("Error creating area polygon for $areaName: $e");
