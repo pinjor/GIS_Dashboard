@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
-import 'package:gis_dashboard/core/providers/filter_provider.dart';
+import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/features/summary/presentation/controllers/summary_controller.dart';
 
 import '../../../../core/common/constants/constants.dart';

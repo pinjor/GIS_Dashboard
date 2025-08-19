@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
-import 'package:gis_dashboard/core/providers/filter_provider.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
+import '../providers/filter_provider.dart';
 
 class FilterDialogBoxWidget extends ConsumerStatefulWidget {
   const FilterDialogBoxWidget({super.key});
@@ -18,37 +18,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   late String _selectedVaccine;
   late String _selectedDivision;
   String? _selectedCityCorporation;
+  String? _selectedDistrict;
+  late String _selectedYear;
 
   final _formKey = GlobalKey<FormState>();
-
-  // Bangladesh Divisions
-  final List<String> _divisions = [
-    'All',
-    'Dhaka Division',
-    'Barishal Division',
-    'Rajshahi Division',
-    'Rangpur Division',
-    'Sylhet Division',
-    // 'Chattogram Division',
-    // 'Khulna Division',
-    // 'Mymensingh Division',
-  ];
-
-  // Bangladesh City Corporations
-  final List<String> _cityCorporations = [
-    'Dhaka North CC',
-    'Dhaka South CC',
-    'Gazipur CC',
-    'Narayanganj CC',
-    'Chattogram CC',
-    'Khulna CC',
-    'Sylhet CC',
-    'Rangpur CC',
-    // 'Rajshahi CC',
-    // 'Barishal CC',
-    // 'Cumilla CC',
-    // 'Mymensingh CC',
-  ];
 
   @override
   void initState() {
@@ -65,11 +38,26 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _selectedVaccine = currentFilter.selectedVaccine;
     _selectedDivision = currentFilter.selectedDivision;
     _selectedCityCorporation = currentFilter.selectedCityCorporation;
+    _selectedDistrict = currentFilter.selectedDistrict;
+    _selectedYear = currentFilter.selectedYear;
   }
 
   @override
   Widget build(BuildContext context) {
     final primaryColor = Color(Constants.primaryColor);
+    final filterState = ref.watch(filterProvider);
+    final filterNotifier = ref.read(filterProvider.notifier);
+
+    // Sync local district selection with provider state when districts are filtered
+    if (_selectedDistrict != null &&
+        !filterNotifier.districtDropdownItems.contains(_selectedDistrict)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _selectedDistrict = null;
+        });
+      });
+    }
+
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -86,6 +74,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 5.h,
+                // Area Type Selection
                 Row(
                   children: [
                     GestureDetector(
@@ -128,7 +117,6 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                             visualDensity: VisualDensity.compact,
-
                             activeColor: primaryColor,
                             value: 'city_corporation',
                             groupValue: _selectedAreaType,
@@ -144,6 +132,8 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     ),
                   ],
                 ),
+                16.h,
+                // Period Selection
                 const Text(
                   'Period',
                   style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
@@ -153,81 +143,140 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
-                  value: '2025',
+                  value: _selectedYear,
                   items: ['2025', '2024']
                       .map(
                         (year) =>
                             DropdownMenuItem(value: year, child: Text(year)),
                       )
                       .toList(),
-                  onChanged: (value) {},
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedYear = value;
+                      });
+                    }
+                  },
                 ),
                 16.h,
+                // Area-specific dropdowns
                 if (_selectedAreaType == 'district') ...[
+                  // Division Dropdown
                   const Text(
                     'Division',
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
                   ),
                   8.h,
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+                  if (filterState.isLoadingAreas)
+                    const Center(child: CircularProgressIndicator())
+                  else if (filterState.areasError != null)
+                    Column(
+                      children: [
+                        Text('Error: ${filterState.areasError}'),
+                        8.h,
+                        ElevatedButton(
+                          onPressed: () => filterNotifier.retryLoadAreas(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    )
+                  else
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _selectedDivision,
+                      items: filterNotifier.divisionDropdownItems
+                          .map(
+                            (division) => DropdownMenuItem(
+                              value: division,
+                              child: Text(division),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedDivision = value;
+                            _selectedDistrict =
+                                null; // Clear district when division changes
+                          });
+                          // Update the provider to filter districts based on selected division
+                          filterNotifier.updateDivision(value);
+                        }
+                      },
                     ),
-                    value: _selectedDivision,
-                    items: _divisions
-                        .map(
-                          (division) => DropdownMenuItem(
-                            value: division,
-                            child: Text(division),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedDivision = value!;
-                      });
-                    },
-                  ),
                   16.h,
+                  // District Dropdown
                   const Text(
                     'District',
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
                   ),
                   8.h,
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search District',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ] else if (_selectedAreaType == 'city_corporation') ...[
-                  const Text(
-                    'City Corporation',
-                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
-                  ),
-                  8.h,
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    value: _selectedCityCorporation,
-                    hint: const Text('Select City Corporation'),
-                    items: _cityCorporations
+                    value: _selectedDistrict,
+                    hint: const Text('All'),
+                    items: ['All', ...filterNotifier.districtDropdownItems]
                         .map(
-                          (corporation) => DropdownMenuItem(
-                            value: corporation,
-                            child: Text(corporation),
+                          (district) => DropdownMenuItem(
+                            value: district == 'All' ? null : district,
+                            child: Text(district),
                           ),
                         )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        _selectedCityCorporation = value;
+                        _selectedDistrict = value;
                       });
                     },
                   ),
+                ] else if (_selectedAreaType == 'city_corporation') ...[
+                  // City Corporation Dropdown
+                  const Text(
+                    'City Corporation',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                  ),
+                  8.h,
+                  if (filterState.isLoadingAreas)
+                    const Center(child: CircularProgressIndicator())
+                  else if (filterState.areasError != null)
+                    Column(
+                      children: [
+                        Text('Error: ${filterState.areasError}'),
+                        8.h,
+                        ElevatedButton(
+                          onPressed: () => filterNotifier.retryLoadAreas(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    )
+                  else
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _selectedCityCorporation,
+                      hint: const Text('Select City Corporation'),
+                      items: filterNotifier.cityCorporationDropdownItems
+                          .map(
+                            (corporation) => DropdownMenuItem(
+                              value: corporation,
+                              child: Text(corporation),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCityCorporation = value;
+                        });
+                      },
+                    ),
                 ],
                 16.h,
+                // Vaccine Selection
                 const Text(
                   'Select Vaccine',
                   style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
@@ -263,33 +312,32 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                   ],
                 ),
                 24.h,
+                // Action Buttons
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(5),
-                            ), // Makes it perfectly square
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
                           ),
                         ),
-
                         onPressed: () {
                           // Apply filters to global state
-                          ref
-                              .read(filterProvider.notifier)
-                              .updateVaccine(_selectedVaccine);
-                          // ref
-                          //     .read(filterProvider.notifier)
-                          //     .updateAreaType(_selectedAreaType);
-                          // ref
-                          //     .read(filterProvider.notifier)
-                          //     .updateDivision(_selectedDivision);
-                          // ref
-                          //     .read(filterProvider.notifier)
-                          //     .updateCityCorporation(_selectedCityCorporation);
+                          filterNotifier.updateVaccine(_selectedVaccine);
+                          filterNotifier.updateAreaType(_selectedAreaType);
+                          filterNotifier.updateYear(_selectedYear);
+
+                          if (_selectedAreaType == 'district') {
+                            filterNotifier.updateDivision(_selectedDivision);
+                            filterNotifier.updateDistrict(_selectedDistrict);
+                          } else if (_selectedAreaType == 'city_corporation') {
+                            filterNotifier.updateCityCorporation(
+                              _selectedCityCorporation,
+                            );
+                          }
+
                           Navigator.of(context).pop();
                         },
                         child: const Text(
@@ -302,15 +350,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(5),
-                            ), // Makes it perfectly square
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
                           ),
                         ),
                         onPressed: () {
                           // Reset filters to default
-                          ref.read(filterProvider.notifier).resetFilters();
+                          filterNotifier.resetFilters();
                           Navigator.of(context).pop();
                         },
                         child: const Text(

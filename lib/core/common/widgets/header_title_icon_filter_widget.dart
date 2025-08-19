@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
-import 'package:gis_dashboard/core/providers/filter_provider.dart';
-
-import '../../../features/map/presentation/widget/filter_dialog_box_widget.dart';
+import 'package:gis_dashboard/features/filter/filter.dart';
 
 class HeaderTitleIconFilterWidget extends ConsumerWidget {
   final VoidCallback? onFilterTap;
@@ -43,13 +41,13 @@ class HeaderTitleIconFilterWidget extends ConsumerWidget {
               () {
                 showDialog(
                   context: context,
-                  builder: (_) => const Dialog(
+                  builder: (_) => Dialog(
                     backgroundColor: Color(Constants.cardColor),
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
-                    insetPadding: EdgeInsets.symmetric(horizontal: 16),
-                    child: FilterDialogBoxWidget(),
+                    insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: const FilterDialogBoxWidget(),
                   ),
                 );
               },

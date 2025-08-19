@@ -47,6 +47,7 @@ class MapRepository {
       final archive = GZipDecoder().decodeBytes(bytes);
       final geoJson = String.fromCharCodes(archive);
       logg.i('Successfully decompressed GeoJSON data');
+      logg.i(geoJson);
       return geoJson;
     } on DioException catch (e) {
       logg.e("Dio error fetching GeoJSON: $e");

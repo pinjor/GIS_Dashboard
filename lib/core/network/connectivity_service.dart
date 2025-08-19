@@ -13,6 +13,7 @@ class ConnectivityService {
     try {
       // First check connectivity state
       final connectivityResult = await _connectivity.checkConnectivity();
+      print(connectivityResult);
 
       // If no connectivity, return false immediately
       if (connectivityResult.contains(ConnectivityResult.none)) {

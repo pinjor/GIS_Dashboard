@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/config/coverage_colors.dart';
 import 'package:gis_dashboard/core/common/widgets/header_title_icon_filter_widget.dart';
 import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
-import 'package:gis_dashboard/core/providers/filter_provider.dart';
+import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/custom_loading_map_widget.dart';
 import 'package:latlong2/latlong.dart';
