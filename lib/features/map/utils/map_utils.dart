@@ -13,6 +13,7 @@ List<AreaPolygon> parseGeoJsonToPolygons(
   String geoJson,
   VaccineCoverageResponse coverageData,
   String selectedVaccine,
+  String currentLevel, // Add current level to determine drill-down capability
 ) {
   final stopwatch = Stopwatch()..start();
 
@@ -78,6 +79,7 @@ List<AreaPolygon> parseGeoJsonToPolygons(
   int skippedFeatures = 0;
 
   final List<AreaPolygon> polygonList = [];
+  final Map<String, List<Map<String, dynamic>>> areaGroups = {};
 
   for (final feature in features) {
     final geometry = feature['geometry'];
@@ -115,199 +117,149 @@ List<AreaPolygon> parseGeoJsonToPolygons(
       );
     }
 
-    final type = geometry['type'];
+    // Group features by area name to combine parts
+    if (!areaGroups.containsKey(areaName)) {
+      areaGroups[areaName] = [];
+    }
 
-    // Process different geometry types
-    if (type == 'Polygon') {
-      final polygonData = _processPolygonGeometry(
-        geometry,
-        areaName,
-        orgUid,
-        coveragePercentage,
-        slug: slug,
-        parentSlug: parentSlug,
-      );
-      if (polygonData != null) {
-        polygonList.add(polygonData);
-        processedPolygons++;
+    areaGroups[areaName]!.add({
+      'geometry': geometry,
+      'areaName': areaName,
+      'orgUid': orgUid,
+      'coveragePercentage': coveragePercentage,
+      'slug': slug,
+      'parentSlug': parentSlug,
+    });
+  }
+
+  // Process grouped areas
+  for (final entry in areaGroups.entries) {
+    final areaName = entry.key;
+    final featureGroup = entry.value;
+
+    // Collect all valid polygon points for this area
+    final List<List<LatLng>> allPolygonRings = [];
+
+    String? areaOrgUid;
+    double? areaCoveragePercentage;
+    String? areaSlug;
+    String? areaParentSlug;
+
+    // Process all features for this area name
+    for (final featureData in featureGroup) {
+      final geometry = featureData['geometry'];
+      areaOrgUid ??= featureData['orgUid'];
+      areaCoveragePercentage ??= featureData['coveragePercentage'];
+      areaSlug ??= featureData['slug'];
+      areaParentSlug ??= featureData['parentSlug'];
+
+      final type = geometry['type'];
+
+      // Process different geometry types and collect all rings
+      if (type == 'Polygon') {
+        final polygonRings = _extractPolygonRings(geometry, areaName);
+        allPolygonRings.addAll(polygonRings);
+      } else if (type == 'MultiPolygon') {
+        final multiPolygonRings = _extractMultiPolygonRings(geometry, areaName);
+        allPolygonRings.addAll(multiPolygonRings);
+      } else {
+        logg.w("Unsupported geometry type: $type for $areaName");
+        skippedFeatures++;
       }
-    } else if (type == 'MultiPolygon') {
-      // Process ALL polygons in MultiPolygon, not just the first one
-      final multiPolygons = _processMultiPolygonGeometry(
-        geometry,
-        areaName,
-        orgUid,
-        coveragePercentage,
-        slug: slug,
-        parentSlug: parentSlug,
+    }
+
+    // Create a single AreaPolygon for this area using the largest/most significant ring
+    if (allPolygonRings.isNotEmpty) {
+      // Use the ring with the most points (usually the main area)
+      final mainRing = allPolygonRings.reduce(
+        (a, b) => a.length > b.length ? a : b,
       );
-      polygonList.addAll(multiPolygons);
-      processedPolygons += multiPolygons.length;
-    } else {
-      logg.w("Unsupported geometry type: $type for $areaName");
-      skippedFeatures++;
+
+      final areaPolygon = _createAreaPolygon(
+        areaName, // Use original name without "Part X" suffix
+        areaOrgUid,
+        areaCoveragePercentage,
+        mainRing,
+        currentLevel,
+        slug: areaSlug,
+        parentSlug: areaParentSlug,
+      );
+
+      if (areaPolygon != null) {
+        polygonList.add(areaPolygon);
+        processedPolygons++;
+        logg.d(
+          "Created unified polygon for $areaName with ${allPolygonRings.length} parts",
+        );
+      }
     }
   }
 
   logg.i(
-    "GeoJSON parsing completed in ${stopwatch.elapsedMilliseconds}ms: $processedPolygons total polygons, $matchedCount with coverage data, $noDataCount without data, $skippedFeatures skipped",
+    "GeoJSON parsing completed in ${stopwatch.elapsedMilliseconds}ms: $processedPolygons total areas processed, $matchedCount with coverage data, $noDataCount without data, $skippedFeatures skipped",
   );
-  logg.i("Final polygon count: ${polygonList.length}");
-
-  // Additional debugging: analyze polygon distribution by area
-  final Map<String, int> areaPolygonCounts = {};
-  for (final polygon in polygonList) {
-    final areaName = polygon.areaName.split(' Part ')[0]; // Remove part suffix
-    areaPolygonCounts[areaName] = (areaPolygonCounts[areaName] ?? 0) + 1;
-  }
-
-  // Log areas with multiple polygons (likely MultiPolygon features)
-  final multiPolygonAreas =
-      areaPolygonCounts.entries.where((entry) => entry.value > 1).toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
-
-  if (multiPolygonAreas.isNotEmpty) {
-    logg.i("Areas with multiple polygon parts:");
-    for (final entry in multiPolygonAreas.take(10)) {
-      // Show top 10
-      logg.i("  ${entry.key}: ${entry.value} parts");
-    }
-  }
+  logg.i("Final unified polygon count: ${polygonList.length}");
 
   stopwatch.stop();
   return polygonList;
 }
 
-// Helper function to process single Polygon geometry
-AreaPolygon? _processPolygonGeometry(
+// Helper function to extract polygon rings from a Polygon geometry
+List<List<LatLng>> _extractPolygonRings(
   Map<String, dynamic> geometry,
   String areaName,
-  String? orgUid,
-  double? coveragePercentage, {
-  String? slug,
-  String? parentSlug,
-}) {
+) {
   try {
     final coordinatesArray = geometry['coordinates'] as List<dynamic>;
+    final List<List<LatLng>> rings = [];
 
-    // Handle different coordinate structures
-    List<dynamic> coords;
     if (coordinatesArray.isNotEmpty) {
       // Standard polygon structure: coordinates[0] is the outer ring
-      coords = coordinatesArray[0] as List<dynamic>;
-    } else {
-      logg.w("$areaName: Empty coordinates array");
-      return null;
-    }
+      final coords = coordinatesArray[0] as List<dynamic>;
+      final points = _extractCoordinates(coords, areaName);
 
-    final points = _extractCoordinates(coords, areaName);
-
-    // More lenient coordinate requirement - even 2 points can be useful for debugging
-    if (points.length < 2) {
-      logg.w(
-        "Skipping polygon for $areaName - insufficient valid coordinates (${points.length})",
-      );
-      return null;
-    }
-
-    // For polygons with less than 3 points, create a simple line or point representation
-    if (points.length == 2) {
-      logg.i("$areaName: Creating line polygon with ${points.length} points");
-      // Duplicate the last point to create a minimal triangle
-      points.add(points.last);
-    }
-
-    return _createAreaPolygon(
-      areaName,
-      orgUid,
-      coveragePercentage,
-      points,
-      slug: slug,
-      parentSlug: parentSlug,
-    );
-  } catch (e) {
-    logg.e("Error processing polygon for $areaName: $e");
-    // Try to extract coordinate information for debugging
-    try {
-      final coords = geometry['coordinates'];
-      logg.e("  Coordinate structure: ${coords.runtimeType}");
-      if (coords is List) {
-        logg.e("  Coordinate array length: ${coords.length}");
-        if (coords.isNotEmpty) {
-          logg.e("  First element type: ${coords[0].runtimeType}");
-        }
+      if (points.length >= 3) {
+        rings.add(points);
+      } else if (points.length == 2) {
+        // Create a minimal triangle for debugging
+        points.add(points.last);
+        rings.add(points);
       }
-    } catch (debugError) {
-      logg.e("  Could not analyze coordinate structure: $debugError");
     }
-    return null;
+
+    return rings;
+  } catch (e) {
+    logg.e("Error extracting polygon rings for $areaName: $e");
+    return [];
   }
 }
 
-// Helper function to process MultiPolygon geometry
-List<AreaPolygon> _processMultiPolygonGeometry(
+// Helper function to extract polygon rings from a MultiPolygon geometry
+List<List<LatLng>> _extractMultiPolygonRings(
   Map<String, dynamic> geometry,
   String areaName,
-  String? orgUid,
-  double? coveragePercentage, {
-  String? slug,
-  String? parentSlug,
-}) {
-  final List<AreaPolygon> polygons = [];
+) {
+  final List<List<LatLng>> rings = [];
 
   try {
     final multiPolygonCoords = geometry['coordinates'] as List<dynamic>;
-
-    // Process ALL polygon parts - don't limit them for completeness
-    // This ensures we don't miss any boundaries
-    logg.d("$areaName: Processing ${multiPolygonCoords.length} polygon parts");
 
     for (int i = 0; i < multiPolygonCoords.length; i++) {
       try {
         final polygonCoords = multiPolygonCoords[i] as List<dynamic>;
 
-        // Handle different MultiPolygon structures
-        List<dynamic> coords;
         if (polygonCoords.isNotEmpty && polygonCoords[0] is List) {
           // Take the outer ring (first element) of each polygon
-          coords = polygonCoords[0] as List<dynamic>;
-        } else {
-          logg.w("$areaName Part ${i + 1}: Unexpected polygon structure");
-          continue;
-        }
+          final coords = polygonCoords[0] as List<dynamic>;
+          final points = _extractCoordinates(coords, areaName);
 
-        final points = _extractCoordinates(coords, areaName);
-
-        if (points.length >= 3) {
-          final polygon = _createAreaPolygon(
-            "$areaName${i > 0 ? ' Part ${i + 1}' : ''}",
-            orgUid,
-            coveragePercentage,
-            points,
-            slug: slug,
-            parentSlug: parentSlug,
-          );
-          if (polygon != null) {
-            polygons.add(polygon);
+          if (points.length >= 3) {
+            rings.add(points);
+          } else if (points.length == 2) {
+            // Create a minimal triangle for debugging
+            points.add(points.last);
+            rings.add(points);
           }
-        } else if (points.length == 2) {
-          // Create a minimal triangle for debugging
-          points.add(points.last);
-          final polygon = _createAreaPolygon(
-            "$areaName Part ${i + 1} (Line)",
-            orgUid,
-            coveragePercentage,
-            points,
-            slug: slug,
-            parentSlug: parentSlug,
-          );
-          if (polygon != null) {
-            polygons.add(polygon);
-          }
-        } else {
-          logg.d(
-            "Skipping polygon part ${i + 1} for $areaName - insufficient coordinates (${points.length})",
-          );
         }
       } catch (e) {
         logg.e("Error processing polygon part ${i + 1} for $areaName: $e");
@@ -315,11 +267,10 @@ List<AreaPolygon> _processMultiPolygonGeometry(
       }
     }
   } catch (e) {
-    logg.e("Error processing multipolygon for $areaName: $e");
+    logg.e("Error extracting multipolygon rings for $areaName: $e");
   }
 
-  logg.d("Processed ${polygons.length} polygon parts for $areaName");
-  return polygons;
+  return rings;
 }
 
 // Helper function to extract and validate coordinates
@@ -383,13 +334,18 @@ AreaPolygon? _createAreaPolygon(
   String areaName,
   String? orgUid,
   double? coveragePercentage,
-  List<LatLng> points, {
+  List<LatLng> points,
+  String currentLevel, {
   String? slug,
   String? parentSlug,
 }) {
   try {
     // Get color based on coverage percentage
     final polygonColor = CoverageColors.getCoverageColor(coveragePercentage);
+
+    // Only allow drill-down if we're at district level and have a valid slug
+    final canDrillDown =
+        currentLevel == 'district' && slug != null && slug.isNotEmpty;
 
     return AreaPolygon(
       polygon: Polygon(
@@ -402,11 +358,11 @@ AreaPolygon? _createAreaPolygon(
       ),
       areaId: orgUid ?? areaName,
       areaName: areaName,
-      level: 'district',
+      level: currentLevel, // Use the actual current level
       coveragePercentage: coveragePercentage ?? 0.0,
       slug: slug,
       parentSlug: parentSlug,
-      canDrillDown: slug != null && slug.isNotEmpty,
+      canDrillDown: canDrillDown, // Only allow drill-down from district level
     );
   } catch (e) {
     logg.e("Error creating area polygon for $areaName: $e");

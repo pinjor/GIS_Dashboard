@@ -109,7 +109,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       return;
     }
 
-    state = state.copyWith(isLoading: true, clearError: true);
+    // First clear any existing error state explicitly
+    state = state.copyWith(clearError: true, isLoading: false);
+    // Then set loading state
+    state = state.copyWith(isLoading: true);
 
     try {
       logg.i("Drilling down to $areaName with slug: $slug");
@@ -181,7 +184,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       return;
     }
 
-    state = state.copyWith(isLoading: true, clearError: true);
+    // First clear any existing error state explicitly
+    state = state.copyWith(clearError: true, isLoading: false);
+    // Then set loading state
+    state = state.copyWith(isLoading: true);
 
     try {
       final newStack = List<DrilldownLevel>.from(state.navigationStack)
@@ -257,5 +263,11 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         parentSlug: currentLevel.parentSlug,
       );
     }
+  }
+
+  /// Explicitly clear any error state
+  void clearError() {
+    logg.i("Explicitly clearing error state");
+    state = state.copyWith(clearError: true);
   }
 }

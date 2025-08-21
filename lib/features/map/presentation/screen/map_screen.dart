@@ -23,6 +23,8 @@ class MapScreen extends ConsumerStatefulWidget {
 
 class _MapScreenState extends ConsumerState<MapScreen> {
   final mapController = MapController();
+  Timer? _autoZoomTimer;
+  DateTime? _lastAutoZoom;
   final double _initialZoom = 6.60;
 
   @override
@@ -39,13 +41,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   /// Build markers for area names (only for drilled-down areas)
   List<Marker> _buildAreaNameMarkers(List<AreaPolygon> areaPolygons) {
-    // Don't build too many markers to avoid performance issues
-    if (areaPolygons.length > 50) {
+    // With unified polygons, we should have fewer markers now
+    if (areaPolygons.length > 100) {
       logg.w(
-        "Too many polygons (${areaPolygons.length}) for area name markers, skipping labels",
+        "Too many areas (${areaPolygons.length}) for name markers, skipping labels",
       );
       return [];
     }
+
+    logg.i("Building ${areaPolygons.length} area name markers (unified areas)");
 
     return areaPolygons.map((areaPolygon) {
       // Calculate centroid of the polygon
@@ -53,30 +57,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
       return Marker(
         point: centroid,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.black38, width: 0.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 2,
-                offset: const Offset(1, 1),
-              ),
-            ],
-          ),
-          child: Text(
-            areaPolygon.areaName,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
+        child: FittedBox(
+          fit: BoxFit.none,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.black38, width: 0.5),
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            child: Text(
+              areaPolygon.areaName,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
           ),
         ),
       );
@@ -228,6 +221,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _performDrillDown(AreaPolygon tappedPolygon) {
     final mapNotifier = ref.read(mapControllerProvider.notifier);
 
+    // Clear any existing error state before drilldown
+    mapNotifier.clearError();
+
     // Determine the next level based on current level
     String nextLevel = _getNextLevel(
       ref.read(mapControllerProvider).currentLevel,
@@ -272,6 +268,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// Go back one level in navigation
   void _goBack() {
     final currentState = ref.read(mapControllerProvider);
+    final mapNotifier = ref.read(mapControllerProvider.notifier);
+
+    // Clear any existing error state before going back
+    mapNotifier.clearError();
 
     // If going back to country level, also reset map zoom
     if (currentState.navigationStack.length == 1) {
@@ -282,7 +282,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       });
     }
 
-    ref.read(mapControllerProvider.notifier).goBack();
+    mapNotifier.goBack();
+  }
+
+  @override
+  void dispose() {
+    _autoZoomTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -299,19 +305,36 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           current.currentLevel != 'district' && // Only for drilled-down levels
           current.geoJson != null &&
           current.coverageData != null) {
-        // Trigger auto-zoom after a short delay
-        Future.delayed(const Duration(milliseconds: 1000), () {
-          final newPolygons = parseGeoJsonToPolygons(
-            current.geoJson!,
-            current.coverageData!,
-            filterState.selectedVaccine,
-          );
+        // Throttle auto-zoom to prevent rapid calls
+        final now = DateTime.now();
+        if (_lastAutoZoom != null &&
+            now.difference(_lastAutoZoom!).inMilliseconds < 2000) {
+          logg.i("Auto-zoom throttled - too recent");
+          return;
+        }
+        _lastAutoZoom = now;
 
-          if (newPolygons.isNotEmpty) {
-            logg.i(
-              "Auto-zooming to ${newPolygons.length} polygons at level: ${current.currentLevel}",
+        // Cancel any existing timer
+        _autoZoomTimer?.cancel();
+
+        // Trigger auto-zoom after a longer delay to allow tiles to load
+        _autoZoomTimer = Timer(const Duration(milliseconds: 1500), () {
+          try {
+            final newPolygons = parseGeoJsonToPolygons(
+              current.geoJson!,
+              current.coverageData!,
+              filterState.selectedVaccine,
+              current.currentLevel,
             );
-            _autoZoomToPolygons(newPolygons);
+
+            if (newPolygons.isNotEmpty && mounted) {
+              logg.i(
+                "Auto-zooming to ${newPolygons.length} polygons at level: ${current.currentLevel}",
+              );
+              _autoZoomToPolygons(newPolygons);
+            }
+          } catch (e) {
+            logg.w("Auto-zoom failed: $e");
           }
         });
       }
@@ -325,6 +348,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           mapState.geoJson!,
           mapState.coverageData!,
           filterState.selectedVaccine,
+          mapState.currentLevel,
         );
         logg.i("Successfully parsed ${areaPolygons.length} polygons");
       } catch (e) {
@@ -433,11 +457,33 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         },
                       ),
                       children: [
-                        // maybe the url needs an update
+                        // Enhanced tile layer with error handling and network resilience
                         TileLayer(
                           urlTemplate:
                               'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                           subdomains: const ['a', 'b', 'c'],
+                          // Add fallback URL for better reliability
+                          fallbackUrl:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          // Silence network exceptions to prevent error flooding
+                          tileProvider: NetworkTileProvider(
+                            silenceExceptions: true,
+                          ),
+                          // Add user agent to comply with OSM usage policy
+                          userAgentPackageName: 'com.example.gis_dashboard',
+                          // Error handling configuration
+                          errorTileCallback: (tile, error, stackTrace) {
+                            // Log the error but don't show UI errors
+                            logg.w(
+                              'Tile loading error for ${tile.coordinates}: $error',
+                            );
+                          },
+                          // Keep tiles in memory longer to reduce reloads
+                          keepBuffer: 3,
+                          // Reduce tile loading during panning
+                          panBuffer: 1,
+                          // Limit max zoom to reduce tile requests
+                          maxZoom: 15,
                         ),
                         // Area polygons
                         PolygonLayer(polygons: _buildPolygons(areaPolygons)),

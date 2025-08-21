@@ -17,24 +17,6 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
     return dropoutPercentage < 0 ? 0.0 : dropoutPercentage;
   }
 
-  // // Get location name based on area type
-  // String _getLocationName(String? areaType) {
-  //   switch (areaType?.toLowerCase()) {
-  //     case 'district':
-  //       return 'Bangladesh (Districts)';
-  //     case 'upazila':
-  //       return 'Bangladesh (Upazilas)';
-  //     case 'union':
-  //       return 'Bangladesh (Unions)';
-  //     case 'ward':
-  //       return 'Bangladesh (Wards)';
-  //     case 'subblock':
-  //       return 'Bangladesh (Sub-blocks)';
-  //     default:
-  //       return 'Bangladesh';
-  //   }
-  // }
-
   // Create performance areas with indicators
   List<Map<String, dynamic>> _createPerformanceData(Vaccine selectedVaccine) {
     List<Map<String, dynamic>> performanceData = [];
@@ -181,10 +163,9 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
 
     // Get performance data - use performance section if available, otherwise create from areas
     final performanceData = _createPerformanceData(selectedVaccine);
-    // final locationName = _getLocationName(
-    //   summaryState.coverageData?.metadata?.areaType,
-    // );
-    final locationName = 'Bangladesh'; // Placeholder for location name
+
+    // Use dynamic location name based on current area
+    final locationName = summaryState.currentAreaName;
 
     if (performanceData.isEmpty) {
       return Card(
