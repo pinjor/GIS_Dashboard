@@ -343,9 +343,11 @@ AreaPolygon? _createAreaPolygon(
     // Get color based on coverage percentage
     final polygonColor = CoverageColors.getCoverageColor(coveragePercentage);
 
-    // Only allow drill-down if we're at district level and have a valid slug
+    // Allow drill-down for district and upazila levels, with valid slug
     final canDrillDown =
-        currentLevel == 'district' && slug != null && slug.isNotEmpty;
+        (currentLevel == 'district' || currentLevel == 'upazila') &&
+        slug != null &&
+        slug.isNotEmpty;
 
     return AreaPolygon(
       polygon: Polygon(

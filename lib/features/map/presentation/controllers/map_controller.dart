@@ -170,9 +170,26 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       logg.i("Successfully drilled down to $areaName at level $newLevel");
     } catch (e) {
       logg.e("Error drilling down to $areaName: $e");
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Failed to load data for $areaName: $e',
+
+      // Enhanced error handling to prevent connectivity screen bugs
+      String errorMessage;
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('Connection') ||
+          e.toString().contains('Network')) {
+        errorMessage =
+            'Network error while loading $areaName. Please check your connection and try again.';
+      } else if (e.toString().contains('404') ||
+          e.toString().contains('Not Found')) {
+        errorMessage = 'Data not available for $areaName at this time.';
+      } else {
+        errorMessage = 'Failed to load data for $areaName. Please try again.';
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
+
+      // Don't navigate away or show connectivity screen - keep user on current level
+      logg.w(
+        "Drill down failed but maintaining current state to prevent navigation issues",
       );
     }
   }
@@ -235,10 +252,22 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       logg.i("Successfully navigated back");
     } catch (e) {
       logg.e("Error navigating back: $e");
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Failed to navigate back: $e',
-      );
+
+      // Enhanced error handling for navigation
+      String errorMessage;
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('Connection') ||
+          e.toString().contains('Network')) {
+        errorMessage =
+            'Network error while navigating back. Please check your connection and try again.';
+      } else {
+        errorMessage = 'Failed to navigate back. Please try again.';
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
+
+      // Keep user on current level to prevent navigation issues
+      logg.w("Navigation back failed but maintaining current state");
     }
   }
 

@@ -351,6 +351,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           mapState.currentLevel,
         );
         logg.i("Successfully parsed ${areaPolygons.length} polygons");
+
+        // Clear any existing errors when data is successfully loaded and parsed
+        if (mapState.error != null && !mapState.isLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(mapControllerProvider.notifier).clearError();
+          });
+        }
       } catch (e) {
         logg.e("Error parsing polygons: $e");
         // Don't set error state here, just log it
