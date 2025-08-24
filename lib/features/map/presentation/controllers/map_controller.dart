@@ -105,7 +105,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     // Check if slug is empty (no drilldown data available)
     if (slug.isEmpty) {
       logg.w("Cannot drill down to $areaName - slug is empty");
-      state = state.copyWith(error: 'No detailed data available for $areaName');
+      // Don't show error state, just ignore the request silently
       return;
     }
 
@@ -131,7 +131,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       logg.i("Fetching GeoJSON from: $geoJsonPath");
       logg.i("Fetching coverage from: $coveragePath");
 
-      final results = await Future.wait([
+      // For union and deeper levels (not upazila), also fetch EPI data (3 simultaneous requests)
+      List<Future> apiRequests = [
         _dataService.getGeoJson(
           urlPath: geoJsonPath,
           forceRefresh: true, // Always refresh for drilldown
@@ -140,10 +141,31 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           urlPath: coveragePath,
           forceRefresh: true, // Always refresh for drilldown
         ),
-      ]);
+      ];
+
+      // Add EPI request ONLY for union and deeper levels (not for district or upazila)
+      if (newLevel == 'union' || newLevel == 'ward' || newLevel == 'subblock') {
+        final epiPath = ApiConstants.getEpiPath(slug: slug);
+        logg.i("Fetching EPI data from: $epiPath");
+        apiRequests.add(
+          _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
+        );
+      }
+
+      final results = await Future.wait(apiRequests);
 
       final geoJson = results[0] as String;
       final coverageData = results[1] as VaccineCoverageResponse;
+
+      // EPI data is only available for union and deeper levels (not district or upazila)
+      String? epiData;
+      if ((newLevel == 'union' ||
+              newLevel == 'ward' ||
+              newLevel == 'subblock') &&
+          results.length > 2) {
+        epiData = results[2] as String;
+        logg.i("Successfully fetched EPI data for $areaName");
+      }
 
       // Create new navigation level
       final newNavLevel = DrilldownLevel(
@@ -160,6 +182,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         geoJson: geoJson,
         coverageData: coverageData,
+        epiData: epiData,
         currentLevel: newLevel,
         navigationStack: newStack,
         currentAreaName: areaName,
@@ -171,25 +194,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     } catch (e) {
       logg.e("Error drilling down to $areaName: $e");
 
-      // Enhanced error handling to prevent connectivity screen bugs
-      String errorMessage;
-      if (e.toString().contains('SocketException') ||
-          e.toString().contains('Connection') ||
-          e.toString().contains('Network')) {
-        errorMessage =
-            'Network error while loading $areaName. Please check your connection and try again.';
-      } else if (e.toString().contains('404') ||
-          e.toString().contains('Not Found')) {
-        errorMessage = 'Data not available for $areaName at this time.';
-      } else {
-        errorMessage = 'Failed to load data for $areaName. Please try again.';
-      }
+      // GRACEFUL DEGRADATION: Don't show error screens, just silently fail and stay at current level
+      // This prevents the app from getting stuck in error states
+      state = state.copyWith(
+        isLoading: false,
+        clearError: true, // Clear any error state instead of setting one
+      );
 
-      state = state.copyWith(isLoading: false, error: errorMessage);
-
-      // Don't navigate away or show connectivity screen - keep user on current level
+      // Log the error but don't expose it to UI to prevent blocking user interaction
       logg.w(
-        "Drill down failed but maintaining current state to prevent navigation issues",
+        "Drill down to $areaName failed gracefully - staying at current level. Error: $e",
       );
     }
   }
@@ -227,20 +241,43 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           year: selectedYear,
         );
 
-        final results = await Future.wait([
+        // Prepare API requests
+        List<Future> apiRequests = [
           _dataService.getGeoJson(urlPath: geoJsonPath, forceRefresh: true),
           _dataService.getVaccinationCoverage(
             urlPath: coveragePath,
             forceRefresh: true,
           ),
-        ]);
+        ];
+
+        // Add EPI request if going back to union or deeper level (not district or upazila)
+        if (previousLevel.level == 'union' ||
+            previousLevel.level == 'ward' ||
+            previousLevel.level == 'subblock') {
+          final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
+          apiRequests.add(
+            _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
+          );
+        }
+
+        final results = await Future.wait(apiRequests);
 
         final geoJson = results[0] as String;
         final coverageData = results[1] as VaccineCoverageResponse;
 
+        // EPI data is only available for union and deeper levels (not district or upazila)
+        String? epiData;
+        if ((previousLevel.level == 'union' ||
+                previousLevel.level == 'ward' ||
+                previousLevel.level == 'subblock') &&
+            results.length > 2) {
+          epiData = results[2] as String;
+        }
+
         state = state.copyWith(
           geoJson: geoJson,
           coverageData: coverageData,
+          epiData: epiData,
           currentLevel: previousLevel.level,
           navigationStack: newStack,
           currentAreaName: previousLevel.name,
@@ -253,21 +290,17 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     } catch (e) {
       logg.e("Error navigating back: $e");
 
-      // Enhanced error handling for navigation
-      String errorMessage;
-      if (e.toString().contains('SocketException') ||
-          e.toString().contains('Connection') ||
-          e.toString().contains('Network')) {
-        errorMessage =
-            'Network error while navigating back. Please check your connection and try again.';
-      } else {
-        errorMessage = 'Failed to navigate back. Please try again.';
-      }
+      // GRACEFUL DEGRADATION: Don't show error screens, just silently fail
+      // This prevents navigation issues and keeps the app stable
+      state = state.copyWith(
+        isLoading: false,
+        clearError: true, // Clear any error state instead of setting one
+      );
 
-      state = state.copyWith(isLoading: false, error: errorMessage);
-
-      // Keep user on current level to prevent navigation issues
-      logg.w("Navigation back failed but maintaining current state");
+      // Log the error but don't expose it to UI
+      logg.w(
+        "Navigation back failed gracefully - staying at current level. Error: $e",
+      );
     }
   }
 

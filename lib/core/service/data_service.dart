@@ -21,7 +21,7 @@ class DataService {
 
   DataService({required MapRepository repository}) : _repository = repository;
 
-  /// Get vaccination coverage data with caching
+  /// Get vaccination coverage data with caching and retry logic
   Future<VaccineCoverageResponse> getVaccinationCoverage({
     required String urlPath,
     bool forceRefresh = false,
@@ -30,13 +30,31 @@ class DataService {
       return _cachedCoverageData!;
     }
 
-    final data = await _repository.fetchVaccinationCoverage(urlPath: urlPath);
-    _cachedCoverageData = data;
-    _lastFetchTime = DateTime.now();
-    return data;
+    // Retry logic for vaccination coverage
+    VaccineCoverageResponse? data;
+    Exception? lastError;
+
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      try {
+        data = await _repository.fetchVaccinationCoverage(urlPath: urlPath);
+        _cachedCoverageData = data;
+        _lastFetchTime = DateTime.now();
+        return data;
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        if (attempt < 3) {
+          // Wait before retry (exponential backoff)
+          await Future.delayed(Duration(milliseconds: 500 * attempt));
+          continue;
+        }
+      }
+    }
+
+    // If all retries failed, throw the last error
+    throw lastError ?? Exception('Unknown error occurred');
   }
 
-  /// Get GeoJSON data with caching
+  /// Get GeoJSON data with caching and retry logic
   Future<String> getGeoJson({
     required String urlPath,
     bool forceRefresh = false,
@@ -45,10 +63,60 @@ class DataService {
       return _cachedGeoJson!;
     }
 
-    final data = await _repository.fetchGeoJson(urlPath: urlPath);
-    _cachedGeoJson = data;
-    _lastFetchTime = DateTime.now();
-    return data;
+    // Retry logic for GeoJSON
+    String? data;
+    Exception? lastError;
+
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      try {
+        data = await _repository.fetchGeoJson(urlPath: urlPath);
+        _cachedGeoJson = data;
+        _lastFetchTime = DateTime.now();
+        return data;
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        if (attempt < 3) {
+          // Wait before retry (exponential backoff)
+          await Future.delayed(
+            Duration(milliseconds: 1000 * attempt),
+          ); // Longer delay for GeoJSON
+          continue;
+        }
+      }
+    }
+
+    // If all retries failed, throw the last error
+    throw lastError ?? Exception('Unknown error occurred');
+  }
+
+  /// Get EPI data (vaccination centers) with retry logic
+  Future<String> getEpiData({
+    required String urlPath,
+    bool forceRefresh = false,
+  }) async {
+    // EPI data doesn't need caching as it's specific to each drill-down level
+    // and changes frequently based on area, but we'll add retry logic
+
+    String? data;
+    Exception? lastError;
+
+    for (int attempt = 1; attempt <= 2; attempt++) {
+      // Fewer retries for EPI
+      try {
+        data = await _repository.fetchEpiData(urlPath: urlPath);
+        return data;
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        if (attempt < 2) {
+          // Shorter delay for EPI data
+          await Future.delayed(Duration(milliseconds: 500 * attempt));
+          continue;
+        }
+      }
+    }
+
+    // If all retries failed, throw the last error
+    throw lastError ?? Exception('EPI data unavailable');
   }
 
   /// Check if cached data is still valid

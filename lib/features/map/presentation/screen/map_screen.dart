@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gis_dashboard/config/coverage_colors.dart';
 import 'package:gis_dashboard/core/common/widgets/header_title_icon_filter_widget.dart';
-import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/custom_loading_map_widget.dart';
@@ -89,6 +90,83 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     return LatLng(centroidLat / points.length, centroidLng / points.length);
+  }
+
+  /// Build EPI markers (vaccination centers) from EPI data
+  List<Marker> _buildEpiMarkers(String? epiData) {
+    if (epiData == null || epiData.isEmpty) return [];
+
+    try {
+      final decoded = jsonDecode(epiData) as Map<String, dynamic>;
+      final features = decoded['features'] as List<dynamic>?;
+
+      if (features == null || features.isEmpty) return [];
+
+      logg.i("Building ${features.length} EPI markers");
+
+      return features
+          .map<Marker>((feature) {
+            final geometry = feature['geometry'];
+            final info = feature['info'];
+
+            if (geometry?['type'] == 'Point' &&
+                geometry?['coordinates'] != null) {
+              final coords = geometry['coordinates'] as List;
+              final lng = (coords[0] as num).toDouble();
+              final lat = (coords[1] as num).toDouble();
+              final centerName = info?['name'] ?? 'EPI Center';
+              final isFixedCenter = info?['is_fixed_center'] ?? false;
+
+              return Marker(
+                point: LatLng(lat, lng),
+                child: Tooltip(
+                  message: centerName,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: isFixedCenter
+                          ? Colors.blueAccent
+                          : Colors.deepPurple,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: !isFixedCenter
+                          ? FaIcon(
+                              FontAwesomeIcons.syringe,
+                              size: 12,
+                              color: Colors.white,
+                            )
+                          : Icon(Icons.home, color: Colors.white, size: 12),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // Return empty marker for invalid geometry
+            return Marker(
+              point: const LatLng(0, 0),
+              child: const SizedBox.shrink(),
+            );
+          })
+          .where(
+            (marker) =>
+                marker.point.latitude != 0 || marker.point.longitude != 0,
+          )
+          .toList();
+    } catch (e) {
+      logg.e("Error parsing EPI data: $e");
+      return [];
+    }
   }
 
   /// Calculate bounds of all polygons for auto-zoom
@@ -229,12 +307,62 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ref.read(mapControllerProvider).currentLevel,
     );
 
+    // Show a subtle loading indicator and perform the drilldown
+    _showLoadingSnackBar(tappedPolygon.areaName);
+
     // Perform the drilldown
     mapNotifier.drillDownToArea(
       areaName: tappedPolygon.areaName,
       slug: tappedPolygon.slug!,
       newLevel: nextLevel,
       parentSlug: tappedPolygon.parentSlug,
+    );
+  }
+
+  /// Show a subtle loading indicator during drilldown
+  void _showLoadingSnackBar(String areaName) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text('Loading $areaName...'),
+          ],
+        ),
+        backgroundColor: Colors.blue.shade600,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  /// Show success indicator after successful drilldown
+  void _showSuccessSnackBar(String areaName) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white, size: 16),
+            const SizedBox(width: 12),
+            Text('Loaded $areaName successfully'),
+          ],
+        ),
+        backgroundColor: Colors.green.shade600,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+      ),
     );
   }
 
@@ -256,13 +384,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   /// Show snackbar when no drilldown data is available
   void _showNoDataSnackBar(String areaName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('No detailed data available for $areaName'),
-        backgroundColor: Colors.orange,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('No detailed data available for $areaName'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 2),
+        ),
+      );
   }
 
   /// Go back one level in navigation
@@ -298,6 +428,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Listen for state changes to trigger auto-zoom after drilldown
     ref.listen<dynamic>(mapControllerProvider, (previous, current) {
+      // Hide any loading snackbars when state changes
+      if (previous?.isLoading == true && current.isLoading == false) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      }
+
       // Check if we just finished loading after a drilldown (not initial load)
       if (previous?.isLoading == true &&
           current.isLoading == false &&
@@ -316,6 +451,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         // Cancel any existing timer
         _autoZoomTimer?.cancel();
+
+        // Show success indicator
+        _showSuccessSnackBar(current.currentAreaName ?? 'Area');
 
         // Trigger auto-zoom after a longer delay to allow tiles to load
         _autoZoomTimer = Timer(const Duration(milliseconds: 1500), () {
@@ -391,11 +529,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   ),
                   Expanded(
                     child: Text(
-                      mapState.displayPath,
+                      'Home > ${mapState.displayPath}',
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -416,37 +555,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       color: Colors.black.withValues(alpha: 0.3),
                       child: const Center(child: CustomLoadingMapWidget()),
                     ),
-                  if (mapState.error != null && !mapState.isLoading)
-                    Column(
-                      children: [
-                        NetworkErrorWidget(
-                          error: mapState.error!,
-                          onRetry: () {
-                            ref
-                                .read(mapControllerProvider.notifier)
-                                .refreshMapData();
-                          },
-                        ),
-                        // Debug info
-                        if (true) // Set to false in production
-                          Container(
-                            margin: const EdgeInsets.all(8),
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              border: Border.all(color: Colors.red.shade200),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'Debug: Error="${mapState.error}", Loading=${mapState.isLoading}, Level=${mapState.currentLevel}, HasGeoJson=${mapState.geoJson != null}, HasCoverage=${mapState.coverageData != null}',
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                          ),
-                      ],
-                    ),
+                  // REMOVED ERROR SCREEN - No more blocking error displays
+                  // Errors are now handled gracefully with silent degradation
+
                   // Show map when data is loaded successfully (even if polygons are empty)
                   if (!mapState.isLoading &&
-                      mapState.error == null &&
                       mapState.geoJson != null &&
                       mapState.coverageData != null)
                     FlutterMap(
@@ -499,44 +612,88 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           MarkerLayer(
                             markers: _buildAreaNameMarkers(areaPolygons),
                           ),
+                        // EPI markers (vaccination centers) - ONLY show for union and deeper levels
+                        if ((mapState.currentLevel == 'union' ||
+                                mapState.currentLevel == 'ward' ||
+                                mapState.currentLevel == 'subblock') &&
+                            mapState.epiData != null)
+                          MarkerLayer(
+                            markers: _buildEpiMarkers(mapState.epiData),
+                          ),
                       ],
                     ),
 
-                  // Show message when data loaded but no polygons found
+                  // Show message when data loaded but no polygons found (less intrusive)
                   if (!mapState.isLoading &&
-                      mapState.error == null &&
                       mapState.geoJson != null &&
                       mapState.coverageData != null &&
                       areaPolygons.isEmpty)
-                    Center(
+                    Positioned(
+                      bottom: 100,
+                      left: 20,
+                      right: 20,
                       child: Card(
+                        elevation: 4,
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
                             children: [
                               Icon(
                                 Icons.info_outline,
-                                size: 48,
+                                size: 24,
                                 color: Colors.blue.shade600,
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'No map data available',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue.shade800,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'No map data available for this area',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.blue.shade800,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Data loaded successfully but no geographical boundaries found for this area.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade600,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // Show message when app is starting and no data yet (initial state)
+                  if (!mapState.isLoading &&
+                      mapState.geoJson == null &&
+                      mapState.coverageData == null)
+                    Positioned(
+                      bottom: 100,
+                      left: 20,
+                      right: 20,
+                      child: Card(
+                        elevation: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
                                 ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text(
+                                  'Initializing map data...',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  ref
+                                      .read(mapControllerProvider.notifier)
+                                      .loadInitialData(forceRefresh: true);
+                                },
+                                child: const Text('Retry'),
                               ),
                             ],
                           ),
@@ -566,6 +723,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (mapState.currentLevel == 'union' ||
+                                mapState.currentLevel == 'ward' ||
+                                mapState.currentLevel == 'subblock')
+                              _showVaccineCenterInfoIcons(),
                             const Text(
                               'Coverage %',
                               style: TextStyle(fontWeight: FontWeight.bold),
@@ -596,34 +757,64 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ),
                     ),
                   ),
-                  // // Drilldown hint
-                  // if (areaPolygons.any((polygon) => polygon.canDrillDown))
-                  //   Positioned(
-                  //     bottom: 20,
-                  //     left: 20,
-                  //     child: Card(
-                  //       color: Colors.blue.shade50,
-                  //       child: Padding(
-                  //         padding: const EdgeInsets.all(8.0),
-                  //         child: Row(
-                  //           mainAxisSize: MainAxisSize.min,
-                  //           children: [
-                  //             Icon(
-                  //               Icons.touch_app,
-                  //               size: 16,
-                  //               color: Colors.blue.shade700,
-                  //             ),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _showVaccineCenterInfoIcons() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.deepPurple,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: FaIcon(
+                  FontAwesomeIcons.syringe,
+                  size: 8,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Outreach Center',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.lightBlueAccent,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Icon(Icons.home, color: Colors.white, size: 10),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Fixed Center',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

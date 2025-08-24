@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,14 +41,18 @@ class MapRepository {
       logg.i("Fetching GeoJSON from $urlPath");
       final response = await _client.get(
         urlPath,
-        options: Options(responseType: ResponseType.bytes),
+        options: Options(
+          responseType: ResponseType.bytes,
+          receiveTimeout: const Duration(
+            seconds: 30,
+          ), // Allow time for large files
+        ),
       );
       logg.i('Response received with status: ${response.statusCode}');
       final bytes = response.data as List<int>;
       final archive = GZipDecoder().decodeBytes(bytes);
       final geoJson = String.fromCharCodes(archive);
       logg.i('Successfully decompressed GeoJSON data');
-      logg.i(geoJson);
       return geoJson;
     } on DioException catch (e) {
       logg.e("Dio error fetching GeoJSON: $e");
@@ -73,7 +78,14 @@ class MapRepository {
       }
 
       logg.i("Fetching vaccination coverage from $urlPath");
-      final response = await _client.get(urlPath);
+      final response = await _client.get(
+        urlPath,
+        options: Options(
+          receiveTimeout: const Duration(
+            seconds: 20,
+          ), // Reasonable timeout for JSON
+        ),
+      );
       final vaccineCoverageData = response.data as Map<String, dynamic>;
       logg.i('Successfully received vaccination coverage data');
 
@@ -83,6 +95,48 @@ class MapRepository {
       throw NetworkErrorHandler.handleDioError(e);
     } catch (e) {
       logg.e("Error fetching vaccination coverage: $e");
+      throw NetworkErrorHandler.handleGenericError(e);
+    }
+  }
+
+  Future<String> fetchEpiData({required String urlPath}) async {
+    try {
+      // Check internet connectivity first
+      final hasInternet = await _connectivityService.hasInternetConnection();
+      if (!hasInternet) {
+        throw NetworkException(
+          message:
+              'No internet connection. Please check your network settings and try again.',
+          type: NetworkErrorType.noInternet,
+        );
+      }
+
+      logg.i("Fetching EPI data from $urlPath");
+      final response = await _client.get(
+        urlPath,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 15), // Timeout for EPI data
+        ),
+      );
+      final epiData = response.data;
+
+      // Convert to JSON string if it's a Map
+      String epiJsonString;
+      if (epiData is Map<String, dynamic>) {
+        epiJsonString = jsonEncode(epiData);
+      } else if (epiData is String) {
+        epiJsonString = epiData;
+      } else {
+        epiJsonString = epiData.toString();
+      }
+
+      logg.i('Successfully received EPI data');
+      return epiJsonString;
+    } on DioException catch (e) {
+      logg.e("Dio error fetching EPI data: $e");
+      throw NetworkErrorHandler.handleDioError(e);
+    } catch (e) {
+      logg.e("Error fetching EPI data: $e");
       throw NetworkErrorHandler.handleGenericError(e);
     }
   }

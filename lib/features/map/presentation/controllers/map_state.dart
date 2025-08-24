@@ -32,6 +32,7 @@ class DrilldownLevel {
 class MapState {
   final String? geoJson;
   final VaccineCoverageResponse? coverageData;
+  final String? epiData; // EPI vaccination centers data
   final String currentLevel;
   final List<DrilldownLevel> navigationStack;
   final bool isLoading;
@@ -41,6 +42,7 @@ class MapState {
   MapState({
     this.geoJson,
     this.coverageData,
+    this.epiData,
     this.currentLevel = 'district',
     this.navigationStack = const [],
     this.isLoading = false,
@@ -51,6 +53,7 @@ class MapState {
   MapState copyWith({
     String? geoJson,
     VaccineCoverageResponse? coverageData,
+    String? epiData,
     String? currentLevel,
     List<DrilldownLevel>? navigationStack,
     bool? isLoading,
@@ -61,6 +64,7 @@ class MapState {
     return MapState(
       geoJson: geoJson ?? this.geoJson,
       coverageData: coverageData ?? this.coverageData,
+      epiData: epiData ?? this.epiData,
       currentLevel: currentLevel ?? this.currentLevel,
       navigationStack: navigationStack ?? this.navigationStack,
       isLoading: isLoading ?? this.isLoading,

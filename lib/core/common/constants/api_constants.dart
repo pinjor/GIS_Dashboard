@@ -34,6 +34,15 @@ class ApiConstants {
     return '/coverage/$slug/$year-coverage.json';
   }
 
+  /// Generate EPI path based on slug
+  /// Example: /epi/sunamganj-district/tahirpur-upazila/epi.json
+  static String getEpiPath({String? slug}) {
+    if (slug == null || slug.isEmpty) {
+      return '/epi/epi.json'; // Default if no slug
+    }
+    return '/epi/$slug/epi.json';
+  }
+
   /// Legacy getters for backward compatibility
   static String getCoveragePath25({String? slug}) =>
       getCoveragePath(slug: slug, year: '2025');
