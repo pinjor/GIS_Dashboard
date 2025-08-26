@@ -42,19 +42,36 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   /// Build markers for area names (only for drilled-down areas)
   List<Marker> _buildAreaNameMarkers(List<AreaPolygon> areaPolygons) {
-    // With unified polygons, we should have fewer markers now
-    if (areaPolygons.length > 100) {
+    // Filter out "Part X" polygons to avoid duplicate labels
+    final mainAreaPolygons = areaPolygons
+        .where(
+          (polygon) =>
+              !polygon.areaName.contains('(Part ') ||
+              polygon.areaName.endsWith('(Part 1)'),
+        )
+        .toList();
+
+    // With comprehensive polygon rendering, we might have many more polygons now
+    if (mainAreaPolygons.length > 150) {
       logg.w(
-        "Too many areas (${areaPolygons.length}) for name markers, skipping labels",
+        "Too many areas (${mainAreaPolygons.length}) for name markers, skipping labels",
       );
       return [];
     }
 
-    logg.i("Building ${areaPolygons.length} area name markers (unified areas)");
+    logg.i(
+      "Building ${mainAreaPolygons.length} area name markers from ${areaPolygons.length} total polygons",
+    );
 
-    return areaPolygons.map((areaPolygon) {
+    return mainAreaPolygons.map((areaPolygon) {
       // Calculate centroid of the polygon
       LatLng centroid = _calculatePolygonCentroid(areaPolygon.polygon.points);
+
+      // Clean up the area name (remove "Part X" suffix for display)
+      String displayName = areaPolygon.areaName;
+      if (displayName.contains('(Part 1)')) {
+        displayName = displayName.replaceFirst(' (Part 1)', '');
+      }
 
       return Marker(
         point: centroid,
@@ -68,7 +85,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               border: Border.all(color: Colors.black38, width: 0.5),
             ),
             child: Text(
-              areaPolygon.areaName,
+              displayName,
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),

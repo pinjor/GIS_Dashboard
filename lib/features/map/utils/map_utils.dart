@@ -9,6 +9,58 @@ import '../../../core/utils/utils.dart';
 import '../domain/area_polygon.dart';
 import '../domain/vaccine_coverage_response.dart';
 
+// FUTURE-PROOF: Adaptive data extraction helpers for API changes
+
+/// Extracts area name from feature with multiple fallback strategies
+String _extractAreaName(
+  
+  Map<String, dynamic> info,
+  Map<String, dynamic> feature,
+) {
+  // Try multiple possible field names for future API compatibility
+  return info['name'] as String? ??
+      info['title'] as String? ??
+      info['area_name'] as String? ??
+      info['areaName'] as String? ??
+      feature['name'] as String? ??
+      feature['title'] as String? ??
+      'Unknown Area';
+}
+
+/// Extracts organization UID with fallback strategies
+String? _extractOrgUid(
+  Map<String, dynamic> info,
+  Map<String, dynamic> feature,
+) {
+  return info['org_uid'] as String? ??
+      info['orgUid'] as String? ??
+      info['uid'] as String? ??
+      info['id'] as String? ??
+      feature['org_uid'] as String? ??
+      feature['uid'] as String? ??
+      feature['id'] as String?;
+}
+
+/// Extracts slug with fallback strategies
+String? _extractSlug(Map<String, dynamic> info, Map<String, dynamic> feature) {
+  return info['slug'] as String? ??
+      info['area_slug'] as String? ??
+      info['areaSlug'] as String? ??
+      feature['slug'] as String?;
+}
+
+/// Extracts parent slug with fallback strategies
+String? _extractParentSlug(
+  Map<String, dynamic> info,
+  Map<String, dynamic> feature,
+) {
+  return info['parent_slug'] as String? ??
+      info['parentSlug'] as String? ??
+      info['parent'] as String? ??
+      feature['parent_slug'] as String? ??
+      feature['parent'] as String?;
+}
+
 List<AreaPolygon> parseGeoJsonToPolygons(
   String geoJson,
   VaccineCoverageResponse coverageData,
@@ -44,15 +96,18 @@ List<AreaPolygon> parseGeoJsonToPolygons(
   }
 
   logg.i(
-    "Starting GeoJSON parsing: ${features.length} features, ${coverageMap.length} coverage areas for vaccine: $selectedVaccine",
+    "Starting FUTURE-PROOF GeoJSON parsing: ${features.length} features, ${coverageMap.length} coverage areas for vaccine: $selectedVaccine",
   );
 
-  // Debug: Log first few features to understand structure
+  // Enhanced debugging for future API changes
   if (features.isNotEmpty) {
     final firstFeature = features[0];
     logg.d("Sample feature structure: ${firstFeature.runtimeType}");
     logg.d("Sample geometry type: ${firstFeature['geometry']?['type']}");
     logg.d("Sample info keys: ${firstFeature['info']?.keys.toList()}");
+    logg.d(
+      "Sample properties keys: ${firstFeature['properties']?.keys.toList()}",
+    );
 
     // Log coordinate structure for debugging
     final geometry = firstFeature['geometry'];
@@ -75,25 +130,34 @@ List<AreaPolygon> parseGeoJsonToPolygons(
 
   int matchedCount = 0;
   int noDataCount = 0;
-  int processedPolygons = 0;
+  int processedFeatures = 0;
   int skippedFeatures = 0;
+  int totalPolygonsCreated = 0;
+  int totalRingsProcessed = 0;
 
   final List<AreaPolygon> polygonList = [];
-  final Map<String, List<Map<String, dynamic>>> areaGroups = {};
 
+  // FUTURE-PROOF: Process each feature individually to render ALL valid polygons
   for (final feature in features) {
     final geometry = feature['geometry'];
-    final info = feature['info'];
 
-    // Extract area information from GeoJSON
-    final String areaName = info?['name'] ?? 'Unknown Area';
-    final String? orgUid = info?['org_uid'];
-    final String? slug = info?['slug'];
-    final String? parentSlug = info?['parent_slug'];
+    // ADAPTIVE: Try both 'info' and 'properties' for future API compatibility
+    final info =
+        feature['info'] as Map<String, dynamic>? ??
+        feature['properties'] as Map<String, dynamic>? ??
+        <String, dynamic>{};
 
-    // Skip features without geometry
+    // FLEXIBLE: Extract area information with fallbacks for future changes
+    final String areaName = _extractAreaName(info, feature);
+    final String? orgUid = _extractOrgUid(info, feature);
+    final String? slug = _extractSlug(info, feature);
+    final String? parentSlug = _extractParentSlug(info, feature);
+
+    // Skip features without geometry - this is the ONLY valid reason to skip
     if (geometry == null) {
-      logg.w("Skipping feature $areaName - no geometry");
+      logg.w(
+        "Skipping feature $areaName - no geometry (this is the only valid skip reason)",
+      );
       skippedFeatures++;
       continue;
     }
@@ -111,222 +175,408 @@ List<AreaPolygon> parseGeoJsonToPolygons(
       );
     } else {
       noDataCount++;
-      // Still process features without coverage data - they'll get default styling
+      // ALWAYS process features without coverage data - they'll get default styling
       logg.d(
-        "No coverage data found for district: $areaName (org_uid: $orgUid) - will use default styling",
+        "No coverage data found for area: $areaName (org_uid: $orgUid) - will use default styling",
       );
     }
 
-    // Group features by area name to combine parts
-    if (!areaGroups.containsKey(areaName)) {
-      areaGroups[areaName] = [];
+    final type = geometry['type'];
+
+    // FUTURE-PROOF: Extract ALL rings from ANY valid geometry type
+    List<List<LatLng>> allRings = [];
+
+    if (type == 'Polygon') {
+      allRings = _extractAllPolygonRings(geometry, areaName);
+    } else if (type == 'MultiPolygon') {
+      allRings = _extractAllMultiPolygonRings(geometry, areaName);
+    } else if (type == 'Point' || type == 'LineString') {
+      // Future API might include other geometry types - log but don't render
+      logg.i(
+        "Skipping non-polygon geometry type: $type for $areaName (valid for other purposes)",
+      );
+      skippedFeatures++;
+      continue;
+    } else {
+      // Unknown geometry type - be defensive but informative
+      logg.w(
+        "Unknown geometry type: $type for $areaName - attempting polygon extraction anyway",
+      );
+      allRings = _extractAllPolygonRings(geometry, areaName);
     }
 
-    areaGroups[areaName]!.add({
-      'geometry': geometry,
-      'areaName': areaName,
-      'orgUid': orgUid,
-      'coveragePercentage': coveragePercentage,
-      'slug': slug,
-      'parentSlug': parentSlug,
-    });
-  }
+    totalRingsProcessed += allRings.length;
 
-  // Process grouped areas
-  for (final entry in areaGroups.entries) {
-    final areaName = entry.key;
-    final featureGroup = entry.value;
+    // RENDER ALL VALID RINGS: No arbitrary limits or performance-based skipping
+    for (int ringIndex = 0; ringIndex < allRings.length; ringIndex++) {
+      final ring = allRings[ringIndex];
 
-    // Collect all valid polygon points for this area
-    final List<List<LatLng>> allPolygonRings = [];
-
-    String? areaOrgUid;
-    double? areaCoveragePercentage;
-    String? areaSlug;
-    String? areaParentSlug;
-
-    // Process all features for this area name
-    for (final featureData in featureGroup) {
-      final geometry = featureData['geometry'];
-      areaOrgUid ??= featureData['orgUid'];
-      areaCoveragePercentage ??= featureData['coveragePercentage'];
-      areaSlug ??= featureData['slug'];
-      areaParentSlug ??= featureData['parentSlug'];
-
-      final type = geometry['type'];
-
-      // Process different geometry types and collect all rings
-      if (type == 'Polygon') {
-        final polygonRings = _extractPolygonRings(geometry, areaName);
-        allPolygonRings.addAll(polygonRings);
-      } else if (type == 'MultiPolygon') {
-        final multiPolygonRings = _extractMultiPolygonRings(geometry, areaName);
-        allPolygonRings.addAll(multiPolygonRings);
-      } else {
-        logg.w("Unsupported geometry type: $type for $areaName");
-        skippedFeatures++;
+      // ONLY skip if coordinates are truly invalid (empty or insufficient points)
+      if (ring.isEmpty || ring.length < 3) {
+        logg.d(
+          "$areaName: Skipping ring $ringIndex - insufficient coordinates (${ring.length} points)",
+        );
+        continue;
       }
-    }
 
-    // Create a single AreaPolygon for this area using the largest/most significant ring
-    if (allPolygonRings.isNotEmpty) {
-      // Use the ring with the most points (usually the main area)
-      final mainRing = allPolygonRings.reduce(
-        (a, b) => a.length > b.length ? a : b,
-      );
+      // Create unique identifier for each ring
+      final ringAreaName = allRings.length > 1
+          ? "$areaName (Part ${ringIndex + 1})"
+          : areaName;
 
       final areaPolygon = _createAreaPolygon(
-        areaName, // Use original name without "Part X" suffix
-        areaOrgUid,
-        areaCoveragePercentage,
-        mainRing,
+        ringAreaName,
+        orgUid,
+        coveragePercentage,
+        ring,
         currentLevel,
-        slug: areaSlug,
-        parentSlug: areaParentSlug,
+        slug: slug,
+        parentSlug: parentSlug,
       );
 
       if (areaPolygon != null) {
         polygonList.add(areaPolygon);
-        processedPolygons++;
-        logg.d(
-          "Created unified polygon for $areaName with ${allPolygonRings.length} parts",
-        );
+        totalPolygonsCreated++;
       }
     }
+
+    processedFeatures++;
   }
 
   logg.i(
-    "GeoJSON parsing completed in ${stopwatch.elapsedMilliseconds}ms: $processedPolygons total areas processed, $matchedCount with coverage data, $noDataCount without data, $skippedFeatures skipped",
+    "FUTURE-PROOF GeoJSON parsing completed in ${stopwatch.elapsedMilliseconds}ms: $processedFeatures features processed, $totalRingsProcessed rings processed, $totalPolygonsCreated polygons created, $matchedCount with coverage data, $noDataCount without data, $skippedFeatures skipped",
   );
-  logg.i("Final unified polygon count: ${polygonList.length}");
+  logg.i("Final comprehensive polygon count: ${polygonList.length}");
 
   stopwatch.stop();
   return polygonList;
 }
 
-// Helper function to extract polygon rings from a Polygon geometry
-List<List<LatLng>> _extractPolygonRings(
-  Map<String, dynamic> geometry,
-  String areaName,
-) {
-  try {
-    final coordinatesArray = geometry['coordinates'] as List<dynamic>;
-    final List<List<LatLng>> rings = [];
-
-    if (coordinatesArray.isNotEmpty) {
-      // Standard polygon structure: coordinates[0] is the outer ring
-      final coords = coordinatesArray[0] as List<dynamic>;
-      final points = _extractCoordinates(coords, areaName);
-
-      if (points.length >= 3) {
-        rings.add(points);
-      } else if (points.length == 2) {
-        // Create a minimal triangle for debugging
-        points.add(points.last);
-        rings.add(points);
-      }
-    }
-
-    return rings;
-  } catch (e) {
-    logg.e("Error extracting polygon rings for $areaName: $e");
-    return [];
-  }
-}
-
-// Helper function to extract polygon rings from a MultiPolygon geometry
-List<List<LatLng>> _extractMultiPolygonRings(
+// Helper function to extract ALL polygon rings from a Polygon geometry
+// FUTURE-PROOF: Enhanced ring extraction for comprehensive polygon rendering
+List<List<LatLng>> _extractAllPolygonRings(
   Map<String, dynamic> geometry,
   String areaName,
 ) {
   final List<List<LatLng>> rings = [];
 
   try {
-    final multiPolygonCoords = geometry['coordinates'] as List<dynamic>;
+    final polygonCoords = geometry['coordinates'];
 
-    for (int i = 0; i < multiPolygonCoords.length; i++) {
+    // ADAPTIVE: Handle different coordinate structures that may come from future APIs
+    if (polygonCoords == null) {
+      logg.w("$areaName: No coordinates found in polygon geometry");
+      return rings;
+    }
+
+    if (polygonCoords is! List) {
+      logg.w(
+        "$areaName: Unexpected coordinate type: ${polygonCoords.runtimeType}",
+      );
+      return rings;
+    }
+
+    final coordsList = polygonCoords;
+    logg.d("$areaName: Processing Polygon with ${coordsList.length} rings");
+
+    // For Polygon: coordinates = [exterior_ring, hole1, hole2, ...]
+    for (int ringIndex = 0; ringIndex < coordsList.length; ringIndex++) {
       try {
-        final polygonCoords = multiPolygonCoords[i] as List<dynamic>;
+        final coords = coordsList[ringIndex];
 
-        if (polygonCoords.isNotEmpty && polygonCoords[0] is List) {
-          // Take the outer ring (first element) of each polygon
-          final coords = polygonCoords[0] as List<dynamic>;
-          final points = _extractCoordinates(coords, areaName);
+        if (coords is! List) {
+          logg.w(
+            "$areaName: Unexpected ring coordinate type at $ringIndex: ${coords.runtimeType}",
+          );
+          continue;
+        }
 
-          if (points.length >= 3) {
-            rings.add(points);
-          } else if (points.length == 2) {
-            // Create a minimal triangle for debugging
-            points.add(points.last);
-            rings.add(points);
+        final points = _extractCoordinates(coords, areaName);
+
+        // COMPREHENSIVE: Process ALL valid coordinate sets
+        if (points.length >= 3) {
+          rings.add(points);
+          logg.d(
+            "$areaName: Successfully extracted polygon ring $ringIndex with ${points.length} points",
+          );
+        } else if (points.length == 2) {
+          // ADAPTIVE: Handle minimal polygons gracefully
+          points.add(points.last);
+          rings.add(points);
+          logg.d(
+            "$areaName: Created minimal triangle for ring $ringIndex (2 points extended to 3)",
+          );
+        } else if (points.length == 1) {
+          // FUTURE-PROOF: Handle single points that might represent areas
+          final point = points.first;
+          final minimalTriangle = [
+            point,
+            LatLng(point.latitude + 0.001, point.longitude),
+            LatLng(point.latitude, point.longitude + 0.001),
+          ];
+          rings.add(minimalTriangle);
+          logg.d(
+            "$areaName: Created minimal triangle from single point at ring $ringIndex",
+          );
+        } else {
+          logg.d(
+            "$areaName: Skipping ring $ringIndex - insufficient valid coordinates (${points.length} points)",
+          );
+        }
+      } catch (e) {
+        logg.e("Error processing polygon ring $ringIndex for $areaName: $e");
+        // RESILIENT: Continue with other rings instead of failing completely
+        continue;
+      }
+    }
+  } catch (e) {
+    logg.e("Error extracting polygon rings for $areaName: $e");
+    // GRACEFUL: Return what we have instead of empty list
+  }
+
+  logg.d(
+    "$areaName: Successfully extracted ${rings.length} polygon rings total",
+  );
+  return rings;
+}
+
+// FUTURE-PROOF: Enhanced MultiPolygon extraction for comprehensive rendering
+List<List<LatLng>> _extractAllMultiPolygonRings(
+  Map<String, dynamic> geometry,
+  String areaName,
+) {
+  final List<List<LatLng>> allRings = [];
+
+  try {
+    final multiPolygonCoords = geometry['coordinates'];
+
+    // ADAPTIVE: Handle different coordinate structures
+    if (multiPolygonCoords == null) {
+      logg.w("$areaName: No coordinates found in multipolygon geometry");
+      return allRings;
+    }
+
+    if (multiPolygonCoords is! List) {
+      logg.w(
+        "$areaName: Unexpected multipolygon coordinate type: ${multiPolygonCoords.runtimeType}",
+      );
+      return allRings;
+    }
+
+    final coordsList = multiPolygonCoords;
+    logg.d(
+      "$areaName: Processing MultiPolygon with ${coordsList.length} polygons",
+    );
+
+    // For MultiPolygon: coordinates = [polygon1, polygon2, ...]
+    // Each polygon = [exterior_ring, hole1, hole2, ...]
+    for (
+      int polygonIndex = 0;
+      polygonIndex < coordsList.length;
+      polygonIndex++
+    ) {
+      try {
+        final polygonCoords = coordsList[polygonIndex];
+
+        if (polygonCoords is! List) {
+          logg.w(
+            "$areaName: Unexpected polygon coordinate type at $polygonIndex: ${polygonCoords.runtimeType}",
+          );
+          continue;
+        }
+
+        final polygonList = polygonCoords;
+
+        // COMPREHENSIVE: Extract ALL rings from this polygon (exterior + holes)
+        for (int ringIndex = 0; ringIndex < polygonList.length; ringIndex++) {
+          try {
+            final coords = polygonList[ringIndex];
+
+            if (coords is! List) {
+              logg.w(
+                "$areaName: Unexpected ring coordinate type at polygon $polygonIndex ring $ringIndex: ${coords.runtimeType}",
+              );
+              continue;
+            }
+
+            final points = _extractCoordinates(coords, areaName);
+
+            // COMPREHENSIVE: Process ALL valid coordinate sets
+            if (points.length >= 3) {
+              allRings.add(points);
+              logg.d(
+                "$areaName: Successfully extracted polygon $polygonIndex ring $ringIndex with ${points.length} points",
+              );
+            } else if (points.length == 2) {
+              // ADAPTIVE: Handle minimal polygons gracefully
+              points.add(points.last);
+              allRings.add(points);
+              logg.d(
+                "$areaName: Created minimal triangle for polygon $polygonIndex ring $ringIndex (2 points extended to 3)",
+              );
+            } else if (points.length == 1) {
+              // FUTURE-PROOF: Handle single points that might represent areas
+              final point = points.first;
+              final minimalTriangle = [
+                point,
+                LatLng(point.latitude + 0.001, point.longitude),
+                LatLng(point.latitude, point.longitude + 0.001),
+              ];
+              allRings.add(minimalTriangle);
+              logg.d(
+                "$areaName: Created minimal triangle from single point at polygon $polygonIndex ring $ringIndex",
+              );
+            } else {
+              logg.d(
+                "$areaName: Skipping polygon $polygonIndex ring $ringIndex - insufficient valid coordinates (${points.length} points)",
+              );
+            }
+          } catch (e) {
+            logg.e(
+              "Error processing polygon $polygonIndex ring $ringIndex for $areaName: $e",
+            );
+            // RESILIENT: Continue with other rings
+            continue;
           }
         }
       } catch (e) {
-        logg.e("Error processing polygon part ${i + 1} for $areaName: $e");
-        // Continue processing other parts
+        logg.e("Error processing polygon $polygonIndex for $areaName: $e");
+        // RESILIENT: Continue with other polygons
+        continue;
       }
     }
   } catch (e) {
     logg.e("Error extracting multipolygon rings for $areaName: $e");
+    // GRACEFUL: Return what we have
   }
 
-  return rings;
+  logg.d(
+    "$areaName: Successfully extracted ${allRings.length} total rings from MultiPolygon",
+  );
+  return allRings;
 }
 
-// Helper function to extract and validate coordinates
+// FUTURE-PROOF: Enhanced coordinate extraction with comprehensive validation and error recovery
 List<LatLng> _extractCoordinates(List<dynamic> coords, String areaName) {
   final validCoords = <LatLng>[];
   int invalidCount = 0;
 
-  for (final coord in coords) {
-    try {
-      if (coord is List && coord.length >= 2) {
-        final lng = (coord[0] as num).toDouble();
-        final lat = (coord[1] as num).toDouble();
+  if (coords.isEmpty) {
+    logg.w(
+      "$areaName: Empty coordinates array - this might indicate an API structure change",
+    );
+    return validCoords;
+  }
 
-        // Very relaxed coordinate validation - accept any reasonable coordinate values
-        // Only filter out clearly invalid values like NaN, infinite, or extreme outliers
-        if (!lat.isNaN && !lng.isNaN && lat.isFinite && lng.isFinite) {
-          // Accept any coordinate that could realistically be on Earth
-          if (lat.abs() <= 90.0 && lng.abs() <= 180.0) {
-            validCoords.add(LatLng(lat, lng));
-          } else {
-            invalidCount++;
-            if (invalidCount <= 5) {
-              // Log first few extreme outliers
-              logg.d(
-                "$areaName: Extreme coordinate filtered: lat=$lat, lng=$lng",
-              );
-            }
+  // ADAPTIVE: Handle different coordinate formats that might come from future APIs
+  for (int i = 0; i < coords.length; i++) {
+    try {
+      final coord = coords[i];
+
+      // COMPREHENSIVE: Handle multiple possible coordinate formats
+      double? lat, lng;
+
+      if (coord is List && coord.length >= 2) {
+        // Standard [lng, lat] format
+        final dynamic lngValue = coord[0];
+        final dynamic latValue = coord[1];
+
+        if (lngValue is num && latValue is num) {
+          lng = lngValue.toDouble();
+          lat = latValue.toDouble();
+        }
+      } else if (coord is Map) {
+        // FUTURE-PROOF: Handle object-based coordinates like {lat: x, lng: y} or {latitude: x, longitude: y}
+        final latKeys = ['lat', 'latitude', 'y'];
+        final lngKeys = ['lng', 'longitude', 'lon', 'x'];
+
+        for (final key in latKeys) {
+          if (coord[key] is num) {
+            lat = (coord[key] as num).toDouble();
+            break;
           }
+        }
+
+        for (final key in lngKeys) {
+          if (coord[key] is num) {
+            lng = (coord[key] as num).toDouble();
+            break;
+          }
+        }
+      } else if (coord is num &&
+          i < coords.length - 1 &&
+          coords[i + 1] is num) {
+        // ADAPTIVE: Handle flat array format [lng1, lat1, lng2, lat2, ...]
+        lng = coord.toDouble();
+        lat = (coords[i + 1] as num).toDouble();
+        i++; // Skip next element since we consumed it
+      }
+
+      // COMPREHENSIVE: Validate and add coordinate if valid
+      if (lat != null && lng != null) {
+        if (_isValidCoordinate(lat, lng)) {
+          validCoords.add(LatLng(lat, lng));
         } else {
           invalidCount++;
-          if (invalidCount <= 5) {
-            // Log first few NaN/infinite values
+          if (invalidCount <= 3) {
+            // Log first few invalid coordinates for debugging API changes
             logg.d(
-              "$areaName: Invalid coordinate filtered: lat=$lat, lng=$lng",
+              "$areaName: Invalid coordinate at index $i: lat=$lat, lng=$lng (possible API change or data quality issue)",
             );
           }
         }
       } else {
         invalidCount++;
+        if (invalidCount <= 3) {
+          logg.d(
+            "$areaName: Unparseable coordinate at index $i: $coord (format: ${coord.runtimeType})",
+          );
+        }
       }
     } catch (e) {
       invalidCount++;
-      if (invalidCount <= 5) {
-        // Log first few parsing errors
-        logg.d("$areaName: Coordinate parsing error: $e");
+      if (invalidCount <= 3) {
+        logg.e("$areaName: Error processing coordinate at index $i: $e");
       }
+      // RESILIENT: Continue processing other coordinates
+      continue;
     }
   }
 
+  // INFORMATIVE: Log summary for monitoring API changes
   if (invalidCount > 0) {
+    logg.w(
+      "$areaName: Processed ${coords.length} coordinates, found $invalidCount invalid (${((invalidCount / coords.length) * 100).toStringAsFixed(1)}% invalid rate)",
+    );
+  } else {
     logg.d(
-      "$areaName: ${validCoords.length} valid coordinates, $invalidCount invalid",
+      "$areaName: Successfully processed ${validCoords.length} coordinates with 100% validity",
     );
   }
 
   return validCoords;
+}
+
+// Helper function to validate individual coordinates
+bool _isValidCoordinate(double lat, double lng) {
+  // Check for NaN and infinite values
+  if (!lat.isFinite || !lng.isFinite) {
+    return false;
+  }
+
+  // Check for valid Earth coordinate ranges
+  if (lat.abs() > 90.0 || lng.abs() > 180.0) {
+    return false;
+  }
+
+  // Additional check for obviously wrong coordinates (zeros might be valid in some contexts)
+  // For Bangladesh, latitude should be roughly 20-27 and longitude should be roughly 88-93
+  // But we'll be permissive to handle edge cases and neighboring areas
+  if (lat < -90.0 || lat > 90.0 || lng < -180.0 || lng > 180.0) {
+    return false;
+  }
+
+  return true;
 }
 
 // Helper function to create AreaPolygon
