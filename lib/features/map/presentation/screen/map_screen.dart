@@ -238,13 +238,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
-  // void _resetToCountryView() {
-  //   // Reset to country level first
-  //   // ref.read(mapControllerProvider.notifier).resetToCountryLevel();
+  void _resetToCountryView({required String currentLevel}) {
+    // Reset to country level first
+    if (currentLevel != 'district') {
+      // Already at country level
+      logg.i("Resetting to country level view");
+      ref.read(mapControllerProvider.notifier).resetToCountryLevel();
+    } else {
+      logg.i("Already at country level, just resetting zoom");
+    }
 
-  //   // Reset map view to initial position and zoom
-  //   mapController.moveAndRotate(LatLng(23.6850, 90.3563), _initialZoom, 0);
-  // }
+    // Reset map view to initial position and zoom
+    mapController.moveAndRotate(LatLng(23.6850, 90.3563), _initialZoom, 0);
+  }
 
   /// Handle polygon tap for drilldown
   void _onPolygonTap(LatLng tappedPoint, List<AreaPolygon> areaPolygons) {
@@ -702,61 +708,67 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ),
 
                   // // Reset Button
-                  // Positioned(
-                  //   top: 5,
-                  //   left: 5,
-                  //   child: FloatingActionButton(
-                  //     mini: true,
-                  //     backgroundColor: Colors.white.withValues(alpha: 0.8),
-                  //     onPressed: _resetToCountryView,
-                  //     child: const Icon(Icons.home, color: Colors.grey),
-                  //   ),
-                  // ),
+                  if (!mapState.isLoading)
+                    Positioned(
+                      top: 5,
+                      left: 5,
+                      child: FloatingActionButton(
+                        mini: true,
+                        backgroundColor: Colors.white.withValues(alpha: 0.8),
+                        onPressed: () => _resetToCountryView(
+                          currentLevel: mapState.currentLevel,
+                        ),
+                        child: const Icon(Icons.home, color: Colors.grey),
+                      ),
+                    ),
                   // Legend
-                  Positioned(
-                    top: 5,
-                    right: 5,
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (mapState.currentLevel == 'union' ||
-                                mapState.currentLevel == 'ward' ||
-                                mapState.currentLevel == 'subblock')
-                              _showVaccineCenterInfoIcons(),
-                            const Text(
-                              'Coverage %',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            _LegendItem(
-                              color: CoverageColors.veryLow,
-                              label: '<80%',
-                            ),
-                            _LegendItem(
-                              color: CoverageColors.low,
-                              label: '80-85%',
-                            ),
-                            _LegendItem(
-                              color: CoverageColors.medium,
-                              label: '85-90%',
-                            ),
-                            _LegendItem(
-                              color: CoverageColors.high,
-                              label: '90-95%',
-                            ),
-                            _LegendItem(
-                              color: CoverageColors.veryHigh,
-                              label: '>95%',
-                            ),
-                          ],
+                  if (!mapState.isLoading &&
+                      mapState.geoJson != null &&
+                      mapState.coverageData != null)
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (mapState.currentLevel == 'union' ||
+                                  mapState.currentLevel == 'ward' ||
+                                  mapState.currentLevel == 'subblock')
+                                _showVaccineCenterInfoIcons(),
+                              const Text(
+                                'Coverage %',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              _LegendItem(
+                                color: CoverageColors.veryLow,
+                                label: '<80%',
+                              ),
+                              _LegendItem(
+                                color: CoverageColors.low,
+                                label: '80-85%',
+                              ),
+                              _LegendItem(
+                                color: CoverageColors.medium,
+                                label: '85-90%',
+                              ),
+                              _LegendItem(
+                                color: CoverageColors.high,
+                                label: '90-95%',
+                              ),
+                              _LegendItem(
+                                color: CoverageColors.veryHigh,
+                                label: '>95%',
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
