@@ -4,15 +4,13 @@ import 'package:gis_dashboard/core/utils/utils.dart';
 
 import '../../../../core/common/constants/constants.dart';
 
-class SummaryCardWidgetNew extends StatelessWidget {
-  // final String iconPath;
+class SummaryCardWidget extends StatelessWidget {
   final String label;
   final String value;
-  // final String duration;
   final int boysCount;
   final int girlsCount;
 
-  const SummaryCardWidgetNew({
+  const SummaryCardWidget({
     super.key,
     required this.label,
     required this.value,

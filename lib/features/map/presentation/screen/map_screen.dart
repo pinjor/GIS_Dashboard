@@ -8,12 +8,14 @@ import 'package:gis_dashboard/config/coverage_colors.dart';
 import 'package:gis_dashboard/core/common/widgets/header_title_icon_filter_widget.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
-import 'package:gis_dashboard/features/map/presentation/widget/custom_loading_map_widget.dart';
+import 'package:gis_dashboard/features/map/presentation/widget/vaccine_center_info_overlay_widget.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../domain/area_polygon.dart';
 import '../../utils/map_utils.dart';
 import '../controllers/map_controller.dart';
+import '../widget/map_legend_item.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -576,7 +578,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   if (mapState.isLoading)
                     Container(
                       color: Colors.black.withValues(alpha: 0.3),
-                      child: const Center(child: CustomLoadingMapWidget()),
+                      child: const Center(child: CustomLoadingWidget()),
                     ),
                   // REMOVED ERROR SCREEN - No more blocking error displays
                   // Errors are now handled gracefully with silent degradation
@@ -755,29 +757,29 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               if (mapState.currentLevel == 'union' ||
                                   mapState.currentLevel == 'ward' ||
                                   mapState.currentLevel == 'subblock')
-                                _showVaccineCenterInfoIcons(),
+                                const VaccineCenterInfoOverlayWidget(),
                               const Text(
                                 'Coverage %',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
-                              _LegendItem(
+                              MapLegendItem(
                                 color: CoverageColors.veryLow,
                                 label: '<80%',
                               ),
-                              _LegendItem(
+                              MapLegendItem(
                                 color: CoverageColors.low,
                                 label: '80-85%',
                               ),
-                              _LegendItem(
+                              MapLegendItem(
                                 color: CoverageColors.medium,
                                 label: '85-90%',
                               ),
-                              _LegendItem(
+                              MapLegendItem(
                                 color: CoverageColors.high,
                                 label: '90-95%',
                               ),
-                              _LegendItem(
+                              MapLegendItem(
                                 color: CoverageColors.veryHigh,
                                 label: '>95%',
                               ),
@@ -790,87 +792,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _showVaccineCenterInfoIcons() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                color: Colors.deepPurple,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: FaIcon(
-                  FontAwesomeIcons.syringe,
-                  size: 8,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'Outreach Center',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                color: Colors.lightBlueAccent,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(Icons.home, color: Colors.white, size: 10),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'Fixed Center',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _LegendItem extends StatelessWidget {
-  const _LegendItem({required this.color, required this.label});
-
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              color: color,
-              border: Border.all(color: Colors.grey),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );

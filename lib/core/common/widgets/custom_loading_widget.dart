@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CustomLoadingMapWidget extends ConsumerStatefulWidget {
-  const CustomLoadingMapWidget({
+class CustomLoadingWidget extends ConsumerStatefulWidget {
+  const CustomLoadingWidget({
     super.key,
     this.loadingText = 'Loading map...',
   });
@@ -10,10 +10,10 @@ class CustomLoadingMapWidget extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _CustomLoadingMapWidgetState();
+      _CustomLoadingWidgetState();
 }
 
-class _CustomLoadingMapWidgetState extends ConsumerState<CustomLoadingMapWidget>
+class _CustomLoadingWidgetState extends ConsumerState<CustomLoadingWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

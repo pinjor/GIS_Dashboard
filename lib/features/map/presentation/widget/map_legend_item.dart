@@ -9,7 +9,7 @@ class MapLegendItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -17,12 +17,12 @@ class MapLegendItem extends StatelessWidget {
             width: 16,
             height: 16,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.6),
-              border: Border.all(color: color),
+              color: color,
+              border: Border.all(color: Colors.grey),
             ),
           ),
-          SizedBox(width: 6),
-          Text(label, style: TextStyle(fontSize: 12)),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );

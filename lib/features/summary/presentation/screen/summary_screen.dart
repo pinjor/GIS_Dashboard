@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
-import 'package:gis_dashboard/features/map/presentation/widget/custom_loading_map_widget.dart';
-import 'package:gis_dashboard/features/summary/presentation/widget/summary_card_widget_new.dart';
 
 import '../../../../core/common/constants/constants.dart';
+import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/common/widgets/header_title_icon_filter_widget.dart';
 import '../controllers/summary_controller.dart';
+import '../widget/summary_card_widget.dart';
 import '../widget/vaccine_performance_graph_widget.dart';
 import '../widget/vaccine_coverage_performance_table_widget.dart';
 
@@ -47,7 +47,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
       backgroundColor: Color(Constants.scaffoldBackgroundColor),
       body: summaryState.isLoading
           ? Center(
-              child: CustomLoadingMapWidget(
+              child: CustomLoadingWidget(
                 loadingText: 'Loading summary data...',
               ),
             )
@@ -69,7 +69,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                   const SizedBox(height: 16),
                   Column(
                     children: [
-                      SummaryCardWidgetNew(
+                      SummaryCardWidget(
                         label: 'Total Children (0-11 m)',
                         value:
                             selectedVaccineData?.totalTarget?.toString() ??
@@ -78,7 +78,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                         girlsCount: selectedVaccineData?.totalTargetFemale ?? 0,
                       ),
                       10.h,
-                      SummaryCardWidgetNew(
+                      SummaryCardWidget(
                         label: 'Vaccinated Children',
                         value:
                             selectedVaccineData?.totalCoverage?.toString() ??
