@@ -260,11 +260,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _resetToCountryView({required String currentLevel}) {
     // Reset to country level first
     if (currentLevel != 'district') {
-      // Already at country level
-      logg.i("Resetting to country level view");
       ref.read(mapControllerProvider.notifier).resetToCountryLevel();
-    } else {
-      logg.i("Already at country level, just resetting zoom");
     }
 
     // Reset map view to initial position and zoom
@@ -439,6 +435,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     mapNotifier.goBack();
   }
+
+  bool _isCoverageDataExpanded = false;
 
   @override
   void dispose() {
@@ -632,11 +630,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         ),
                         // Area polygons
                         PolygonLayer(polygons: _buildPolygons(areaPolygons)),
-                        // Area name labels - ONLY show when drilled down (not on initial district view)
-                        if (mapState.currentLevel != 'district')
-                          MarkerLayer(
-                            markers: _buildAreaNameMarkers(areaPolygons),
-                          ),
+
                         // EPI markers (vaccination centers) - ONLY show for union and deeper levels
                         if ((mapState.currentLevel == 'union' ||
                                 mapState.currentLevel == 'ward' ||
@@ -644,6 +638,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             mapState.epiData != null)
                           MarkerLayer(
                             markers: _buildEpiMarkers(mapState.epiData),
+                          ),
+
+                        // Area name labels - ONLY show when drilled down (not on initial district view)
+                        if (mapState.currentLevel != 'district')
+                          MarkerLayer(
+                            markers: _buildAreaNameMarkers(areaPolygons),
                           ),
                       ],
                     ),
@@ -740,52 +740,90 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         child: const Icon(Icons.home, color: Colors.grey),
                       ),
                     ),
-                  // Legend
+
+                  // inside your build
                   if (!mapState.isLoading &&
                       mapState.geoJson != null &&
                       mapState.coverageData != null)
                     Positioned(
                       top: 5,
                       right: 5,
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (mapState.currentLevel == 'union' ||
-                                  mapState.currentLevel == 'ward' ||
-                                  mapState.currentLevel == 'subblock')
-                                const VaccineCenterInfoOverlayWidget(),
-                              const Text(
-                                'Coverage %',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 8),
-                              MapLegendItem(
-                                color: CoverageColors.veryLow,
-                                label: '<80%',
-                              ),
-                              MapLegendItem(
-                                color: CoverageColors.low,
-                                label: '80-85%',
-                              ),
-                              MapLegendItem(
-                                color: CoverageColors.medium,
-                                label: '85-90%',
-                              ),
-                              MapLegendItem(
-                                color: CoverageColors.high,
-                                label: '90-95%',
-                              ),
-                              MapLegendItem(
-                                color: CoverageColors.veryHigh,
-                                label: '>95%',
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: StatefulBuilder(
+                        builder: (context, setState) {
+                          return Card(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Header row (tap to expand/collapse)
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _isCoverageDataExpanded =
+                                          !_isCoverageDataExpanded;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          "Coverage",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          _isCoverageDataExpanded
+                                              ? Icons.arrow_drop_up_sharp
+                                              : Icons.arrow_drop_down_sharp,
+                                          size: 15,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Expandable content
+                                if (_isCoverageDataExpanded)
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (mapState.currentLevel == 'union' ||
+                                            mapState.currentLevel == 'ward' ||
+                                            mapState.currentLevel == 'subblock')
+                                          const VaccineCenterInfoOverlayWidget(),
+                                        MapLegendItem(
+                                          color: CoverageColors.veryLow,
+                                          label: '<80%',
+                                        ),
+                                        MapLegendItem(
+                                          color: CoverageColors.low,
+                                          label: '80-85%',
+                                        ),
+                                        MapLegendItem(
+                                          color: CoverageColors.medium,
+                                          label: '85-90%',
+                                        ),
+                                        MapLegendItem(
+                                          color: CoverageColors.high,
+                                          label: '90-95%',
+                                        ),
+                                        MapLegendItem(
+                                          color: CoverageColors.veryHigh,
+                                          label: '>95%',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ),
                 ],
