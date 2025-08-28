@@ -46,4 +46,3 @@ app.*.map.json
 
 .env
 /lib/core/jsons/
-FUTURE_PROOF_RENDERING.md

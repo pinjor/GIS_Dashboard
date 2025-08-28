@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,14 @@ import '../../domain/area_polygon.dart';
 import '../../utils/map_utils.dart';
 import '../controllers/map_controller.dart';
 import '../widget/map_legend_item.dart';
+
+// Helper class to store center point and zoom information
+class CenterInfo {
+  final LatLng center;
+  final double zoom;
+
+  CenterInfo({required this.center, required this.zoom});
+}
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -96,9 +105,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }).toList();
   }
 
-  /// Calculate the centroid (center point) of a polygon
+  /// Calculate the centroid (center point) of a polygon - OPTIMIZED to prevent freezing
   LatLng _calculatePolygonCentroid(List<LatLng> points) {
     if (points.isEmpty) return const LatLng(0, 0);
+
+    // Prevent freezing with very large polygon data
+    if (points.length > 1000) {
+      logg.w(
+        "Large polygon with ${points.length} points - using sampling for performance",
+      );
+      // Sample every 10th point for very large polygons to prevent freezing
+      final sampledPoints = <LatLng>[];
+      for (int i = 0; i < points.length; i += 10) {
+        sampledPoints.add(points[i]);
+      }
+      points = sampledPoints;
+    }
 
     double centroidLat = 0;
     double centroidLng = 0;
@@ -214,45 +236,214 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
   }
 
+  /// Calculate center point and appropriate zoom level for current level polygons
+  CenterInfo _calculateCurrentLevelCenterAndZoom(
+    List<AreaPolygon> polygons,
+    String currentLevel,
+  ) {
+    if (polygons.isEmpty) {
+      // Fallback to Bangladesh center
+      logg.w(
+        "No polygons available for centering, using default Bangladesh center",
+      );
+      return CenterInfo(
+        center: const LatLng(23.6850, 90.3563),
+        zoom: _initialZoom,
+      );
+    }
+
+    // Calculate the bounding box of all polygons
+    final bounds = _calculatePolygonsBounds(polygons);
+
+    // Calculate center point using weighted centroid for better accuracy
+    LatLng center = _calculateWeightedCentroid(polygons, bounds);
+
+    // Calculate appropriate zoom level based on bounds size, level, and polygon density
+    double zoom = _calculateZoomForBounds(
+      bounds,
+      currentLevel,
+      polygons.length,
+    );
+
+    logg.i(
+      "Calculated center for $currentLevel: lat=${center.latitude.toStringAsFixed(6)}, lng=${center.longitude.toStringAsFixed(6)}, zoom=${zoom.toStringAsFixed(1)}, polygons=${polygons.length}",
+    );
+
+    return CenterInfo(center: center, zoom: zoom);
+  }
+
+  /// Calculate weighted centroid for more accurate center point
+  LatLng _calculateWeightedCentroid(
+    List<AreaPolygon> polygons,
+    LatLngBounds bounds,
+  ) {
+    if (polygons.length == 1) {
+      // For single polygon, use its actual centroid
+      return _calculatePolygonCentroid(polygons.first.polygon.points);
+    }
+
+    // For multiple polygons, calculate weighted centroid based on polygon area
+    double totalWeightedLat = 0;
+    double totalWeightedLng = 0;
+    double totalWeight = 0;
+
+    for (final polygon in polygons) {
+      final polygonCenter = _calculatePolygonCentroid(polygon.polygon.points);
+      final polygonArea = _calculatePolygonArea(polygon.polygon.points);
+
+      // Use area as weight, with minimum weight of 1 to avoid zero weights
+      final weight = math.max(polygonArea, 1.0);
+
+      totalWeightedLat += polygonCenter.latitude * weight;
+      totalWeightedLng += polygonCenter.longitude * weight;
+      totalWeight += weight;
+    }
+
+    if (totalWeight > 0) {
+      return LatLng(
+        totalWeightedLat / totalWeight,
+        totalWeightedLng / totalWeight,
+      );
+    } else {
+      // Fallback to bounds center
+      return LatLng(
+        (bounds.north + bounds.south) / 2,
+        (bounds.east + bounds.west) / 2,
+      );
+    }
+  }
+
+  /// Calculate approximate area of a polygon (for weighting purposes) - OPTIMIZED to prevent freezing
+  double _calculatePolygonArea(List<LatLng> points) {
+    if (points.length < 3) return 0.0;
+
+    // Prevent freezing with very large polygon data
+    if (points.length > 500) {
+      logg.d(
+        "Large polygon with ${points.length} points - using sampling for area calculation",
+      );
+      // Sample every 5th point for very large polygons to prevent freezing
+      final sampledPoints = <LatLng>[];
+      for (int i = 0; i < points.length; i += 5) {
+        sampledPoints.add(points[i]);
+      }
+      points = sampledPoints;
+    }
+
+    double area = 0.0;
+    for (int i = 0; i < points.length; i++) {
+      final j = (i + 1) % points.length;
+      area += points[i].longitude * points[j].latitude;
+      area -= points[j].longitude * points[i].latitude;
+    }
+    return area.abs() / 2.0;
+  }
+
+  /// Calculate appropriate zoom level based on bounds size, current level, and polygon count
+  double _calculateZoomForBounds(
+    LatLngBounds bounds,
+    String currentLevel,
+    int polygonCount,
+  ) {
+    // Calculate the span of the bounds
+    final latSpan = bounds.north - bounds.south;
+    final lngSpan = bounds.east - bounds.west;
+    final maxSpan = math.max(latSpan, lngSpan);
+
+    // Base zoom calculation based on span size
+    double baseZoom;
+    if (maxSpan > 5.0) {
+      baseZoom = 6.0; // Very large area (country level)
+    } else if (maxSpan > 2.0) {
+      baseZoom = 7.5; // Large area (multiple districts)
+    } else if (maxSpan > 1.0) {
+      baseZoom = 8.5; // Medium area (district level)
+    } else if (maxSpan > 0.5) {
+      baseZoom = 9.5; // Smaller area (upazila level)
+    } else if (maxSpan > 0.2) {
+      baseZoom = 11.0; // Small area (union level)
+    } else if (maxSpan > 0.1) {
+      baseZoom = 12.0; // Very small area (ward level)
+    } else {
+      baseZoom = 13.0; // Tiny area (subblock level)
+    }
+
+    // Adjust zoom based on polygon density (more polygons = zoom out a bit for overview)
+    if (polygonCount > 50) {
+      baseZoom -= 0.5; // Zoom out for many polygons
+    } else if (polygonCount > 20) {
+      baseZoom -= 0.3; // Slight zoom out for moderate polygon count
+    } else if (polygonCount == 1) {
+      baseZoom += 0.5; // Zoom in for single polygon
+    }
+
+    // Adjust zoom based on current level for optimal viewing
+    switch (currentLevel) {
+      case 'district':
+        return math.max(baseZoom, 6.5); // Ensure minimum zoom for districts
+      case 'upazila':
+        return math.max(baseZoom, 8.0); // Ensure minimum zoom for upazilas
+      case 'union':
+        return math.max(baseZoom, 10.0); // Ensure minimum zoom for unions
+      case 'ward':
+        return math.max(baseZoom, 11.5); // Ensure minimum zoom for wards
+      case 'subblock':
+        return math.max(baseZoom, 12.5); // Ensure minimum zoom for subblocks
+      default:
+        return math.min(
+          math.max(baseZoom, 6.0),
+          15.0,
+        ); // Clamp to reasonable range
+    }
+  }
+
   /// Auto-zoom to fit all polygons with padding
   void _autoZoomToPolygons(List<AreaPolygon> areaPolygons) {
     if (areaPolygons.isEmpty) return;
 
     final bounds = _calculatePolygonsBounds(areaPolygons);
 
-    // Add some padding around the bounds
-    final paddedBounds = LatLngBounds(
-      LatLng(
-        bounds.south - 0.02, // Smaller padding for better fit
-        bounds.west - 0.02,
-      ),
-      LatLng(
-        bounds.north + 0.02, // Smaller padding for better fit
-        bounds.east + 0.02,
-      ),
+    logg.i(
+      "Auto-zooming to fit polygons: bounds from ${bounds.south}, ${bounds.west} to ${bounds.north}, ${bounds.east}",
     );
 
-    // Fit the map to show all polygons with proper bounds
+    // Calculate center of bounds
+    final center = LatLng(
+      (bounds.north + bounds.south) / 2,
+      (bounds.east + bounds.west) / 2,
+    );
+
+    // Calculate appropriate zoom level based on bounds size
+    final latSpan = bounds.north - bounds.south;
+    final lngSpan = bounds.east - bounds.west;
+    final maxSpan = math.max(latSpan, lngSpan);
+
+    double zoom;
+    if (maxSpan > 4.0) {
+      zoom = 6.0;
+    } else if (maxSpan > 2.0) {
+      zoom = 7.0;
+    } else if (maxSpan > 1.0) {
+      zoom = 8.0;
+    } else if (maxSpan > 0.5) {
+      zoom = 9.0;
+    } else if (maxSpan > 0.2) {
+      zoom = 10.0;
+    } else if (maxSpan > 0.1) {
+      zoom = 11.0;
+    } else {
+      zoom = 12.0;
+    }
+
+    // Ensure zoom is within reasonable bounds
+    zoom = math.min(math.max(zoom, 6.0), 15.0);
+
     try {
-      mapController.fitCamera(
-        CameraFit.bounds(
-          bounds: paddedBounds,
-          padding: const EdgeInsets.all(
-            50,
-          ), // Increased padding for UI elements
-          maxZoom: 12.0, // Limit maximum zoom for readability
-        ),
-      );
-      logg.i(
-        "Auto-zoomed to bounds: ${paddedBounds.south}, ${paddedBounds.west} to ${paddedBounds.north}, ${paddedBounds.east}",
-      );
+      mapController.moveAndRotate(center, zoom, 0);
+      logg.i("Auto-zoom completed successfully to zoom level $zoom");
     } catch (e) {
       logg.e("Error auto-zooming: $e");
-      // Fallback to center point zoom
-      final center = LatLng(
-        (bounds.north + bounds.south) / 2,
-        (bounds.east + bounds.west) / 2,
-      );
+      // Fallback to center bounds with default zoom
       mapController.moveAndRotate(center, 8.0, 0);
     }
   }
@@ -265,6 +456,40 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Reset map view to initial position and zoom
     mapController.moveAndRotate(LatLng(23.6850, 90.3563), _initialZoom, 0);
+  }
+
+  void _centerViewForCurrentLevelPolygonMap({required String currentLevel}) {
+    final mapState = ref.read(mapControllerProvider);
+
+    // Parse current polygons to get the bounds
+    List<AreaPolygon> currentPolygons = [];
+    if (mapState.geoJson != null && mapState.coverageData != null) {
+      final filterState = ref.read(filterProvider);
+      currentPolygons = parseGeoJsonToPolygons(
+        mapState.geoJson!,
+        mapState.coverageData!,
+        filterState.selectedVaccine,
+        currentLevel,
+      );
+    }
+
+    if (currentPolygons.isEmpty) {
+      logg.w("No polygons available to center view for level: $currentLevel");
+      return;
+    }
+
+    // Calculate the center point and appropriate zoom for current level polygons
+    final centerInfo = _calculateCurrentLevelCenterAndZoom(
+      currentPolygons,
+      currentLevel,
+    );
+
+    logg.i(
+      "Centering view for $currentLevel: center=${centerInfo.center.latitude}, ${centerInfo.center.longitude}, zoom=${centerInfo.zoom}",
+    );
+
+    // Move map to calculated center with appropriate zoom
+    mapController.moveAndRotate(centerInfo.center, centerInfo.zoom, 0);
   }
 
   /// Handle polygon tap for drilldown
@@ -297,8 +522,23 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
-  /// Check if a point is inside a polygon using ray casting algorithm
+  /// Check if a point is inside a polygon using ray casting algorithm - OPTIMIZED to prevent freezing
   bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
+    if (polygon.length < 3) return false;
+
+    // Prevent freezing with very large polygon data
+    if (polygon.length > 1000) {
+      logg.d(
+        "Large polygon with ${polygon.length} points - using sampling for hit testing",
+      );
+      // Sample every 20th point for very large polygons to prevent freezing
+      final sampledPolygon = <LatLng>[];
+      for (int i = 0; i < polygon.length; i += 20) {
+        sampledPolygon.add(polygon[i]);
+      }
+      polygon = sampledPolygon;
+    }
+
     int intersections = 0;
     for (int i = 0; i < polygon.length; i++) {
       int j = (i + 1) % polygon.length;
@@ -449,6 +689,30 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final mapState = ref.watch(mapControllerProvider);
     final filterState = ref.watch(filterProvider);
 
+    // Parse polygons when we have both GeoJSON and coverage data - MOVE BEFORE LISTENER
+    List<AreaPolygon> areaPolygons = [];
+    if (mapState.geoJson != null && mapState.coverageData != null) {
+      try {
+        areaPolygons = parseGeoJsonToPolygons(
+          mapState.geoJson!,
+          mapState.coverageData!,
+          filterState.selectedVaccine,
+          mapState.currentLevel,
+        );
+        logg.i("Successfully parsed ${areaPolygons.length} polygons");
+
+        // Clear any existing errors when data is successfully loaded and parsed
+        if (mapState.error != null && !mapState.isLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(mapControllerProvider.notifier).clearError();
+          });
+        }
+      } catch (e) {
+        logg.e("Error parsing polygons: $e");
+        areaPolygons = [];
+      }
+    }
+
     // Listen for state changes to trigger auto-zoom after drilldown
     ref.listen<dynamic>(mapControllerProvider, (previous, current) {
       // Hide any loading snackbars when state changes
@@ -463,7 +727,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           current.currentLevel != 'district' && // Only for drilled-down levels
           current.geoJson != null &&
           current.coverageData != null) {
-        // Throttle auto-zoom to prevent rapid calls
+        // Throttle auto-zoom to prevent rapid calls and freezing
         final now = DateTime.now();
         if (_lastAutoZoom != null &&
             now.difference(_lastAutoZoom!).inMilliseconds < 2000) {
@@ -472,27 +736,35 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         }
         _lastAutoZoom = now;
 
-        // Cancel any existing timer
+        // Cancel any existing timer to prevent overlapping operations
         _autoZoomTimer?.cancel();
 
         // Show success indicator
         _showSuccessSnackBar(current.currentAreaName ?? 'Area');
 
-        // Trigger auto-zoom after a longer delay to allow tiles to load
+        // Schedule auto-zoom after tiles load
         _autoZoomTimer = Timer(const Duration(milliseconds: 1500), () {
           try {
-            final newPolygons = parseGeoJsonToPolygons(
-              current.geoJson!,
-              current.coverageData!,
-              filterState.selectedVaccine,
-              current.currentLevel,
-            );
-
-            if (newPolygons.isNotEmpty && mounted) {
-              logg.i(
-                "Auto-zooming to ${newPolygons.length} polygons at level: ${current.currentLevel}",
+            if (mounted) {
+              // Parse fresh polygons for auto-zoom
+              final filterState = ref.read(filterProvider);
+              final freshPolygons = parseGeoJsonToPolygons(
+                current.geoJson!,
+                current.coverageData!,
+                filterState.selectedVaccine,
+                current.currentLevel,
               );
-              _autoZoomToPolygons(newPolygons);
+
+              if (freshPolygons.isNotEmpty) {
+                logg.i(
+                  "Auto-zooming to ${freshPolygons.length} polygons at level: ${current.currentLevel}",
+                );
+                _autoZoomToPolygons(freshPolygons);
+              } else {
+                logg.w("No polygons available for auto-zoom");
+              }
+            } else {
+              logg.w("Skipping auto-zoom - widget unmounted");
             }
           } catch (e) {
             logg.w("Auto-zoom failed: $e");
@@ -501,8 +773,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
-    // Parse polygons when we have both GeoJSON and coverage data
-    List<AreaPolygon> areaPolygons = [];
     if (mapState.geoJson != null && mapState.coverageData != null) {
       try {
         areaPolygons = parseGeoJsonToPolygons(
@@ -727,7 +997,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ),
 
                   // // Reset Button
-                  if (!mapState.isLoading)
+                  if (!mapState.isLoading) ...[
                     Positioned(
                       top: 5,
                       left: 5,
@@ -740,6 +1010,29 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         child: const Icon(Icons.home, color: Colors.grey),
                       ),
                     ),
+                    // Compass Icon button which centers current level polygon map
+                    if (mapState.currentLevel != 'district')
+                      Positioned(
+                        bottom: 5,
+                        left: 5,
+                        child: FloatingActionButton(
+                          mini: true,
+                          backgroundColor: Colors.white.withValues(alpha: 0.9),
+                          onPressed: () {
+                            _centerViewForCurrentLevelPolygonMap(
+                              currentLevel: mapState.currentLevel,
+                            );
+                            logg.d(
+                              'Centered view to ${mapState.currentLevel} level',
+                            );
+                          },
+                          child: const Icon(
+                            Icons.center_focus_strong,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                  ],
 
                   // inside your build
                   if (!mapState.isLoading &&
