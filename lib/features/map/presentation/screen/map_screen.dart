@@ -9,6 +9,7 @@ import 'package:gis_dashboard/config/coverage_colors.dart';
 import 'package:gis_dashboard/core/common/widgets/header_title_icon_filter_widget.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
+import 'package:gis_dashboard/features/map/presentation/widget/static_compass_direction_indicator_widget.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/vaccine_center_info_overlay_widget.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -1010,6 +1011,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         child: const Icon(Icons.home, color: Colors.grey),
                       ),
                     ),
+
+                    // Static 4-direction indicator (N, E, S, W)
+                    if (mapState.geoJson != null &&
+                        mapState.coverageData != null)
+                      StaticCompassDirectionIndicatorWidget(),
+
                     // Compass Icon button which centers current level polygon map
                     if (mapState.currentLevel != 'district')
                       Positioned(
