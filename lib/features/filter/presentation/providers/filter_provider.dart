@@ -145,13 +145,33 @@ class FilterNotifier extends StateNotifier<FilterState> {
 
   /// Reset all filters to default values
   void resetFilters() {
+    // Define default values
+    const defaultDivision = 'All';
+    const String? defaultCityCorporation = null;
+    const String? defaultDistrict = null;
+    const defaultYear = '2025';
+
+    // Check if the state is actually changed from default
+    final bool isStateChanged =
+        state.selectedDivision != defaultDivision ||
+        state.selectedCityCorporation != defaultCityCorporation ||
+        state.selectedDistrict != defaultDistrict ||
+        state.selectedYear != defaultYear;
+
+    // Only reset if state has actually changed from default
+    if (!isStateChanged) {
+      print(
+        'FilterProvider: State is already at default values, skipping reset',
+      );
+      return;
+    }
+
+    print('FilterProvider: Resetting filters to default values');
     state = state.copyWith(
-      selectedVaccine: 'Penta - 1st',
-      selectedAreaType: 'district',
-      selectedDivision: 'All',
-      selectedCityCorporation: null,
-      selectedDistrict: null,
-      selectedYear: '2025',
+      selectedDivision: defaultDivision,
+      selectedCityCorporation: defaultCityCorporation,
+      selectedDistrict: defaultDistrict,
+      selectedYear: defaultYear,
       filteredDistricts: state.districts, // Reset to show all districts
     );
   }
