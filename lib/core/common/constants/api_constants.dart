@@ -7,6 +7,8 @@ class ApiConstants {
   static final String baseUrlProd = dotenv.env['PROD_SERVER_URL'] ?? '';
   static final String baseUrlStaging = dotenv.env['STAGING_SERVER_URL'] ?? '';
   static final String urlCommonPath = dotenv.env['URL_COMMON_PATH'] ?? '';
+  static final String epiCenterDataBaseUrl =
+      dotenv.env['EPI_CENTER_DATA_BASE_URL'] ?? '';
 
   static String get districtJsonPath => '/shapes/shape.json.gz';
   static String get districtCoveragePath25 => '/coverage/2025-coverage.json';
