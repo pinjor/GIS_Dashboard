@@ -156,8 +156,11 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         ),
       ];
 
-      // Add EPI request ONLY for union and deeper levels (not for district or upazila)
-      if (newLevel == 'union' || newLevel == 'ward' || newLevel == 'subblock') {
+      // Add EPI request for upazila, union and deeper levels (not for district)
+      if (newLevel == 'upazila' ||
+          newLevel == 'union' ||
+          newLevel == 'ward' ||
+          newLevel == 'subblock') {
         final epiPath = ApiConstants.getEpiPath(slug: slug);
         logg.i("Fetching EPI data from: $epiPath");
         apiRequests.add(
@@ -170,9 +173,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final geoJson = results[0] as String;
       final coverageData = results[1] as VaccineCoverageResponse;
 
-      // EPI data is only available for union and deeper levels (not district or upazila)
+      // EPI data is available for upazila, union and deeper levels (not district)
       String? epiData;
-      if ((newLevel == 'union' ||
+      if ((newLevel == 'upazila' ||
+              newLevel == 'union' ||
               newLevel == 'ward' ||
               newLevel == 'subblock') &&
           results.length > 2) {
@@ -263,8 +267,9 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           ),
         ];
 
-        // Add EPI request if going back to union or deeper level (not district or upazila)
-        if (previousLevel.level == 'union' ||
+        // Add EPI request if going back to upazila, union or deeper level (not district)
+        if (previousLevel.level == 'upazila' ||
+            previousLevel.level == 'union' ||
             previousLevel.level == 'ward' ||
             previousLevel.level == 'subblock') {
           final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
@@ -278,9 +283,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         final geoJson = results[0] as String;
         final coverageData = results[1] as VaccineCoverageResponse;
 
-        // EPI data is only available for union and deeper levels (not district or upazila)
+        // EPI data is available for upazila, union and deeper levels (not district)
         String? epiData;
-        if ((previousLevel.level == 'union' ||
+        if ((previousLevel.level == 'upazila' ||
+                previousLevel.level == 'union' ||
                 previousLevel.level == 'ward' ||
                 previousLevel.level == 'subblock') &&
             results.length > 2) {
@@ -534,7 +540,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
-  /// Load district-specific data when user selects a specific district (division="All")
+  /// Load district-specific data when user selects district filter
   Future<void> loadDistrictData({required String districtName}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -542,18 +548,18 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final currentFilter = _filterNotifier.state;
       final selectedYear = currentFilter.selectedYear;
 
-      // Extract district slug from current GeoJSON data
-      final districtSlug = _extractDistrictSlugFromGeoJson(districtName);
+      // Get district slug from country-level GeoJSON data
+      final districtSlug = await _getDistrictSlugFromCountryData(districtName);
 
       if (districtSlug == null) {
         throw Exception(
-          'Could not find slug for district: $districtName in GeoJSON data',
+          'Could not find district $districtName in GeoJSON data or district has no slug',
         );
       }
 
       logg.i("Loading district data for: $districtName (slug: $districtSlug)");
 
-      // Construct API paths for district using the actual slug from GeoJSON
+      // Construct API paths for district using the actual slug from filter data
       final geoJsonPath = ApiConstants.getGeoJsonPath(slug: districtSlug);
       final coveragePath = ApiConstants.getCoveragePath(
         slug: districtSlug,
@@ -605,17 +611,21 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
-  /// Extract district slug from current GeoJSON data
-  /// This uses the actual slug values from the loaded GeoJSON instead of predicting them
-  String? _extractDistrictSlugFromGeoJson(String districtName) {
+  /// Extract district slug from country-level GeoJSON data
+  /// This loads fresh country data to ensure we have all districts available
+  Future<String?> _getDistrictSlugFromCountryData(String districtName) async {
     try {
-      final geoJsonString = state.geoJson;
-      if (geoJsonString == null) {
-        logg.w("No GeoJSON data available to extract district slug");
-        return null;
-      }
+      logg.i(
+        "Loading country-level GeoJSON to find slug for district: $districtName",
+      );
 
-      final decoded = jsonDecode(geoJsonString) as Map<String, dynamic>;
+      // Load fresh country-level GeoJSON that contains all districts
+      final countryGeoJson = await _dataService.getGeoJson(
+        urlPath: ApiConstants.districtJsonPath,
+        forceRefresh: false, // Use cache if available for performance
+      );
+
+      final decoded = jsonDecode(countryGeoJson) as Map<String, dynamic>;
       final features = decoded['features'] as List<dynamic>;
 
       // Search for the district in the GeoJSON features
@@ -639,11 +649,11 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       }
 
       logg.w(
-        "Could not find slug for district: $districtName in current GeoJSON data",
+        "Could not find slug for district: $districtName in country-level GeoJSON data",
       );
       return null;
     } catch (e) {
-      logg.e("Error extracting district slug from GeoJSON: $e");
+      logg.e("Error extracting district slug from country GeoJSON: $e");
       return null;
     }
   }

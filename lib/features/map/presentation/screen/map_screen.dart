@@ -721,11 +721,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       }
 
-      // Check if we just finished loading after a drilldown (not initial load)
+      // Check if we just finished loading after a drilldown or filter application
       if (previous?.isLoading == true &&
           current.isLoading == false &&
           current.error == null &&
-          current.currentLevel != 'district' && // Only for drilled-down levels
+          // Allow auto-zoom for:
+          // 1. All drilled-down levels (upazila, union, ward, subblock)
+          // 2. Division level from filter
+          // 3. District level from filter (navigationStack will have district entry)
+          // 4. City corporation level from filter
+          (current.currentLevel != 'district' || // All non-district levels
+              (current.currentLevel == 'district' &&
+                  current.navigationStack.isNotEmpty) || // District from filter
+              current.currentLevel == 'division' || // Division from filter
+              current.currentLevel ==
+                  'city_corporation') && // City corporation from filter
           current.geoJson != null &&
           current.coverageData != null) {
         // Throttle auto-zoom to prevent rapid calls and freezing
@@ -985,8 +995,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         // Area polygons
                         PolygonLayer(polygons: _buildPolygons(areaPolygons)),
 
-                        // EPI markers (vaccination centers) - Show for city corporations, union and deeper levels
+                        // EPI markers (vaccination centers) - Show for city corporations, upazila, union and deeper levels
                         if ((mapState.currentLevel == 'city_corporation' ||
+                                mapState.currentLevel == 'upazila' ||
                                 mapState.currentLevel == 'union' ||
                                 mapState.currentLevel == 'ward' ||
                                 mapState.currentLevel == 'subblock') &&
