@@ -774,6 +774,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
+    // Listen for filter year changes to refresh coverage data
+    ref.listen<FilterState>(filterProvider, (previous, current) {
+      if (previous != null && previous.selectedYear != current.selectedYear) {
+        logg.i(
+          "Filter year changed from ${previous.selectedYear} to ${current.selectedYear}",
+        );
+
+        // Refresh coverage data for the new year
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref
+                .read(mapControllerProvider.notifier)
+                .refreshCoverageForYearChange();
+          }
+        });
+      }
+    });
+
     if (mapState.geoJson != null && mapState.coverageData != null) {
       try {
         areaPolygons = parseGeoJsonToPolygons(

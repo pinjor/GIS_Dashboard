@@ -31,10 +31,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     try {
       logg.i("Loading initial map data...");
 
-      // Try to get cached data first
+      // Get current filter state for year selection
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Try to get cached data first, but only if it's for the correct year
       final cachedCoverageData = _dataService.getCachedCoverageData();
-      if (cachedCoverageData != null && !forceRefresh) {
-        logg.i("Using cached map data");
+      if (cachedCoverageData != null &&
+          !forceRefresh &&
+          cachedCoverageData.metadata?.year == selectedYear) {
+        logg.i("Using cached map data for year $selectedYear");
         // Still need to load GeoJSON for map rendering
         final geoJson = await _dataService.getGeoJson(
           urlPath: ApiConstants.districtJsonPath,
@@ -53,13 +59,19 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         return;
       }
 
+      // Use dynamic year-based coverage path
+      final coveragePath = ApiConstants.getCoveragePath(year: selectedYear);
+      logg.i(
+        "Loading coverage data for year $selectedYear from: $coveragePath",
+      );
+
       final results = await Future.wait([
         _dataService.getGeoJson(
           urlPath: ApiConstants.districtJsonPath,
           forceRefresh: forceRefresh,
         ),
         _dataService.getVaccinationCoverage(
-          urlPath: ApiConstants.districtCoveragePath25,
+          urlPath: coveragePath,
           forceRefresh: forceRefresh,
         ),
       ]);
@@ -323,6 +335,52 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         slug: currentLevel.slug ?? '',
         newLevel: currentLevel.level,
         parentSlug: currentLevel.parentSlug,
+      );
+    }
+  }
+
+  /// Refresh coverage data when year changes (keeps GeoJSON unchanged)
+  Future<void> refreshCoverageForYearChange() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      // Get current filter state for year selection
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      logg.i("Refreshing coverage data for year change to: $selectedYear");
+
+      String coveragePath;
+      if (state.navigationStack.isEmpty) {
+        // At country level
+        coveragePath = ApiConstants.getCoveragePath(year: selectedYear);
+      } else {
+        // At drilldown level
+        final currentLevel = state.navigationStack.last;
+        coveragePath = ApiConstants.getCoveragePath(
+          slug: currentLevel.slug,
+          year: selectedYear,
+        );
+      }
+
+      logg.i("Fetching coverage from: $coveragePath");
+
+      final coverageData = await _dataService.getVaccinationCoverage(
+        urlPath: coveragePath,
+        forceRefresh: true, // Always refresh for year change
+      );
+
+      state = state.copyWith(
+        coverageData: coverageData,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("Successfully refreshed coverage data for year $selectedYear");
+    } catch (e) {
+      logg.e("Error refreshing coverage data for year change: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load coverage data for selected year: $e',
       );
     }
   }
