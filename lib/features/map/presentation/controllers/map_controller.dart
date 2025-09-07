@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/api_constants.dart';
 import 'package:gis_dashboard/core/service/data_service.dart';
@@ -393,8 +394,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final currentFilter = _filterNotifier.state;
       final selectedYear = currentFilter.selectedYear;
 
-      // Convert division name to slug
-      final divisionSlug = ApiConstants.nameToSlug(divisionName);
+      // Convert division name to proper slug format
+      final divisionSlug = ApiConstants.divisionNameToSlug(divisionName);
 
       logg.i("Loading division data for: $divisionName (slug: $divisionSlug)");
 
@@ -462,8 +463,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final currentFilter = _filterNotifier.state;
       final selectedYear = currentFilter.selectedYear;
 
-      // Convert city corporation name to slug
-      final ccSlug = ApiConstants.nameToSlug(cityCorporationName);
+      // Get city corporation slug using proper name conversion
+      final ccSlug = ApiConstants.cityCorporationNameToSlug(
+        cityCorporationName,
+      );
 
       logg.i(
         "Loading city corporation data for: $cityCorporationName (slug: $ccSlug)",
@@ -528,6 +531,120 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         isLoading: false,
         error: 'Failed to load city corporation data: $e',
       );
+    }
+  }
+
+  /// Load district-specific data when user selects a specific district (division="All")
+  Future<void> loadDistrictData({required String districtName}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      // Get current filter state
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Extract district slug from current GeoJSON data
+      final districtSlug = _extractDistrictSlugFromGeoJson(districtName);
+
+      if (districtSlug == null) {
+        throw Exception(
+          'Could not find slug for district: $districtName in GeoJSON data',
+        );
+      }
+
+      logg.i("Loading district data for: $districtName (slug: $districtSlug)");
+
+      // Construct API paths for district using the actual slug from GeoJSON
+      final geoJsonPath = ApiConstants.getGeoJsonPath(slug: districtSlug);
+      final coveragePath = ApiConstants.getCoveragePath(
+        slug: districtSlug,
+        year: selectedYear,
+      );
+
+      logg.i("Fetching district GeoJSON from: $geoJsonPath");
+      logg.i("Fetching district coverage from: $coveragePath");
+
+      final results = await Future.wait([
+        _dataService.getGeoJson(urlPath: geoJsonPath, forceRefresh: true),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: true,
+        ),
+      ]);
+
+      final geoJson = results[0] as String;
+      final coverageData = results[1] as VaccineCoverageResponse;
+
+      // Create navigation level for district
+      final districtNavLevel = DrilldownLevel(
+        level: 'district',
+        slug: districtSlug,
+        name: districtName,
+        parentSlug: null,
+      );
+
+      state = state.copyWith(
+        geoJson: geoJson,
+        coverageData: coverageData,
+        epiData: null, // No EPI data for districts from filter
+        currentLevel: 'district',
+        navigationStack: [
+          districtNavLevel,
+        ], // Start fresh navigation for district
+        currentAreaName: districtName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("Successfully loaded district data for $districtName");
+    } catch (e) {
+      logg.e("Error loading district data for $districtName: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load district data: $e',
+      );
+    }
+  }
+
+  /// Extract district slug from current GeoJSON data
+  /// This uses the actual slug values from the loaded GeoJSON instead of predicting them
+  String? _extractDistrictSlugFromGeoJson(String districtName) {
+    try {
+      final geoJsonString = state.geoJson;
+      if (geoJsonString == null) {
+        logg.w("No GeoJSON data available to extract district slug");
+        return null;
+      }
+
+      final decoded = jsonDecode(geoJsonString) as Map<String, dynamic>;
+      final features = decoded['features'] as List<dynamic>;
+
+      // Search for the district in the GeoJSON features
+      for (final feature in features) {
+        final info =
+            feature['info'] as Map<String, dynamic>? ??
+            feature['properties'] as Map<String, dynamic>? ??
+            <String, dynamic>{};
+
+        final String? featureName = info['name'] as String?;
+        final String? slug = info['slug'] as String?;
+
+        // Match district name and return the actual slug from GeoJSON
+        if (featureName != null &&
+            featureName.toLowerCase() == districtName.toLowerCase() &&
+            slug != null &&
+            slug.isNotEmpty) {
+          logg.i("Found slug for $districtName: $slug");
+          return slug;
+        }
+      }
+
+      logg.w(
+        "Could not find slug for district: $districtName in current GeoJSON data",
+      );
+      return null;
+    } catch (e) {
+      logg.e("Error extracting district slug from GeoJSON: $e");
+      return null;
     }
   }
 

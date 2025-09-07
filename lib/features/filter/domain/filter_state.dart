@@ -20,6 +20,9 @@ class FilterState {
   final bool isLoadingAreas;
   final String? areasError;
 
+  // Filter application tracking
+  final DateTime? lastAppliedTimestamp;
+
   const FilterState({
     this.selectedVaccine = 'Penta - 1st',
     this.selectedAreaType = 'district',
@@ -33,6 +36,7 @@ class FilterState {
     this.filteredDistricts = const [],
     this.isLoadingAreas = false,
     this.areasError,
+    this.lastAppliedTimestamp,
   });
 
   FilterState copyWith({
@@ -48,6 +52,7 @@ class FilterState {
     List<AreaResponseModel>? filteredDistricts,
     bool? isLoadingAreas,
     String? areasError,
+    DateTime? lastAppliedTimestamp,
   }) {
     return FilterState(
       selectedVaccine: selectedVaccine ?? this.selectedVaccine,
@@ -63,6 +68,7 @@ class FilterState {
       filteredDistricts: filteredDistricts ?? this.filteredDistricts,
       isLoadingAreas: isLoadingAreas ?? this.isLoadingAreas,
       areasError: areasError ?? this.areasError,
+      lastAppliedTimestamp: lastAppliedTimestamp ?? this.lastAppliedTimestamp,
     );
   }
 }

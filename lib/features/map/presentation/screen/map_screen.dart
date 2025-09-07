@@ -791,25 +791,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         });
       }
 
-      // Listen for area type and specific area changes
-      if (previous != null) {
-        final bool areaTypeChanged =
-            previous.selectedAreaType != current.selectedAreaType;
+      // Only trigger map loading when filters are actually applied (filter button pressed)
+      if (previous != null &&
+          current.lastAppliedTimestamp != null &&
+          previous.lastAppliedTimestamp != current.lastAppliedTimestamp) {
+        logg.i("Filter applied - triggering map data load");
+
         final bool divisionFilterApplied =
             current.selectedAreaType == 'district' &&
             current.selectedDivision != 'All' &&
-            current.selectedDistrict == null &&
-            (previous.selectedDivision != current.selectedDivision ||
-                areaTypeChanged);
+            current.selectedDistrict == null;
+        final bool districtFilterApplied =
+            current.selectedAreaType == 'district' &&
+            current.selectedDivision == 'All' &&
+            current.selectedDistrict != null;
         final bool cityCorporationFilterApplied =
             current.selectedAreaType == 'city_corporation' &&
-            current.selectedCityCorporation != null &&
-            (previous.selectedCityCorporation !=
-                    current.selectedCityCorporation ||
-                areaTypeChanged);
+            current.selectedCityCorporation != null;
         final bool shouldResetToCountry =
             (current.selectedAreaType == 'district' &&
-                current.selectedDivision == 'All') ||
+                current.selectedDivision == 'All' &&
+                current.selectedDistrict == null) ||
             (current.selectedAreaType == 'city_corporation' &&
                 current.selectedCityCorporation == null);
 
@@ -820,6 +822,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ref
                   .read(mapControllerProvider.notifier)
                   .loadDivisionData(divisionName: current.selectedDivision);
+            }
+          });
+        } else if (districtFilterApplied) {
+          logg.i("District filter applied: ${current.selectedDistrict}");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadDistrictData(districtName: current.selectedDistrict!);
             }
           });
         } else if (cityCorporationFilterApplied) {
@@ -974,8 +985,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         // Area polygons
                         PolygonLayer(polygons: _buildPolygons(areaPolygons)),
 
-                        // EPI markers (vaccination centers) - ONLY show for union and deeper levels
-                        if ((mapState.currentLevel == 'union' ||
+                        // EPI markers (vaccination centers) - Show for city corporations, union and deeper levels
+                        if ((mapState.currentLevel == 'city_corporation' ||
+                                mapState.currentLevel == 'union' ||
                                 mapState.currentLevel == 'ward' ||
                                 mapState.currentLevel == 'subblock') &&
                             mapState.epiData != null)
@@ -1165,7 +1177,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        if (mapState.currentLevel == 'union' ||
+                                        if (mapState.currentLevel ==
+                                                'city_corporation' ||
+                                            mapState.currentLevel == 'union' ||
                                             mapState.currentLevel == 'ward' ||
                                             mapState.currentLevel == 'subblock')
                                           const VaccineCenterInfoOverlayWidget(),

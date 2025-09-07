@@ -324,19 +324,22 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           ),
                         ),
                         onPressed: () {
-                          // Apply filters to global state
-                          filterNotifier.updateVaccine(_selectedVaccine);
-                          filterNotifier.updateAreaType(_selectedAreaType);
-                          filterNotifier.updateYear(_selectedYear);
-
-                          if (_selectedAreaType == 'district') {
-                            filterNotifier.updateDivision(_selectedDivision);
-                            filterNotifier.updateDistrict(_selectedDistrict);
-                          } else if (_selectedAreaType == 'city_corporation') {
-                            filterNotifier.updateCityCorporation(
-                              _selectedCityCorporation,
-                            );
-                          }
+                          // Apply filters to global state with timestamp
+                          filterNotifier.applyFilters(
+                            vaccine: _selectedVaccine,
+                            areaType: _selectedAreaType,
+                            year: _selectedYear,
+                            division: _selectedAreaType == 'district'
+                                ? _selectedDivision
+                                : null,
+                            district: _selectedAreaType == 'district'
+                                ? _selectedDistrict
+                                : null,
+                            cityCorporation:
+                                _selectedAreaType == 'city_corporation'
+                                ? _selectedCityCorporation
+                                : null,
+                          );
 
                           Navigator.of(context).pop();
                         },

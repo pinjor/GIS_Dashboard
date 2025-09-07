@@ -205,4 +205,27 @@ class FilterNotifier extends StateNotifier<FilterState> {
         .where((name) => name.isNotEmpty)
         .toList();
   }
+
+  /// Get district slug by district name from GeoJSON data
+
+  /// Apply filters and mark the timestamp when filters are applied
+  void applyFilters({
+    String? vaccine,
+    String? areaType,
+    String? division,
+    String? cityCorporation,
+    String? district,
+    String? year,
+  }) {
+    // Update individual filter selections
+    if (vaccine != null) updateVaccine(vaccine);
+    if (areaType != null) updateAreaType(areaType);
+    if (year != null) updateYear(year);
+    if (division != null) updateDivision(division);
+    if (cityCorporation != null) updateCityCorporation(cityCorporation);
+    if (district != null) updateDistrict(district);
+
+    // Mark the timestamp when filters are applied
+    state = state.copyWith(lastAppliedTimestamp: DateTime.now());
+  }
 }

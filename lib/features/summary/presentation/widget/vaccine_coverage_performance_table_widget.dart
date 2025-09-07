@@ -74,6 +74,11 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
     return performanceData;
   }
 
+  String _getLocationName(String locationName) {
+    if (locationName.isEmpty) return 'Bangladesh';
+    return locationName.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filterState = ref.watch(filterProvider);
@@ -165,7 +170,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
     final performanceData = _createPerformanceData(selectedVaccine);
 
     // Use dynamic location name based on current area
-    final locationName = summaryState.currentAreaName;
+    final locationName = _getLocationName(summaryState.currentAreaName);
 
     if (performanceData.isEmpty) {
       return Card(

@@ -13,7 +13,6 @@ import '../domain/vaccine_coverage_response.dart';
 
 /// Extracts area name from feature with multiple fallback strategies
 String _extractAreaName(
-  
   Map<String, dynamic> info,
   Map<String, dynamic> feature,
 ) {
@@ -593,9 +592,10 @@ AreaPolygon? _createAreaPolygon(
     // Get color based on coverage percentage
     final polygonColor = CoverageColors.getCoverageColor(coveragePercentage);
 
-    // Allow drill-down for district, upazila, union, and ward levels, with valid slug
+    // Allow drill-down for division, district, upazila, union, and ward levels, with valid slug
     final canDrillDown =
-        (currentLevel == 'district' ||
+        (currentLevel == 'division' ||
+            currentLevel == 'district' ||
             currentLevel == 'upazila' ||
             currentLevel == 'union' ||
             currentLevel == 'ward') &&
@@ -617,7 +617,8 @@ AreaPolygon? _createAreaPolygon(
       coveragePercentage: coveragePercentage ?? 0.0,
       slug: slug,
       parentSlug: parentSlug,
-      canDrillDown: canDrillDown, // Only allow drill-down from district level
+      canDrillDown:
+          canDrillDown, // Allow drill-down from division, district, upazila, union, and ward levels
     );
   } catch (e) {
     logg.e("Error creating area polygon for $areaName: $e");

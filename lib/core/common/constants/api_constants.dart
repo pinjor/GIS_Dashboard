@@ -81,11 +81,18 @@ class ApiConstants {
     return '/epi/city-corporations/$ccSlug/epi.json';
   }
 
-  /// Helper method to convert name to slug format
-  /// Example: "Barishal Division" -> "barishal-division"
-  /// Example: "Dhaka North CC" -> "dhaka-north-cc"
-  static String nameToSlug(String name) {
-    return name.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
+  /// Helper methods to convert names to proper slugs for different types
+
+  /// Convert division name to slug format
+  /// Example: "Rangpur Division" -> "rangpur-division"
+  static String divisionNameToSlug(String divisionName) {
+    return divisionName.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
+  }
+
+  /// Convert city corporation name to slug format
+  /// Example: "Narayanganj CC" -> "narayanganj-cc"
+  static String cityCorporationNameToSlug(String ccName) {
+    return ccName.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
   }
 
   /// Legacy getters for backward compatibility

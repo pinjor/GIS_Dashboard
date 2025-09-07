@@ -83,8 +83,13 @@ class MapState {
   /// Get the display path for breadcrumb navigation
   String get displayPath {
     if (navigationStack.isEmpty) return 'Bangladesh';
+
     return navigationStack
-        .map((level) => level.name ?? level.level)
+        .map((level) {
+          final name = level.name ?? level.level;
+          // Remove trailing parts that start with a space and then (
+          return name.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
+        })
         .join(' > ');
   }
 }
