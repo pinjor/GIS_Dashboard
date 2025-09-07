@@ -45,6 +45,49 @@ class ApiConstants {
     return '/epi/$slug/epi.json';
   }
 
+  /// Generate division-specific paths
+  /// Example: /shapes/divisions/barishal-division/shape.json.gz
+  static String getDivisionGeoJsonPath({required String divisionSlug}) {
+    return '/shapes/divisions/$divisionSlug/shape.json.gz';
+  }
+
+  /// Generate division coverage path
+  /// Example: /coverage/divisions/barishal-division/2025-coverage.json
+  static String getDivisionCoveragePath({
+    required String divisionSlug,
+    required String year,
+  }) {
+    return '/coverage/divisions/$divisionSlug/$year-coverage.json';
+  }
+
+  /// Generate city corporation-specific paths
+  /// Example: /shapes/city-corporations/dhaka-north-cc/shape.json.gz
+  static String getCityCorporationGeoJsonPath({required String ccSlug}) {
+    return '/shapes/city-corporations/$ccSlug/shape.json.gz';
+  }
+
+  /// Generate city corporation coverage path
+  /// Example: /coverage/city-corporations/dhaka-north-cc/2025-coverage.json
+  static String getCityCorporationCoveragePath({
+    required String ccSlug,
+    required String year,
+  }) {
+    return '/coverage/city-corporations/$ccSlug/$year-coverage.json';
+  }
+
+  /// Generate city corporation EPI path
+  /// Example: /epi/city-corporations/dhaka-north-cc/epi.json
+  static String getCityCorporationEpiPath({required String ccSlug}) {
+    return '/epi/city-corporations/$ccSlug/epi.json';
+  }
+
+  /// Helper method to convert name to slug format
+  /// Example: "Barishal Division" -> "barishal-division"
+  /// Example: "Dhaka North CC" -> "dhaka-north-cc"
+  static String nameToSlug(String name) {
+    return name.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
+  }
+
   /// Legacy getters for backward compatibility
   static String getCoveragePath25({String? slug}) =>
       getCoveragePath(slug: slug, year: '2025');

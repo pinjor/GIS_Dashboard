@@ -385,6 +385,152 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
+  /// Load division-specific data when user selects division filter
+  Future<void> loadDivisionData({required String divisionName}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      // Get current filter state
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Convert division name to slug
+      final divisionSlug = ApiConstants.nameToSlug(divisionName);
+
+      logg.i("Loading division data for: $divisionName (slug: $divisionSlug)");
+
+      // Construct API paths for division
+      final geoJsonPath = ApiConstants.getDivisionGeoJsonPath(
+        divisionSlug: divisionSlug,
+      );
+      final coveragePath = ApiConstants.getDivisionCoveragePath(
+        divisionSlug: divisionSlug,
+        year: selectedYear,
+      );
+
+      logg.i("Fetching division GeoJSON from: $geoJsonPath");
+      logg.i("Fetching division coverage from: $coveragePath");
+
+      final results = await Future.wait([
+        _dataService.getGeoJson(urlPath: geoJsonPath, forceRefresh: true),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: true,
+        ),
+      ]);
+
+      final geoJson = results[0] as String;
+      final coverageData = results[1] as VaccineCoverageResponse;
+
+      // Create navigation level for division
+      final divisionNavLevel = DrilldownLevel(
+        level: 'division',
+        slug: 'divisions/$divisionSlug',
+        name: divisionName,
+        parentSlug: null,
+      );
+
+      state = state.copyWith(
+        geoJson: geoJson,
+        coverageData: coverageData,
+        epiData: null, // No EPI data for divisions
+        currentLevel: 'division',
+        navigationStack: [
+          divisionNavLevel,
+        ], // Start fresh navigation for division
+        currentAreaName: divisionName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("Successfully loaded division data for $divisionName");
+    } catch (e) {
+      logg.e("Error loading division data for $divisionName: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load division data: $e',
+      );
+    }
+  }
+
+  /// Load city corporation-specific data when user selects city corporation filter
+  Future<void> loadCityCorporationData({
+    required String cityCorporationName,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      // Get current filter state
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Convert city corporation name to slug
+      final ccSlug = ApiConstants.nameToSlug(cityCorporationName);
+
+      logg.i(
+        "Loading city corporation data for: $cityCorporationName (slug: $ccSlug)",
+      );
+
+      // Construct API paths for city corporation
+      final geoJsonPath = ApiConstants.getCityCorporationGeoJsonPath(
+        ccSlug: ccSlug,
+      );
+      final coveragePath = ApiConstants.getCityCorporationCoveragePath(
+        ccSlug: ccSlug,
+        year: selectedYear,
+      );
+      final epiPath = ApiConstants.getCityCorporationEpiPath(ccSlug: ccSlug);
+
+      logg.i("Fetching city corporation GeoJSON from: $geoJsonPath");
+      logg.i("Fetching city corporation coverage from: $coveragePath");
+      logg.i("Fetching city corporation EPI from: $epiPath");
+
+      final results = await Future.wait([
+        _dataService.getGeoJson(urlPath: geoJsonPath, forceRefresh: true),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: true,
+        ),
+        _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
+      ]);
+
+      final geoJson = results[0] as String;
+      final coverageData = results[1] as VaccineCoverageResponse;
+      final epiData = results[2] as String;
+
+      // Create navigation level for city corporation
+      final ccNavLevel = DrilldownLevel(
+        level: 'city_corporation',
+        slug: 'city-corporations/$ccSlug',
+        name: cityCorporationName,
+        parentSlug: null,
+      );
+
+      state = state.copyWith(
+        geoJson: geoJson,
+        coverageData: coverageData,
+        epiData: epiData, // Include EPI data for city corporations
+        currentLevel: 'city_corporation',
+        navigationStack: [
+          ccNavLevel,
+        ], // Start fresh navigation for city corporation
+        currentAreaName: cityCorporationName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i(
+        "Successfully loaded city corporation data for $cityCorporationName",
+      );
+    } catch (e) {
+      logg.e(
+        "Error loading city corporation data for $cityCorporationName: $e",
+      );
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load city corporation data: $e',
+      );
+    }
+  }
+
   /// Explicitly clear any error state
   void clearError() {
     logg.i("Explicitly clearing error state");

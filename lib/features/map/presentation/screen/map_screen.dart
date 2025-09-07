@@ -790,6 +790,60 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           }
         });
       }
+
+      // Listen for area type and specific area changes
+      if (previous != null) {
+        final bool areaTypeChanged =
+            previous.selectedAreaType != current.selectedAreaType;
+        final bool divisionFilterApplied =
+            current.selectedAreaType == 'district' &&
+            current.selectedDivision != 'All' &&
+            current.selectedDistrict == null &&
+            (previous.selectedDivision != current.selectedDivision ||
+                areaTypeChanged);
+        final bool cityCorporationFilterApplied =
+            current.selectedAreaType == 'city_corporation' &&
+            current.selectedCityCorporation != null &&
+            (previous.selectedCityCorporation !=
+                    current.selectedCityCorporation ||
+                areaTypeChanged);
+        final bool shouldResetToCountry =
+            (current.selectedAreaType == 'district' &&
+                current.selectedDivision == 'All') ||
+            (current.selectedAreaType == 'city_corporation' &&
+                current.selectedCityCorporation == null);
+
+        if (divisionFilterApplied) {
+          logg.i("Division filter applied: ${current.selectedDivision}");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadDivisionData(divisionName: current.selectedDivision);
+            }
+          });
+        } else if (cityCorporationFilterApplied) {
+          logg.i(
+            "City corporation filter applied: ${current.selectedCityCorporation}",
+          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadCityCorporationData(
+                    cityCorporationName: current.selectedCityCorporation!,
+                  );
+            }
+          });
+        } else if (shouldResetToCountry) {
+          logg.i("Resetting to country level view");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref.read(mapControllerProvider.notifier).resetToCountryLevel();
+            }
+          });
+        }
+      }
     });
 
     if (mapState.geoJson != null && mapState.coverageData != null) {
