@@ -3,8 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ApiConstants {
   static final String urlScheme = dotenv.env['URL_SCHEME'] ?? '';
   static final String stagingHost = dotenv.env['STAGING_HOST'] ?? '';
-  static final String prodHost = dotenv.env['PROD_HOST'] ?? '';
-  static final String baseUrlProd = dotenv.env['PROD_SERVER_URL'] ?? '';
+  // static final String prodHost = dotenv.env['PROD_HOST'] ?? '';
+  // static final String baseUrlProd = dotenv.env['PROD_SERVER_URL'] ?? '';
   static final String baseUrlStaging = dotenv.env['STAGING_SERVER_URL'] ?? '';
   static final String urlCommonPath = dotenv.env['URL_COMMON_PATH'] ?? '';
   static final String epiCenterDataBaseUrl =
