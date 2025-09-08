@@ -156,11 +156,14 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         ),
       ];
 
-      // Add EPI request for upazila, union and deeper levels (not for district)
-      if (newLevel == 'upazila' ||
-          newLevel == 'union' ||
-          newLevel == 'ward' ||
-          newLevel == 'subblock') {
+      // Add EPI request only when drilling down to a specific area (not for collections)
+      // EPI is only available for specific upazila, union, ward, or subblock areas
+      // When drilling down from district->upazila, we load multiple upazilas so no EPI
+      // EPI should only be fetched when clicking on a specific upazila/union/ward/subblock
+      if ((newLevel == 'union' ||
+              newLevel == 'ward' ||
+              newLevel == 'subblock') ||
+          (newLevel == 'upazila' && state.currentLevel != 'district')) {
         final epiPath = ApiConstants.getEpiPath(slug: slug);
         logg.i("Fetching EPI data from: $epiPath");
         apiRequests.add(
@@ -173,12 +176,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final geoJson = results[0] as String;
       final coverageData = results[1] as VaccineCoverageResponse;
 
-      // EPI data is available for upazila, union and deeper levels (not district)
+      // EPI data is available for specific upazila, union and deeper levels (not collections)
       String? epiData;
-      if ((newLevel == 'upazila' ||
-              newLevel == 'union' ||
-              newLevel == 'ward' ||
-              newLevel == 'subblock') &&
+      if (((newLevel == 'union' ||
+                  newLevel == 'ward' ||
+                  newLevel == 'subblock') ||
+              (newLevel == 'upazila' && state.currentLevel != 'district')) &&
           results.length > 2) {
         epiData = results[2] as String;
         logg.i("Successfully fetched EPI data for $areaName");

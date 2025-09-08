@@ -18,6 +18,7 @@ import '../../domain/area_polygon.dart';
 import '../../utils/map_utils.dart';
 import '../controllers/map_controller.dart';
 import '../widget/map_legend_item.dart';
+import '../../../epi_center/presentation/screen/epi_center_details_screen.dart';
 
 // Helper class to store center point and zoom information
 class CenterInfo {
@@ -161,33 +162,37 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
               return Marker(
                 point: LatLng(lat, lng),
-                child: Tooltip(
-                  message: centerName,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: isFixedCenter
-                          ? Colors.blueAccent
-                          : Colors.deepPurple,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: !isFixedCenter
-                          ? FaIcon(
-                              FontAwesomeIcons.syringe,
-                              size: 12,
-                              color: Colors.white,
-                            )
-                          : Icon(Icons.home, color: Colors.white, size: 12),
+                child: GestureDetector(
+                  onTap: () =>
+                      _onEpiMarkerTap(centerName, info?['org_uid'] ?? '', info),
+                  child: Tooltip(
+                    message: centerName,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: isFixedCenter
+                            ? Colors.blueAccent
+                            : Colors.deepPurple,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: !isFixedCenter
+                            ? FaIcon(
+                                FontAwesomeIcons.syringe,
+                                size: 12,
+                                color: Colors.white,
+                              )
+                            : Icon(Icons.home, color: Colors.white, size: 12),
+                      ),
                     ),
                   ),
                 ),
@@ -655,6 +660,50 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           duration: const Duration(seconds: 2),
         ),
       );
+  }
+
+  /// Handle EPI marker tap - navigate to EPI center details screen
+  void _onEpiMarkerTap(
+    String centerName,
+    String epiUid,
+    Map<String, dynamic>? info,
+  ) {
+    logg.i("EPI marker tapped: $centerName (UID: $epiUid)");
+
+    if (epiUid.isEmpty) {
+      logg.w("EPI marker has no UID, cannot navigate to details");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('EPI center details not available'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Get current context for navigation
+    final currentState = ref.read(mapControllerProvider);
+    final filterState = ref.read(filterProvider);
+
+    // Determine if we're in city corporation context
+    String? ccUid;
+    if (currentState.currentLevel == 'city_corporation') {
+      // Extract city corporation UID from current navigation or filter
+      ccUid = filterState.selectedCityCorporation;
+    }
+
+    // Navigate to EPI center details screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EpiCenterDetailsScreen(
+          epiUid: epiUid,
+          epiCenterName: centerName,
+          ccUid: ccUid,
+          currentLevel: currentState.currentLevel,
+        ),
+      ),
+    );
   }
 
   /// Go back one level in navigation

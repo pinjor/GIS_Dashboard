@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/map/data/map_repository.dart';
 import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
 
+import '../../features/epi_center/presentation/controllers/epi_center_controller.dart';
+
 /// Data service for caching and managing vaccine coverage data
 /// This helps avoid duplicate API calls when both map and summary screens need the same data
 final dataServiceProvider = Provider<DataService>((ref) {
@@ -135,5 +137,45 @@ class DataService {
   /// Get cached coverage data without making API call
   VaccineCoverageResponse? getCachedCoverageData() {
     return _isCacheValid() ? _cachedCoverageData : null;
+  }
+
+  /// Get EPI Center details data with retry logic
+  Future<String> getEpiCenterData({
+    required String urlPath,
+    bool forceRefresh = false,
+  }) async {
+    Exception? lastError;
+
+    // Try multiple times for EPI center data
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      try {
+        logg.i("Fetching EPI center data (attempt $attempt): $urlPath");
+
+        final data = await _repository.fetchEpiCenterData(urlPath: urlPath);
+
+        logg.i("Successfully fetched EPI center data on attempt $attempt");
+        return data;
+      } catch (e) {
+        lastError = e as Exception;
+        logg.w("EPI center data fetch attempt $attempt failed: $e");
+
+        // Don't retry for certain errors that won't benefit from retries
+        if (e.toString().contains('EPI_CENTER_NO_DATA') ||
+            e.toString().contains('SSL_CERTIFICATE_ERROR') ||
+            e.toString().contains('No internet connection')) {
+          logg.i("Not retrying for error type: ${e.toString()}");
+          rethrow;
+        }
+
+        if (attempt < 3) {
+          // Wait before retry for other errors
+          await Future.delayed(Duration(milliseconds: 1000 * attempt));
+          continue;
+        }
+      }
+    }
+
+    // If all retries failed, throw the last error
+    throw lastError ?? Exception('EPI center data unavailable');
   }
 }
