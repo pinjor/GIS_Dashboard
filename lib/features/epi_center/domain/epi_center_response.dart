@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 // -------------------- EPI Center Response --------------------
 class EpiCenterResponse {
   final List<AreaReference>? cityCorporations;
@@ -144,6 +146,10 @@ class AreaDetails {
   final String? status;
   final AreaDetails? parent;
 
+  // Parsed data from JSON strings
+  final Map<String, dynamic>? parsedVaccineTarget;
+  final Map<String, dynamic>? parsedVaccineCoverage;
+
   AreaDetails({
     this.id,
     this.type,
@@ -163,9 +169,31 @@ class AreaDetails {
     this.updatedAt,
     this.status,
     this.parent,
+    this.parsedVaccineTarget,
+    this.parsedVaccineCoverage,
   });
 
   factory AreaDetails.fromJson(Map<String, dynamic> json) {
+    // Parse vaccine target JSON string
+    Map<String, dynamic>? parsedTarget;
+    try {
+      if (json['vaccine_target'] != null) {
+        parsedTarget = jsonDecode(json['vaccine_target']);
+      }
+    } catch (e) {
+      print('Error parsing vaccine_target: $e');
+    }
+
+    // Parse vaccine coverage JSON string
+    Map<String, dynamic>? parsedCoverage;
+    try {
+      if (json['vaccine_coverage'] != null) {
+        parsedCoverage = jsonDecode(json['vaccine_coverage']);
+      }
+    } catch (e) {
+      print('Error parsing vaccine_coverage: $e');
+    }
+
     return AreaDetails(
       id: json['id'] is int
           ? json['id']
@@ -191,6 +219,8 @@ class AreaDetails {
       parent: json['parent'] is Map<String, dynamic>
           ? AreaDetails.fromJson(json['parent'])
           : null,
+      parsedVaccineTarget: parsedTarget,
+      parsedVaccineCoverage: parsedCoverage,
     );
   }
 }

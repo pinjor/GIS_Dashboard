@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
@@ -177,7 +178,7 @@ class MapRepository {
       }
       logg.w('urlPath for epi center!!!!!!!!!!!!!!: $urlPath');
       final response = await epiDio.get(urlPath);
-      logg.w('Response received for epi center data!!!!!!!!!!!!!!!!!: $response');
+      log('Response received for epi center data!!!!!!!!!!!!!!!!!: $response');
 
       // Check if response is successful
       if (response.statusCode != 200) {

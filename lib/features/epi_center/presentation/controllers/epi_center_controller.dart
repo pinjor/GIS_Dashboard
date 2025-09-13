@@ -8,7 +8,6 @@ import '../../../../core/utils/utils.dart';
 import '../../domain/epi_center_response.dart';
 import '../../domain/epi_center_state.dart';
 
-
 final epiCenterControllerProvider =
     StateNotifierProvider<EpiCenterController, EpiCenterState>(
       (ref) => EpiCenterController(ref.read(dataServiceProvider)),
@@ -64,17 +63,20 @@ class EpiCenterController extends StateNotifier<EpiCenterState> {
       EpiCenterResponse epiCenterData;
       if (parsedJson is Map<String, dynamic>) {
         epiCenterData = EpiCenterResponse.fromJson(parsedJson);
-      } 
-      // else if (parsedJson is List) {
-      //   // If response is a list, wrap it in a map structure
-      //   logg.w("Received List response, wrapping in Map structure");
-      //   epiCenterData = EpiCenterResponse.fromJson({
-      //     'data': parsedJson,
-      //     'uid': epiUid,
-      //     'type': 'list_response',
-      //   });
-      // }
-       else {
+
+        // If coverageTableData is empty, build it from the area's vaccine coverage data
+        if (epiCenterData.coverageTableData == null ||
+            (epiCenterData.coverageTableData!['months'] as Map?)?.isEmpty ==
+                true) {
+          final processedData = _processCoverageData(epiCenterData, year);
+          if (processedData != null) {
+            // Create a new response with the processed data
+            final updatedJson = Map<String, dynamic>.from(parsedJson);
+            updatedJson['coverageTableData'] = processedData;
+            epiCenterData = EpiCenterResponse.fromJson(updatedJson);
+          }
+        }
+      } else {
         logg.e("Unexpected response type: ${parsedJson.runtimeType}");
         throw Exception('Unexpected response format');
       }
@@ -132,5 +134,107 @@ class EpiCenterController extends StateNotifier<EpiCenterState> {
   /// Reset state
   void reset() {
     state = const EpiCenterState();
+  }
+
+  /// Process vaccine coverage data to create coverageTableData structure
+  Map<String, dynamic>? _processCoverageData(
+    EpiCenterResponse epiData,
+    int year,
+  ) {
+    if (epiData.area?.parsedVaccineCoverage == null) return null;
+
+    final coverageByYear = epiData.area!.parsedVaccineCoverage!;
+
+    if (coverageByYear['child_0_to_11_month'] == null ||
+        coverageByYear['child_0_to_11_month'][year.toString()] == null) {
+      return null;
+    }
+
+    final yearData = coverageByYear['child_0_to_11_month'][year.toString()];
+
+    // Process monthly data
+    Map<String, dynamic> processedMonths = {};
+
+    if (yearData['months'] != null) {
+      final monthsData = yearData['months'] as Map<String, dynamic>;
+
+      for (var monthEntry in monthsData.entries) {
+        final monthNumber = monthEntry.key;
+        final monthData = monthEntry.value;
+
+        if (monthData['vaccine'] != null) {
+          final vaccineArray = monthData['vaccine'] as List<dynamic>;
+
+          // Convert vaccine array to structured data
+          Map<String, dynamic> coverages = {};
+          Map<String, dynamic> dropouts = {};
+
+          for (var vaccineData in vaccineArray) {
+            if (vaccineData is Map<String, dynamic>) {
+              final vaccineName = vaccineData['vaccine_name']?.toString();
+              final male = vaccineData['male'];
+              final female = vaccineData['female'];
+
+              if (vaccineName != null) {
+                // Calculate total from male + female (handle null values)
+                int total = 0;
+                if (male != null && male is! bool)
+                  total += (male is int
+                      ? male
+                      : int.tryParse(male.toString()) ?? 0);
+                if (female != null && female is! bool)
+                  total += (female is int
+                      ? female
+                      : int.tryParse(female.toString()) ?? 0);
+
+                coverages[vaccineName] = total;
+                // For now, we don't have dropout data, so we'll set it to 0
+                dropouts[vaccineName] = 0;
+              }
+            }
+          }
+
+          // Map month number to month name
+          final monthNames = [
+            '',
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+          ];
+
+          final monthIndex = int.tryParse(monthNumber) ?? 0;
+          if (monthIndex > 0 && monthIndex < monthNames.length) {
+            processedMonths[monthNames[monthIndex]] = {
+              'coverages': coverages,
+              'dropouts': dropouts,
+            };
+          }
+        }
+      }
+    }
+
+    return {
+      'months': processedMonths,
+      'totals': {},
+      'vaccine_names': [
+        'Penta - 1st',
+        'Penta - 2nd',
+        'Penta - 3rd',
+        'MR - 1st',
+        'MR - 2nd',
+        'BCG',
+      ],
+      'targets': {'month': processedMonths.length},
+      'coverage_percentages': {},
+    };
   }
 }

@@ -1147,6 +1147,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       top: 5,
                       left: 5,
                       child: FloatingActionButton(
+                        heroTag: null,
                         mini: true,
                         backgroundColor: Colors.white.withValues(alpha: 0.8),
                         onPressed: () => _resetToCountryView(
@@ -1167,6 +1168,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         bottom: 5,
                         left: 5,
                         child: FloatingActionButton(
+                          heroTag: null,
                           mini: true,
                           backgroundColor: Colors.white.withValues(alpha: 0.9),
                           onPressed: () {
