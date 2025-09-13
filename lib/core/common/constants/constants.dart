@@ -8,16 +8,6 @@ class Constants {
   static const String eqmsLogoPath = 'assets/icons/eqms_logo.png';
   static const String unicefLogoPath = 'assets/icons/unicef_logo.png';
   static const String poweredByLeftLogosPath = 'assets/icons/powered_by_left_logos.png';
-
-  static const String districtGeoJsonPath =
-      'assets/json/districts-2025-coverage.json';
-  static const String upazillaGeoJsonPath =
-      'assets/json/upazila-2025-coverage.json';
-  static const String unionsGeoJsonPath =
-      'assets/json/unions-2025-coverage.json';
-  static const String wardsGeoJsonPath = 'assets/json/wards-2025-coverage.json';
-  static const String subBlocksGeoJsonPath =
-      'assets/json/subblocks-2025-coverage.json';
   static const String mapLocationIconPath = 'assets/icons/map_location.svg';
   static const String lineGraphIconPath = 'assets/icons/line_graph.svg';
   static const String filterIconPath = 'assets/icons/filter_data.svg';

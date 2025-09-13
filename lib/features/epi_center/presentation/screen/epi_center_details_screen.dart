@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../controllers/epi_center_controller.dart';
-import '../../../filter/presentation/providers/filter_provider.dart';
+import '../../../filter/presentation/controllers/filter_controller.dart';
 
 class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
   final String epiUid;
@@ -31,7 +31,7 @@ class _EpiCenterDetailsScreenState
     super.initState();
     // Fetch data when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final currentFilter = ref.read(filterProvider);
+      final currentFilter = ref.read(filterControllerProvider);
       ref
           .read(epiCenterControllerProvider.notifier)
           .fetchEpiCenterData(
@@ -45,7 +45,7 @@ class _EpiCenterDetailsScreenState
   @override
   Widget build(BuildContext context) {
     final epiState = ref.watch(epiCenterControllerProvider);
-    final filterState = ref.watch(filterProvider);
+    // final filterState = ref.watch(filterControllerProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -103,7 +103,7 @@ class _EpiCenterDetailsScreenState
         //             onChanged: (newYear) {
         //               if (newYear != null) {
         //                 ref
-        //                     .read(filterProvider.notifier)
+        //                     .read(filterControllerProvider.notifier)
         //                     .updateYear(newYear.toString());
         //                 ref
         //                     .read(epiCenterControllerProvider.notifier)
@@ -130,7 +130,7 @@ class _EpiCenterDetailsScreenState
   /// Build beautiful no-data state with empty tables and charts
   Widget _buildNoDataState() {
     final epiState = ref.watch(epiCenterControllerProvider);
-    final filterState = ref.watch(filterProvider);
+    final filterState = ref.watch(filterControllerProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),

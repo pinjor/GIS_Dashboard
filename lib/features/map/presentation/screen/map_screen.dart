@@ -470,7 +470,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // Parse current polygons to get the bounds
     List<AreaPolygon> currentPolygons = [];
     if (mapState.geoJson != null && mapState.coverageData != null) {
-      final filterState = ref.read(filterProvider);
+      final filterState = ref.read(filterControllerProvider);
       currentPolygons = parseGeoJsonToPolygons(
         mapState.geoJson!,
         mapState.coverageData!,
@@ -683,7 +683,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Get current context for navigation
     final currentState = ref.read(mapControllerProvider);
-    final filterState = ref.read(filterProvider);
+    final filterState = ref.read(filterControllerProvider);
 
     // Determine if we're in city corporation context
     String? ccUid;
@@ -737,7 +737,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final mapState = ref.watch(mapControllerProvider);
-    final filterState = ref.watch(filterProvider);
+    final filterState = ref.watch(filterControllerProvider);
 
     // Parse polygons when we have both GeoJSON and coverage data - MOVE BEFORE LISTENER
     List<AreaPolygon> areaPolygons = [];
@@ -807,7 +807,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           try {
             if (mounted) {
               // Parse fresh polygons for auto-zoom
-              final filterState = ref.read(filterProvider);
+              final filterState = ref.read(filterControllerProvider);
               final freshPolygons = parseGeoJsonToPolygons(
                 current.geoJson!,
                 current.coverageData!,
@@ -834,7 +834,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     });
 
     // Listen for filter year changes to refresh coverage data
-    ref.listen<FilterState>(filterProvider, (previous, current) {
+    ref.listen<FilterState>(filterControllerProvider, (previous, current) {
       if (previous != null && previous.selectedYear != current.selectedYear) {
         logg.i(
           "Filter year changed from ${previous.selectedYear} to ${current.selectedYear}",

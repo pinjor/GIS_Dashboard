@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/map/data/map_repository.dart';
 import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
 
-import '../../features/epi_center/presentation/controllers/epi_center_controller.dart';
+import '../utils/utils.dart';
 
 /// Data service for caching and managing vaccine coverage data
 /// This helps avoid duplicate API calls when both map and summary screens need the same data

@@ -32,7 +32,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
   @override
   Widget build(BuildContext context) {
     final summaryState = ref.watch(summaryControllerProvider);
-    final filterState = ref.watch(filterProvider);
+    final filterState = ref.watch(filterControllerProvider);
 
     // Find the selected vaccine data
     final vaccines = summaryState.coverageData?.vaccines ?? [];

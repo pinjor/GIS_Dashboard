@@ -4,17 +4,17 @@ import '../../domain/area_response_model.dart';
 import '../../data/filter_repository.dart';
 
 /// Global filter state provider
-final filterProvider = StateNotifierProvider<FilterNotifier, FilterState>((
+final filterControllerProvider = StateNotifierProvider<FilterControllerNotifier, FilterState>((
   ref,
 ) {
   final repository = ref.watch(filterRepositoryProvider);
-  return FilterNotifier(repository);
+  return FilterControllerNotifier(repository);
 });
 
-class FilterNotifier extends StateNotifier<FilterState> {
+class FilterControllerNotifier extends StateNotifier<FilterState> {
   final FilterRepository _repository;
 
-  FilterNotifier(this._repository) : super(const FilterState()) {
+  FilterControllerNotifier(this._repository) : super(const FilterState()) {
     // Initialize area data when provider is created
     _loadAllAreas();
   }
@@ -96,7 +96,7 @@ class FilterNotifier extends StateNotifier<FilterState> {
     }
   }
 
-  /// Load districts for a specific division
+  /// Load all districts for a specific division
   Future<void> _loadDistrictsByDivision(String divisionUid) async {
     try {
       print('FilterProvider: Loading districts for division UID: $divisionUid');

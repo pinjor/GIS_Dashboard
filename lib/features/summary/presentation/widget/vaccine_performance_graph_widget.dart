@@ -23,7 +23,7 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filterState = ref.watch(filterProvider);
+    final filterState = ref.watch(filterControllerProvider);
     final summaryState = ref.watch(summaryControllerProvider);
 
     // Show loading or error state

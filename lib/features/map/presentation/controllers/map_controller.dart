@@ -12,17 +12,17 @@ final mapControllerProvider =
     StateNotifierProvider<MapControllerNotifier, MapState>((ref) {
       return MapControllerNotifier(
         dataService: ref.read(dataServiceProvider),
-        filterNotifier: ref.read(filterProvider.notifier),
+        filterNotifier: ref.read(filterControllerProvider.notifier),
       );
     });
 
 class MapControllerNotifier extends StateNotifier<MapState> {
   final DataService _dataService;
-  final FilterNotifier _filterNotifier;
+  final FilterControllerNotifier _filterNotifier;
 
   MapControllerNotifier({
     required DataService dataService,
-    required FilterNotifier filterNotifier,
+    required FilterControllerNotifier filterNotifier,
   }) : _dataService = dataService,
        _filterNotifier = filterNotifier,
        super(MapState());

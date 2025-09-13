@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
-import '../providers/filter_provider.dart';
+import '../controllers/filter_controller.dart';
 
 class FilterDialogBoxWidget extends ConsumerStatefulWidget {
   const FilterDialogBoxWidget({super.key});
@@ -33,7 +33,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Initialize with current filter state
-    final currentFilter = ref.read(filterProvider);
+    final currentFilter = ref.read(filterControllerProvider);
     _selectedAreaType = currentFilter.selectedAreaType;
     _selectedVaccine = currentFilter.selectedVaccine;
     _selectedDivision = currentFilter.selectedDivision;
@@ -45,8 +45,8 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   @override
   Widget build(BuildContext context) {
     final primaryColor = Color(Constants.primaryColor);
-    final filterState = ref.watch(filterProvider);
-    final filterNotifier = ref.read(filterProvider.notifier);
+    final filterState = ref.watch(filterControllerProvider);
+    final filterNotifier = ref.read(filterControllerProvider.notifier);
 
     // Sync local district selection with provider state when districts are filtered
     if (_selectedDistrict != null &&

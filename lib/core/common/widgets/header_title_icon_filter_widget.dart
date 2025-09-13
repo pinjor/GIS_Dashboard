@@ -11,7 +11,7 @@ class HeaderTitleIconFilterWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filterState = ref.watch(filterProvider);
+    final filterState = ref.watch(filterControllerProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

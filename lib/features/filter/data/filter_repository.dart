@@ -14,6 +14,7 @@ class FilterRepository {
 
   FilterRepository({required Dio client}) : _client = client;
 
+  /// Fetches all divisions from the API
   Future<List<AreaResponseModel>> fetchAllDivisions() async {
     try {
       final uri = Uri(
@@ -36,6 +37,8 @@ class FilterRepository {
     }
   }
 
+
+  /// Fetches all districts from the API
   Future<List<AreaResponseModel>> fetchAllDistricts() async {
     try {
       final uri = Uri(
@@ -58,6 +61,8 @@ class FilterRepository {
     }
   }
 
+
+  /// Fetches all city corporations from the API
   Future<List<AreaResponseModel>> fetchAllCityCorporations() async {
     try {
       final uri = Uri(
@@ -75,6 +80,8 @@ class FilterRepository {
     }
   }
 
+
+  /// Fetches districts based on a given division ID: All districts under that division
   Future<List<AreaResponseModel>> fetchDistrictsByDivisionId(
     String divisionId,
   ) async {
@@ -93,4 +100,10 @@ class FilterRepository {
       return Future.error('Failed to fetch districts');
     }
   }
+
+
+  /// Fetch specific district by its UID
+  
+  
+  /// Fetch specific city corporation by its UID 
 }

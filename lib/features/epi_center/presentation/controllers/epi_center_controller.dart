@@ -1,14 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 
 import 'dart:convert';
 
 import '../../../../core/common/constants/api_constants.dart';
 import '../../../../core/service/data_service.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/epi_center_response.dart';
 import '../../domain/epi_center_state.dart';
 
-final logg = Logger();
 
 final epiCenterControllerProvider =
     StateNotifierProvider<EpiCenterController, EpiCenterState>(
