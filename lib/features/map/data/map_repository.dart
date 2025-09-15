@@ -179,6 +179,7 @@ class MapRepository {
       logg.w('urlPath for epi center!!!!!!!!!!!!!!: $urlPath');
       final response = await epiDio.get(urlPath);
       log('Response received for epi center data!!!!!!!!!!!!!!!!!: $response');
+      logg.i('Response details response $response');
 
       // Check if response is successful
       if (response.statusCode != 200) {

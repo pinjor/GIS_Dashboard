@@ -666,4 +666,142 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     logg.i("Explicitly clearing error state");
     state = state.copyWith(clearError: true);
   }
+
+  // ============================================================================
+  // MAP-FILTER SYNC FUNCTIONALITY (Integrated from MapFilterSyncService)
+  // ============================================================================
+
+  /// Check if a UID corresponds to a district using live backend data
+  bool isDistrictUid(String uid) {
+    final filterState = _filterNotifier.state;
+    final districts = filterState.districts;
+    return districts.any((district) => district.uid == uid);
+  }
+
+  /// Get division name for a district UID using live backend data
+  String? getDivisionNameForDistrict(String districtUid) {
+    try {
+      final filterState = _filterNotifier.state;
+
+      // Find the district with this UID
+      final districts = filterState.districts;
+      final district = districts.where((d) => d.uid == districtUid).firstOrNull;
+
+      if (district?.parentUid == null) {
+        logg.w("🔍 District UID '$districtUid' has no parent_uid");
+        return null;
+      }
+
+      // Find the division with the parent UID
+      final divisions = filterState.divisions;
+      final division = divisions
+          .where((d) => d.uid == district!.parentUid)
+          .firstOrNull;
+
+      if (division?.name == null) {
+        logg.w("🔍 No division found for parent_uid '${district!.parentUid}'");
+        return null;
+      }
+
+      logg.d(
+        "✅ DYNAMIC: District '$districtUid' → Division '${division!.name}'",
+      );
+      return division.name;
+    } catch (e) {
+      logg.e("❌ Error resolving division for district '$districtUid': $e");
+      return null;
+    }
+  }
+
+  /// Get district name for a district UID using live backend data
+  String? getDistrictName(String districtUid) {
+    try {
+      final filterState = _filterNotifier.state;
+      final districts = filterState.districts;
+      final district = districts.where((d) => d.uid == districtUid).firstOrNull;
+
+      if (district?.name == null) {
+        logg.w("🔍 No district found for UID '$districtUid'");
+        return null;
+      }
+
+      logg.d(
+        "✅ DYNAMIC: District UID '$districtUid' → Name '${district!.name}'",
+      );
+      return district.name;
+    } catch (e) {
+      logg.e("❌ Error resolving district name for UID '$districtUid': $e");
+      return null;
+    }
+  }
+
+  /// Sync filters with tapped district using live backend data
+  Future<bool> syncFiltersWithDistrict(String districtUid) async {
+    try {
+      logg.d(
+        "🔄 DYNAMIC SYNC: Starting filter sync for district UID '$districtUid'",
+      );
+
+      // Get district and division names using live data
+      final districtName = getDistrictName(districtUid);
+      final divisionName = getDivisionNameForDistrict(districtUid);
+
+      if (districtName == null || divisionName == null) {
+        logg.w(
+          "❌ Cannot sync - missing names: district='$districtName', division='$divisionName'",
+        );
+        return false;
+      }
+
+      // Update filters using the existing FilterController methods
+      logg.d("🎯 DYNAMIC SYNC: Updating division to '$divisionName'");
+      _filterNotifier.updateDivision(divisionName);
+
+      // Small delay to let division update propagate
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      logg.d("🎯 DYNAMIC SYNC: Updating district to '$districtName'");
+      _filterNotifier.updateDistrict(districtName);
+
+      logg.i(
+        "✅ DYNAMIC SYNC: Successfully synced filters - Division: '$divisionName', District: '$districtName'",
+      );
+      return true;
+    } catch (e) {
+      logg.e(
+        "❌ DYNAMIC SYNC: Error syncing filters for district '$districtUid': $e",
+      );
+      return false;
+    }
+  }
+
+  /// Get debug information about available filter data
+  Map<String, dynamic> getFilterSyncDebugInfo() {
+    final filterState = _filterNotifier.state;
+    return {
+      'divisionsLoaded': filterState.divisions.length,
+      'districtsLoaded': filterState.districts.length,
+      'isLoadingAreas': filterState.isLoadingAreas,
+      'hasError': filterState.areasError != null,
+      'selectedDivision': filterState.selectedDivision,
+      'selectedDistrict': filterState.selectedDistrict,
+      'sampleDistricts': filterState.districts
+          .take(3)
+          .map((d) => '${d.uid}: ${d.name}')
+          .toList(),
+      'sampleDivisions': filterState.divisions
+          .take(3)
+          .map((d) => '${d.uid}: ${d.name}')
+          .toList(),
+    };
+  }
+
+  /// Check if the filter data is ready for sync operations
+  bool get isFilterSyncReady {
+    final filterState = _filterNotifier.state;
+    return !filterState.isLoadingAreas &&
+        filterState.areasError == null &&
+        filterState.divisions.isNotEmpty &&
+        filterState.districts.isNotEmpty;
+  }
 }

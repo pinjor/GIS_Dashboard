@@ -1,10 +1,10 @@
-import 'epi_center_response.dart';
+import 'epi_center_details_response.dart';
 
 class EpiCenterState {
   final bool isLoading;
   final bool hasError;
   final String? errorMessage;
-  final EpiCenterResponse? epiCenterData;
+  final EpiCenterDetailsResponse? epiCenterData;
   final String? currentEpiUid;
   final String? currentCcUid;
   final int selectedYear;
@@ -23,7 +23,7 @@ class EpiCenterState {
     bool? isLoading,
     bool? hasError,
     String? errorMessage,
-    EpiCenterResponse? epiCenterData,
+    EpiCenterDetailsResponse? epiCenterData,
     String? currentEpiUid,
     String? currentCcUid,
     int? selectedYear,

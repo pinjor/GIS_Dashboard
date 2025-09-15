@@ -46,6 +46,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     super.initState();
     Future.delayed(Duration.zero, () {
       ref.read(mapControllerProvider.notifier).loadInitialData();
+      // Dynamic sync service is now initialized through Riverpod providers
+      // No manual initialization needed - uses live FilterController state
     });
   }
 
@@ -498,7 +500,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     mapController.moveAndRotate(centerInfo.center, centerInfo.zoom, 0);
   }
 
-  /// Handle polygon tap for drilldown
+  /// Handle polygon tap for drilldown and filter sync
   void _onPolygonTap(LatLng tappedPoint, List<AreaPolygon> areaPolygons) {
     logg.i("Map tapped at: ${tappedPoint.latitude}, ${tappedPoint.longitude}");
 
@@ -514,6 +516,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (tappedPolygon != null) {
       logg.i("Tapped on: ${tappedPolygon.areaName}");
 
+      // IMPORTANT: Perform filter sync BEFORE drilldown
+      // This ensures the filter state is updated to match the tapped area
+      _syncFiltersWithTappedArea(tappedPolygon);
+
       if (tappedPolygon.canDrillDown) {
         logg.i("Drilling down to: ${tappedPolygon.areaName}");
         _performDrillDown(tappedPolygon);
@@ -526,6 +532,84 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     } else {
       logg.i("No polygon found at tapped location");
     }
+  }
+
+  /// Sync filter selections with the tapped area using DYNAMIC backend data
+  void _syncFiltersWithTappedArea(AreaPolygon tappedPolygon) {
+    try {
+      // Get the map controller which now contains the sync functionality
+      final mapController = ref.read(mapControllerProvider.notifier);
+
+      // Check if filter data is ready
+      if (!mapController.isFilterSyncReady) {
+        logg.w('🔄 Filter data not ready yet - skipping sync');
+        return;
+      }
+
+      final String areaId = tappedPolygon.areaId;
+      final String areaName = tappedPolygon.areaName;
+
+      logg.i("🎯 DYNAMIC SYNC: Starting for area '$areaName' (ID: '$areaId')");
+
+      if (areaId.isEmpty || areaId == areaName) {
+        logg.w("❓ No valid area ID for sync - skipping");
+        return;
+      }
+
+      // Check if this area ID corresponds to a district
+      if (mapController.isDistrictUid(areaId)) {
+        logg.d("✅ Found district UID '$areaId' - proceeding with sync");
+
+        // Perform the sync using the map controller's integrated functionality
+        mapController.syncFiltersWithDistrict(areaId).then((success) {
+          if (success) {
+            // Get the names for user feedback
+            final districtName = mapController.getDistrictName(areaId);
+            final divisionName = mapController.getDivisionNameForDistrict(
+              areaId,
+            );
+
+            if (districtName != null && divisionName != null) {
+              _showFilterSyncSuccessSnackBar(divisionName, districtName);
+            }
+          }
+        });
+      } else {
+        logg.d("ℹ️ Area ID '$areaId' is not a district - no sync needed");
+        // This is expected for divisions, upazilas, etc.
+      }
+    } catch (e) {
+      logg.e("❌ Error during dynamic filter sync: $e");
+      // Don't show error to user - this is a supplementary feature
+    }
+  }
+
+  /// Show success feedback when filter sync completes
+  void _showFilterSyncSuccessSnackBar(
+    String divisionName,
+    String districtName,
+  ) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.sync, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Filters synced: $divisionName → $districtName',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green.shade600,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   /// Check if a point is inside a polygon using ray casting algorithm - OPTIMIZED to prevent freezing
@@ -693,6 +777,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     // Navigate to EPI center details screen
+    logg.i("🚀 Navigating to EPI center details:");
+    logg.i("   EPI UID: $epiUid");
+    logg.i("   Center Name: $centerName");
+    logg.i("   CC UID: $ccUid");
+    logg.i("   Current Level: ${currentState.currentLevel}");
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -700,7 +790,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           epiUid: epiUid,
           epiCenterName: centerName,
           ccUid: ccUid,
-          currentLevel: currentState.currentLevel,
+          currentLevel: int.tryParse(currentState.currentLevel),
         ),
       ),
     );
