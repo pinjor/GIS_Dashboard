@@ -42,7 +42,12 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
             orElse: () => vaccines.first,
           )
         : null;
-
+    final selectedVaccineTotalTarget =
+        selectedVaccineData?.totalTargetMale ??
+        0 + (selectedVaccineData?.totalTargetFemale ?? 0);
+    final selectedVaccineTotalCoverage =
+        selectedVaccineData?.totalCoverageMale ??
+        0 + (selectedVaccineData?.totalCoverageFemale ?? 0);
     return Scaffold(
       backgroundColor: Color(Constants.scaffoldBackgroundColor),
       body: summaryState.isLoading
@@ -71,18 +76,14 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                     children: [
                       SummaryCardWidget(
                         label: 'Total Children (0-11 m)',
-                        value:
-                            selectedVaccineData?.totalTarget?.toString() ??
-                            'Unknown',
+                        value: selectedVaccineTotalTarget.toString(),
                         boysCount: selectedVaccineData?.totalTargetMale ?? 0,
                         girlsCount: selectedVaccineData?.totalTargetFemale ?? 0,
                       ),
                       10.h,
                       SummaryCardWidget(
                         label: 'Vaccinated Children',
-                        value:
-                            selectedVaccineData?.totalCoverage?.toString() ??
-                            'Unknown',
+                        value: selectedVaccineTotalCoverage.toString(),
                         boysCount: selectedVaccineData?.totalCoverageMale ?? 0,
                         girlsCount:
                             selectedVaccineData?.totalCoverageFemale ?? 0,

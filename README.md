@@ -1,16 +1,47 @@
-# gis_dashboard
+# GIS Dashboard
 
-A new Flutter project.
+A Flutter application for geographic information system visualization for vaccination data of Bangladesh.
 
-## Getting Started
+## Setup Instructions
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK (3.8.1 or higher)
+- Dart SDK
+- Android Studio / VS Code
+- Git
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Getting Started
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/pinjor/GIS_Dashboard.git
+   cd GIS_Dashboard
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   flutter pub get
+   ```
+
+3. **Generate required files**
+
+   ```bash
+   dart run build_runner build --delete-conflicting-outputs
+   ```
+
+   This generates the `.freezed.dart` and `.g.dart` files that are excluded from version control.
+
+4. **Run the application**
+   ```bash
+   flutter run
+   ```
+
+### Development Notes
+
+- Generated files (`.freezed.dart`, `.g.dart`) are gitignored
+- Always run `build_runner` after pulling new changes that modify model files
+- Use `dart run build_runner build --delete-conflicting-outputs` to resolve conflicts 
+- which is already mentioned in step 3 above.
