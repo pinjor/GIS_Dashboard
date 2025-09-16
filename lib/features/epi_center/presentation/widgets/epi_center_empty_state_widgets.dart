@@ -4,10 +4,10 @@ import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../controllers/epi_center_controller.dart';
 
 /// Collection of empty state widgets for EPI Center Details screen
-class EpiCenterNoDataState extends ConsumerWidget {
+class EpiCenterEmptyStateWidget extends ConsumerWidget {
   final String epiCenterName;
 
-  const EpiCenterNoDataState({super.key, required this.epiCenterName});
+  const EpiCenterEmptyStateWidget({super.key, required this.epiCenterName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

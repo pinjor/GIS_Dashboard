@@ -7,10 +7,20 @@ class Constants {
   static const String bdMapLogoPath = 'assets/icons/bd_map_logo.png';
   static const String eqmsLogoPath = 'assets/icons/eqms_logo.png';
   static const String unicefLogoPath = 'assets/icons/unicef_logo.png';
-  static const String poweredByLeftLogosPath = 'assets/icons/powered_by_left_logos.png';
+  static const String poweredByLeftLogosPath =
+      'assets/icons/powered_by_left_logos.png';
   static const String mapLocationIconPath = 'assets/icons/map_location.svg';
   static const String lineGraphIconPath = 'assets/icons/line_graph.svg';
   static const String filterIconPath = 'assets/icons/filter_data.svg';
   static const String childrenIconPath = 'assets/icons/children.svg';
   static const String dosesIconPath = 'assets/icons/doses.svg';
+
+  static const String urlTemplate =
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  static final subDomains = ['a', 'b', 'c'];
+
+  static const String fallbackUrl =
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  static const String userAgentPackageName = 'com.example.gis_dashboard';
 }

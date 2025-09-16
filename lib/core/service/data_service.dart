@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 import 'package:gis_dashboard/features/map/data/map_repository.dart';
 import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
 
@@ -140,7 +141,7 @@ class DataService {
   }
 
   /// Get EPI Center details data with retry logic
-  Future<String> getEpiCenterData({
+  Future<EpiCenterDetailsResponse> getEpiCenterData({
     required String urlPath,
     bool forceRefresh = false,
   }) async {

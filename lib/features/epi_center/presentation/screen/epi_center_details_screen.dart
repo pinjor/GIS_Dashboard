@@ -40,6 +40,12 @@ class _EpiCenterDetailsScreenState
     super.initState();
     // Always load EPI center data when the screen initializes
     // The epiUid is required and should always be available from the navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadEpiCenterData();
+    });
+  }
+
+  Future<void> _loadEpiCenterData() async{
     Future.microtask(() {
       final filterState = ref.read(filterControllerProvider);
       final year =
@@ -95,35 +101,8 @@ class _EpiCenterDetailsScreenState
                 loadingText: 'Loading EPI Center data...',
               ),
             )
-          : epiState.hasError
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error Loading Data',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red[700],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      epiState.errorMessage ?? 'Failed to load EPI center data',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                    ],
-                ),
-              ),
-            )
-          : epiState.epiCenterData == null
-          ? EpiCenterNoDataState(epiCenterName: widget.epiCenterName)
+          : epiState.hasError || epiState.epiCenterData == null
+          ? EpiCenterEmptyStateWidget(epiCenterName: widget.epiCenterName)
           : _buildContent(epiState.epiCenterData!),
     );
   }
@@ -142,10 +121,6 @@ class _EpiCenterDetailsScreenState
           EpiCenterCityCorporationInfo(epiData: epiCenterData),
           const SizedBox(height: 16),
 
-          // Microplan section
-          EpiCenterMicroplanSection(epiData: epiCenterData),
-          const SizedBox(height: 24),
-
           // Coverage tables
           EpiCenterCoverageTables(
             coverageData: epiCenterData,
@@ -156,12 +131,12 @@ class _EpiCenterDetailsScreenState
           // Chart section
           EpiCenterChartSection(chartData: epiCenterData),
           const SizedBox(height: 24),
-
+          // Microplan section
+          EpiCenterMicroplanSection(epiData: epiCenterData),
+          const SizedBox(height: 24),
           EpiCenterDetailsWidget(),
           SizedBox(height: 10),
           EpiYearlySessionPersonnelWidget(),
-
-
         ],
       ),
     );

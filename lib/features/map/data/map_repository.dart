@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/network/connectivity_service.dart';
 import 'package:gis_dashboard/core/network/dio_client_provider.dart';
 import 'package:gis_dashboard/core/network/network_error_handler.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
+import 'package:gis_dashboard/features/map/utils/epi_utils.dart';
 
 import '../../../core/utils/utils.dart';
 import '../domain/vaccine_coverage_response.dart';
@@ -102,6 +104,7 @@ class MapRepository {
     }
   }
 
+  /// Fetch EPI center coordinates data from the API
   Future<String> fetchEpiData({required String urlPath}) async {
     try {
       // Check internet connectivity first
@@ -145,7 +148,9 @@ class MapRepository {
   }
 
   /// Fetch EPI Center details data from the API
-  Future<String> fetchEpiCenterData({required String urlPath}) async {
+  Future<EpiCenterDetailsResponse> fetchEpiCenterData({
+    required String urlPath,
+  }) async {
     try {
       // Check internet connectivity first
       if (!await _connectivityService.hasInternetConnection()) {
@@ -178,68 +183,102 @@ class MapRepository {
       }
       logg.w('urlPath for epi center!!!!!!!!!!!!!!: $urlPath');
       final response = await epiDio.get(urlPath);
-      log('Response received for epi center data!!!!!!!!!!!!!!!!!: $response');
-      logg.i('Response details response $response');
-
+     
       // Check if response is successful
       if (response.statusCode != 200) {
         throw Exception('Server returned status code: ${response.statusCode}');
       }
 
-      final epiCenterData = response.data;
+      final rawData = response.data;
       final contentType = response.headers.value('content-type') ?? '';
 
       // Check if response contains HTML (indicates no data available)
       if (contentType.contains('text/html') ||
-          (epiCenterData is String && epiCenterData.trim().startsWith('<'))) {
+          (rawData is String && rawData.trim().startsWith('<'))) {
         logg.w('EPI center returned HTML response - no data available');
         throw Exception('EPI_CENTER_NO_DATA');
       }
+      logg.i('successful step: 1');
+      // final rawData = epiCenterData is String
+      //     ? jsonEncode(epiCenterData)
+      //     : epiCenterData;
+      // logg.d('Raw EPI center data string length: ${rawData.length}');
+      logg.i('successful step: 2');
+      final epiCenterDetailedJsonObject = decodeEpiCenterDetailsNestedJson(
+        rawData,
+      );
+      logg.i('successful step: 3');
+      // log(
+      //   'Parsed EPI center detailed json response:\n\n\n $epiCenterDetailedJsonObject',
+      // );
+      logg.i('Parsed EPI center detailed data Successfully!!!');
+      log(
+        'Parsed EPI center detailed json response:\n\n\n $epiCenterDetailedJsonObject',
+      );
+      final epiCenterDetailedData = EpiCenterDetailsResponse.fromJson(
+        epiCenterDetailedJsonObject as Map<String, dynamic>,
+      );
+      logg.i('successful step: 4');
+      logg.i('Parsed EPI center detailed data :) lets go!!!');
+      return epiCenterDetailedData;
 
       // Convert to JSON string if it's a Map
-      String epiCenterJsonString;
-      if (epiCenterData is Map<String, dynamic>) {
-        epiCenterJsonString = jsonEncode(epiCenterData);
+      // String epiCenterJsonString;
+      // if (epiCenterData is Map<String, dynamic>) {
+      //   epiCenterJsonString = jsonEncode(epiCenterData);
 
-        // Additional validation: check if the JSON response actually contains data
-        if (epiCenterData.isEmpty ||
-            (epiCenterData.containsKey('error') &&
-                epiCenterData['error'] != null)) {
-          logg.w('EPI center returned empty or error JSON response');
-          throw Exception('EPI_CENTER_NO_DATA');
-        }
-      } else if (epiCenterData is String) {
-        // Check if string response is HTML
-        if (epiCenterData.trim().startsWith('<')) {
-          logg.w(
-            'EPI center returned HTML string response - no data available',
-          );
-          throw Exception('EPI_CENTER_NO_DATA');
-        }
+      //   // Additional validation: check if the JSON response actually contains data
+      //   if (epiCenterData.isEmpty ||
+      //       (epiCenterData.containsKey('error') &&
+      //           epiCenterData['error'] != null)) {
+      //     logg.w('EPI center returned empty or error JSON response');
+      //     throw Exception('EPI_CENTER_NO_DATA');
+      //   }
+      // } else if (epiCenterData is String) {
+      //   // Check if string response is HTML
+      //   if (epiCenterData.trim().startsWith('<')) {
+      //     logg.w(
+      //       'EPI center returned HTML string response - no data available',
+      //     );
+      //     throw Exception('EPI_CENTER_NO_DATA');
+      //   }
 
-        // Try to parse as JSON to validate
-        try {
-          final parsed = jsonDecode(epiCenterData);
-          if (parsed is Map<String, dynamic>) {
-            if (parsed.isEmpty ||
-                (parsed.containsKey('error') && parsed['error'] != null)) {
-              throw Exception('EPI_CENTER_NO_DATA');
-            }
-          }
-          epiCenterJsonString = epiCenterData;
-        } catch (e) {
-          logg.w('EPI center returned invalid JSON string response');
-          throw Exception('EPI_CENTER_NO_DATA');
-        }
-      } else {
-        logg.w(
-          'EPI center returned unexpected response type: ${epiCenterData.runtimeType}',
-        );
-        throw Exception('EPI_CENTER_NO_DATA');
-      }
+      //   // Try to parse as JSON to validate
+      //   try {
+      //     final parsed = jsonDecode(epiCenterData);
+      //     if (parsed is Map<String, dynamic>) {
+      //       if (parsed.isEmpty ||
+      //           (parsed.containsKey('error') && parsed['error'] != null)) {
+      //         throw Exception('EPI_CENTER_NO_DATA');
+      //       }
+      //     }
 
-      logg.i('Successfully received valid EPI center JSON data');
-      return epiCenterJsonString;
+      //     // now it is surely a valid JSON string of some sort
+      //     epiCenterJsonString = epiCenterData;
+      //   } catch (e) {
+      //     logg.w('EPI center returned invalid JSON string response');
+      //     throw Exception('EPI_CENTER_NO_DATA');
+      //   }
+      // } else {
+      //   logg.w(
+      //     'EPI center returned unexpected response type: ${epiCenterData.runtimeType}',
+      //   );
+      //   throw Exception('EPI_CENTER_NO_DATA');
+      // }
+
+      // logg.i('Successfully received valid EPI center JSON data');
+      // final epiCenterDetailedJsonObject = decodeEpiCenterDetailsNestedJson(
+      //   jsonDecode(epiCenterData),
+      // );
+      // final epiCenterDetailedData = EpiCenterDetailsResponse.fromJson(
+      //   epiCenterDetailedJsonObject,
+      // );
+      // logg.d('Parsed EPI center detailed data');
+      // log(
+      //   'Parsed EPI center detailed json response:\n\n\n $epiCenterDetailedData',
+      // );
+
+      // return epiCenterDetailedData;
     } on DioException catch (e) {
       logg.e("Dio error fetching EPI center data: $e");
       logg.e("Error: ${e.error}");

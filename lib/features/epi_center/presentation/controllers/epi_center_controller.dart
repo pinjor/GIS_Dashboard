@@ -1,11 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'dart:convert';
 
 import '../../../../core/common/constants/api_constants.dart';
 import '../../../../core/service/data_service.dart';
 import '../../../../core/utils/utils.dart';
-import '../../domain/epi_center_details_response.dart';
 import '../../domain/epi_center_state.dart';
 
 final epiCenterControllerProvider =
@@ -52,50 +50,50 @@ class EpiCenterController extends StateNotifier<EpiCenterState> {
 
       logg.i("🌐 Fetching EPI center data from: $apiUrl");
 
-      final response = await _dataService.getEpiCenterData(urlPath: apiUrl);
+      final epiCenterData = await _dataService.getEpiCenterData(urlPath: apiUrl);
 
-      logg.i("✅ Received response from API (length: ${response.length})");
+      logg.i("✅ Received epi center details response from API ");
 
       // Parse JSON with better error handling
-      dynamic parsedJson;
-      try {
-        parsedJson = jsonDecode(response);
-        logg.i("✅ Successfully parsed JSON response");
-      } catch (e) {
-        logg.e("❌ JSON parsing error: $e");
-        throw Exception('Invalid response format');
-      }
+      // dynamic parsedJson;
+      // try {
+      //   parsedJson = jsonDecode(response);
+      //   logg.i("✅ Successfully parsed JSON response");
+      // } catch (e) {
+      //   logg.e("❌ JSON parsing error: $e");
+      //   throw Exception('Invalid response format');
+      // }
 
       // Handle different response types
-      EpiCenterDetailsResponse epiCenterData;
-      if (parsedJson is Map<String, dynamic>) {
-        logg.i("✅ Parsing JSON as Map<String, dynamic>");
-        epiCenterData = EpiCenterDetailsResponse.fromJson(parsedJson);
+      // EpiCenterDetailsResponse epiCenterData;
+      // if (parsedJson is Map<String, dynamic>) {
+      //   logg.i("✅ Parsing JSON as Map<String, dynamic>");
+      //   epiCenterData = EpiCenterDetailsResponse.fromJson(parsedJson);
 
-        // If coverageTableData months are empty, build them from the area's vaccine coverage data
-        if (epiCenterData.coverageTableData!.months.isEmpty) {
-          logg.i(
-            "🔄 Coverage table data is empty, processing from vaccine coverage data",
-          );
-          final processedData = _processCoverageData(epiCenterData, year);
-          if (processedData != null) {
-            logg.i("✅ Successfully processed coverage data");
-            // Create a new response with the processed data
-            final updatedJson = Map<String, dynamic>.from(parsedJson);
-            updatedJson['coverageTableData'] = processedData;
-            epiCenterData = EpiCenterDetailsResponse.fromJson(updatedJson);
-          } else {
-            logg.w("⚠️ No processed coverage data available");
-          }
-        } else {
-          logg.i(
-            "✅ Coverage table data already available (${epiCenterData.coverageTableData!.months.length} months)",
-          );
-        }
-      } else {
-        logg.e("❌ Unexpected response type: ${parsedJson.runtimeType}");
-        throw Exception('Unexpected response format');
-      }
+      //   // // If coverageTableData months are empty, build them from the area's vaccine coverage data
+      //   // if (epiCenterData.coverageTableData!.months.isEmpty) {
+      //   //   logg.i(
+      //   //     "🔄 Coverage table data is empty, processing from vaccine coverage data",
+      //   //   );
+      //   //   final processedData = _processCoverageData(epiCenterData, year);
+      //   //   if (processedData != null) {
+      //   //     logg.i("✅ Successfully processed coverage data");
+      //   //     // Create a new response with the processed data
+      //   //     final updatedJson = Map<String, dynamic>.from(parsedJson);
+      //   //     updatedJson['coverageTableData'] = processedData;
+      //   //     epiCenterData = EpiCenterDetailsResponse.fromJson(updatedJson);
+      //   //   } else {
+      //   //     logg.w("⚠️ No processed coverage data available");
+      //   //   }
+      //   // } else {
+      //   //   logg.i(
+      //   //     "✅ Coverage table data already available (${epiCenterData.coverageTableData!.months.length} months)",
+      //   //   );
+      //   // }
+      // } else {
+      //   logg.e("❌ Unexpected response type: ${parsedJson.runtimeType}");
+      //   throw Exception('Unexpected response format');
+      // }
 
       state = state.copyWith(
         isLoading: false,
@@ -156,82 +154,82 @@ class EpiCenterController extends StateNotifier<EpiCenterState> {
     state = const EpiCenterState();
   }
 
-  /// Process vaccine coverage data to create coverageTableData structure
-  Map<String, dynamic>? _processCoverageData(
-    EpiCenterDetailsResponse epiData,
-    int year,
-  ) {
-    // Use the structured VaccineCoverage data from the new model
-    final yearCoverage =
-        epiData.area!.vaccineCoverage!.child0To11Month[year.toString()];
+  // /// Process vaccine coverage data to create coverageTableData structure
+  // Map<String, dynamic>? _processCoverageData(
+  //   EpiCenterDetailsResponse epiData,
+  //   int year,
+  // ) {
+  //   // Use the structured VaccineCoverage data from the new model
+  //   final yearCoverage =
+  //       epiData.area!.vaccineCoverage!.child0To11Month[year.toString()];
 
-    if (yearCoverage == null) {
-      return null;
-    }
+  //   if (yearCoverage == null) {
+  //     return null;
+  //   }
 
-    // Process monthly data
-    Map<String, dynamic> processedMonths = {};
+  //   // Process monthly data
+  //   Map<String, dynamic> processedMonths = {};
 
-    // Convert month coverage data
-    for (var monthEntry in yearCoverage.months.entries) {
-      final monthNumber = monthEntry.key;
-      final monthCoverage = monthEntry.value;
+  //   // Convert month coverage data
+  //   for (var monthEntry in yearCoverage.months.entries) {
+  //     final monthNumber = monthEntry.key;
+  //     final monthCoverage = monthEntry.value;
 
-      // Convert vaccine array to structured data
-      Map<String, dynamic> coverages = {};
-      Map<String, dynamic> dropouts = {};
+  //     // Convert vaccine array to structured data
+  //     Map<String, dynamic> coverages = {};
+  //     Map<String, dynamic> dropouts = {};
 
-      for (var vaccineItem in monthCoverage.vaccine) {
-        final vaccineName = vaccineItem.vaccineName;
+  //     for (var vaccineItem in monthCoverage.vaccine) {
+  //       final vaccineName = vaccineItem.vaccineName;
 
-        // Calculate total from male + female (handle null values)
-        int total = 0;
-        if (vaccineItem.male != null) total += vaccineItem.male!;
-        if (vaccineItem.female != null) total += vaccineItem.female!;
+  //       // Calculate total from male + female (handle null values)
+  //       int total = 0;
+  //       if (vaccineItem.male != null) total += vaccineItem.male!;
+  //       if (vaccineItem.female != null) total += vaccineItem.female!;
 
-        coverages[vaccineName ?? ''] = total;
-        // For now, we don't have dropout data, so we'll set it to 0
-        dropouts[vaccineName ?? ''] = 0;
-      }
+  //       coverages[vaccineName ?? ''] = total;
+  //       // For now, we don't have dropout data, so we'll set it to 0
+  //       dropouts[vaccineName ?? ''] = 0;
+  //     }
 
-      // Map month number to month name
-      final monthNames = [
-        '',
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
+  //     // Map month number to month name
+  //     final monthNames = [
+  //       '',
+  //       'January',
+  //       'February',
+  //       'March',
+  //       'April',
+  //       'May',
+  //       'June',
+  //       'July',
+  //       'August',
+  //       'September',
+  //       'October',
+  //       'November',
+  //       'December',
+  //     ];
 
-      final monthIndex = int.tryParse(monthNumber) ?? 0;
-      if (monthIndex > 0 && monthIndex < monthNames.length) {
-        processedMonths[monthNames[monthIndex]] = {
-          'coverages': coverages,
-          'dropouts': dropouts,
-        };
-      }
-    }
+  //     final monthIndex = int.tryParse(monthNumber) ?? 0;
+  //     if (monthIndex > 0 && monthIndex < monthNames.length) {
+  //       processedMonths[monthNames[monthIndex]] = {
+  //         'coverages': coverages,
+  //         'dropouts': dropouts,
+  //       };
+  //     }
+  //   }
 
-    // Extract vaccine names from the year data
-    Set<String> vaccineNames = {};
-    for (var vaccineItem in yearCoverage.vaccine) {
-      vaccineNames.add(vaccineItem.vaccineName ?? '');
-    }
+  //   // Extract vaccine names from the year data
+  //   Set<String> vaccineNames = {};
+  //   for (var vaccineItem in yearCoverage.vaccine) {
+  //     vaccineNames.add(vaccineItem.vaccineName ?? '');
+  //   }
 
-    return {
-      'months': processedMonths,
-      'totals': {},
-      'vaccine_names': vaccineNames.toList(),
-      'targets': {'month': processedMonths.length},
-      'coverage_percentages': {},
-    };
-  }
+  //   return {
+  //     'months': processedMonths,
+  //     'totals': {},
+  //     'vaccine_names': vaccineNames.toList(),
+  //     'targets': {'month': processedMonths.length},
+  //     'coverage_percentages': {},
+  //   };
+  // }
 }

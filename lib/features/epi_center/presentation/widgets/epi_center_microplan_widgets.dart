@@ -205,29 +205,26 @@ class PopulationSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: [Colors.blue[600]!, Colors.blue[400]!],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.grey[50],
+          border: Border.all(color: Colors.grey[200]!),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.people, color: Colors.white, size: 24),
+                Icon(Icons.people, color: Colors.blue[600], size: 24),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'Total Population',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.grey[800],
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -237,8 +234,8 @@ class PopulationSummaryCard extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               totalPop > 0 ? totalPop.toString() : '-',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Colors.blue[700],
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
               ),
@@ -247,11 +244,15 @@ class PopulationSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                GenderInfo(gender: 'Male', count: male, color: Colors.white70),
+                GenderInfo(
+                  gender: 'Male',
+                  count: male,
+                  color: Colors.blue[400]!,
+                ),
                 GenderInfo(
                   gender: 'Female',
                   count: female,
-                  color: Colors.white70,
+                  color: Colors.blue[300]!,
                 ),
               ],
             ),
@@ -270,29 +271,26 @@ class TargetGroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: [Colors.green[600]!, Colors.green[400]!],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.grey[50],
+          border: Border.all(color: Colors.grey[200]!),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.child_care, color: Colors.white, size: 24),
+                Icon(Icons.child_care, color: Colors.green[600], size: 24),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'Target Children',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.grey[800],
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -302,8 +300,8 @@ class TargetGroupCard extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               targetCount > 0 ? targetCount.toString() : '-',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Colors.green[700],
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
               ),
@@ -312,13 +310,14 @@ class TargetGroupCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.green[100],
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.green[200]!),
               ),
-              child: const Text(
+              child: Text(
                 '0-11 months',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.green[700],
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),

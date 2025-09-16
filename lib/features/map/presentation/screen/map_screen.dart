@@ -13,6 +13,7 @@ import 'package:gis_dashboard/features/map/presentation/widget/static_compass_di
 import 'package:gis_dashboard/features/map/presentation/widget/vaccine_center_info_overlay_widget.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../domain/area_polygon.dart';
 import '../../utils/map_utils.dart';
@@ -190,7 +191,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         child: !isFixedCenter
                             ? FaIcon(
                                 FontAwesomeIcons.syringe,
-                                size: 12,
+                                size: 11,
                                 color: Colors.white,
                               )
                             : Icon(Icons.home, color: Colors.white, size: 12),
@@ -1105,18 +1106,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       children: [
                         // Enhanced tile layer with error handling and network resilience
                         TileLayer(
-                          urlTemplate:
-                              'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          subdomains: const ['a', 'b', 'c'],
+                          urlTemplate: Constants.urlTemplate,
+                          subdomains: Constants.subDomains,
                           // Add fallback URL for better reliability
-                          fallbackUrl:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          fallbackUrl: Constants.fallbackUrl,
                           // Silence network exceptions to prevent error flooding
                           tileProvider: NetworkTileProvider(
                             silenceExceptions: true,
                           ),
                           // Add user agent to comply with OSM usage policy
-                          userAgentPackageName: 'com.example.gis_dashboard',
+                          userAgentPackageName: Constants.userAgentPackageName,
                           // Error handling configuration
                           errorTileCallback: (tile, error, stackTrace) {
                             // Log the error but don't show UI errors

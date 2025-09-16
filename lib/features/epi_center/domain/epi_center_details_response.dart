@@ -37,7 +37,7 @@ abstract class EpiCenterDetailsResponse with _$EpiCenterDetailsResponse {
     String? ccZoneName,
     String? ccWardName,
     String? ccUid,
-    String? selectedYear,
+    int? selectedYear,
   }) = _EpiCenterDetailsResponse;
 
   factory EpiCenterDetailsResponse.fromJson(Map<String, dynamic> json) =>
@@ -46,10 +46,7 @@ abstract class EpiCenterDetailsResponse with _$EpiCenterDetailsResponse {
 
 @freezed
 abstract class CityCorporation with _$CityCorporation {
-  const factory CityCorporation({
-    String? uid,
-    String? name,
-  }) = _CityCorporation;
+  const factory CityCorporation({String? uid, String? name}) = _CityCorporation;
 
   factory CityCorporation.fromJson(Map<String, dynamic> json) =>
       _$CityCorporationFromJson(json);
@@ -57,10 +54,7 @@ abstract class CityCorporation with _$CityCorporation {
 
 @freezed
 abstract class District with _$District {
-  const factory District({
-    String? uid,
-    String? name,
-  }) = _District;
+  const factory District({String? uid, String? name}) = _District;
 
   factory District.fromJson(Map<String, dynamic> json) =>
       _$DistrictFromJson(json);
@@ -68,10 +62,7 @@ abstract class District with _$District {
 
 @freezed
 abstract class Division with _$Division {
-  const factory Division({
-    String? uid,
-    String? name,
-  }) = _Division;
+  const factory Division({String? uid, String? name}) = _Division;
 
   factory Division.fromJson(Map<String, dynamic> json) =>
       _$DivisionFromJson(json);
@@ -84,19 +75,19 @@ abstract class Area with _$Area {
     String? type,
     String? uid,
     String? name,
-    String? etrackerName,
-    String? geoName,
-    String? parentUid,
-    String? jsonFilePath,
-    bool? isBulkImported,
-    VaccineTarget? vaccineTarget,
-    VaccineCoverage? vaccineCoverage,
-    AdditionalData? additionalData,
-    dynamic epiUids,
+    @JsonKey(name: 'etracker_name') String? etrackerName,
+    @JsonKey(name: 'geo_name') String? geoName,
+    @JsonKey(name: 'parent_uid') String? parentUid,
+    @JsonKey(name: 'json_file_path') String? jsonFilePath,
+    @JsonKey(name: 'is_bulk_imported') bool? isBulkImported,
+    @JsonKey(name: 'vaccine_target') VaccineTarget? vaccineTarget,
+    @JsonKey(name: 'vaccine_coverage') VaccineCoverage? vaccineCoverage,
+    @JsonKey(name: 'additional_data') AdditionalData? additionalData,
+    @JsonKey(name: 'epi_uids') dynamic epiUids,
     dynamic remarks,
-    String? buildAt,
-    String? createdAt,
-    String? updatedAt,
+    @JsonKey(name: 'build_at') String? buildAt,
+    @JsonKey(name: 'created_at') String? createdAt,
+    @JsonKey(name: 'updated_at') String? updatedAt,
     String? status,
     Parent? parent,
   }) = _Area;
@@ -108,7 +99,8 @@ abstract class Area with _$Area {
 abstract class VaccineTarget with _$VaccineTarget {
   const factory VaccineTarget({
     @JsonKey(name: 'child_0_to_11_month')
-    @Default({}) Map<String, YearTarget> child0To11Month,
+    @Default({})
+    Map<String, YearTarget> child0To11Month,
   }) = _VaccineTarget;
 
   factory VaccineTarget.fromJson(Map<String, dynamic> json) =>
@@ -117,10 +109,7 @@ abstract class VaccineTarget with _$VaccineTarget {
 
 @freezed
 abstract class YearTarget with _$YearTarget {
-  const factory YearTarget({
-    int? male,
-    int? female,
-  }) = _YearTarget;
+  const factory YearTarget({int? male, int? female}) = _YearTarget;
 
   factory YearTarget.fromJson(Map<String, dynamic> json) =>
       _$YearTargetFromJson(json);
@@ -130,7 +119,8 @@ abstract class YearTarget with _$YearTarget {
 abstract class VaccineCoverage with _$VaccineCoverage {
   const factory VaccineCoverage({
     @JsonKey(name: 'child_0_to_11_month')
-    @Default({}) Map<String, YearCoverage> child0To11Month,
+    @Default({})
+    Map<String, YearCoverage> child0To11Month,
   }) = _VaccineCoverage;
 
   factory VaccineCoverage.fromJson(Map<String, dynamic> json) =>
@@ -163,9 +153,8 @@ abstract class VaccineItem with _$VaccineItem {
 
 @freezed
 abstract class MonthCoverage with _$MonthCoverage {
-  const factory MonthCoverage({
-    @Default([]) List<VaccineItem> vaccine,
-  }) = _MonthCoverage;
+  const factory MonthCoverage({@Default([]) List<VaccineItem> vaccine}) =
+      _MonthCoverage;
 
   factory MonthCoverage.fromJson(Map<String, dynamic> json) =>
       _$MonthCoverageFromJson(json);
@@ -174,7 +163,7 @@ abstract class MonthCoverage with _$MonthCoverage {
 @freezed
 abstract class AdditionalData with _$AdditionalData {
   const factory AdditionalData({
-    @Default({}) Map<String, YearAdditionalData> demographics,
+    @Default({}) Map<String, YearDemographics> demographics,
   }) = _AdditionalData;
 
   factory AdditionalData.fromJson(Map<String, dynamic> json) =>
@@ -182,41 +171,45 @@ abstract class AdditionalData with _$AdditionalData {
 }
 
 @freezed
-abstract class YearAdditionalData with _$YearAdditionalData {
-  const factory YearAdditionalData({
+abstract class YearDemographics with _$YearDemographics {
+  const factory YearDemographics({
     Population? population,
     @JsonKey(name: 'child_0_15_month') ChildData? child0To15Month,
     @JsonKey(name: 'child_0_11_month') ChildData? child0To11Month,
     @JsonKey(name: 'number_of_sessions_in_year') int? numberOfSessionsInYear,
     @JsonKey(name: 'women_15_to_49') int? women15To49,
-    @JsonKey(name: 'ha_vaccinator_designation1') String? haVaccinatorDesignation1,
+    @JsonKey(name: 'ha_vaccinator_designation1')
+    String? haVaccinatorDesignation1,
     @JsonKey(name: 'ha_vaccinator_name1') String? haVaccinatorName1,
-    @JsonKey(name: 'ha_vaccinator_designation2') String? haVaccinatorDesignation2,
+    @JsonKey(name: 'ha_vaccinator_designation2')
+    String? haVaccinatorDesignation2,
     @JsonKey(name: 'ha_vaccinator_name2') String? haVaccinatorName2,
     @JsonKey(name: 'supervisor1_designation') String? supervisor1Designation,
     @JsonKey(name: 'supervisor1_name') String? supervisor1Name,
     @JsonKey(name: 'epi_center_name_address') String? epiCenterNameAddress,
-    @JsonKey(name: 'epi_center_implementer_name') String? epiCenterImplementerName,
-    @JsonKey(name: 'distance_from_cc_to_epi_center') dynamic distanceFromCcToEpiCenter,
-    @JsonKey(name: 'mode_of_transportation_distribution') String? modeOfTransportationDistribution,
-    @JsonKey(name: 'mode_of_transportation_uhc') String? modeOfTransportationUhc,
-    @JsonKey(name: 'time_to_reach_distribution_point') int? timeToReachDistributionPoint,
+    @JsonKey(name: 'epi_center_implementer_name')
+    String? epiCenterImplementerName,
+    @JsonKey(name: 'distance_from_cc_to_epi_center')
+    dynamic distanceFromCcToEpiCenter,
+    @JsonKey(name: 'mode_of_transportation_distribution')
+    String? modeOfTransportationDistribution,
+    @JsonKey(name: 'mode_of_transportation_uhc')
+    String? modeOfTransportationUhc,
+    @JsonKey(name: 'time_to_reach_distribution_point')
+    int? timeToReachDistributionPoint,
     @JsonKey(name: 'time_to_reach_epi_center') int? timeToReachEpiCenter,
     @JsonKey(name: 'porter_name') String? porterName,
     @JsonKey(name: 'porter_mobile') int? porterMobile,
     @JsonKey(name: 'epi_center_type') String? epiCenterType,
-  }) = _YearAdditionalData;
+  }) = _YearDemographics;
 
-  factory YearAdditionalData.fromJson(Map<String, dynamic> json) =>
-      _$YearAdditionalDataFromJson(json);
+  factory YearDemographics.fromJson(Map<String, dynamic> json) =>
+      _$YearDemographicsFromJson(json);
 }
 
 @freezed
 abstract class Population with _$Population {
-  const factory Population({
-    int? female,
-    int? male,
-  }) = _Population;
+  const factory Population({int? female, int? male}) = _Population;
 
   factory Population.fromJson(Map<String, dynamic> json) =>
       _$PopulationFromJson(json);
@@ -224,10 +217,7 @@ abstract class Population with _$Population {
 
 @freezed
 abstract class ChildData with _$ChildData {
-  const factory ChildData({
-    int? female,
-    int? male,
-  }) = _ChildData;
+  const factory ChildData({int? female, int? male}) = _ChildData;
 
   factory ChildData.fromJson(Map<String, dynamic> json) =>
       _$ChildDataFromJson(json);
@@ -240,19 +230,19 @@ abstract class Parent with _$Parent {
     String? type,
     String? uid,
     String? name,
-    String? etrackerName,
-    String? geoName,
-    String? parentUid,
-    String? jsonFilePath,
-    bool? isBulkImported,
-    VaccineTarget? vaccineTarget,
-    VaccineCoverage? vaccineCoverage,
-    dynamic additionalData,
-    dynamic epiUids,
+    @JsonKey(name: 'etracker_name') String? etrackerName,
+    @JsonKey(name: 'geo_name') String? geoName,
+    @JsonKey(name: 'parent_uid') String? parentUid,
+    @JsonKey(name: 'json_file_path') String? jsonFilePath,
+    @JsonKey(name: 'is_bulk_imported') bool? isBulkImported,
+    @JsonKey(name: 'vaccine_target') VaccineTarget? vaccineTarget,
+    @JsonKey(name: 'vaccine_coverage') VaccineCoverage? vaccineCoverage,
+    @JsonKey(name: 'additional_data') AdditionalData? additionalData,
+    @JsonKey(name: 'epi_uids') dynamic epiUids,
     dynamic remarks,
-    String? buildAt,
-    String? createdAt,
-    String? updatedAt,
+    @JsonKey(name: 'build_at') String? buildAt,
+    @JsonKey(name: 'created_at') String? createdAt,
+    @JsonKey(name: 'updated_at') String? updatedAt,
     String? status,
   }) = _Parent;
 
@@ -266,7 +256,9 @@ abstract class CoverageTableData with _$CoverageTableData {
     TotalTableData? totals,
     @JsonKey(name: 'vaccine_names') @Default([]) List<String> vaccineNames,
     Targets? targets,
-    @JsonKey(name: 'coverage_percentages') @Default({}) Map<String, double> coveragePercentages,
+    @JsonKey(name: 'coverage_percentages')
+    @Default({})
+    Map<String, double> coveragePercentages,
   }) = _CoverageTableData;
 
   factory CoverageTableData.fromJson(Map<String, dynamic> json) =>
@@ -297,10 +289,7 @@ abstract class TotalTableData with _$TotalTableData {
 
 @freezed
 abstract class Targets with _$Targets {
-  const factory Targets({
-    int? year,
-    int? month,
-  }) = _Targets;
+  const factory Targets({int? year, int? month}) = _Targets;
 
   factory Targets.fromJson(Map<String, dynamic> json) =>
       _$TargetsFromJson(json);
@@ -325,7 +314,7 @@ abstract class Dataset with _$Dataset {
     String? borderColor,
     String? backgroundColor,
     int? borderWidth,
-    List<int>? borderDash,
+    @Default([]) List<int> borderDash,
     int? pointRadius,
     double? tension,
   }) = _Dataset;
@@ -336,10 +325,7 @@ abstract class Dataset with _$Dataset {
 
 @freezed
 abstract class Subblock with _$Subblock {
-  const factory Subblock({
-    String? uid,
-    String? name,
-  }) = _Subblock;
+  const factory Subblock({String? uid, String? name}) = _Subblock;
 
   factory Subblock.fromJson(Map<String, dynamic> json) =>
       _$SubblockFromJson(json);
@@ -347,30 +333,21 @@ abstract class Subblock with _$Subblock {
 
 @freezed
 abstract class Ward with _$Ward {
-  const factory Ward({
-    String? uid,
-    String? name,
-  }) = _Ward;
+  const factory Ward({String? uid, String? name}) = _Ward;
 
   factory Ward.fromJson(Map<String, dynamic> json) => _$WardFromJson(json);
 }
 
 @freezed
 abstract class Union with _$Union {
-  const factory Union({
-    String? uid,
-    String? name,
-  }) = _Union;
+  const factory Union({String? uid, String? name}) = _Union;
 
   factory Union.fromJson(Map<String, dynamic> json) => _$UnionFromJson(json);
 }
 
 @freezed
 abstract class Upazila with _$Upazila {
-  const factory Upazila({
-    String? uid,
-    String? name,
-  }) = _Upazila;
+  const factory Upazila({String? uid, String? name}) = _Upazila;
 
   factory Upazila.fromJson(Map<String, dynamic> json) =>
       _$UpazilaFromJson(json);

@@ -143,7 +143,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
-                  value: _selectedYear,
+                  initialValue: _selectedYear,
                   items: ['2025', '2024']
                       .map(
                         (year) =>
@@ -185,7 +185,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
-                      value: _selectedDivision,
+                      initialValue: _selectedDivision,
                       items: filterNotifier.divisionDropdownItems
                           .map(
                             (division) => DropdownMenuItem(
@@ -217,7 +217,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    value: _selectedDistrict,
+                    initialValue: _selectedDistrict,
                     hint: const Text('All'),
                     items: ['All', ...filterNotifier.districtDropdownItems]
                         .map(
@@ -258,7 +258,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
-                      value: _selectedCityCorporation,
+                      initialValue: _selectedCityCorporation,
                       hint: const Text('Select City Corporation'),
                       items: filterNotifier.cityCorporationDropdownItems
                           .map(
