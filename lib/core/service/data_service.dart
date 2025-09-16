@@ -1,18 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gis_dashboard/features/epi_center/data/epi_center_repository.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 import 'package:gis_dashboard/features/map/data/map_repository.dart';
 import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
 
+import '../../features/summary/data/summary_repository.dart';
 import '../utils/utils.dart';
 
 /// Data service for caching and managing vaccine coverage data
 /// This helps avoid duplicate API calls when both map and summary screens need the same data
 final dataServiceProvider = Provider<DataService>((ref) {
-  return DataService(repository: ref.read(mapRepositoryProvider));
+  return DataService(
+    mapRepository: ref.read(mapRepositoryProvider),
+    summaryRepository: ref.read(summaryRepositoryProvider),
+    epiCenterRepository: ref.read(epiCenterRepositoryProvider),
+  );
 });
 
 class DataService {
-  final MapRepository _repository;
+  final MapRepository _mapRepository;
+  final SummaryRepository _summaryRepository;
+  final EpiCenterRepository _epiCenterRepository;
 
   // In-memory cache
   VaccineCoverageResponse? _cachedCoverageData;
@@ -22,7 +30,13 @@ class DataService {
   // Cache duration - 5 minutes
   static const _cacheDuration = Duration(minutes: 5);
 
-  DataService({required MapRepository repository}) : _repository = repository;
+  DataService({
+    required MapRepository mapRepository,
+    required SummaryRepository summaryRepository,
+    required EpiCenterRepository epiCenterRepository,
+  }) : _mapRepository = mapRepository,
+       _summaryRepository = summaryRepository,
+       _epiCenterRepository = epiCenterRepository;
 
   /// Get vaccination coverage data with caching and retry logic
   Future<VaccineCoverageResponse> getVaccinationCoverage({
@@ -39,7 +53,9 @@ class DataService {
 
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        data = await _repository.fetchVaccinationCoverage(urlPath: urlPath);
+        data = await _summaryRepository.fetchVaccinationCoverageSummary(
+          urlPath: urlPath,
+        );
         _cachedCoverageData = data;
         _lastFetchTime = DateTime.now();
         return data;
@@ -72,7 +88,7 @@ class DataService {
 
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        data = await _repository.fetchGeoJson(urlPath: urlPath);
+        data = await _mapRepository.fetchGeoJson(urlPath: urlPath);
         _cachedGeoJson = data;
         _lastFetchTime = DateTime.now();
         return data;
@@ -106,7 +122,7 @@ class DataService {
     for (int attempt = 1; attempt <= 2; attempt++) {
       // Fewer retries for EPI
       try {
-        data = await _repository.fetchEpiData(urlPath: urlPath);
+        data = await _epiCenterRepository.fetchEpiCoordsData(urlPath: urlPath);
         return data;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
@@ -152,7 +168,9 @@ class DataService {
       try {
         logg.i("Fetching EPI center data (attempt $attempt): $urlPath");
 
-        final data = await _repository.fetchEpiCenterData(urlPath: urlPath);
+        final data = await _epiCenterRepository.fetchEpiCenterData(
+          urlPath: urlPath,
+        );
 
         logg.i("Successfully fetched EPI center data on attempt $attempt");
         return data;
