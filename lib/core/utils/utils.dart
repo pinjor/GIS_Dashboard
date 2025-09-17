@@ -20,3 +20,22 @@ extension SizedBoxExtension on num {
   /// Returns a SizedBox with the specified width
   SizedBox get w => SizedBox(width: toDouble());
 }
+
+enum MapLevel {
+  district('districts'),
+  upazilla('upazilas'),
+  union('union'),
+  ward('ward'),
+  subblock('subblock');
+
+  final String value;
+  const MapLevel(this.value);
+}
+
+enum AreaType {
+  district('district'),
+  citycorporation('city_corporation');
+
+  final String value;
+  const AreaType(this.value);
+}

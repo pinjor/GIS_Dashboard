@@ -46,7 +46,6 @@ app.*.map.json
 
 .env
 /lib/core/jsons/
-/assets/images/
 
 # freezed, generated files
 *.g.dart

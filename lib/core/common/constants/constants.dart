@@ -12,8 +12,10 @@ class Constants {
   static const String mapLocationIconPath = 'assets/icons/map_location.svg';
   static const String lineGraphIconPath = 'assets/icons/line_graph.svg';
   static const String filterIconPath = 'assets/icons/filter_data.svg';
-  static const String childrenIconPath = 'assets/icons/children.svg';
-  static const String dosesIconPath = 'assets/icons/doses.svg';
+  static const String childrenIconPath = 'assets/images/children.png';
+  static const String dosesIconPath = 'assets/images/doses.png';
+  static const String boyIconPath = 'assets/images/boy.png';
+  static const String girlIconPath = 'assets/images/girl.png';
 
   static const String urlTemplate =
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';

@@ -9,6 +9,7 @@ class SummaryCardWidget extends StatelessWidget {
   final String value;
   final int boysCount;
   final int girlsCount;
+  final bool isFirst;
 
   const SummaryCardWidget({
     super.key,
@@ -16,6 +17,7 @@ class SummaryCardWidget extends StatelessWidget {
     required this.value,
     required this.boysCount,
     required this.girlsCount,
+    this.isFirst = true,
   });
 
   String _formatNumber(String value) {
@@ -36,26 +38,38 @@ class SummaryCardWidget extends StatelessWidget {
         color: Color(Constants.primaryColor),
       ),
       padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Text(label, style: TextStyle(color: Colors.white)),
-          4.h,
-          Text(
-            _formatNumber(value),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: Colors.white,
-            ),
-          ),
-          4.h,
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _childCountWidget(isBoy: true, count: boysCount),
-              5.w,
-              _childCountWidget(isBoy: false, count: girlsCount),
+              Text(label, style: TextStyle(color: Colors.white)),
+              4.h,
+              Text(
+                _formatNumber(value),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+              4.h,
+              Row(
+                children: [
+                  _childCountWidget(isBoy: true, count: boysCount),
+                  5.w,
+                  _childCountWidget(isBoy: false, count: girlsCount),
+                ],
+              ),
             ],
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: Image.asset(
+              isFirst ? Constants.childrenIconPath : Constants.dosesIconPath,
+              width: isFirst ? 45 : 35,
+            ),
           ),
         ],
       ),
@@ -65,7 +79,11 @@ class SummaryCardWidget extends StatelessWidget {
   Widget _childCountWidget({bool isBoy = true, required int count}) {
     return Row(
       children: [
-        Icon(isBoy ? Icons.male : Icons.female, color: Colors.white),
+        Image.asset(
+          isBoy ? Constants.boyIconPath : Constants.girlIconPath,
+          color: Colors.white,
+          width: isBoy ? 10 : 16,
+        ),
         2.w,
         Text(
           isBoy ? 'Boys: ' : 'Girls: ',

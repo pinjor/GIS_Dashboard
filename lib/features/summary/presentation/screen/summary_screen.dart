@@ -43,11 +43,11 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
           )
         : null;
     final selectedVaccineTotalTarget =
-        selectedVaccineData?.totalTargetMale ??
-        0 + (selectedVaccineData?.totalTargetFemale ?? 0);
+        (selectedVaccineData?.totalTargetMale ?? 0) +
+        (selectedVaccineData?.totalTargetFemale ?? 0);
     final selectedVaccineTotalCoverage =
-        selectedVaccineData?.totalCoverageMale ??
-        0 + (selectedVaccineData?.totalCoverageFemale ?? 0);
+        (selectedVaccineData?.totalCoverageMale ?? 0) +
+        (selectedVaccineData?.totalCoverageFemale ?? 0);
     return Scaffold(
       backgroundColor: Color(Constants.scaffoldBackgroundColor),
       body: summaryState.isLoading
@@ -87,6 +87,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                         boysCount: selectedVaccineData?.totalCoverageMale ?? 0,
                         girlsCount:
                             selectedVaccineData?.totalCoverageFemale ?? 0,
+                        isFirst: false,
                       ),
                     ],
                   ),

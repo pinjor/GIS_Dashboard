@@ -91,28 +91,19 @@ class MicroplanTable extends ConsumerWidget {
 
     // Calculate totals from available data
     final totalPopulation = _calculateTotal(populationData[0]);
-    final targetChildren = _calculateTotal(populationData[1]);
 
     return Column(
-      children: [
-        PopulationSummaryCard(
-          totalPop: totalPopulation,
-          male: populationData[0]['male']!,
-          female: populationData[0]['female']!,
-        ),
-        const SizedBox(height: 16),
-        TargetGroupCard(targetCount: targetChildren),
-        const SizedBox(height: 16),
-        ...populationData.map(
-          (data) => PopulationCard(
-            category: data['category']!,
-            male: data['male']!,
-            female: data['female']!,
-            total: data['total']!,
-            totalPopulation: totalPopulation,
-          ),
-        ),
-      ],
+      children: populationData
+          .map(
+            (data) => PopulationCard(
+              category: data['category']!,
+              male: data['male']!,
+              female: data['female']!,
+              total: data['total']!,
+              totalPopulation: totalPopulation,
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -187,146 +178,6 @@ class MicroplanTable extends ConsumerWidget {
       return 0;
     }
     return int.tryParse(totalStr) ?? 0;
-  }
-}
-
-class PopulationSummaryCard extends StatelessWidget {
-  final int totalPop;
-  final String male;
-  final String female;
-
-  const PopulationSummaryCard({
-    super.key,
-    required this.totalPop,
-    required this.male,
-    required this.female,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.grey[50],
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.people, color: Colors.blue[600], size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  'Total Population',
-                  style: TextStyle(
-                    color: Colors.grey[800],
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              totalPop > 0 ? totalPop.toString() : '-',
-              style: TextStyle(
-                color: Colors.blue[700],
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GenderInfo(
-                  gender: 'Male',
-                  count: male,
-                  color: Colors.blue[400]!,
-                ),
-                GenderInfo(
-                  gender: 'Female',
-                  count: female,
-                  color: Colors.blue[300]!,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TargetGroupCard extends StatelessWidget {
-  final int targetCount;
-
-  const TargetGroupCard({super.key, required this.targetCount});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.grey[50],
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.child_care, color: Colors.green[600], size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  'Target Children',
-                  style: TextStyle(
-                    color: Colors.grey[800],
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              targetCount > 0 ? targetCount.toString() : '-',
-              style: TextStyle(
-                color: Colors.green[700],
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.green[100],
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.green[200]!),
-              ),
-              child: Text(
-                '0-11 months',
-                style: TextStyle(
-                  color: Colors.green[700],
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

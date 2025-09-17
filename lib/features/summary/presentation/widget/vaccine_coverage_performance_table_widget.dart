@@ -198,7 +198,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
               child: Text(
                 '$locationName Performance',
                 style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   fontSize: 14,
                 ),
               ),

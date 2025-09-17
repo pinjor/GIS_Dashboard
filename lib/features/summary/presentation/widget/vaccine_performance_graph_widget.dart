@@ -151,10 +151,10 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '${selectedVaccine?.vaccineName ?? filterState.selectedVaccine} Vaccine Achievements',
+                'No of children vaccinated - (${summaryState.currentAreaName})',
                 style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                 ),
               ),
             ),
