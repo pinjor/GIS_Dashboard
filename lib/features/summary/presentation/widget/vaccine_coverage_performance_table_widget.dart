@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/summary/presentation/controllers/summary_controller.dart';
-import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 
 import '../../../../core/common/constants/constants.dart';
 

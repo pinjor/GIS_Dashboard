@@ -6,7 +6,7 @@ import 'package:gis_dashboard/features/filter/filter.dart';
 
 import '../../../../core/utils/utils.dart';
 import 'map_state.dart';
-import '../../domain/vaccine_coverage_response.dart';
+import '../../../summary/domain/vaccine_coverage_response.dart';
 
 final mapControllerProvider =
     StateNotifierProvider<MapControllerNotifier, MapState>((ref) {
@@ -40,7 +40,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final cachedCoverageData = _dataService.getCachedCoverageData();
       if (cachedCoverageData != null &&
           !forceRefresh &&
-          cachedCoverageData.metadata?.year == selectedYear) {
+          cachedCoverageData.metadata?.year.toString() == selectedYear) {
         logg.i("Using cached map data for year $selectedYear");
         // Still need to load GeoJSON for map rendering
         final geoJson = await _dataService.getGeoJson(
@@ -104,9 +104,9 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
-  Future<void> refreshMapData() async {
-    await loadInitialData(forceRefresh: true);
-  }
+  // Future<void> refreshMapData() async {
+  //   await loadInitialData(forceRefresh: true);
+  // }
 
   /// Drill down to a specific area based on the slug
   Future<void> drillDownToArea({
@@ -273,8 +273,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         // Add EPI request if going back to upazila, union or deeper level (not district)
         if (previousLevel.level == 'upazila' ||
             previousLevel.level == 'union' ||
-            previousLevel.level == 'ward' ||
-            previousLevel.level == 'subblock') {
+            previousLevel.level == 'ward') {
           final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
           apiRequests.add(
             _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
@@ -290,8 +289,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         String? epiData;
         if ((previousLevel.level == 'upazila' ||
                 previousLevel.level == 'union' ||
-                previousLevel.level == 'ward' ||
-                previousLevel.level == 'subblock') &&
+                previousLevel.level == 'ward') &&
             results.length > 2) {
           epiData = results[2] as String;
         }
@@ -329,25 +327,25 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   /// Reset to country level
   Future<void> resetToCountryLevel() async {
     logg.i("Resetting to country level");
-    await loadInitialData(forceRefresh: true);
+    await loadInitialData(forceRefresh: false);
   }
 
-  /// Reload current level data (useful when filter changes)
-  Future<void> reloadCurrentLevel() async {
-    if (state.navigationStack.isEmpty) {
-      // At country level
-      await loadInitialData(forceRefresh: true);
-    } else {
-      // At some drilldown level
-      final currentLevel = state.navigationStack.last;
-      await drillDownToArea(
-        areaName: currentLevel.name ?? currentLevel.level,
-        slug: currentLevel.slug ?? '',
-        newLevel: currentLevel.level,
-        parentSlug: currentLevel.parentSlug,
-      );
-    }
-  }
+  // /// Reload current level data (useful when filter changes)
+  // Future<void> reloadCurrentLevel() async {
+  //   if (state.navigationStack.isEmpty) {
+  //     // At country level
+  //     await loadInitialData(forceRefresh: true);
+  //   } else {
+  //     // At some drilldown level
+  //     final currentLevel = state.navigationStack.last;
+  //     await drillDownToArea(
+  //       areaName: currentLevel.name ?? currentLevel.level,
+  //       slug: currentLevel.slug ?? '',
+  //       newLevel: currentLevel.level,
+  //       parentSlug: currentLevel.parentSlug,
+  //     );
+  //   }
+  // }
 
   /// Refresh coverage data when year changes (keeps GeoJSON unchanged)
   Future<void> refreshCoverageForYearChange() async {
@@ -395,7 +393,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
-  /// Load division-specific data when user selects division filter
+  /// Load division-specific data when user selects division filter and district is null or all or empty etc.
   Future<void> loadDivisionData({required String divisionName}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -544,6 +542,9 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   }
 
   /// Load district-specific data when user selects district filter
+  /// This uses dynamic slug extraction from country-level GeoJSON
+  /// this is when user also selects district from filter
+  /// ! this has some serious problems like in currentLevel determination
   Future<void> loadDistrictData({required String districtName}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -634,9 +635,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       // Search for the district in the GeoJSON features
       for (final feature in features) {
         final info =
-            feature['info'] as Map<String, dynamic>? ??
-            feature['properties'] as Map<String, dynamic>? ??
-            <String, dynamic>{};
+            feature['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
 
         final String? featureName = info['name'] as String?;
         final String? slug = info['slug'] as String?;
@@ -736,6 +735,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   }
 
   /// Sync filters with tapped district using live backend data
+  /// ! this needs some modifications : should not allow any api calling at all
+  /// ! should just update things at once using existing data in filter state
+  /// ! maybe it is updating district two times
+  /// ! needs further investigation
   Future<bool> syncFiltersWithDistrict(String districtUid) async {
     try {
       logg.d(
@@ -775,26 +778,26 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
-  /// Get debug information about available filter data
-  Map<String, dynamic> getFilterSyncDebugInfo() {
-    final filterState = _filterNotifier.state;
-    return {
-      'divisionsLoaded': filterState.divisions.length,
-      'districtsLoaded': filterState.districts.length,
-      'isLoadingAreas': filterState.isLoadingAreas,
-      'hasError': filterState.areasError != null,
-      'selectedDivision': filterState.selectedDivision,
-      'selectedDistrict': filterState.selectedDistrict,
-      'sampleDistricts': filterState.districts
-          .take(3)
-          .map((d) => '${d.uid}: ${d.name}')
-          .toList(),
-      'sampleDivisions': filterState.divisions
-          .take(3)
-          .map((d) => '${d.uid}: ${d.name}')
-          .toList(),
-    };
-  }
+  // /// Get debug information about available filter data
+  // Map<String, dynamic> getFilterSyncDebugInfo() {
+  //   final filterState = _filterNotifier.state;
+  //   return {
+  //     'divisionsLoaded': filterState.divisions.length,
+  //     'districtsLoaded': filterState.districts.length,
+  //     'isLoadingAreas': filterState.isLoadingAreas,
+  //     'hasError': filterState.areasError != null,
+  //     'selectedDivision': filterState.selectedDivision,
+  //     'selectedDistrict': filterState.selectedDistrict,
+  //     'sampleDistricts': filterState.districts
+  //         .take(3)
+  //         .map((d) => '${d.uid}: ${d.name}')
+  //         .toList(),
+  //     'sampleDivisions': filterState.divisions
+  //         .take(3)
+  //         .map((d) => '${d.uid}: ${d.name}')
+  //         .toList(),
+  //   };
+  // }
 
   /// Check if the filter data is ready for sync operations
   bool get isFilterSyncReady {

@@ -582,7 +582,7 @@ as String?,
 /// @nodoc
 mixin _$GeoJsonFeature {
 
-@JsonKey(name: 'type') String? get type;@JsonKey(name: 'geometry') GeoJsonGeometry? get geometry;@JsonKey(name: 'info') FeatureInfo? get info;@JsonKey(name: 'properties') Map<String, dynamic>? get properties;
+@JsonKey(name: 'type') String? get type;@JsonKey(name: 'geometry') GeoJsonGeometry? get geometry;@JsonKey(name: 'info') FeatureInfo? get info;
 /// Create a copy of GeoJsonFeature
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -595,16 +595,16 @@ $GeoJsonFeatureCopyWith<GeoJsonFeature> get copyWith => _$GeoJsonFeatureCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GeoJsonFeature&&(identical(other.type, type) || other.type == type)&&(identical(other.geometry, geometry) || other.geometry == geometry)&&(identical(other.info, info) || other.info == info)&&const DeepCollectionEquality().equals(other.properties, properties));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GeoJsonFeature&&(identical(other.type, type) || other.type == type)&&(identical(other.geometry, geometry) || other.geometry == geometry)&&(identical(other.info, info) || other.info == info));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,geometry,info,const DeepCollectionEquality().hash(properties));
+int get hashCode => Object.hash(runtimeType,type,geometry,info);
 
 @override
 String toString() {
-  return 'GeoJsonFeature(type: $type, geometry: $geometry, info: $info, properties: $properties)';
+  return 'GeoJsonFeature(type: $type, geometry: $geometry, info: $info)';
 }
 
 
@@ -615,7 +615,7 @@ abstract mixin class $GeoJsonFeatureCopyWith<$Res>  {
   factory $GeoJsonFeatureCopyWith(GeoJsonFeature value, $Res Function(GeoJsonFeature) _then) = _$GeoJsonFeatureCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'type') String? type,@JsonKey(name: 'geometry') GeoJsonGeometry? geometry,@JsonKey(name: 'info') FeatureInfo? info,@JsonKey(name: 'properties') Map<String, dynamic>? properties
+@JsonKey(name: 'type') String? type,@JsonKey(name: 'geometry') GeoJsonGeometry? geometry,@JsonKey(name: 'info') FeatureInfo? info
 });
 
 
@@ -632,13 +632,12 @@ class _$GeoJsonFeatureCopyWithImpl<$Res>
 
 /// Create a copy of GeoJsonFeature
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = freezed,Object? geometry = freezed,Object? info = freezed,Object? properties = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = freezed,Object? geometry = freezed,Object? info = freezed,}) {
   return _then(_self.copyWith(
 type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String?,geometry: freezed == geometry ? _self.geometry : geometry // ignore: cast_nullable_to_non_nullable
 as GeoJsonGeometry?,info: freezed == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
-as FeatureInfo?,properties: freezed == properties ? _self.properties : properties // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,
+as FeatureInfo?,
   ));
 }
 /// Create a copy of GeoJsonFeature
@@ -747,10 +746,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'geometry')  GeoJsonGeometry? geometry, @JsonKey(name: 'info')  FeatureInfo? info, @JsonKey(name: 'properties')  Map<String, dynamic>? properties)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'geometry')  GeoJsonGeometry? geometry, @JsonKey(name: 'info')  FeatureInfo? info)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GeoJsonFeature() when $default != null:
-return $default(_that.type,_that.geometry,_that.info,_that.properties);case _:
+return $default(_that.type,_that.geometry,_that.info);case _:
   return orElse();
 
 }
@@ -768,10 +767,10 @@ return $default(_that.type,_that.geometry,_that.info,_that.properties);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'geometry')  GeoJsonGeometry? geometry, @JsonKey(name: 'info')  FeatureInfo? info, @JsonKey(name: 'properties')  Map<String, dynamic>? properties)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'geometry')  GeoJsonGeometry? geometry, @JsonKey(name: 'info')  FeatureInfo? info)  $default,) {final _that = this;
 switch (_that) {
 case _GeoJsonFeature():
-return $default(_that.type,_that.geometry,_that.info,_that.properties);case _:
+return $default(_that.type,_that.geometry,_that.info);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -788,10 +787,10 @@ return $default(_that.type,_that.geometry,_that.info,_that.properties);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'geometry')  GeoJsonGeometry? geometry, @JsonKey(name: 'info')  FeatureInfo? info, @JsonKey(name: 'properties')  Map<String, dynamic>? properties)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'geometry')  GeoJsonGeometry? geometry, @JsonKey(name: 'info')  FeatureInfo? info)?  $default,) {final _that = this;
 switch (_that) {
 case _GeoJsonFeature() when $default != null:
-return $default(_that.type,_that.geometry,_that.info,_that.properties);case _:
+return $default(_that.type,_that.geometry,_that.info);case _:
   return null;
 
 }
@@ -803,21 +802,12 @@ return $default(_that.type,_that.geometry,_that.info,_that.properties);case _:
 @JsonSerializable()
 
 class _GeoJsonFeature implements GeoJsonFeature {
-  const _GeoJsonFeature({@JsonKey(name: 'type') this.type, @JsonKey(name: 'geometry') this.geometry, @JsonKey(name: 'info') this.info, @JsonKey(name: 'properties') final  Map<String, dynamic>? properties}): _properties = properties;
+  const _GeoJsonFeature({@JsonKey(name: 'type') this.type, @JsonKey(name: 'geometry') this.geometry, @JsonKey(name: 'info') this.info});
   factory _GeoJsonFeature.fromJson(Map<String, dynamic> json) => _$GeoJsonFeatureFromJson(json);
 
 @override@JsonKey(name: 'type') final  String? type;
 @override@JsonKey(name: 'geometry') final  GeoJsonGeometry? geometry;
 @override@JsonKey(name: 'info') final  FeatureInfo? info;
- final  Map<String, dynamic>? _properties;
-@override@JsonKey(name: 'properties') Map<String, dynamic>? get properties {
-  final value = _properties;
-  if (value == null) return null;
-  if (_properties is EqualUnmodifiableMapView) return _properties;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(value);
-}
-
 
 /// Create a copy of GeoJsonFeature
 /// with the given fields replaced by the non-null parameter values.
@@ -832,16 +822,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GeoJsonFeature&&(identical(other.type, type) || other.type == type)&&(identical(other.geometry, geometry) || other.geometry == geometry)&&(identical(other.info, info) || other.info == info)&&const DeepCollectionEquality().equals(other._properties, _properties));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GeoJsonFeature&&(identical(other.type, type) || other.type == type)&&(identical(other.geometry, geometry) || other.geometry == geometry)&&(identical(other.info, info) || other.info == info));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,geometry,info,const DeepCollectionEquality().hash(_properties));
+int get hashCode => Object.hash(runtimeType,type,geometry,info);
 
 @override
 String toString() {
-  return 'GeoJsonFeature(type: $type, geometry: $geometry, info: $info, properties: $properties)';
+  return 'GeoJsonFeature(type: $type, geometry: $geometry, info: $info)';
 }
 
 
@@ -852,7 +842,7 @@ abstract mixin class _$GeoJsonFeatureCopyWith<$Res> implements $GeoJsonFeatureCo
   factory _$GeoJsonFeatureCopyWith(_GeoJsonFeature value, $Res Function(_GeoJsonFeature) _then) = __$GeoJsonFeatureCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'type') String? type,@JsonKey(name: 'geometry') GeoJsonGeometry? geometry,@JsonKey(name: 'info') FeatureInfo? info,@JsonKey(name: 'properties') Map<String, dynamic>? properties
+@JsonKey(name: 'type') String? type,@JsonKey(name: 'geometry') GeoJsonGeometry? geometry,@JsonKey(name: 'info') FeatureInfo? info
 });
 
 
@@ -869,13 +859,12 @@ class __$GeoJsonFeatureCopyWithImpl<$Res>
 
 /// Create a copy of GeoJsonFeature
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = freezed,Object? geometry = freezed,Object? info = freezed,Object? properties = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = freezed,Object? geometry = freezed,Object? info = freezed,}) {
   return _then(_GeoJsonFeature(
 type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String?,geometry: freezed == geometry ? _self.geometry : geometry // ignore: cast_nullable_to_non_nullable
 as GeoJsonGeometry?,info: freezed == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
-as FeatureInfo?,properties: freezed == properties ? _self._properties : properties // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,
+as FeatureInfo?,
   ));
 }
 

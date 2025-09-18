@@ -34,7 +34,6 @@ abstract class GeoJsonFeature with _$GeoJsonFeature {
     @JsonKey(name: 'type') String? type,
     @JsonKey(name: 'geometry') GeoJsonGeometry? geometry,
     @JsonKey(name: 'info') FeatureInfo? info,
-    @JsonKey(name: 'properties') Map<String, dynamic>? properties,
   }) = _GeoJsonFeature;
 
   factory GeoJsonFeature.fromJson(Map<String, dynamic> json) =>

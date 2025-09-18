@@ -9,7 +9,7 @@ import 'package:gis_dashboard/core/network/dio_client_provider.dart';
 import '../../../core/network/connectivity_service.dart';
 import '../../../core/network/network_error_handler.dart';
 import '../../../core/utils/utils.dart';
-import '../../map/utils/epi_utils.dart';
+import '../utils/epi_utils.dart';
 import '../domain/epi_center_details_response.dart';
 
 final epiCenterRepositoryProvider = Provider((ref) {

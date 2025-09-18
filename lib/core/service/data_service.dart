@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/epi_center/data/epi_center_repository.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 import 'package:gis_dashboard/features/map/data/map_repository.dart';
-import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 
 import '../../features/summary/data/summary_repository.dart';
 import '../utils/utils.dart';
@@ -198,3 +198,34 @@ class DataService {
     throw lastError ?? Exception('EPI center data unavailable');
   }
 }
+
+
+
+// future plans (detailed)
+
+// ✅ Summary: Key Improvements
+// Improvement	Why It Matters	Status
+// 🔁 Separate timestamps per cache entry	Prevents stale/invalidated data from affecting others	✅ Do this
+// 🗺️ Multi-URL cache using Maps	Prevents data from being overwritten	✅ Do this
+// 🧾 Log cache hits and misses	Debug visibility	✅ Do this
+// 💾 Persistent cache (e.g., Hive, files)	Makes cache survive app restarts	Optional
+// 🧪 Unit tests	Ensures correctness	Recommended
+// 👁 Expose last fetch time for UI	Show “updated x mins ago”	Optional
+// 🧹 Fine-grained cache clearing	More control	Optional
+
+// concise list
+// 🔧 Caching Improvements – Concise List
+
+// Use separate timestamps for each cached data type (GeoJSON, coverage, etc.).
+
+// Cache data per URL using a Map<String, T> to prevent overwrites.
+
+// Add logs for cache hits/misses to help debugging and visibility.
+
+// Support persistent caching (e.g., with Hive or file storage) to survive app restarts.
+
+// Implement unit tests to validate caching behavior under different conditions.
+
+// Expose last fetch time for optional UI features like "Last updated X mins ago".
+
+// Allow fine-grained cache clearing (per URL or per data type).

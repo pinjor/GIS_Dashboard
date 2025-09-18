@@ -4,17 +4,18 @@ import '../../domain/area_response_model.dart';
 import '../../data/filter_repository.dart';
 
 /// Global filter state provider
-final filterControllerProvider = StateNotifierProvider<FilterControllerNotifier, FilterState>((
-  ref,
-) {
-  final repository = ref.watch(filterRepositoryProvider);
-  return FilterControllerNotifier(repository);
-});
+final filterControllerProvider =
+    StateNotifierProvider<FilterControllerNotifier, FilterState>((ref) {
+      final repository = ref.watch(filterRepositoryProvider);
+      return FilterControllerNotifier(repository: repository);
+    });
 
 class FilterControllerNotifier extends StateNotifier<FilterState> {
   final FilterRepository _repository;
 
-  FilterControllerNotifier(this._repository) : super(const FilterState()) {
+  FilterControllerNotifier({required FilterRepository repository})
+    : _repository = repository,
+      super(const FilterState()) {
     // Initialize area data when provider is created
     _loadAllAreas();
   }
@@ -144,6 +145,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Reset all filters to default values
+  /// ! needs attention as this does not reset properly like web, and at all...
   void resetFilters() {
     // Define default values
     const defaultDivision = 'All';
@@ -208,7 +210,8 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Get district slug by district name from GeoJSON data
 
-  /// Apply filters and mark the timestamp when filters are applied
+  /// Apply filters and mark the timestamp when filters are applied 
+  ///! also needs attention as this does not work properly maybe!!!
   void applyFilters({
     String? vaccine,
     String? areaType,

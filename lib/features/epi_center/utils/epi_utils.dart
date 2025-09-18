@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 /// Recursively decode any stringified JSON until fully converted.
+/// This function handles nested JSON strings within epi center details json response
+/// but can be used for any similar structure.
 dynamic decodeEpiCenterDetailsNestedJson(dynamic input) {
   if (input is Map) {
     // Ensure keys are Strings

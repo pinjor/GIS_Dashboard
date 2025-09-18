@@ -99,17 +99,17 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
   }
 
   /// Initialize with cached data without triggering a new load
-  void initializeWithCachedData() {
-    final cachedData = _dataService.getCachedCoverageData();
-    if (cachedData != null) {
-      logg.i("Initializing summary with cached data");
-      state = state.copyWith(
-        coverageData: cachedData,
-        currentLevel: 'district',
-        currentAreaName: 'Bangladesh',
-        isLoading: false,
-        error: null,
-      );
-    }
-  }
+  // void initializeWithCachedData() {
+  //   final cachedData = _dataService.getCachedCoverageData();
+  //   if (cachedData != null) {
+  //     logg.i("Initializing summary with cached data");
+  //     state = state.copyWith(
+  //       coverageData: cachedData,
+  //       currentLevel: 'district',
+  //       currentAreaName: 'Bangladesh',
+  //       isLoading: false,
+  //       error: null,
+  //     );
+  //   }
+  // }
 }

@@ -7,11 +7,57 @@ import 'package:latlong2/latlong.dart';
 import '../../../config/coverage_colors.dart';
 import '../../../core/utils/utils.dart';
 import '../domain/area_polygon.dart';
-import '../domain/vaccine_coverage_response.dart';
+import '../../summary/domain/vaccine_coverage_response.dart';
+
+/// Check if a point is inside a polygon using ray casting algorithm - OPTIMIZED to prevent freezing
+bool isTappedPointInPolygon(LatLng point, List<LatLng> polygon) {
+  if (polygon.length < 3) return false;
+
+  // Prevent freezing with very large polygon data
+  if (polygon.length > 1000) {
+    logg.d(
+      "Large polygon with ${polygon.length} points - using sampling for hit testing",
+    );
+    // Sample every 20th point for very large polygons to prevent freezing
+    final sampledPolygon = <LatLng>[];
+    for (int i = 0; i < polygon.length; i += 20) {
+      sampledPolygon.add(polygon[i]);
+    }
+    polygon = sampledPolygon;
+  }
+
+  int intersections = 0;
+  for (int i = 0; i < polygon.length; i++) {
+    int j = (i + 1) % polygon.length;
+
+    if ((polygon[i].longitude > point.longitude) !=
+            (polygon[j].longitude > point.longitude) &&
+        (point.latitude <
+            (polygon[j].latitude - polygon[i].latitude) *
+                    (point.longitude - polygon[i].longitude) /
+                    (polygon[j].longitude - polygon[i].longitude) +
+                polygon[i].latitude)) {
+      intersections++;
+    }
+  }
+  return intersections % 2 == 1;
+}
+
+// this utils function has to be clean and well documented
+// no redundant code should be there
 
 // FUTURE-PROOF: Adaptive data extraction helpers for API changes
 
-/// Extracts area name from feature with multiple fallback strategies
+/// Extracts area name from feature(for a specific area) with multiple fallback strategies
+/// info and features comes from the GeoJSON structure
+/// so if we make a model of the whole GeoJSON response, info is part of that model
+/// so then we can pass that model instead of Map
+/// then even we dont need this function to extract area name
+/// as we can directly access it from the model
+/// but for now we keep it like this for flexibility
+///! so if we make the proper model of the GeoJSON response, we can remove this function
+/// as we can directly access it from the model
+/// * or can make modification in this function to accept model instead of Map
 String _extractAreaName(
   Map<String, dynamic> info,
   Map<String, dynamic> feature,
@@ -27,6 +73,13 @@ String _extractAreaName(
 }
 
 /// Extracts organization UID with fallback strategies
+/// so if we make a model of the whole GeoJSON response, info is part of that model
+/// so then we can pass that model instead of Map
+/// then even we dont need this function to extract organization UID
+/// as we can directly access it from the model
+/// ! so if we make the proper model of the GeoJSON response, we can remove this function
+/// as we can directly access it from the model
+/// * or can make modification in this function to accept model instead of Map
 String? _extractOrgUid(
   Map<String, dynamic> info,
   Map<String, dynamic> feature,
@@ -41,6 +94,13 @@ String? _extractOrgUid(
 }
 
 /// Extracts slug with fallback strategies
+/// so if we make a model of the whole GeoJSON response, info is part of that model
+/// so then we can pass that model instead of Map
+/// then even we dont need this function to extract slug
+/// as we can directly access it from the model
+/// ! so if we make the proper model of the GeoJSON response, we can remove this function
+/// as we can directly access it from the model
+/// * or can make modification in this function to accept model instead of Map
 String? _extractSlug(Map<String, dynamic> info, Map<String, dynamic> feature) {
   return info['slug'] as String? ??
       info['area_slug'] as String? ??
@@ -49,6 +109,13 @@ String? _extractSlug(Map<String, dynamic> info, Map<String, dynamic> feature) {
 }
 
 /// Extracts parent slug with fallback strategies
+/// so if we make a model of the whole GeoJSON response, info is part of that model
+/// so then we can pass that model instead of Map
+/// then even we dont need this function to extract parent slug
+/// as we can directly access it from the model
+/// * or can make modification in this function to accept model instead of Map
+/// ! so if we make the proper model of the GeoJSON response, we can remove this function
+/// as we can directly access it from the model
 String? _extractParentSlug(
   Map<String, dynamic> info,
   Map<String, dynamic> feature,
@@ -99,11 +166,14 @@ List<AreaPolygon> parseGeoJsonToPolygons(
   );
 
   // Enhanced debugging for future API changes
+  //! will be removed later
   if (features.isNotEmpty) {
     final firstFeature = features[0];
     logg.d("Sample feature structure: ${firstFeature.runtimeType}");
     logg.d("Sample geometry type: ${firstFeature['geometry']?['type']}");
-    logg.d("Sample info keys: ${firstFeature['info']?.keys.toList()}");
+    logg.d(
+      "!!!!!!!!!!!!!!!!!!!!Sample info keys: ${firstFeature['info']?.keys.toList()}",
+    );
     logg.d(
       "Sample properties keys: ${firstFeature['properties']?.keys.toList()}",
     );
@@ -127,6 +197,11 @@ List<AreaPolygon> parseGeoJsonToPolygons(
     }
   }
 
+  // these counters are for logging and debugging purposes
+  // to track how many features were processed, matched with coverage data, skipped, etc.
+  // they help ensure the parsing logic is working as intended
+  // features means each area in the GeoJSON
+  // polygons means each polygon created for each area
   int matchedCount = 0;
   int noDataCount = 0;
   int processedFeatures = 0;
@@ -141,10 +216,7 @@ List<AreaPolygon> parseGeoJsonToPolygons(
     final geometry = feature['geometry'];
 
     // ADAPTIVE: Try both 'info' and 'properties' for future API compatibility
-    final info =
-        feature['info'] as Map<String, dynamic>? ??
-        feature['properties'] as Map<String, dynamic>? ??
-        <String, dynamic>{};
+    final info = feature['info'] as Map<String, dynamic>? ?? {};
 
     // FLEXIBLE: Extract area information with fallbacks for future changes
     final String areaName = _extractAreaName(info, feature);
@@ -162,6 +234,10 @@ List<AreaPolygon> parseGeoJsonToPolygons(
     }
 
     // Find matching coverage data using org_uid from GeoJSON and uid from coverage
+    //! IMPORTANT: Always process features even without coverage data
+    // They will get default styling later
+    // This ensures all areas are represented on the map even if coverage data is missing for some areas
+    //* this is where we match coverage data with the geojson features
     Area? matchedCoverage;
     double? coveragePercentage;
 
@@ -300,7 +376,9 @@ List<List<LatLng>> _extractAllPolygonRings(
           );
         } else if (points.length == 2) {
           // ADAPTIVE: Handle minimal polygons gracefully
-          points.add(points.last);
+          points.add(
+            points.last,
+          ); // Duplicate last point to form a triangle as triangle is the simplest polygon, so we duplicate last point to make it a triangle
           rings.add(points);
           logg.d(
             "$areaName: Created minimal triangle for ring $ringIndex (2 points extended to 3)",
@@ -594,13 +672,13 @@ AreaPolygon? _createAreaPolygon(
 
     // Allow drill-down for division, district, upazila, union, and ward levels, with valid slug
     final canDrillDown =
-        (currentLevel == 'division' ||
+        ((currentLevel == 'division' ||
             currentLevel == 'district' ||
             currentLevel == 'upazila' ||
             currentLevel == 'union' ||
             currentLevel == 'ward') &&
         slug != null &&
-        slug.isNotEmpty;
+        slug.isNotEmpty);
 
     return AreaPolygon(
       polygon: Polygon(

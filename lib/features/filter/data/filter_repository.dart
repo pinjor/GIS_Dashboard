@@ -4,19 +4,41 @@ import 'package:gis_dashboard/core/common/constants/api_constants.dart';
 import 'package:gis_dashboard/core/network/dio_client_provider.dart';
 import 'package:gis_dashboard/features/filter/domain/area_response_model.dart';
 
+import '../../../core/network/connectivity_service.dart';
+import '../../../core/network/network_error_handler.dart';
+
 final filterRepositoryProvider = Provider<FilterRepository>((ref) {
   final dio = ref.watch(dioClientProvider);
-  return FilterRepository(client: dio);
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  return FilterRepository(
+    client: dio,
+    connectivityService: connectivityService,
+  );
 });
 
 class FilterRepository {
   final Dio _client;
+  final ConnectivityService _connectivityService;
 
-  FilterRepository({required Dio client}) : _client = client;
+  FilterRepository({
+    required Dio client,
+    required ConnectivityService connectivityService,
+  }) : _client = client,
+       _connectivityService = connectivityService;
 
   /// Fetches all divisions from the API
   Future<List<AreaResponseModel>> fetchAllDivisions() async {
     try {
+      // Check internet connectivity first
+      final hasInternet = await _connectivityService.hasInternetConnection();
+      if (!hasInternet) {
+        throw NetworkException(
+          message:
+              'No internet connection. Please check your network settings and try again.',
+          type: NetworkErrorType.noInternet,
+        );
+      }
+
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
         host: ApiConstants.stagingHost,
@@ -37,10 +59,19 @@ class FilterRepository {
     }
   }
 
-
   /// Fetches all districts from the API
   Future<List<AreaResponseModel>> fetchAllDistricts() async {
     try {
+      // Check internet connectivity first
+      final hasInternet = await _connectivityService.hasInternetConnection();
+      if (!hasInternet) {
+        throw NetworkException(
+          message:
+              'No internet connection. Please check your network settings and try again.',
+          type: NetworkErrorType.noInternet,
+        );
+      }
+
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
         host: ApiConstants.stagingHost,
@@ -61,10 +92,18 @@ class FilterRepository {
     }
   }
 
-
   /// Fetches all city corporations from the API
   Future<List<AreaResponseModel>> fetchAllCityCorporations() async {
     try {
+      // Check internet connectivity first
+      final hasInternet = await _connectivityService.hasInternetConnection();
+      if (!hasInternet) {
+        throw NetworkException(
+          message:
+              'No internet connection. Please check your network settings and try again.',
+          type: NetworkErrorType.noInternet,
+        );
+      }
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
         host: ApiConstants.stagingHost,
@@ -80,12 +119,21 @@ class FilterRepository {
     }
   }
 
-
   /// Fetches districts based on a given division ID: All districts under that division
   Future<List<AreaResponseModel>> fetchDistrictsByDivisionId(
     String divisionId,
   ) async {
     try {
+      // Check internet connectivity first
+      final hasInternet = await _connectivityService.hasInternetConnection();
+      if (!hasInternet) {
+        throw NetworkException(
+          message:
+              'No internet connection. Please check your network settings and try again.',
+          type: NetworkErrorType.noInternet,
+        );
+      }
+
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
         host: ApiConstants.stagingHost,
@@ -101,9 +149,7 @@ class FilterRepository {
     }
   }
 
-
   /// Fetch specific district by its UID
-  
-  
-  /// Fetch specific city corporation by its UID 
+
+  /// Fetch specific city corporation by its UID
 }

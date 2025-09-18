@@ -5,7 +5,7 @@ import 'package:gis_dashboard/core/network/dio_client_provider.dart';
 import '../../../core/network/connectivity_service.dart';
 import '../../../core/network/network_error_handler.dart';
 import '../../../core/utils/utils.dart';
-import '../../map/domain/vaccine_coverage_response.dart';
+import '../domain/vaccine_coverage_response.dart';
 
 final summaryRepositoryProvider = Provider(
   (ref) => SummaryRepository(
@@ -43,7 +43,7 @@ class SummaryRepository {
         urlPath,
         options: Options(
           receiveTimeout: const Duration(
-            seconds: 20,
+            seconds: 40,
           ), // Reasonable timeout for JSON
         ),
       );

@@ -1,11 +1,15 @@
 import 'package:flutter_map/flutter_map.dart';
 
 /// Class to represent a polygon with associated area data
+/// This class holds the polygon shape and metadata for a specific geographical area.
+/// It is used to render areas on the map and provide relevant information.
+/// Polygon: Units of the area (e.g., district, state)
+/// AreaPolygon: Represents a polygon with area metadata
 class AreaPolygon {
   final Polygon polygon;
   final String areaId;
   final String areaName;
-  final String level;
+  final String level; 
   final double? coveragePercentage;
   final String? slug;
   final String? parentSlug;

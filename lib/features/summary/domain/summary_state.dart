@@ -1,16 +1,16 @@
-import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 
 class SummaryState {
   final VaccineCoverageResponse? coverageData;
   final bool isLoading;
   final String? error;
   final String currentLevel;
-  final String currentAreaName;
+  final String currentAreaName; 
 
   SummaryState({
     this.coverageData,
     this.isLoading = false,
-    this.error,
+    this.error, 
     this.currentLevel = 'district',
     this.currentAreaName = 'Bangladesh',
   });

@@ -43,7 +43,6 @@ _GeoJsonFeature _$GeoJsonFeatureFromJson(Map<String, dynamic> json) =>
       info: json['info'] == null
           ? null
           : FeatureInfo.fromJson(json['info'] as Map<String, dynamic>),
-      properties: json['properties'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$GeoJsonFeatureToJson(_GeoJsonFeature instance) =>
@@ -51,7 +50,6 @@ Map<String, dynamic> _$GeoJsonFeatureToJson(_GeoJsonFeature instance) =>
       'type': instance.type,
       'geometry': instance.geometry,
       'info': instance.info,
-      'properties': instance.properties,
     };
 
 _GeoJsonGeometry _$GeoJsonGeometryFromJson(Map<String, dynamic> json) =>

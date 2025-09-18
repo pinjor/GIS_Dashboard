@@ -41,10 +41,13 @@ abstract class Vaccine with _$Vaccine {
     @JsonKey(name: 'total_coverage_male') int? totalCoverageMale,
     @JsonKey(name: 'total_coverage_female') int? totalCoverageFemale,
     @JsonKey(name: 'total_coverage_percentage') double? totalCoveragePercentage,
-    @JsonKey(name: 'total_coverage_percentage_male') double? totalCoveragePercentageMale,
-    @JsonKey(name: 'total_coverage_percentage_female') double? totalCoveragePercentageFemale,
+    @JsonKey(name: 'total_coverage_percentage_male')
+    double? totalCoveragePercentageMale,
+    @JsonKey(name: 'total_coverage_percentage_female')
+    double? totalCoveragePercentageFemale,
     @JsonKey(name: 'areas') List<Area>? areas,
-    @JsonKey(name: 'month_wise_total_coverages') Map<String, MonthlyCoverage>? monthWiseTotalCoverages,
+    @JsonKey(name: 'month_wise_total_coverages')
+    Map<String, MonthlyCoverage>? monthWiseTotalCoverages,
     @JsonKey(name: 'performance') Performance? performance,
   }) = _Vaccine;
 
@@ -65,11 +68,13 @@ abstract class Area with _$Area {
     @JsonKey(name: 'coverage_female') int? coverageFemale,
     @JsonKey(name: 'coverage_percentage') double? coveragePercentage,
     @JsonKey(name: 'coverage_percentage_male') double? coveragePercentageMale,
-    @JsonKey(name: 'coverage_percentage_female') double? coveragePercentageFemale,
+    @JsonKey(name: 'coverage_percentage_female')
+    double? coveragePercentageFemale,
     @JsonKey(name: 'dropout') double? dropout,
     @JsonKey(name: 'dropout_male') double? dropoutMale,
     @JsonKey(name: 'dropout_female') double? dropoutFemale,
-    @JsonKey(name: 'monthly_coverages') Map<String, MonthlyCoverage>? monthlyCoverages,
+    @JsonKey(name: 'monthly_coverages')
+    Map<String, MonthlyCoverage>? monthlyCoverages,
   }) = _Area;
 
   factory Area.fromJson(Map<String, dynamic> json) => _$AreaFromJson(json);
@@ -83,7 +88,8 @@ abstract class MonthlyCoverage with _$MonthlyCoverage {
     @JsonKey(name: 'coverage_female') int? coverageFemale,
     @JsonKey(name: 'coverage_percentage') double? coveragePercentage,
     @JsonKey(name: 'coverage_percentage_male') double? coveragePercentageMale,
-    @JsonKey(name: 'coverage_percentage_female') double? coveragePercentageFemale,
+    @JsonKey(name: 'coverage_percentage_female')
+    double? coveragePercentageFemale,
   }) = _MonthlyCoverage;
 
   factory MonthlyCoverage.fromJson(Map<String, dynamic> json) =>

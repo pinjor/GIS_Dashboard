@@ -23,7 +23,10 @@ class MapRepository {
     required ConnectivityService connectivityService,
   }) : _client = client,
        _connectivityService = connectivityService;
+  
 
+  /// Fetch and decompress GeoJSON data from the given URL, it is the
+  /// universal method to fetch GeoJSON for any area level map data.
   Future<String> fetchGeoJson({required String urlPath}) async {
     try {
       // Check internet connectivity first
@@ -35,20 +38,20 @@ class MapRepository {
           type: NetworkErrorType.noInternet,
         );
       }
-
+      // 💡 The only optional improvements are around progress reporting, utf8 decoding, and edge-case checks.
       logg.i("Fetching GeoJSON from $urlPath");
       final response = await _client.get(
         urlPath,
         options: Options(
           responseType: ResponseType.bytes,
           receiveTimeout: const Duration(
-            seconds: 30,
+            seconds: 300, // as the file can be large
           ), // Allow time for large files
         ),
       );
       logg.i('Response received with status: ${response.statusCode}');
-      final bytes = response.data as List<int>;
-      final archive = GZipDecoder().decodeBytes(bytes);
+      // final bytes = response.data as List<int>;
+      final archive = GZipDecoder().decodeBytes(response.data as List<int>);
       final geoJson = String.fromCharCodes(archive);
       logg.i('Successfully decompressed GeoJSON data');
       return geoJson;
@@ -60,6 +63,4 @@ class MapRepository {
       throw NetworkErrorHandler.handleGenericError(e);
     }
   }
-
-  
 }

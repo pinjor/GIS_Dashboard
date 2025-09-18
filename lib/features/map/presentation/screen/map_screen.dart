@@ -5,29 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:gis_dashboard/config/coverage_colors.dart';
 import 'package:gis_dashboard/core/common/widgets/header_title_icon_filter_widget.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
+import 'package:gis_dashboard/features/map/presentation/widget/map_coverage_visualizer_card_widget.dart';
+import 'package:gis_dashboard/features/map/presentation/widget/map_tile_layer.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/static_compass_direction_indicator_widget.dart';
-import 'package:gis_dashboard/features/map/presentation/widget/vaccine_center_info_overlay_widget.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../domain/area_polygon.dart';
+import '../../domain/center_info.dart';
 import '../../utils/map_utils.dart';
 import '../controllers/map_controller.dart';
-import '../widget/map_legend_item.dart';
 import '../../../epi_center/presentation/screen/epi_center_details_screen.dart';
 
 // Helper class to store center point and zoom information
-class CenterInfo {
-  final LatLng center;
-  final double zoom;
-
-  CenterInfo({required this.center, required this.zoom});
-}
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -52,9 +45,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     });
   }
 
-  List<Polygon> _buildPolygons(List<AreaPolygon> areaPolygons) {
-    return areaPolygons.map((areaPolygon) => areaPolygon.polygon).toList();
-  }
+  // List<Polygon> _buildPolygons(List<AreaPolygon> areaPolygons) {
+  //   return areaPolygons.map((areaPolygon) => areaPolygon.polygon).toList();
+  // }
 
   /// Build markers for area names (only for drilled-down areas)
   List<Marker> _buildAreaNameMarkers(List<AreaPolygon> areaPolygons) {
@@ -287,10 +280,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       polygons.length,
     );
 
-    logg.i(
-      "Calculated center for $currentLevel: lat=${center.latitude.toStringAsFixed(6)}, lng=${center.longitude.toStringAsFixed(6)}, zoom=${zoom.toStringAsFixed(1)}, polygons=${polygons.length}",
-    );
-
     return CenterInfo(center: center, zoom: zoom);
   }
 
@@ -521,7 +510,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // Find which polygon was tapped
     AreaPolygon? tappedPolygon;
     for (final areaPolygon in areaPolygons) {
-      if (_isPointInPolygon(tappedPoint, areaPolygon.polygon.points)) {
+      if (isTappedPointInPolygon(tappedPoint, areaPolygon.polygon.points)) {
         tappedPolygon = areaPolygon;
         break;
       }
@@ -540,7 +529,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         logg.i(
           "Cannot drill down to ${tappedPolygon.areaName} - no detailed data available",
         );
-        _showNoDataSnackBar(tappedPolygon.areaName);
+        showCustomSnackBar(
+          context: context,
+          message: 'No more detailed data available',
+          color: Colors.orangeAccent.shade200,
+        );
       }
     } else {
       logg.i("No polygon found at tapped location");
@@ -574,19 +567,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         logg.d("✅ Found district UID '$areaId' - proceeding with sync");
 
         // Perform the sync using the map controller's integrated functionality
-        mapController.syncFiltersWithDistrict(areaId).then((success) {
-          if (success) {
-            // Get the names for user feedback
-            final districtName = mapController.getDistrictName(areaId);
-            final divisionName = mapController.getDivisionNameForDistrict(
-              areaId,
-            );
+        mapController.syncFiltersWithDistrict(areaId);
+        //  .then((success) {
+        //   if (success) {
+        //     // Get the names for user feedback
+        //     final districtName = mapController.getDistrictName(areaId);
+        //     final divisionName = mapController.getDivisionNameForDistrict(
+        //       areaId,
+        //     );
 
-            if (districtName != null && divisionName != null) {
-              _showFilterSyncSuccessSnackBar(divisionName, districtName);
-            }
-          }
-        });
+        //     if (districtName != null && divisionName != null) {
+        //       _showFilterSyncSuccessSnackBar(divisionName, districtName);
+        //     }
+        //   }
+        // });
       } else {
         logg.d("ℹ️ Area ID '$areaId' is not a district - no sync needed");
         // This is expected for divisions, upazilas, etc.
@@ -598,66 +592,32 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   /// Show success feedback when filter sync completes
-  void _showFilterSyncSuccessSnackBar(
-    String divisionName,
-    String districtName,
-  ) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.sync, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Filters synced: $divisionName → $districtName',
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green.shade600,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-  }
-
-  /// Check if a point is inside a polygon using ray casting algorithm - OPTIMIZED to prevent freezing
-  bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
-    if (polygon.length < 3) return false;
-
-    // Prevent freezing with very large polygon data
-    if (polygon.length > 1000) {
-      logg.d(
-        "Large polygon with ${polygon.length} points - using sampling for hit testing",
-      );
-      // Sample every 20th point for very large polygons to prevent freezing
-      final sampledPolygon = <LatLng>[];
-      for (int i = 0; i < polygon.length; i += 20) {
-        sampledPolygon.add(polygon[i]);
-      }
-      polygon = sampledPolygon;
-    }
-
-    int intersections = 0;
-    for (int i = 0; i < polygon.length; i++) {
-      int j = (i + 1) % polygon.length;
-
-      if ((polygon[i].longitude > point.longitude) !=
-              (polygon[j].longitude > point.longitude) &&
-          (point.latitude <
-              (polygon[j].latitude - polygon[i].latitude) *
-                      (point.longitude - polygon[i].longitude) /
-                      (polygon[j].longitude - polygon[i].longitude) +
-                  polygon[i].latitude)) {
-        intersections++;
-      }
-    }
-    return intersections % 2 == 1;
-  }
+  // void _showFilterSyncSuccessSnackBar(
+  //   String divisionName,
+  //   String districtName,
+  // ) {
+  //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Row(
+  //         children: [
+  //           const Icon(Icons.sync, color: Colors.white, size: 18),
+  //           const SizedBox(width: 8),
+  //           Expanded(
+  //             child: Text(
+  //               'Filters synced: $divisionName → $districtName',
+  //               style: const TextStyle(fontSize: 14),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       backgroundColor: Colors.green.shade600,
+  //       duration: const Duration(seconds: 2),
+  //       behavior: SnackBarBehavior.floating,
+  //       margin: const EdgeInsets.all(16),
+  //     ),
+  //   );
+  // }
 
   /// Perform drilldown to the selected area
   void _performDrillDown(AreaPolygon tappedPolygon) {
@@ -667,12 +627,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     mapNotifier.clearError();
 
     // Determine the next level based on current level
-    String nextLevel = _getNextLevel(
+    String nextLevel = getNextMapViewLevel(
       ref.read(mapControllerProvider).currentLevel,
     );
 
     // Show a subtle loading indicator and perform the drilldown
-    _showLoadingSnackBar(tappedPolygon.areaName);
+    showCustomSnackBar(
+      context: context,
+      message: 'Loading ${tappedPolygon.areaName}...',
+      color: Colors.blue.shade600,
+      isLoading: true,
+    );
 
     // Perform the drilldown
     mapNotifier.drillDownToArea(
@@ -681,82 +646,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       newLevel: nextLevel,
       parentSlug: tappedPolygon.parentSlug,
     );
-  }
-
-  /// Show a subtle loading indicator during drilldown
-  void _showLoadingSnackBar(String areaName) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text('Loading $areaName...'),
-          ],
-        ),
-        backgroundColor: Colors.blue.shade600,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-  }
-
-  /// Show success indicator after successful drilldown
-  void _showSuccessSnackBar(String areaName) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 16),
-            const SizedBox(width: 12),
-            Text('Loaded $areaName successfully'),
-          ],
-        ),
-        backgroundColor: Colors.green.shade600,
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-  }
-
-  /// Get the next hierarchical level for drilldown
-  String _getNextLevel(String currentLevel) {
-    switch (currentLevel) {
-      case 'district':
-        return 'upazila';
-      case 'upazila':
-        return 'union';
-      case 'union':
-        return 'ward';
-      case 'ward':
-        return 'subblock';
-      default:
-        return 'upazila'; // Default fallback
-    }
-  }
-
-  /// Show snackbar when no drilldown data is available
-  void _showNoDataSnackBar(String areaName) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('No detailed data available for $areaName'),
-          backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 2),
-        ),
-      );
   }
 
   /// Handle EPI marker tap - navigate to EPI center details screen
@@ -770,9 +659,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (epiUid.isEmpty) {
       logg.w("EPI marker has no UID, cannot navigate to details");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('EPI center details not available'),
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.orangeAccent.shade200,
         ),
       );
       return;
@@ -829,7 +718,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     mapNotifier.goBack();
   }
 
-  bool _isCoverageDataExpanded = false;
 
   @override
   void dispose() {
@@ -867,6 +755,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     // Listen for state changes to trigger auto-zoom after drilldown
+    // ! needs modifications, maybe responsible for not working auto-zoom when district filter applied
     ref.listen<dynamic>(mapControllerProvider, (previous, current) {
       // Hide any loading snackbars when state changes
       if (previous?.isLoading == true && current.isLoading == false) {
@@ -883,7 +772,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           // 3. District level from filter (navigationStack will have district entry)
           // 4. City corporation level from filter
           (current.currentLevel != 'district' || // All non-district levels
-              (current.currentLevel == 'district' &&
+              (current.currentLevel ==
+                      'district' && //? may cause issue, needs testing
                   current.navigationStack.isNotEmpty) || // District from filter
               current.currentLevel == 'division' || // Division from filter
               current.currentLevel ==
@@ -893,7 +783,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Throttle auto-zoom to prevent rapid calls and freezing
         final now = DateTime.now();
         if (_lastAutoZoom != null &&
-            now.difference(_lastAutoZoom!).inMilliseconds < 2000) {
+            now.difference(_lastAutoZoom!).inMilliseconds < 800) {
           logg.i("Auto-zoom throttled - too recent");
           return;
         }
@@ -903,7 +793,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _autoZoomTimer?.cancel();
 
         // Show success indicator
-        _showSuccessSnackBar(current.currentAreaName ?? 'Area');
+        // _showSuccessSnackBar(current.currentAreaName ?? 'Area');
 
         // Schedule auto-zoom after tiles load
         _autoZoomTimer = Timer(const Duration(milliseconds: 1500), () {
@@ -922,7 +812,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 logg.i(
                   "Auto-zooming to ${freshPolygons.length} polygons at level: ${current.currentLevel}",
                 );
-                _autoZoomToPolygons(freshPolygons);
+                _autoZoomToPolygons(
+                  freshPolygons,
+                ); //? what if we try with old polygons e.g. areaPolygons?
               } else {
                 logg.w("No polygons available for auto-zoom");
               }
@@ -937,8 +829,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     });
 
     // Listen for filter year changes to refresh coverage data
+    //! IMPORTANT: Move this listener AFTER polygon parsing to prevent premature triggers
+    // This ensures we have the latest filter state when polygons are parsed
+    //! ALSO IMPORTANT: This listener must be AFTER polygon parsing to ensure
+    //! we have the latest filter state when polygons are parsed
+    // this reloads coverage data when year changes
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
-      if (previous != null && previous.selectedYear != current.selectedYear) {
+      if (previous != null && (previous.selectedYear != current.selectedYear)) {
         logg.i(
           "Filter year changed from ${previous.selectedYear} to ${current.selectedYear}",
         );
@@ -1019,32 +916,33 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
-    if (mapState.geoJson != null && mapState.coverageData != null) {
-      try {
-        areaPolygons = parseGeoJsonToPolygons(
-          mapState.geoJson!,
-          mapState.coverageData!,
-          filterState.selectedVaccine,
-          mapState.currentLevel,
-        );
-        logg.i("Successfully parsed ${areaPolygons.length} polygons");
+    // if (mapState.geoJson != null && mapState.coverageData != null) {
+    //   try {
+    //     areaPolygons = parseGeoJsonToPolygons(
+    //       mapState.geoJson!,
+    //       mapState.coverageData!,
+    //       filterState.selectedVaccine,
+    //       mapState.currentLevel,
+    //     );
+    //     logg.i("Successfully parsed ${areaPolygons.length} polygons");
 
-        // Clear any existing errors when data is successfully loaded and parsed
-        if (mapState.error != null && !mapState.isLoading) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(mapControllerProvider.notifier).clearError();
-          });
-        }
-      } catch (e) {
-        logg.e("Error parsing polygons: $e");
-        // Don't set error state here, just log it
-      }
+    //     // Clear any existing errors when data is successfully loaded and parsed
+    //     if (mapState.error != null && !mapState.isLoading) {
+    //       WidgetsBinding.instance.addPostFrameCallback((_) {
+    //         ref.read(mapControllerProvider.notifier).clearError();
+    //       });
+    //     }
+    //   } catch (e) {
+    //     logg.e("Error parsing polygons: $e");
+    //     // Don't set error state here, just log it
+    //     areaPolygons = [];
+    //   }
 
-      // Debug logging
-      logg.i(
-        "Map render state: loading=${mapState.isLoading}, error=${mapState.error ?? 'none'}, polygons=${areaPolygons.length}, level=${mapState.currentLevel}",
-      );
-    }
+    //   // Debug logging
+    //   logg.i(
+    //     "Map render state: loading=${mapState.isLoading}, error=${mapState.error ?? 'none'}, polygons=${areaPolygons.length}, level=${mapState.currentLevel}",
+    //   );
+    // }
 
     return Scaffold(
       body: Column(
@@ -1062,9 +960,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: _goBack,
+                    onPressed:
+                        _goBack, //! doesn't perform go back when upazila -> district is attempted! :( unfortunately
                     icon: const Icon(Icons.arrow_back),
-                    tooltip: 'Go Back',
                   ),
                   Expanded(
                     child: Text(
@@ -1117,33 +1015,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ),
                       children: [
                         // Enhanced tile layer with error handling and network resilience
-                        TileLayer(
-                          urlTemplate: Constants.urlTemplate,
-                          subdomains: Constants.subDomains,
-                          // Add fallback URL for better reliability
-                          fallbackUrl: Constants.fallbackUrl,
-                          // Silence network exceptions to prevent error flooding
-                          tileProvider: NetworkTileProvider(
-                            silenceExceptions: true,
-                          ),
-                          // Add user agent to comply with OSM usage policy
-                          userAgentPackageName: Constants.userAgentPackageName,
-                          // Error handling configuration
-                          errorTileCallback: (tile, error, stackTrace) {
-                            // Log the error but don't show UI errors
-                            logg.w(
-                              'Tile loading error for ${tile.coordinates}: $error',
-                            );
-                          },
-                          // Keep tiles in memory longer to reduce reloads
-                          keepBuffer: 3,
-                          // Reduce tile loading during panning
-                          panBuffer: 1,
-                          // Limit max zoom to reduce tile requests
-                          maxZoom: 15,
-                        ),
+                        MapTileLayer(),
                         // Area polygons
-                        PolygonLayer(polygons: _buildPolygons(areaPolygons)),
+                        PolygonLayer(
+                          polygons: areaPolygons
+                              .map((areaPolygon) => areaPolygon.polygon)
+                              .toList(),
+                        ),
 
                         // EPI markers (vaccination centers) - Show for city corporations, upazila, union and deeper levels
                         if ((mapState.currentLevel == 'city_corporation' ||
@@ -1295,84 +1173,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     Positioned(
                       top: 5,
                       right: 5,
-                      child: StatefulBuilder(
-                        builder: (context, setState) {
-                          return Card(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Header row (tap to expand/collapse)
-                                InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _isCoverageDataExpanded =
-                                          !_isCoverageDataExpanded;
-                                    });
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Text(
-                                          "Coverage",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          _isCoverageDataExpanded
-                                              ? Icons.arrow_drop_up_sharp
-                                              : Icons.arrow_drop_down_sharp,
-                                          size: 15,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                // Expandable content
-                                if (_isCoverageDataExpanded)
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        if (mapState.currentLevel ==
-                                                'city_corporation' ||
-                                            mapState.currentLevel == 'union' ||
-                                            mapState.currentLevel == 'ward' ||
-                                            mapState.currentLevel == 'subblock')
-                                          const VaccineCenterInfoOverlayWidget(),
-                                        MapLegendItem(
-                                          color: CoverageColors.veryLow,
-                                          label: '<80%',
-                                        ),
-                                        MapLegendItem(
-                                          color: CoverageColors.low,
-                                          label: '80-85%',
-                                        ),
-                                        MapLegendItem(
-                                          color: CoverageColors.medium,
-                                          label: '85-90%',
-                                        ),
-                                        MapLegendItem(
-                                          color: CoverageColors.high,
-                                          label: '90-95%',
-                                        ),
-                                        MapLegendItem(
-                                          color: CoverageColors.veryHigh,
-                                          label: '>95%',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
+                      child: MapCoverageVisualizerCardWidget(
+                        currentLevel: mapState.currentLevel,
                       ),
                     ),
                 ],

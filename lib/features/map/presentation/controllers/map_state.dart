@@ -1,4 +1,6 @@
-import 'package:gis_dashboard/features/map/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
+
+import '../../../../core/utils/utils.dart';
 
 /// Represents a level in the drilldown hierarchy
 class DrilldownLevel {
@@ -30,14 +32,16 @@ class DrilldownLevel {
 }
 
 class MapState {
-  final String? geoJson;
-  final VaccineCoverageResponse? coverageData;
-  final String? epiData; // EPI vaccination centers data
+  final String?
+  geoJson; // GeoJSON data for the current map view e.g coordinates in GeoJSON format
+  final VaccineCoverageResponse? coverageData; // Vaccine coverage data
+  final String?
+  epiData; // EPI vaccination centers data e.g coordinates in GeoJSON format
   final String currentLevel;
-  final List<DrilldownLevel> navigationStack;
+  final List<DrilldownLevel> navigationStack; // Stack to track drilldown levels
   final bool isLoading;
   final String? error;
-  final String? currentAreaName;
+  final String? currentAreaName; // Name of the current area being viewed
 
   MapState({
     this.geoJson,
@@ -86,8 +90,12 @@ class MapState {
 
     return navigationStack
         .map((level) {
+          logg.i(
+            "Level: ${level.level}, Name: ${level.name} in displayPath::navigationStack",
+          );
           final name = level.name ?? level.level;
-          // Remove trailing parts that start with a space and then (
+          // Remove trailing parts that start with a space and then (some text)
+
           return name.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
         })
         .join(' > ');
