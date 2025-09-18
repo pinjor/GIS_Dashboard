@@ -94,15 +94,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         child: FittedBox(
           fit: BoxFit.none,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 3,
+              vertical: 1,
+            ), // Reduced padding significantly
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.black38, width: 0.5),
+              borderRadius: BorderRadius.circular(3), // Smaller border radius
+              border: Border.all(
+                color: Colors.black38,
+                width: 0.3,
+              ), // Thinner border
             ),
             child: Text(
               displayName,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+              ), // Smaller font size and lighter weight
             ),
           ),
         ),
@@ -165,36 +174,40 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
               return Marker(
                 point: LatLng(lat, lng),
+                width: 19,
+                height: 19,
                 child: GestureDetector(
                   onTap: () =>
                       _onEpiMarkerTap(centerName, info?['org_uid'] ?? '', info),
                   child: Tooltip(
                     message: centerName,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: isFixedCenter
-                            ? Colors.blueAccent
-                            : Colors.deepPurple,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 3,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: !isFixedCenter
-                            ? FaIcon(
-                                FontAwesomeIcons.syringe,
-                                size: 11,
-                                color: Colors.white,
-                              )
-                            : Icon(Icons.home, color: Colors.white, size: 12),
+                    child: SizedBox(
+                      width: 14, // Force container size with SizedBox
+                      height: 14, // Force container size with SizedBox
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isFixedCenter
+                              ? Colors.blueAccent
+                              : Colors.deepPurple,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 0.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 1,
+                              offset: const Offset(0, 0.5),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: !isFixedCenter
+                              ? FaIcon(
+                                  FontAwesomeIcons.syringe,
+                                  size: 10,
+                                  color: Colors.white,
+                                )
+                              : Icon(Icons.home, color: Colors.white, size: 10),
+                        ),
                       ),
                     ),
                   ),
@@ -516,7 +529,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     if (tappedPolygon != null) {
       logg.i("Tapped on: ${tappedPolygon.areaName}");
-
       // IMPORTANT: Perform filter sync BEFORE drilldown
       // This ensures the filter state is updated to match the tapped area
       _syncFiltersWithTappedArea(tappedPolygon);
