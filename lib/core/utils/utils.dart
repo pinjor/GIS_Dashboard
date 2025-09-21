@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import '../../features/map/utils/map_enums.dart';
 
 final logg = Logger();
 
@@ -9,25 +10,6 @@ extension SizedBoxExtension on num {
 
   /// Returns a SizedBox with the specified width
   SizedBox get w => SizedBox(width: toDouble());
-}
-
-enum MapLevel {
-  district('districts'),
-  upazilla('upazilas'),
-  union('union'),
-  ward('ward'),
-  subblock('subblock');
-
-  final String value;
-  const MapLevel(this.value);
-}
-
-enum AreaType {
-  district('district'),
-  citycorporation('city_corporation');
-
-  final String value;
-  const AreaType(this.value);
 }
 
 void showCustomSnackBar({
@@ -65,17 +47,9 @@ void showCustomSnackBar({
 }
 
 /// Get the next hierarchical level for drilldown
+@Deprecated('Use GeographicLevel.nextLevel instead')
 String getNextMapViewLevel(String currentLevel) {
-  switch (currentLevel) {
-    case 'district':
-      return 'upazila';
-    case 'upazila':
-      return 'union';
-    case 'union':
-      return 'ward';
-    case 'ward':
-      return 'subblock';
-    default:
-      return 'upazila'; // Default fallback
-  }
+  final level = GeographicLevel.fromString(currentLevel);
+  return level.nextLevel?.value ??
+      GeographicLevel.upazila.value; // Default fallback
 }

@@ -3,6 +3,7 @@ import 'package:gis_dashboard/core/common/constants/api_constants.dart';
 import 'package:gis_dashboard/features/summary/domain/summary_state.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_state.dart';
+import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
 import '../../../../core/service/data_service.dart';
 import '../../../../core/utils/utils.dart';
@@ -61,7 +62,7 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
         logg.i("Using cached summary data");
         state = state.copyWith(
           coverageData: cachedData,
-          currentLevel: 'district',
+          currentLevel: GeographicLevel.district,
           currentAreaName: 'Bangladesh',
           isLoading: false,
           error: null,
@@ -80,7 +81,7 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
 
       state = state.copyWith(
         coverageData: coverageData,
-        currentLevel: 'district',
+        currentLevel: GeographicLevel.district,
         currentAreaName: 'Bangladesh',
         isLoading: false,
         error: null,

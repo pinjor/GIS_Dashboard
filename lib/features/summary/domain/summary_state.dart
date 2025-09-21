@@ -1,17 +1,18 @@
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
 class SummaryState {
   final VaccineCoverageResponse? coverageData;
   final bool isLoading;
   final String? error;
-  final String currentLevel;
-  final String currentAreaName; 
+  final GeographicLevel currentLevel;
+  final String currentAreaName;
 
   SummaryState({
     this.coverageData,
     this.isLoading = false,
-    this.error, 
-    this.currentLevel = 'district',
+    this.error,
+    this.currentLevel = GeographicLevel.district,
     this.currentAreaName = 'Bangladesh',
   });
 
@@ -19,7 +20,7 @@ class SummaryState {
     VaccineCoverageResponse? coverageData,
     bool? isLoading,
     String? error,
-    String? currentLevel,
+    GeographicLevel? currentLevel,
     String? currentAreaName,
   }) {
     return SummaryState(

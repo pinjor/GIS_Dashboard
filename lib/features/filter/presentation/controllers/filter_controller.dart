@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/filter_state.dart';
 import '../../domain/area_response_model.dart';
 import '../../data/filter_repository.dart';
+import '../../../map/utils/map_enums.dart';
 
 /// Global filter state provider
 final filterControllerProvider =
@@ -63,7 +64,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Update area type selection
-  void updateAreaType(String areaType) {
+  void updateAreaType(AreaType areaType) {
     state = state.copyWith(selectedAreaType: areaType);
   }
 
@@ -210,11 +211,11 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Get district slug by district name from GeoJSON data
 
-  /// Apply filters and mark the timestamp when filters are applied 
+  /// Apply filters and mark the timestamp when filters are applied
   ///! also needs attention as this does not work properly maybe!!!
   void applyFilters({
     String? vaccine,
-    String? areaType,
+    AreaType? areaType,
     String? division,
     String? cityCorporation,
     String? district,

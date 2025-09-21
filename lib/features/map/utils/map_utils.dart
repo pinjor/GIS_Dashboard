@@ -8,6 +8,7 @@ import '../../../config/coverage_colors.dart';
 import '../../../core/utils/utils.dart';
 import '../domain/area_polygon.dart';
 import '../../summary/domain/vaccine_coverage_response.dart';
+import 'map_enums.dart';
 
 /// Check if a point is inside a polygon using ray casting algorithm - OPTIMIZED to prevent freezing
 bool isTappedPointInPolygon(LatLng point, List<LatLng> polygon) {
@@ -670,15 +671,10 @@ AreaPolygon? _createAreaPolygon(
     // Get color based on coverage percentage
     final polygonColor = CoverageColors.getCoverageColor(coveragePercentage);
 
-    // Allow drill-down for division, district, upazila, union, and ward levels, with valid slug
+    // Allow drill-down based on geographic level capabilities
+    final currentLevelEnum = GeographicLevel.fromString(currentLevel);
     final canDrillDown =
-        ((currentLevel == 'division' ||
-            currentLevel == 'district' ||
-            currentLevel == 'upazila' ||
-            currentLevel == 'union' ||
-            currentLevel == 'ward') &&
-        slug != null &&
-        slug.isNotEmpty);
+        currentLevelEnum.canDrillDown && slug != null && slug.isNotEmpty;
 
     return AreaPolygon(
       polygon: Polygon(

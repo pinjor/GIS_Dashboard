@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../config/coverage_colors.dart';
+import '../../../map/utils/map_enums.dart';
 import 'map_legend_item.dart';
 import 'vaccine_center_info_overlay_widget.dart';
 
 class MapCoverageVisualizerCardWidget extends StatefulWidget {
-  final String currentLevel;
+  final GeographicLevel currentLevel;
 
   const MapCoverageVisualizerCardWidget({
     super.key,
@@ -61,11 +62,8 @@ class _MapCoverageVisualizerCardState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Conditionally show this widget based on the currentLevel
-                  if (widget.currentLevel == 'city_corporation' ||
-                      widget.currentLevel == 'union' ||
-                      widget.currentLevel == 'ward' ||
-                      widget.currentLevel == 'subblock')
+                  // Show EPI center info for levels that have EPI data
+                  if (widget.currentLevel.hasEpiData)
                     const VaccineCenterInfoOverlayWidget(),
 
                   // Map legend items

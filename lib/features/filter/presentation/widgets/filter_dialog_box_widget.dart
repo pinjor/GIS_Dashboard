@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import '../controllers/filter_controller.dart';
+import '../../../map/utils/map_enums.dart';
 
 class FilterDialogBoxWidget extends ConsumerStatefulWidget {
   const FilterDialogBoxWidget({super.key});
@@ -14,7 +15,7 @@ class FilterDialogBoxWidget extends ConsumerStatefulWidget {
 
 class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   // Local state for temporary selections (until user clicks Filter)
-  late String _selectedAreaType;
+  late AreaType _selectedAreaType;
   late String _selectedVaccine;
   late String _selectedDivision;
   String? _selectedCityCorporation;
@@ -80,18 +81,18 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          _selectedAreaType = 'district';
+                          _selectedAreaType = AreaType.district;
                         });
                       },
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Radio(
+                          Radio<AreaType>(
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                             visualDensity: VisualDensity.compact,
                             activeColor: primaryColor,
-                            value: 'district',
+                            value: AreaType.district,
                             groupValue: _selectedAreaType,
                             onChanged: (value) {
                               setState(() {
@@ -107,18 +108,18 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          _selectedAreaType = 'city_corporation';
+                          _selectedAreaType = AreaType.cityCorporation;
                         });
                       },
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Radio(
+                          Radio<AreaType>(
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                             visualDensity: VisualDensity.compact,
                             activeColor: primaryColor,
-                            value: 'city_corporation',
+                            value: AreaType.cityCorporation,
                             groupValue: _selectedAreaType,
                             onChanged: (value) {
                               setState(() {
@@ -160,7 +161,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                 ),
                 16.h,
                 // Area-specific dropdowns
-                if (_selectedAreaType == 'district') ...[
+                if (_selectedAreaType == AreaType.district) ...[
                   // Division Dropdown
                   const Text(
                     'Division',
@@ -233,7 +234,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       });
                     },
                   ),
-                ] else if (_selectedAreaType == 'city_corporation') ...[
+                ] else if (_selectedAreaType == AreaType.cityCorporation) ...[
                   // City Corporation Dropdown
                   const Text(
                     'City Corporation',
@@ -329,14 +330,14 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             vaccine: _selectedVaccine,
                             areaType: _selectedAreaType,
                             year: _selectedYear,
-                            division: _selectedAreaType == 'district'
+                            division: _selectedAreaType == AreaType.district
                                 ? _selectedDivision
                                 : null,
-                            district: _selectedAreaType == 'district'
+                            district: _selectedAreaType == AreaType.district
                                 ? _selectedDistrict
                                 : null,
                             cityCorporation:
-                                _selectedAreaType == 'city_corporation'
+                                _selectedAreaType == AreaType.cityCorporation
                                 ? _selectedCityCorporation
                                 : null,
                           );

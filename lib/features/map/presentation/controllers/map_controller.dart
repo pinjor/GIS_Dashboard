@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/api_constants.dart';
 import 'package:gis_dashboard/core/service/data_service.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
+import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
 import '../../../../core/utils/utils.dart';
 import 'map_state.dart';
@@ -51,7 +52,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         state = state.copyWith(
           geoJson: geoJson,
           coverageData: cachedCoverageData,
-          currentLevel: 'district',
+          currentLevel: GeographicLevel.district,
           navigationStack: [], // Reset to country level
           currentAreaName: 'Bangladesh',
           isLoading: false,
@@ -89,7 +90,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         geoJson: geoJson,
         coverageData: coverageData,
-        currentLevel: 'district',
+        currentLevel: GeographicLevel.district,
         navigationStack: [], // Reset to country level
         currentAreaName: 'Bangladesh',
         isLoading: false,
@@ -112,9 +113,13 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   Future<void> drillDownToArea({
     required String areaName,
     required String slug,
-    required String newLevel,
+    required String
+    newLevel, // Keep as String for now since it comes from API/parsing
     String? parentSlug,
   }) async {
+    // Convert string level to enum for internal logic
+    final newLevelEnum = GeographicLevel.fromString(newLevel);
+
     // Check if slug is empty (no drilldown data available)
     if (slug.isEmpty) {
       logg.w("Cannot drill down to $areaName - slug is empty");
@@ -157,13 +162,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       ];
 
       // Add EPI request only when drilling down to a specific area (not for collections)
-      // EPI is only available for specific upazila, union, ward, or subblock areas
+      // EPI is only available for specific levels that have EPI data
       // When drilling down from district->upazila, we load multiple upazilas so no EPI
       // EPI should only be fetched when clicking on a specific upazila/union/ward/subblock
-      if ((newLevel == 'union' ||
-              newLevel == 'ward' ||
-              newLevel == 'subblock') ||
-          (newLevel == 'upazila' && state.currentLevel != 'district')) {
+      if (newLevelEnum.hasEpiData ||
+          (newLevelEnum == GeographicLevel.upazila &&
+              state.currentLevel != GeographicLevel.district)) {
         final epiPath = ApiConstants.getEpiPath(slug: slug);
         logg.i("Fetching EPI data from: $epiPath");
         apiRequests.add(
@@ -176,12 +180,11 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final geoJson = results[0] as String;
       final coverageData = results[1] as VaccineCoverageResponse;
 
-      // EPI data is available for specific upazila, union and deeper levels (not collections)
+      // EPI data is available for specific levels that have EPI data (not collections)
       String? epiData;
-      if (((newLevel == 'union' ||
-                  newLevel == 'ward' ||
-                  newLevel == 'subblock') ||
-              (newLevel == 'upazila' && state.currentLevel != 'district')) &&
+      if ((newLevelEnum.hasEpiData ||
+              (newLevelEnum == GeographicLevel.upazila &&
+                  state.currentLevel != GeographicLevel.district)) &&
           results.length > 2) {
         epiData = results[2] as String;
         logg.i("Successfully fetched EPI data for $areaName");
@@ -189,7 +192,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
 
       // Create new navigation level
       final newNavLevel = DrilldownLevel(
-        level: newLevel,
+        level: newLevelEnum,
         slug: slug,
         name: areaName,
         parentSlug: parentSlug,
@@ -203,7 +206,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         geoJson: geoJson,
         coverageData: coverageData,
         epiData: epiData,
-        currentLevel: newLevel,
+        currentLevel: newLevelEnum,
         navigationStack: newStack,
         currentAreaName: areaName,
         isLoading: false,
@@ -270,10 +273,9 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           ),
         ];
 
-        // Add EPI request if going back to upazila, union or deeper level (not district)
-        if (previousLevel.level == 'upazila' ||
-            previousLevel.level == 'union' ||
-            previousLevel.level == 'ward') {
+        // Add EPI request if going back to a level that has EPI data
+        final previousLevelEnum = previousLevel.level;
+        if (previousLevelEnum.hasEpiData) {
           final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
           apiRequests.add(
             _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
@@ -285,12 +287,9 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         final geoJson = results[0] as String;
         final coverageData = results[1] as VaccineCoverageResponse;
 
-        // EPI data is available for upazila, union and deeper levels (not district)
+        // EPI data is available for levels that have EPI data
         String? epiData;
-        if ((previousLevel.level == 'upazila' ||
-                previousLevel.level == 'union' ||
-                previousLevel.level == 'ward') &&
-            results.length > 2) {
+        if (previousLevelEnum.hasEpiData && results.length > 2) {
           epiData = results[2] as String;
         }
 
@@ -431,7 +430,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
 
       // Create navigation level for division
       final divisionNavLevel = DrilldownLevel(
-        level: 'division',
+        level: GeographicLevel.division,
         slug: 'divisions/$divisionSlug',
         name: divisionName,
         parentSlug: null,
@@ -441,7 +440,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         geoJson: geoJson,
         coverageData: coverageData,
         epiData: null, // No EPI data for divisions
-        currentLevel: 'division',
+        currentLevel: GeographicLevel.division,
         navigationStack: [
           divisionNavLevel,
         ], // Start fresh navigation for division
@@ -508,7 +507,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
 
       // Create navigation level for city corporation
       final ccNavLevel = DrilldownLevel(
-        level: 'city_corporation',
+        level:
+            GeographicLevel.district, // City corporations are at district level
         slug: 'city-corporations/$ccSlug',
         name: cityCorporationName,
         parentSlug: null,
@@ -518,7 +518,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         geoJson: geoJson,
         coverageData: coverageData,
         epiData: epiData, // Include EPI data for city corporations
-        currentLevel: 'city_corporation',
+        currentLevel:
+            GeographicLevel.district, // City corporations are at district level
         navigationStack: [
           ccNavLevel,
         ], // Start fresh navigation for city corporation
@@ -586,7 +587,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
 
       // Create navigation level for district
       final districtNavLevel = DrilldownLevel(
-        level: 'district',
+        level: GeographicLevel.district,
         slug: districtSlug,
         name: districtName,
         parentSlug: null,
@@ -596,7 +597,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         geoJson: geoJson,
         coverageData: coverageData,
         epiData: null, // No EPI data for districts from filter
-        currentLevel: 'district',
+        currentLevel: GeographicLevel.district,
         navigationStack: [
           districtNavLevel,
         ], // Start fresh navigation for district

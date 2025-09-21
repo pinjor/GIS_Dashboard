@@ -17,6 +17,7 @@ import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../domain/area_polygon.dart';
 import '../../domain/center_info.dart';
 import '../../utils/map_utils.dart';
+import '../../utils/map_enums.dart';
 import '../controllers/map_controller.dart';
 import '../../../epi_center/presentation/screen/epi_center_details_screen.dart';
 
@@ -254,7 +255,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// Calculate center point and appropriate zoom level for current level polygons
   CenterInfo _calculateCurrentLevelCenterAndZoom(
     List<AreaPolygon> polygons,
-    String currentLevel,
+    GeographicLevel currentLevel,
   ) {
     if (polygons.isEmpty) {
       // Fallback to Bangladesh center
@@ -353,7 +354,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// Calculate appropriate zoom level based on bounds size, current level, and polygon count
   double _calculateZoomForBounds(
     LatLngBounds bounds,
-    String currentLevel,
+    GeographicLevel currentLevel,
     int polygonCount,
   ) {
     // Calculate the span of the bounds
@@ -388,24 +389,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       baseZoom += 0.5; // Zoom in for single polygon
     }
 
-    // Adjust zoom based on current level for optimal viewing
-    switch (currentLevel) {
-      case 'district':
-        return math.max(baseZoom, 6.5); // Ensure minimum zoom for districts
-      case 'upazila':
-        return math.max(baseZoom, 8.0); // Ensure minimum zoom for upazilas
-      case 'union':
-        return math.max(baseZoom, 10.0); // Ensure minimum zoom for unions
-      case 'ward':
-        return math.max(baseZoom, 11.5); // Ensure minimum zoom for wards
-      case 'subblock':
-        return math.max(baseZoom, 12.5); // Ensure minimum zoom for subblocks
-      default:
-        return math.min(
-          math.max(baseZoom, 6.0),
-          15.0,
-        ); // Clamp to reasonable range
-    }
+    // Use the enum's minZoomLevel method for level-specific minimum zoom
+    return math.max(baseZoom, currentLevel.minZoomLevel);
   }
 
   /// Auto-zoom to fit all polygons with padding
@@ -459,9 +444,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
-  void _resetToCountryView({required String currentLevel}) {
+  void _resetToCountryView({required GeographicLevel currentLevel}) {
     // Reset to country level first
-    if (currentLevel != 'district') {
+    if (currentLevel != GeographicLevel.district) {
       ref.read(mapControllerProvider.notifier).resetToCountryLevel();
     }
 
@@ -469,7 +454,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     mapController.moveAndRotate(LatLng(23.6850, 90.3563), _initialZoom, 0);
   }
 
-  void _centerViewForCurrentLevelPolygonMap({required String currentLevel}) {
+  void _centerViewForCurrentLevelPolygonMap({
+    required GeographicLevel currentLevel,
+  }) {
     final mapState = ref.read(mapControllerProvider);
 
     // Parse current polygons to get the bounds
@@ -480,12 +467,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         mapState.geoJson!,
         mapState.coverageData!,
         filterState.selectedVaccine,
-        currentLevel,
+        currentLevel.value, // Convert enum to string for the parser
       );
     }
 
     if (currentPolygons.isEmpty) {
-      logg.w("No polygons available to center view for level: $currentLevel");
+      logg.w(
+        "No polygons available to center view for level: ${currentLevel.value}",
+      );
       return;
     }
 
@@ -496,7 +485,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
 
     logg.i(
-      "Centering view for $currentLevel: center=${centerInfo.center.latitude}, ${centerInfo.center.longitude}, zoom=${centerInfo.zoom}",
+      "Centering view for ${currentLevel.value}: center=${centerInfo.center.latitude}, ${centerInfo.center.longitude}, zoom=${centerInfo.zoom}",
     );
 
     // Move map to calculated center with appropriate zoom
@@ -627,9 +616,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     mapNotifier.clearError();
 
     // Determine the next level based on current level
-    String nextLevel = getNextMapViewLevel(
-      ref.read(mapControllerProvider).currentLevel,
-    );
+    final currentLevel = ref.read(mapControllerProvider).currentLevel;
+    final nextLevel = currentLevel.nextLevel;
+
+    if (nextLevel == null) {
+      logg.w("Cannot drill down further from ${currentLevel.value}");
+      return;
+    }
 
     // Show a subtle loading indicator and perform the drilldown
     showCustomSnackBar(
@@ -643,7 +636,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     mapNotifier.drillDownToArea(
       areaName: tappedPolygon.areaName,
       slug: tappedPolygon.slug!,
-      newLevel: nextLevel,
+      newLevel: nextLevel.value,
       parentSlug: tappedPolygon.parentSlug,
     );
   }
@@ -673,7 +666,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Determine if we're in city corporation context
     String? ccUid;
-    if (currentState.currentLevel == 'city_corporation') {
+    if (filterState.selectedAreaType == AreaType.cityCorporation) {
       // Extract city corporation UID from current navigation or filter
       ccUid = filterState.selectedCityCorporation;
     }
@@ -692,7 +685,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           epiUid: epiUid,
           epiCenterName: centerName,
           ccUid: ccUid,
-          currentLevel: int.tryParse(currentState.currentLevel),
+          currentLevel: null, // TODO: Review if this level conversion is needed
         ),
       ),
     );
@@ -718,7 +711,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     mapNotifier.goBack();
   }
 
-
   @override
   void dispose() {
     _autoZoomTimer?.cancel();
@@ -738,7 +730,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           mapState.geoJson!,
           mapState.coverageData!,
           filterState.selectedVaccine,
-          mapState.currentLevel,
+          mapState.currentLevel.value,
         );
         logg.i("Successfully parsed ${areaPolygons.length} polygons");
 
@@ -771,13 +763,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           // 2. Division level from filter
           // 3. District level from filter (navigationStack will have district entry)
           // 4. City corporation level from filter
-          (current.currentLevel != 'district' || // All non-district levels
+          (current.currentLevel !=
+                  GeographicLevel.district || // All non-district levels
               (current.currentLevel ==
-                      'district' && //? may cause issue, needs testing
+                      GeographicLevel
+                          .district && //? may cause issue, needs testing
                   current.navigationStack.isNotEmpty) || // District from filter
-              current.currentLevel == 'division' || // Division from filter
               current.currentLevel ==
-                  'city_corporation') && // City corporation from filter
+                  GeographicLevel.division || // Division from filter
+              filterState.selectedAreaType ==
+                  AreaType.cityCorporation) && // City corporation from filter
           current.geoJson != null &&
           current.coverageData != null) {
         // Throttle auto-zoom to prevent rapid calls and freezing
@@ -857,21 +852,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         logg.i("Filter applied - triggering map data load");
 
         final bool divisionFilterApplied =
-            current.selectedAreaType == 'district' &&
+            current.selectedAreaType == AreaType.district &&
             current.selectedDivision != 'All' &&
             current.selectedDistrict == null;
         final bool districtFilterApplied =
-            current.selectedAreaType == 'district' &&
+            current.selectedAreaType == AreaType.district &&
             current.selectedDivision == 'All' &&
             current.selectedDistrict != null;
         final bool cityCorporationFilterApplied =
-            current.selectedAreaType == 'city_corporation' &&
+            current.selectedAreaType == AreaType.cityCorporation &&
             current.selectedCityCorporation != null;
         final bool shouldResetToCountry =
-            (current.selectedAreaType == 'district' &&
+            (current.selectedAreaType == AreaType.district &&
                 current.selectedDivision == 'All' &&
                 current.selectedDistrict == null) ||
-            (current.selectedAreaType == 'city_corporation' &&
+            (current.selectedAreaType == AreaType.cityCorporation &&
                 current.selectedCityCorporation == null);
 
         if (divisionFilterApplied) {
@@ -976,7 +971,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ),
                   ),
                   Text(
-                    'Level: ${mapState.currentLevel.toUpperCase()}',
+                    'Level: ${mapState.currentLevel.value.toUpperCase()}',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
@@ -1023,19 +1018,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               .toList(),
                         ),
 
-                        // EPI markers (vaccination centers) - Show for city corporations, upazila, union and deeper levels
-                        if ((mapState.currentLevel == 'city_corporation' ||
-                                mapState.currentLevel == 'upazila' ||
-                                mapState.currentLevel == 'union' ||
-                                mapState.currentLevel == 'ward' ||
-                                mapState.currentLevel == 'subblock') &&
+                        // EPI markers (vaccination centers) - Show for levels that have EPI data
+                        if (mapState.currentLevel.hasEpiData &&
                             mapState.epiData != null)
                           MarkerLayer(
                             markers: _buildEpiMarkers(mapState.epiData),
                           ),
 
                         // Area name labels - ONLY show when drilled down (not on initial district view)
-                        if (mapState.currentLevel != 'district')
+                        if (mapState.currentLevel != GeographicLevel.district)
                           MarkerLayer(
                             markers: _buildAreaNameMarkers(areaPolygons),
                           ),
@@ -1142,7 +1133,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       StaticCompassDirectionIndicatorWidget(),
 
                     // Compass Icon button which centers current level polygon map
-                    if (mapState.currentLevel != 'district')
+                    if (mapState.currentLevel != GeographicLevel.district)
                       Positioned(
                         bottom: 5,
                         left: 5,

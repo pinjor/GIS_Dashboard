@@ -1,9 +1,10 @@
 import 'area_response_model.dart';
+import '../../map/utils/map_enums.dart';
 
 /// Filter state for managing user selections and area data
 class FilterState {
   final String selectedVaccine;
-  final String selectedAreaType;
+  final AreaType selectedAreaType;
   final String selectedDivision;
   final String? selectedCityCorporation;
   final String? selectedDistrict;
@@ -25,7 +26,7 @@ class FilterState {
 
   const FilterState({
     this.selectedVaccine = 'Penta - 1st',
-    this.selectedAreaType = 'district',
+    this.selectedAreaType = AreaType.district,
     this.selectedDivision = 'All',
     this.selectedCityCorporation,
     this.selectedDistrict,
@@ -41,7 +42,7 @@ class FilterState {
 
   FilterState copyWith({
     String? selectedVaccine,
-    String? selectedAreaType,
+    AreaType? selectedAreaType,
     String? selectedDivision,
     String? selectedCityCorporation,
     String? selectedDistrict,

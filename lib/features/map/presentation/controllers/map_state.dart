@@ -1,10 +1,11 @@
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
 import '../../../../core/utils/utils.dart';
 
 /// Represents a level in the drilldown hierarchy
 class DrilldownLevel {
-  final String level;
+  final GeographicLevel level;
   final String? slug;
   final String? name;
   final String? parentSlug;
@@ -17,7 +18,7 @@ class DrilldownLevel {
   });
 
   DrilldownLevel copyWith({
-    String? level,
+    GeographicLevel? level,
     String? slug,
     String? name,
     String? parentSlug,
@@ -37,7 +38,7 @@ class MapState {
   final VaccineCoverageResponse? coverageData; // Vaccine coverage data
   final String?
   epiData; // EPI vaccination centers data e.g coordinates in GeoJSON format
-  final String currentLevel;
+  final GeographicLevel currentLevel;
   final List<DrilldownLevel> navigationStack; // Stack to track drilldown levels
   final bool isLoading;
   final String? error;
@@ -47,7 +48,7 @@ class MapState {
     this.geoJson,
     this.coverageData,
     this.epiData,
-    this.currentLevel = 'district',
+    this.currentLevel = GeographicLevel.district,
     this.navigationStack = const [],
     this.isLoading = false,
     this.error,
@@ -58,7 +59,7 @@ class MapState {
     String? geoJson,
     VaccineCoverageResponse? coverageData,
     String? epiData,
-    String? currentLevel,
+    GeographicLevel? currentLevel,
     List<DrilldownLevel>? navigationStack,
     bool? isLoading,
     String? error,
@@ -91,9 +92,9 @@ class MapState {
     return navigationStack
         .map((level) {
           logg.i(
-            "Level: ${level.level}, Name: ${level.name} in displayPath::navigationStack",
+            "Level: ${level.level.value}, Name: ${level.name} in displayPath::navigationStack",
           );
-          final name = level.name ?? level.level;
+          final name = level.name ?? level.level.value;
           // Remove trailing parts that start with a space and then (some text)
 
           return name.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
