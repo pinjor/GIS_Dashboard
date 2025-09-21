@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../../features/map/utils/map_enums.dart';
 
-final logg = Logger();
+final logg = Logger(
+  printer: PrettyPrinter(
+    methodCount: 0, // No need to show method names
+    errorMethodCount: 0, // No need to show error method names
+    colors: true, // Use colors in the log output
+    printEmojis: true, // Print emojis in the log output
+  ),
+  level: Level.info, // Set the default log level
+  output: ConsoleOutput(), // Use console output for logs
+  filter: ProductionFilter(), // Use production filter to avoid debug logs
+);
 
 extension SizedBoxExtension on num {
   /// Returns a SizedBox with the specified height

@@ -67,8 +67,7 @@ enum GeographicLevel {
 
   /// Check if EPI data is available at this level
   bool get hasEpiData {
-    return this == GeographicLevel.upazila ||
-        this == GeographicLevel.union ||
+    return this == GeographicLevel.union ||
         this == GeographicLevel.ward ||
         this == GeographicLevel.subblock;
   }
