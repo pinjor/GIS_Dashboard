@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../../features/map/utils/map_enums.dart';
 
 final logg = Logger(
   printer: PrettyPrinter(
@@ -57,9 +56,9 @@ void showCustomSnackBar({
 }
 
 /// Get the next hierarchical level for drilldown
-@Deprecated('Use GeographicLevel.nextLevel instead')
-String getNextMapViewLevel(String currentLevel) {
-  final level = GeographicLevel.fromString(currentLevel);
-  return level.nextLevel?.value ??
-      GeographicLevel.upazila.value; // Default fallback
-}
+// @Deprecated('Use GeographicLevel.nextLevel instead')
+// String getNextMapViewLevel(String currentLevel) {
+//   final level = GeographicLevel.fromString(currentLevel);
+//   return level.nextLevel?.value ??
+//       GeographicLevel.upazila.value; // Default fallback
+// }

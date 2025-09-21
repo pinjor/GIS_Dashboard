@@ -40,7 +40,7 @@ Future<void> fetchEpiCenterData({
         : 'year=$year&request-from=app';
     final apiUrl = '${ApiConstants.epiCenterDataBaseUrl}/chart/$epiUid?$queryParams';
 
-    final epiCenterData = await _dataService.getEpiCenterData(urlPath: apiUrl);
+    final epiCenterData = await _dataService.getEpiCenterDetailsData(urlPath: apiUrl);
 
     state = state.copyWith(
       isLoading: false,

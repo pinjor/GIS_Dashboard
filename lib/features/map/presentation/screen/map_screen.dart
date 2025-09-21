@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gis_dashboard/core/common/widgets/header_title_icon_filter_widget.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_coords_response.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/map_coverage_visualizer_card_widget.dart';
@@ -142,12 +143,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   /// Build EPI markers (vaccination centers) from EPI data
-  List<Marker> _buildEpiMarkers(String? epiData) {
-    if (epiData == null || epiData.isEmpty) return [];
+  List<Marker> _buildEpiMarkers(EpiCenterCoordsResponse? epiCenterCoordsData) {
+    if (epiCenterCoordsData == null) return [];
 
     try {
-      final decoded = jsonDecode(epiData) as Map<String, dynamic>;
-      final features = decoded['features'] as List<dynamic>?;
+      final features = epiCenterCoordsData.features;
 
       if (features == null || features.isEmpty) return [];
 
@@ -155,24 +155,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
       return features
           .map<Marker>((feature) {
-            final geometry = feature['geometry'];
-            final info = feature['info'];
+            final geometry = feature.geometry;
+            final info = feature.info;
 
-            if (geometry?['type'] == 'Point' &&
-                geometry?['coordinates'] != null) {
-              final coords = geometry['coordinates'] as List;
+            if (geometry?.type == 'Point' && geometry?.coordinates != null) {
+              final coords = geometry!.coordinates as List;
               final lng = (coords[0] as num).toDouble();
               final lat = (coords[1] as num).toDouble();
-              final centerName = info?['name'] ?? 'EPI Center';
-              final isFixedCenter = info?['is_fixed_center'] ?? false;
+              final centerName = info?.name ?? 'EPI Center';
+              final isFixedCenter = info?.isFixedCenter ?? false;
 
               return Marker(
                 point: LatLng(lat, lng),
                 width: 19,
                 height: 19,
                 child: GestureDetector(
-                  onTap: () =>
-                      _onEpiMarkerTap(centerName, info?['org_uid'] ?? '', info),
+                  onTap: () => _onEpiMarkerTap(centerName, info?.orgUid ?? ''),
                   child: Tooltip(
                     message: centerName,
                     child: SizedBox(
@@ -645,7 +643,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _onEpiMarkerTap(
     String centerName,
     String epiUid,
-    Map<String, dynamic>? info,
+    // EpiInfo? info,
   ) {
     logg.i("EPI marker tapped: $centerName (UID: $epiUid)");
 
@@ -1020,9 +1018,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
                         // EPI markers (vaccination centers) - Show for levels that have EPI data
                         if (mapState.currentLevel.hasEpiData &&
-                            mapState.epiData != null)
+                            mapState.epiCenterCoordsData != null)
                           MarkerLayer(
-                            markers: _buildEpiMarkers(mapState.epiData),
+                            markers: _buildEpiMarkers(
+                              mapState.epiCenterCoordsData,
+                            ),
                           ),
 
                         // Area name labels - ONLY show when drilled down (not on initial district view)

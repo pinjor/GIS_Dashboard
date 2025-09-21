@@ -1,3 +1,4 @@
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_coords_response.dart';
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
@@ -36,8 +37,8 @@ class MapState {
   final String?
   geoJson; // GeoJSON data for the current map view e.g coordinates in GeoJSON format
   final VaccineCoverageResponse? coverageData; // Vaccine coverage data
-  final String?
-  epiData; // EPI vaccination centers data e.g coordinates in GeoJSON format
+  final EpiCenterCoordsResponse?
+  epiCenterCoordsData; // EPI vaccination centers data e.g coordinates in GeoJSON format
   final GeographicLevel currentLevel;
   final List<DrilldownLevel> navigationStack; // Stack to track drilldown levels
   final bool isLoading;
@@ -47,7 +48,7 @@ class MapState {
   MapState({
     this.geoJson,
     this.coverageData,
-    this.epiData,
+    this.epiCenterCoordsData,
     this.currentLevel = GeographicLevel.district,
     this.navigationStack = const [],
     this.isLoading = false,
@@ -58,7 +59,7 @@ class MapState {
   MapState copyWith({
     String? geoJson,
     VaccineCoverageResponse? coverageData,
-    String? epiData,
+    EpiCenterCoordsResponse? epiCenterCoordsData,
     GeographicLevel? currentLevel,
     List<DrilldownLevel>? navigationStack,
     bool? isLoading,
@@ -69,7 +70,7 @@ class MapState {
     return MapState(
       geoJson: geoJson ?? this.geoJson,
       coverageData: coverageData ?? this.coverageData,
-      epiData: epiData ?? this.epiData,
+      epiCenterCoordsData: epiCenterCoordsData ?? this.epiCenterCoordsData,
       currentLevel: currentLevel ?? this.currentLevel,
       navigationStack: navigationStack ?? this.navigationStack,
       isLoading: isLoading ?? this.isLoading,

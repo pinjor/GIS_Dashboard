@@ -2,19 +2,19 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'epi_coords_response.freezed.dart';
-part 'epi_coords_response.g.dart';
+part 'epi_center_coords_response.freezed.dart';
+part 'epi_center_coords_response.g.dart';
 
 /// Root response model for EPI coordinates GeoJSON data
 @freezed
-abstract class EpiCoordsResponse with _$EpiCoordsResponse {
-  const factory EpiCoordsResponse({
+abstract class EpiCenterCoordsResponse with _$EpiCenterCoordsResponse {
+  const factory EpiCenterCoordsResponse({
     @JsonKey(name: 'type') String? type,
     @JsonKey(name: 'features') List<EpiFeature>? features,
-  }) = _EpiCoordsResponse;
+  }) = _EpiCenterCoordsResponse;
 
-  factory EpiCoordsResponse.fromJson(Map<String, dynamic> json) =>
-      _$EpiCoordsResponseFromJson(json);
+  factory EpiCenterCoordsResponse.fromJson(Map<String, dynamic> json) =>
+      _$EpiCenterCoordsResponseFromJson(json);
 }
 
 /// Individual feature in the GeoJSON response

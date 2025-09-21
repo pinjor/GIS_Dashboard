@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/api_constants.dart';
 import 'package:gis_dashboard/core/service/data_service.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_coords_response.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
@@ -38,28 +39,28 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final selectedYear = currentFilter.selectedYear;
 
       // Try to get cached data first, but only if it's for the correct year
-      final cachedCoverageData = _dataService.getCachedCoverageData();
-      if (cachedCoverageData != null &&
-          !forceRefresh &&
-          cachedCoverageData.metadata?.year.toString() == selectedYear) {
-        logg.i("Using cached map data for year $selectedYear");
-        // Still need to load GeoJSON for map rendering
-        final geoJson = await _dataService.getGeoJson(
-          urlPath: ApiConstants.districtJsonPath,
-          forceRefresh: forceRefresh,
-        );
+      // final cachedCoverageData = _dataService.getCachedCoverageData();
+      // if (cachedCoverageData != null &&
+      //     !forceRefresh &&
+      //     cachedCoverageData.metadata?.year.toString() == selectedYear) {
+      //   logg.i("Using cached map data for year $selectedYear");
+      //   // Still need to load GeoJSON for map rendering
+      //   final geoJson = await _dataService.getGeoJson(
+      //     urlPath: ApiConstants.districtJsonPath,
+      //     forceRefresh: forceRefresh,
+      //   );
 
-        state = state.copyWith(
-          geoJson: geoJson,
-          coverageData: cachedCoverageData,
-          currentLevel: GeographicLevel.district,
-          navigationStack: [], // Reset to country level
-          currentAreaName: 'Bangladesh',
-          isLoading: false,
-          clearError: true,
-        );
-        return;
-      }
+      //   state = state.copyWith(
+      //     geoJson: geoJson,
+      //     coverageData: cachedCoverageData,
+      //     currentLevel: GeographicLevel.district,
+      //     navigationStack: [], // Reset to country level
+      //     currentAreaName: 'Bangladesh',
+      //     isLoading: false,
+      //     clearError: true,
+      //   );
+      //   return;
+      // }
 
       // Use dynamic year-based coverage path
       final coveragePath = ApiConstants.getCoveragePath(year: selectedYear);
@@ -171,7 +172,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         final epiPath = ApiConstants.getEpiPath(slug: slug);
         logg.i("Fetching EPI data from: $epiPath");
         apiRequests.add(
-          _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
+          _dataService.getEpiCenterCoordsData(urlPath: epiPath, forceRefresh: true),
         );
       }
 
@@ -181,12 +182,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final coverageData = results[1] as VaccineCoverageResponse;
 
       // EPI data is available for specific levels that have EPI data (not collections)
-      String? epiData;
+      EpiCenterCoordsResponse? epiCenterCoordsData;
       if ((newLevelEnum.hasEpiData ||
               (newLevelEnum == GeographicLevel.upazila &&
                   state.currentLevel != GeographicLevel.district)) &&
           results.length > 2) {
-        epiData = results[2] as String;
+        epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
         logg.i("Successfully fetched EPI data for $areaName");
       }
 
@@ -205,7 +206,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         geoJson: geoJson,
         coverageData: coverageData,
-        epiData: epiData,
+        epiCenterCoordsData: epiCenterCoordsData,
         currentLevel: newLevelEnum,
         navigationStack: newStack,
         currentAreaName: areaName,
@@ -278,7 +279,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         if (previousLevelEnum.hasEpiData) {
           final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
           apiRequests.add(
-            _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
+            _dataService.getEpiCenterCoordsData(urlPath: epiPath, forceRefresh: true),
           );
         }
 
@@ -288,15 +289,15 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         final coverageData = results[1] as VaccineCoverageResponse;
 
         // EPI data is available for levels that have EPI data
-        String? epiData;
+        EpiCenterCoordsResponse? epiCenterCoordsData;
         if (previousLevelEnum.hasEpiData && results.length > 2) {
-          epiData = results[2] as String;
+          epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
         }
 
         state = state.copyWith(
           geoJson: geoJson,
           coverageData: coverageData,
-          epiData: epiData,
+          epiCenterCoordsData: epiCenterCoordsData,
           currentLevel: previousLevel.level,
           navigationStack: newStack,
           currentAreaName: previousLevel.name,
@@ -439,7 +440,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         geoJson: geoJson,
         coverageData: coverageData,
-        epiData: null, // No EPI data for divisions
+        epiCenterCoordsData: null, // No EPI data for divisions
         currentLevel: GeographicLevel.division,
         navigationStack: [
           divisionNavLevel,
@@ -498,12 +499,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           urlPath: coveragePath,
           forceRefresh: true,
         ),
-        _dataService.getEpiData(urlPath: epiPath, forceRefresh: true),
+        _dataService.getEpiCenterCoordsData(urlPath: epiPath, forceRefresh: true),
       ]);
 
       final geoJson = results[0] as String;
       final coverageData = results[1] as VaccineCoverageResponse;
-      final epiData = results[2] as String;
+      final epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
 
       // Create navigation level for city corporation
       final ccNavLevel = DrilldownLevel(
@@ -517,7 +518,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         geoJson: geoJson,
         coverageData: coverageData,
-        epiData: epiData, // Include EPI data for city corporations
+        epiCenterCoordsData: epiCenterCoordsData, // Include EPI data for city corporations
         currentLevel:
             GeographicLevel.district, // City corporations are at district level
         navigationStack: [
@@ -596,7 +597,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         geoJson: geoJson,
         coverageData: coverageData,
-        epiData: null, // No EPI data for districts from filter
+        epiCenterCoordsData: null, // No EPI data for districts from filter
         currentLevel: GeographicLevel.district,
         navigationStack: [
           districtNavLevel,

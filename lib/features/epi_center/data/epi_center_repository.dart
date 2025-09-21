@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/network/dio_client_provider.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_coords_response.dart';
 
 import '../../../core/network/connectivity_service.dart';
 import '../../../core/network/network_error_handler.dart';
@@ -30,7 +30,9 @@ class EpiCenterRepository {
        _connectivityService = connectivityService;
 
   /// Fetch EPI center coordinates data from the API
-  Future<String> fetchEpiCoordsData({required String urlPath}) async {
+  Future<EpiCenterCoordsResponse> fetchEpiCenterCoordsData({
+    required String urlPath,
+  }) async {
     try {
       // Check internet connectivity first
       final hasInternet = await _connectivityService.hasInternetConnection();
@@ -52,17 +54,17 @@ class EpiCenterRepository {
       final epiData = response.data;
 
       // Convert to JSON string if it's a Map
-      String epiJsonString;
-      if (epiData is Map<String, dynamic>) {
-        epiJsonString = jsonEncode(epiData);
-      } else if (epiData is String) {
-        epiJsonString = epiData;
-      } else {
-        epiJsonString = epiData.toString();
-      }
+      // String epiJsonString;
+      // if (epiData is Map<String, dynamic>) {
+      //   epiJsonString = jsonEncode(epiData);
+      // } else if (epiData is String) {
+      //   epiJsonString = epiData;
+      // } else {
+      //   epiJsonString = epiData.toString();
+      // }
 
-      logg.i('Successfully received EPI data');
-      return epiJsonString;
+      // logg.i('Successfully received EPI data');
+      return EpiCenterCoordsResponse.fromJson(epiData as Map<String, dynamic>);
     } on DioException catch (e) {
       logg.e("Dio error fetching EPI data: $e");
       throw NetworkErrorHandler.handleDioError(e);
@@ -73,7 +75,7 @@ class EpiCenterRepository {
   }
 
   /// Fetch EPI Center details data from the API
-  Future<EpiCenterDetailsResponse> fetchEpiCenterData({
+  Future<EpiCenterDetailsResponse> fetchEpiCenterDetailsData({
     required String urlPath,
   }) async {
     try {
