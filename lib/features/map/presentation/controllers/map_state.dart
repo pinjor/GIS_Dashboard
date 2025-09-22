@@ -1,4 +1,5 @@
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_coords_response.dart';
+import 'package:gis_dashboard/features/map/domain/area_coords_geo_json_response.dart';
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
@@ -34,7 +35,7 @@ class DrilldownLevel {
 }
 
 class MapState {
-  final String?
+  final AreaCoordsGeoJsonResponse?
   areaCoordsGeoJsonData; // GeoJSON data for the current map view e.g coordinates in GeoJSON format
   final VaccineCoverageResponse? coverageData; // Vaccine coverage data
   final EpiCenterCoordsResponse?
@@ -57,7 +58,7 @@ class MapState {
   });
 
   MapState copyWith({
-    String? areaCoordsGeoJsonData,
+    AreaCoordsGeoJsonResponse? areaCoordsGeoJsonData,
     VaccineCoverageResponse? coverageData,
     EpiCenterCoordsResponse? epiCenterCoordsData,
     GeographicLevel? currentLevel,

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/api_constants.dart';
 import 'package:gis_dashboard/core/service/data_service.dart';
@@ -7,6 +6,7 @@ import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 
 import '../../../../core/utils/utils.dart';
+import '../../domain/area_coords_geo_json_response.dart';
 import 'map_state.dart';
 import '../../../summary/domain/vaccine_coverage_response.dart';
 
@@ -79,7 +79,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         ),
       ]);
 
-      final areaCoordsGeoJsonData = results[0] as String;
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
       logg.i(
         'metadata: ${coverageData.metadata} year: ${coverageData.metadata?.year}',
@@ -172,13 +172,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         final epiPath = ApiConstants.getEpiPath(slug: slug);
         logg.i("Fetching EPI data from: $epiPath");
         apiRequests.add(
-          _dataService.getEpiCenterCoordsData(urlPath: epiPath, forceRefresh: true),
+          _dataService.getEpiCenterCoordsData(
+            urlPath: epiPath,
+            forceRefresh: true,
+          ),
         );
       }
 
       final results = await Future.wait(apiRequests);
 
-      final areaCoordsGeoJsonData = results[0] as String;
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
 
       // EPI data is available for specific levels that have EPI data (not collections)
@@ -267,7 +270,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
 
         // Prepare API requests
         List<Future> apiRequests = [
-          _dataService.fetchAreaGeoJsonCoordsData(urlPath: geoJsonPath, forceRefresh: true),
+          _dataService.fetchAreaGeoJsonCoordsData(
+            urlPath: geoJsonPath,
+            forceRefresh: true,
+          ),
           _dataService.getVaccinationCoverage(
             urlPath: coveragePath,
             forceRefresh: true,
@@ -279,13 +285,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         if (previousLevelEnum.hasEpiData) {
           final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
           apiRequests.add(
-            _dataService.getEpiCenterCoordsData(urlPath: epiPath, forceRefresh: true),
+            _dataService.getEpiCenterCoordsData(
+              urlPath: epiPath,
+              forceRefresh: true,
+            ),
           );
         }
 
         final results = await Future.wait(apiRequests);
 
-        final areaCoordsGeoJsonData = results[0] as String;
+        final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
         final coverageData = results[1] as VaccineCoverageResponse;
 
         // EPI data is available for levels that have EPI data
@@ -419,14 +428,17 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       logg.i("Fetching division coverage from: $coveragePath");
 
       final results = await Future.wait([
-        _dataService.fetchAreaGeoJsonCoordsData(urlPath: geoJsonPath, forceRefresh: true),
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: true,
+        ),
         _dataService.getVaccinationCoverage(
           urlPath: coveragePath,
           forceRefresh: true,
         ),
       ]);
 
-      final areaCoordsGeoJsonData = results[0] as String;
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
 
       // Create navigation level for division
@@ -494,15 +506,21 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       logg.i("Fetching city corporation EPI from: $epiPath");
 
       final results = await Future.wait([
-        _dataService.fetchAreaGeoJsonCoordsData(urlPath: geoJsonPath, forceRefresh: true),
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: true,
+        ),
         _dataService.getVaccinationCoverage(
           urlPath: coveragePath,
           forceRefresh: true,
         ),
-        _dataService.getEpiCenterCoordsData(urlPath: epiPath, forceRefresh: true),
+        _dataService.getEpiCenterCoordsData(
+          urlPath: epiPath,
+          forceRefresh: true,
+        ),
       ]);
 
-      final areaCoordsGeoJsonData = results[0] as String;
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
       final epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
 
@@ -518,7 +536,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: coverageData,
-        epiCenterCoordsData: epiCenterCoordsData, // Include EPI data for city corporations
+        epiCenterCoordsData:
+            epiCenterCoordsData, // Include EPI data for city corporations
         currentLevel:
             GeographicLevel.district, // City corporations are at district level
         navigationStack: [
@@ -576,14 +595,17 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       logg.i("Fetching district coverage from: $coveragePath");
 
       final results = await Future.wait([
-        _dataService.fetchAreaGeoJsonCoordsData(urlPath: geoJsonPath, forceRefresh: true),
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: true,
+        ),
         _dataService.getVaccinationCoverage(
           urlPath: coveragePath,
           forceRefresh: true,
         ),
       ]);
 
-      final areaCoordsGeoJsonData = results[0] as String;
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
 
       // Create navigation level for district
@@ -631,16 +653,17 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         forceRefresh: false, // Use cache if available for performance
       );
 
-      final decoded = jsonDecode(countryGeoJson) as Map<String, dynamic>;
-      final features = decoded['features'] as List<dynamic>;
-
+      final features = countryGeoJson.features;
+      if (features == null || features.isEmpty) {
+        logg.w("Country-level GeoJSON has no features");
+        return null;
+      }
       // Search for the district in the GeoJSON features
       for (final feature in features) {
-        final info =
-            feature['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
+        final info = feature.info;
 
-        final String? featureName = info['name'] as String?;
-        final String? slug = info['slug'] as String?;
+        final featureName = info?.name;
+        final slug = info?.slug;
 
         // Match district name and return the actual slug from GeoJSON
         if (featureName != null &&

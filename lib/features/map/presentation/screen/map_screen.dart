@@ -625,8 +625,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // Show a subtle loading indicator and perform the drilldown
     showCustomSnackBar(
       context: context,
-      message: 'Loading ${tappedPolygon.areaName}...',
-      color: Colors.blue.shade600,
+      message: 'Loading ${tappedPolygon.areaName.excludeParentheses()}...',
+      color: Colors.blueGrey.shade600,
       isLoading: true,
     );
 

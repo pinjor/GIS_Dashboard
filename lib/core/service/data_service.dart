@@ -5,6 +5,7 @@ import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_resp
 import 'package:gis_dashboard/features/map/data/map_repository.dart';
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 
+import '../../features/map/domain/area_coords_geo_json_response.dart';
 import '../../features/summary/data/summary_repository.dart';
 import '../utils/utils.dart';
 
@@ -75,7 +76,7 @@ class DataService {
   }
 
   /// Get GeoJSON data with caching and retry logic
-  Future<String> fetchAreaGeoJsonCoordsData({
+  Future<AreaCoordsGeoJsonResponse> fetchAreaGeoJsonCoordsData({
     required String urlPath,
     bool forceRefresh = false,
   }) async {
@@ -84,15 +85,15 @@ class DataService {
     // }
 
     // Retry logic for GeoJSON
-    String? data;
+    AreaCoordsGeoJsonResponse? areaCoordsData;
     Exception? lastError;
 
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        data = await _mapRepository.fetchAreaGeoJsonCoordsData(urlPath: urlPath);
+        areaCoordsData = await _mapRepository.fetchAreaGeoJsonCoordsData(urlPath: urlPath);
         // _cachedGeoJson = data;
         // _lastFetchTime = DateTime.now();
-        return data;
+        return areaCoordsData;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
         if (attempt < 3) {

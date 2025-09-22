@@ -55,6 +55,13 @@ void showCustomSnackBar({
   );
 }
 
+extension ExcludeParenthesesStrings on String{
+  // if any string is like "example (text)" it will return "example"
+  String excludeParentheses() {
+    return replaceAll(RegExp(r'\s*\(.*?\)\s*'), '').trim();
+  }
+}
+
 /// Get the next hierarchical level for drilldown
 // @Deprecated('Use GeographicLevel.nextLevel instead')
 // String getNextMapViewLevel(String currentLevel) {

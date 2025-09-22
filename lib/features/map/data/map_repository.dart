@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/network/connectivity_service.dart';
 import 'package:gis_dashboard/core/network/dio_client_provider.dart';
 import 'package:gis_dashboard/core/network/network_error_handler.dart';
+import 'package:gis_dashboard/features/map/domain/area_coords_geo_json_response.dart';
 
 import '../../../core/utils/utils.dart';
 
@@ -23,11 +26,12 @@ class MapRepository {
     required ConnectivityService connectivityService,
   }) : _client = client,
        _connectivityService = connectivityService;
-  
 
   /// Fetch and decompress GeoJSON data from the given URL, it is the
   /// universal method to fetch GeoJSON for any area level map data.
-  Future<String> fetchAreaGeoJsonCoordsData({required String urlPath}) async {
+  Future<AreaCoordsGeoJsonResponse> fetchAreaGeoJsonCoordsData({
+    required String urlPath,
+  }) async {
     try {
       // Check internet connectivity first
       final hasInternet = await _connectivityService.hasInternetConnection();
@@ -52,9 +56,11 @@ class MapRepository {
       logg.i('Response received with status: ${response.statusCode}');
       // final bytes = response.data as List<int>;
       final archive = GZipDecoder().decodeBytes(response.data as List<int>);
-      final geoJson = String.fromCharCodes(archive);
+      final areaCoordsGeoJsonData = String.fromCharCodes(archive);
       logg.i('Successfully decompressed GeoJSON data');
-      return geoJson;
+      return AreaCoordsGeoJsonResponse.fromJson(
+        jsonDecode(areaCoordsGeoJsonData) as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       logg.e("Dio error fetching GeoJSON: $e");
       throw NetworkErrorHandler.handleDioError(e);
