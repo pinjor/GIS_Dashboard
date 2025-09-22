@@ -2,19 +2,19 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'map_coord_geojson_response.freezed.dart';
-part 'map_coord_geojson_response.g.dart';
+part 'area_coords_geo_json_response.freezed.dart'; 
+part 'area_coords_geo_json_response.g.dart';
 
 @freezed
-abstract class MapCoordGeojsonResponse with _$MapCoordGeojsonResponse {
-  const factory MapCoordGeojsonResponse({
+abstract class AreaCoordsGeoJsonResponse with _$AreaCoordsGeoJsonResponse {
+  const factory AreaCoordsGeoJsonResponse({
     @JsonKey(name: 'type') String? type,
     @JsonKey(name: 'info') GeoJsonInfo? info,
     @JsonKey(name: 'features') List<GeoJsonFeature>? features,
-  }) = _MapCoordGeojsonResponse;
+  }) = _AreaCoordsGeoJsonResponse;
 
-  factory MapCoordGeojsonResponse.fromJson(Map<String, dynamic> json) =>
-      _$MapCoordGeojsonResponseFromJson(json);
+  factory AreaCoordsGeoJsonResponse.fromJson(Map<String, dynamic> json) =>
+      _$AreaCoordsGeoJsonResponseFromJson(json);
 }
 
 @freezed

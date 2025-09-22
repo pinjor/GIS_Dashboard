@@ -27,7 +27,7 @@ class MapRepository {
 
   /// Fetch and decompress GeoJSON data from the given URL, it is the
   /// universal method to fetch GeoJSON for any area level map data.
-  Future<String> fetchGeoJson({required String urlPath}) async {
+  Future<String> fetchAreaGeoJsonCoordsData({required String urlPath}) async {
     try {
       // Check internet connectivity first
       final hasInternet = await _connectivityService.hasInternetConnection();

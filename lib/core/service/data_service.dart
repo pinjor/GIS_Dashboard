@@ -75,7 +75,7 @@ class DataService {
   }
 
   /// Get GeoJSON data with caching and retry logic
-  Future<String> getGeoJson({
+  Future<String> fetchAreaGeoJsonCoordsData({
     required String urlPath,
     bool forceRefresh = false,
   }) async {
@@ -89,7 +89,7 @@ class DataService {
 
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        data = await _mapRepository.fetchGeoJson(urlPath: urlPath);
+        data = await _mapRepository.fetchAreaGeoJsonCoordsData(urlPath: urlPath);
         // _cachedGeoJson = data;
         // _lastFetchTime = DateTime.now();
         return data;

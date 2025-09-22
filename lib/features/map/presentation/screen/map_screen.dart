@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -459,10 +458,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Parse current polygons to get the bounds
     List<AreaPolygon> currentPolygons = [];
-    if (mapState.geoJson != null && mapState.coverageData != null) {
+    if (mapState.areaCoordsGeoJsonData != null &&
+        mapState.coverageData != null) {
       final filterState = ref.read(filterControllerProvider);
       currentPolygons = parseGeoJsonToPolygons(
-        mapState.geoJson!,
+        mapState.areaCoordsGeoJsonData!,
         mapState.coverageData!,
         filterState.selectedVaccine,
         currentLevel.value, // Convert enum to string for the parser
@@ -519,7 +519,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         showCustomSnackBar(
           context: context,
           message: 'No more detailed data available',
-          color: Colors.orangeAccent.shade200,
+          color: Colors.blueGrey.shade600,
         );
       }
     } else {
@@ -722,10 +722,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Parse polygons when we have both GeoJSON and coverage data - MOVE BEFORE LISTENER
     List<AreaPolygon> areaPolygons = [];
-    if (mapState.geoJson != null && mapState.coverageData != null) {
+    if (mapState.areaCoordsGeoJsonData != null &&
+        mapState.coverageData != null) {
       try {
         areaPolygons = parseGeoJsonToPolygons(
-          mapState.geoJson!,
+          mapState.areaCoordsGeoJsonData!,
           mapState.coverageData!,
           filterState.selectedVaccine,
           mapState.currentLevel.value,
@@ -771,7 +772,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   GeographicLevel.division || // Division from filter
               filterState.selectedAreaType ==
                   AreaType.cityCorporation) && // City corporation from filter
-          current.geoJson != null &&
+          current.areaCoordsGeoJsonData != null &&
           current.coverageData != null) {
         // Throttle auto-zoom to prevent rapid calls and freezing
         final now = DateTime.now();
@@ -795,7 +796,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               // Parse fresh polygons for auto-zoom
               final filterState = ref.read(filterControllerProvider);
               final freshPolygons = parseGeoJsonToPolygons(
-                current.geoJson!,
+                current.fetchAreaGeoJsonCoordsData!,
                 current.coverageData!,
                 filterState.selectedVaccine,
                 current.currentLevel,
@@ -946,7 +947,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ),
           10.h,
           // Breadcrumb Navigation
-          if (mapState.canGoBack)
+          if (mapState.canGoBack && !mapState.isLoading)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -990,7 +991,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
                   // Show map when data is loaded successfully (even if polygons are empty)
                   if (!mapState.isLoading &&
-                      mapState.geoJson != null &&
+                      mapState.areaCoordsGeoJsonData != null &&
                       mapState.coverageData != null)
                     FlutterMap(
                       mapController: mapController,
@@ -1035,7 +1036,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
                   // Show message when data loaded but no polygons found (less intrusive)
                   if (!mapState.isLoading &&
-                      mapState.geoJson != null &&
+                      mapState.areaCoordsGeoJsonData != null &&
                       mapState.coverageData != null &&
                       areaPolygons.isEmpty)
                     Positioned(
@@ -1071,7 +1072,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
                   // Show message when app is starting and no data yet (initial state)
                   if (!mapState.isLoading &&
-                      mapState.geoJson == null &&
+                      mapState.areaCoordsGeoJsonData == null &&
                       mapState.coverageData == null)
                     Positioned(
                       bottom: 100,
@@ -1128,7 +1129,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ),
 
                     // Static 4-direction indicator (N, E, S, W)
-                    if (mapState.geoJson != null &&
+                    if (mapState.areaCoordsGeoJsonData != null &&
                         mapState.coverageData != null)
                       StaticCompassDirectionIndicatorWidget(),
 
@@ -1159,7 +1160,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
                   // inside your build
                   if (!mapState.isLoading &&
-                      mapState.geoJson != null &&
+                      mapState.areaCoordsGeoJsonData != null &&
                       mapState.coverageData != null)
                     Positioned(
                       top: 5,

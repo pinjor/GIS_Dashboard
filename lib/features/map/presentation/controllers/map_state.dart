@@ -35,7 +35,7 @@ class DrilldownLevel {
 
 class MapState {
   final String?
-  geoJson; // GeoJSON data for the current map view e.g coordinates in GeoJSON format
+  areaCoordsGeoJsonData; // GeoJSON data for the current map view e.g coordinates in GeoJSON format
   final VaccineCoverageResponse? coverageData; // Vaccine coverage data
   final EpiCenterCoordsResponse?
   epiCenterCoordsData; // EPI vaccination centers data e.g coordinates in GeoJSON format
@@ -46,7 +46,7 @@ class MapState {
   final String? currentAreaName; // Name of the current area being viewed
 
   MapState({
-    this.geoJson,
+    this.areaCoordsGeoJsonData,
     this.coverageData,
     this.epiCenterCoordsData,
     this.currentLevel = GeographicLevel.district,
@@ -57,7 +57,7 @@ class MapState {
   });
 
   MapState copyWith({
-    String? geoJson,
+    String? areaCoordsGeoJsonData,
     VaccineCoverageResponse? coverageData,
     EpiCenterCoordsResponse? epiCenterCoordsData,
     GeographicLevel? currentLevel,
@@ -68,7 +68,7 @@ class MapState {
     bool clearError = false,
   }) {
     return MapState(
-      geoJson: geoJson ?? this.geoJson,
+      areaCoordsGeoJsonData: areaCoordsGeoJsonData ?? this.areaCoordsGeoJsonData,
       coverageData: coverageData ?? this.coverageData,
       epiCenterCoordsData: epiCenterCoordsData ?? this.epiCenterCoordsData,
       currentLevel: currentLevel ?? this.currentLevel,

@@ -129,14 +129,15 @@ String? _extractParentSlug(
 }
 
 List<AreaPolygon> parseGeoJsonToPolygons(
-  String geoJson,
+  String fetchAreaGeoJsonCoordsData,
   VaccineCoverageResponse coverageData,
   String selectedVaccine,
   String currentLevel, // Add current level to determine drill-down capability
 ) {
   final stopwatch = Stopwatch()..start();
 
-  final decoded = jsonDecode(geoJson) as Map<String, dynamic>;
+  final decoded =
+      jsonDecode(fetchAreaGeoJsonCoordsData) as Map<String, dynamic>;
   final features = decoded['features'] as List<dynamic>;
 
   // Find the selected vaccine data

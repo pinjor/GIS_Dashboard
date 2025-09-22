@@ -184,6 +184,14 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
       );
     }
 
+    // Split performanceData into top and low performers based on the 'isHighest' flag
+    final topPerformers = performanceData
+        .where((data) => data['isHighest'] == true)
+        .toList();
+    final lowPerformers = performanceData
+        .where((data) => data['isHighest'] != true)
+        .toList();
+
     return Card(
       color: Color(Constants.cardColor),
       elevation: 1,
@@ -226,7 +234,6 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          // flex: 1,
                           child: Text(
                             '#',
                             style: TextStyle(
@@ -272,69 +279,100 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  // Data rows
-                  ...performanceData.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final data = entry.value;
-                    final area = data['area'] as Area;
-                    final isEven = index % 2 == 0;
-                    final dropoutPercentage = _calculateDropoutPercentage(
-                      area.target,
-                      area.dropout,
-                    );
+                  // Top Performing section
+                  if (topPerformers.isNotEmpty)
+                    _buildDistinctPerformersRows(
+                      performer: topPerformers,
+                      isHighPerformer: true,
+                    ),
 
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isEven ? Colors.white : Colors.grey.shade50,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            // flex: 1,
-                            child: Icon(
-                              data['icon'] as IconData,
-                              color: data['iconColor'] as Color,
-                              size: 20,
-                            ),
-                          ),
-                          4.w,
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              area.name ?? 'Unknown',
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '${(area.coveragePercentage ?? 0).toStringAsFixed(2)}%',
-                              style: const TextStyle(fontSize: 13),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '${dropoutPercentage.toStringAsFixed(2)}%',
-                              style: const TextStyle(fontSize: 13),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+                  // Low Performing section
+                  if (lowPerformers.isNotEmpty)
+                    _buildDistinctPerformersRows(
+                      performer: lowPerformers,
+                      isHighPerformer: false,
+                    ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDistinctPerformersRows({
+    required List<Map<String, dynamic>> performer,
+    bool isHighPerformer = true,
+  }) {
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(
+              isHighPerformer
+                  ? 'High Performing (${performer.length} area)'
+                  : 'Low Performing (${performer.length} area)',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+        ...performer.asMap().entries.map((entry) {
+          final index = entry.key;
+          final data = entry.value;
+          final area = data['area'] as Area;
+          final isEven = index % 2 == 0;
+          final dropoutPercentage = _calculateDropoutPercentage(
+            area.target,
+            area.dropout,
+          );
+
+          return Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
+            decoration: BoxDecoration(
+              color: isEven ? Colors.white : Colors.grey.shade50,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Icon(
+                    data['icon'] as IconData,
+                    color: data['iconColor'] as Color,
+                    size: 20,
+                  ),
+                ),
+                4.w,
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    area.name ?? 'Unknown',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    '${(area.coveragePercentage ?? 0).toStringAsFixed(2)}%',
+                    style: const TextStyle(fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    '${dropoutPercentage.toStringAsFixed(2)}%',
+                    style: const TextStyle(fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 }
