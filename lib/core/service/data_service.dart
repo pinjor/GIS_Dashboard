@@ -212,7 +212,6 @@ class DataService {
 // 🧾 Log cache hits and misses	Debug visibility	✅ Do this
 // 💾 Persistent cache (e.g., Hive, files)	Makes cache survive app restarts	Optional
 // 🧪 Unit tests	Ensures correctness	Recommended
-// 👁 Expose last fetch time for UI	Show “updated x mins ago”	Optional
 // 🧹 Fine-grained cache clearing	More control	Optional
 
 // concise list
@@ -227,7 +226,5 @@ class DataService {
 // Support persistent caching (e.g., with Hive or file storage) to survive app restarts.
 
 // Implement unit tests to validate caching behavior under different conditions.
-
-// Expose last fetch time for optional UI features like "Last updated X mins ago".
 
 // Allow fine-grained cache clearing (per URL or per data type).
