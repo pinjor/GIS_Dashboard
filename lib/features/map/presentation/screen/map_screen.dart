@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +14,6 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../domain/area_polygon.dart';
-import '../../domain/center_info.dart';
 import '../../utils/map_utils.dart';
 import '../../utils/map_enums.dart';
 import '../controllers/map_controller.dart';
@@ -46,399 +44,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     });
   }
 
-  // List<Polygon> _buildPolygons(List<AreaPolygon> areaPolygons) {
-  //   return areaPolygons.map((areaPolygon) => areaPolygon.polygon).toList();
-  // }
-
-  /// Build markers for area names (only for drilled-down areas)
-  List<Marker> _buildAreaNameMarkers(List<AreaPolygon> areaPolygons) {
-    // Filter out "Part X" polygons to avoid duplicate labels
-    final mainAreaPolygons = areaPolygons
-        .where(
-          (polygon) =>
-              !polygon.areaName.contains('(Part ') ||
-              polygon.areaName.endsWith('(Part 1)'),
-        )
-        .toList();
-
-    // With comprehensive polygon rendering, we might have many more polygons now
-    if (mainAreaPolygons.length > 150) {
-      logg.w(
-        "Too many areas (${mainAreaPolygons.length}) for name markers, skipping labels",
-      );
-      return [];
-    }
-
-    logg.i(
-      "Building ${mainAreaPolygons.length} area name markers from ${areaPolygons.length} total polygons",
-    );
-
-    return mainAreaPolygons.map((areaPolygon) {
-      // Calculate centroid of the polygon
-      LatLng centroid = _calculatePolygonCentroid(areaPolygon.polygon.points);
-
-      // Clean up the area name (remove "Part X" suffix for display)
-      String displayName = areaPolygon.areaName;
-      if (displayName.contains('(Part 1)')) {
-        displayName = displayName.replaceFirst(' (Part 1)', '');
-      }
-
-      return Marker(
-        point: centroid,
-        child: FittedBox(
-          fit: BoxFit.none,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 3,
-              vertical: 1,
-            ), // Reduced padding significantly
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(3), // Smaller border radius
-              border: Border.all(
-                color: Colors.black38,
-                width: 0.3,
-              ), // Thinner border
-            ),
-            child: Text(
-              displayName,
-              style: const TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-              ), // Smaller font size and lighter weight
-            ),
-          ),
-        ),
-      );
-    }).toList();
-  }
-
-  /// Calculate the centroid (center point) of a polygon - OPTIMIZED to prevent freezing
-  LatLng _calculatePolygonCentroid(List<LatLng> points) {
-    if (points.isEmpty) return const LatLng(0, 0);
-
-    // Prevent freezing with very large polygon data
-    if (points.length > 1000) {
-      logg.w(
-        "Large polygon with ${points.length} points - using sampling for performance",
-      );
-      // Sample every 10th point for very large polygons to prevent freezing
-      final sampledPoints = <LatLng>[];
-      for (int i = 0; i < points.length; i += 10) {
-        sampledPoints.add(points[i]);
-      }
-      points = sampledPoints;
-    }
-
-    double centroidLat = 0;
-    double centroidLng = 0;
-
-    for (final point in points) {
-      centroidLat += point.latitude;
-      centroidLng += point.longitude;
-    }
-
-    return LatLng(centroidLat / points.length, centroidLng / points.length);
-  }
-
-  /// Build EPI markers (vaccination centers) from EPI data
-  List<Marker> _buildEpiMarkers(EpiCenterCoordsResponse? epiCenterCoordsData) {
-    if (epiCenterCoordsData == null) return [];
-
-    try {
-      final features = epiCenterCoordsData.features;
-
-      if (features == null || features.isEmpty) return [];
-
-      logg.i("Building ${features.length} EPI markers");
-
-      return features
-          .map<Marker>((feature) {
-            final geometry = feature.geometry;
-            final info = feature.info;
-
-            if (geometry?.type == 'Point' && geometry?.coordinates != null) {
-              final coords = geometry!.coordinates as List;
-              final lng = (coords[0] as num).toDouble();
-              final lat = (coords[1] as num).toDouble();
-              final centerName = info?.name ?? 'EPI Center';
-              final isFixedCenter = info?.isFixedCenter ?? false;
-
-              return Marker(
-                point: LatLng(lat, lng),
-                width: 19,
-                height: 19,
-                child: GestureDetector(
-                  onTap: () => _onEpiMarkerTap(centerName, info?.orgUid ?? ''),
-                  child: Tooltip(
-                    message: centerName,
-                    child: SizedBox(
-                      width: 14, // Force container size with SizedBox
-                      height: 14, // Force container size with SizedBox
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isFixedCenter
-                              ? Colors.blueAccent
-                              : Colors.deepPurple,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 0.5),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              blurRadius: 1,
-                              offset: const Offset(0, 0.5),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: !isFixedCenter
-                              ? FaIcon(
-                                  FontAwesomeIcons.syringe,
-                                  size: 10,
-                                  color: Colors.white,
-                                )
-                              : Icon(Icons.home, color: Colors.white, size: 10),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            // Return empty marker for invalid geometry
-            return Marker(
-              point: const LatLng(0, 0),
-              child: const SizedBox.shrink(),
-            );
-          })
-          .where(
-            (marker) =>
-                marker.point.latitude != 0 || marker.point.longitude != 0,
-          )
-          .toList();
-    } catch (e) {
-      logg.e("Error parsing EPI data: $e");
-      return [];
-    }
-  }
-
-  /// Calculate bounds of all polygons for auto-zoom
-  LatLngBounds _calculatePolygonsBounds(List<AreaPolygon> areaPolygons) {
-    if (areaPolygons.isEmpty) {
-      return LatLngBounds(
-        const LatLng(23.6850, 90.3563), // Default Bangladesh center
-        const LatLng(23.6850, 90.3563),
-      );
-    }
-
-    double minLat = double.infinity;
-    double maxLat = double.negativeInfinity;
-    double minLng = double.infinity;
-    double maxLng = double.negativeInfinity;
-
-    for (final areaPolygon in areaPolygons) {
-      for (final point in areaPolygon.polygon.points) {
-        minLat = minLat < point.latitude ? minLat : point.latitude;
-        maxLat = maxLat > point.latitude ? maxLat : point.latitude;
-        minLng = minLng < point.longitude ? minLng : point.longitude;
-        maxLng = maxLng > point.longitude ? maxLng : point.longitude;
-      }
-    }
-
-    return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
-  }
-
-  /// Calculate center point and appropriate zoom level for current level polygons
-  CenterInfo _calculateCurrentLevelCenterAndZoom(
-    List<AreaPolygon> polygons,
-    GeographicLevel currentLevel,
-  ) {
-    if (polygons.isEmpty) {
-      // Fallback to Bangladesh center
-      logg.w(
-        "No polygons available for centering, using default Bangladesh center",
-      );
-      return CenterInfo(
-        center: const LatLng(23.6850, 90.3563),
-        zoom: _initialZoom,
-      );
-    }
-
-    // Calculate the bounding box of all polygons
-    final bounds = _calculatePolygonsBounds(polygons);
-
-    // Calculate center point using weighted centroid for better accuracy
-    LatLng center = _calculateWeightedCentroid(polygons, bounds);
-
-    // Calculate appropriate zoom level based on bounds size, level, and polygon density
-    double zoom = _calculateZoomForBounds(
-      bounds,
-      currentLevel,
-      polygons.length,
-    );
-
-    return CenterInfo(center: center, zoom: zoom);
-  }
-
-  /// Calculate weighted centroid for more accurate center point
-  LatLng _calculateWeightedCentroid(
-    List<AreaPolygon> polygons,
-    LatLngBounds bounds,
-  ) {
-    if (polygons.length == 1) {
-      // For single polygon, use its actual centroid
-      return _calculatePolygonCentroid(polygons.first.polygon.points);
-    }
-
-    // For multiple polygons, calculate weighted centroid based on polygon area
-    double totalWeightedLat = 0;
-    double totalWeightedLng = 0;
-    double totalWeight = 0;
-
-    for (final polygon in polygons) {
-      final polygonCenter = _calculatePolygonCentroid(polygon.polygon.points);
-      final polygonArea = _calculatePolygonArea(polygon.polygon.points);
-
-      // Use area as weight, with minimum weight of 1 to avoid zero weights
-      final weight = math.max(polygonArea, 1.0);
-
-      totalWeightedLat += polygonCenter.latitude * weight;
-      totalWeightedLng += polygonCenter.longitude * weight;
-      totalWeight += weight;
-    }
-
-    if (totalWeight > 0) {
-      return LatLng(
-        totalWeightedLat / totalWeight,
-        totalWeightedLng / totalWeight,
-      );
-    } else {
-      // Fallback to bounds center
-      return LatLng(
-        (bounds.north + bounds.south) / 2,
-        (bounds.east + bounds.west) / 2,
-      );
-    }
-  }
-
-  /// Calculate approximate area of a polygon (for weighting purposes) - OPTIMIZED to prevent freezing
-  double _calculatePolygonArea(List<LatLng> points) {
-    if (points.length < 3) return 0.0;
-
-    // Prevent freezing with very large polygon data
-    if (points.length > 500) {
-      logg.d(
-        "Large polygon with ${points.length} points - using sampling for area calculation",
-      );
-      // Sample every 5th point for very large polygons to prevent freezing
-      final sampledPoints = <LatLng>[];
-      for (int i = 0; i < points.length; i += 5) {
-        sampledPoints.add(points[i]);
-      }
-      points = sampledPoints;
-    }
-
-    double area = 0.0;
-    for (int i = 0; i < points.length; i++) {
-      final j = (i + 1) % points.length;
-      area += points[i].longitude * points[j].latitude;
-      area -= points[j].longitude * points[i].latitude;
-    }
-    return area.abs() / 2.0;
-  }
-
-  /// Calculate appropriate zoom level based on bounds size, current level, and polygon count
-  double _calculateZoomForBounds(
-    LatLngBounds bounds,
-    GeographicLevel currentLevel,
-    int polygonCount,
-  ) {
-    // Calculate the span of the bounds
-    final latSpan = bounds.north - bounds.south;
-    final lngSpan = bounds.east - bounds.west;
-    final maxSpan = math.max(latSpan, lngSpan);
-
-    // Base zoom calculation based on span size
-    double baseZoom;
-    if (maxSpan > 5.0) {
-      baseZoom = 6.0; // Very large area (country level)
-    } else if (maxSpan > 2.0) {
-      baseZoom = 7.5; // Large area (multiple districts)
-    } else if (maxSpan > 1.0) {
-      baseZoom = 8.5; // Medium area (district level)
-    } else if (maxSpan > 0.5) {
-      baseZoom = 9.5; // Smaller area (upazila level)
-    } else if (maxSpan > 0.2) {
-      baseZoom = 11.0; // Small area (union level)
-    } else if (maxSpan > 0.1) {
-      baseZoom = 12.0; // Very small area (ward level)
-    } else {
-      baseZoom = 13.0; // Tiny area (subblock level)
-    }
-
-    // Adjust zoom based on polygon density (more polygons = zoom out a bit for overview)
-    if (polygonCount > 50) {
-      baseZoom -= 0.5; // Zoom out for many polygons
-    } else if (polygonCount > 20) {
-      baseZoom -= 0.3; // Slight zoom out for moderate polygon count
-    } else if (polygonCount == 1) {
-      baseZoom += 0.5; // Zoom in for single polygon
-    }
-
-    // Use the enum's minZoomLevel method for level-specific minimum zoom
-    return math.max(baseZoom, currentLevel.minZoomLevel);
-  }
-
-  /// Auto-zoom to fit all polygons with padding
+  /// Auto-zoom to fit all polygons with padding - now uses centralized function
   void _autoZoomToPolygons(List<AreaPolygon> areaPolygons) {
-    if (areaPolygons.isEmpty) return;
-
-    final bounds = _calculatePolygonsBounds(areaPolygons);
-
-    logg.i(
-      "Auto-zooming to fit polygons: bounds from ${bounds.south}, ${bounds.west} to ${bounds.north}, ${bounds.east}",
-    );
-
-    // Calculate center of bounds
-    final center = LatLng(
-      (bounds.north + bounds.south) / 2,
-      (bounds.east + bounds.west) / 2,
-    );
-
-    // Calculate appropriate zoom level based on bounds size
-    final latSpan = bounds.north - bounds.south;
-    final lngSpan = bounds.east - bounds.west;
-    final maxSpan = math.max(latSpan, lngSpan);
-
-    double zoom;
-    if (maxSpan > 4.0) {
-      zoom = 6.0;
-    } else if (maxSpan > 2.0) {
-      zoom = 7.0;
-    } else if (maxSpan > 1.0) {
-      zoom = 8.0;
-    } else if (maxSpan > 0.5) {
-      zoom = 9.0;
-    } else if (maxSpan > 0.2) {
-      zoom = 10.0;
-    } else if (maxSpan > 0.1) {
-      zoom = 11.0;
-    } else {
-      zoom = 12.0;
-    }
-
-    // Ensure zoom is within reasonable bounds
-    zoom = math.min(math.max(zoom, 6.0), 15.0);
-
-    try {
-      mapController.moveAndRotate(center, zoom, 0);
-      logg.i("Auto-zoom completed successfully to zoom level $zoom");
-    } catch (e) {
-      logg.e("Error auto-zooming: $e");
-      // Fallback to center bounds with default zoom
-      mapController.moveAndRotate(center, 8.0, 0);
-    }
+    final mapState = ref.read(mapControllerProvider);
+    autoZoomToPolygons(areaPolygons, mapState.currentLevel, mapController);
   }
 
   void _resetToCountryView({required GeographicLevel currentLevel}) {
@@ -476,8 +85,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       return;
     }
 
-    // Calculate the center point and appropriate zoom for current level polygons
-    final centerInfo = _calculateCurrentLevelCenterAndZoom(
+    // Use centralized function to calculate center and zoom
+    final centerInfo = calculateCurrentLevelCenterAndZoom(
       currentPolygons,
       currentLevel,
     );
@@ -555,19 +164,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         // Perform the sync using the map controller's integrated functionality
         mapController.syncFiltersWithDistrict(areaId);
-        //  .then((success) {
-        //   if (success) {
-        //     // Get the names for user feedback
-        //     final districtName = mapController.getDistrictName(areaId);
-        //     final divisionName = mapController.getDivisionNameForDistrict(
-        //       areaId,
-        //     );
-
-        //     if (districtName != null && divisionName != null) {
-        //       _showFilterSyncSuccessSnackBar(divisionName, districtName);
-        //     }
-        //   }
-        // });
       } else {
         logg.d("ℹ️ Area ID '$areaId' is not a district - no sync needed");
         // This is expected for divisions, upazilas, etc.
@@ -577,34 +173,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       // Don't show error to user - this is a supplementary feature
     }
   }
-
-  /// Show success feedback when filter sync completes
-  // void _showFilterSyncSuccessSnackBar(
-  //   String divisionName,
-  //   String districtName,
-  // ) {
-  //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Row(
-  //         children: [
-  //           const Icon(Icons.sync, color: Colors.white, size: 18),
-  //           const SizedBox(width: 8),
-  //           Expanded(
-  //             child: Text(
-  //               'Filters synced: $divisionName → $districtName',
-  //               style: const TextStyle(fontSize: 14),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       backgroundColor: Colors.green.shade600,
-  //       duration: const Duration(seconds: 2),
-  //       behavior: SnackBarBehavior.floating,
-  //       margin: const EdgeInsets.all(16),
-  //     ),
-  //   );
-  // }
 
   /// Perform drilldown to the selected area
   void _performDrillDown(AreaPolygon tappedPolygon) {
@@ -796,10 +364,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               // Parse fresh polygons for auto-zoom
               final filterState = ref.read(filterControllerProvider);
               final freshPolygons = parseGeoJsonToPolygons(
-                current.fetchAreaGeoJsonCoordsData!,
+                current.areaCoordsGeoJsonData!,
                 current.coverageData!,
                 filterState.selectedVaccine,
-                current.currentLevel,
+                current.currentLevel.value,
               );
 
               if (freshPolygons.isNotEmpty) {
@@ -910,34 +478,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
-    // if (mapState.geoJson != null && mapState.coverageData != null) {
-    //   try {
-    //     areaPolygons = parseGeoJsonToPolygons(
-    //       mapState.geoJson!,
-    //       mapState.coverageData!,
-    //       filterState.selectedVaccine,
-    //       mapState.currentLevel,
-    //     );
-    //     logg.i("Successfully parsed ${areaPolygons.length} polygons");
-
-    //     // Clear any existing errors when data is successfully loaded and parsed
-    //     if (mapState.error != null && !mapState.isLoading) {
-    //       WidgetsBinding.instance.addPostFrameCallback((_) {
-    //         ref.read(mapControllerProvider.notifier).clearError();
-    //       });
-    //     }
-    //   } catch (e) {
-    //     logg.e("Error parsing polygons: $e");
-    //     // Don't set error state here, just log it
-    //     areaPolygons = [];
-    //   }
-
-    //   // Debug logging
-    //   logg.i(
-    //     "Map render state: loading=${mapState.isLoading}, error=${mapState.error ?? 'none'}, polygons=${areaPolygons.length}, level=${mapState.currentLevel}",
-    //   );
-    // }
-
     return Scaffold(
       body: Column(
         children: [
@@ -955,7 +495,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 children: [
                   IconButton(
                     onPressed:
-                        _goBack, //! doesn't perform go back when upazila -> district is attempted! :( unfortunately
+                        _goBack, //! does perform go back but dont understand why :(
                     icon: const Icon(Icons.arrow_back),
                   ),
                   Expanded(
@@ -1176,5 +716,150 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         ],
       ),
     );
+  }
+
+  /// Build markers for area names (only for drilled-down areas)
+  List<Marker> _buildAreaNameMarkers(List<AreaPolygon> areaPolygons) {
+    // Filter out "Part X" polygons to avoid duplicate labels
+    final mainAreaPolygons = areaPolygons
+        .where(
+          (polygon) =>
+              !polygon.areaName.contains('(Part ') ||
+              polygon.areaName.endsWith('(Part 1)'),
+        )
+        .toList();
+
+    // With comprehensive polygon rendering, we might have many more polygons now
+    if (mainAreaPolygons.length > 150) {
+      logg.w(
+        "Too many areas (${mainAreaPolygons.length}) for name markers, skipping labels",
+      );
+      return [];
+    }
+
+    logg.i(
+      "Building ${mainAreaPolygons.length} area name markers from ${areaPolygons.length} total polygons",
+    );
+
+    return mainAreaPolygons.map((areaPolygon) {
+      // Calculate centroid of the polygon using centralized function
+      LatLng centroid = calculatePolygonCentroid(areaPolygon.polygon.points);
+
+      // Clean up the area name (remove "Part X" suffix for display)
+      String displayName = areaPolygon.areaName;
+      if (displayName.contains('(Part 1)')) {
+        displayName = displayName.replaceFirst(' (Part 1)', '');
+      }
+
+      return Marker(
+        point: centroid,
+        child: FittedBox(
+          fit: BoxFit.none,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 3,
+              vertical: 1,
+            ), // Reduced padding significantly
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(3), // Smaller border radius
+              border: Border.all(
+                color: Colors.black38,
+                width: 0.3,
+              ), // Thinner border
+            ),
+            child: Text(
+              displayName,
+              style: const TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+              ), // Smaller font size and lighter weight
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  /// Build EPI markers (vaccination centers) from EPI data
+  List<Marker> _buildEpiMarkers(EpiCenterCoordsResponse? epiCenterCoordsData) {
+    if (epiCenterCoordsData == null) return [];
+
+    try {
+      final features = epiCenterCoordsData.features;
+
+      if (features == null || features.isEmpty) return [];
+
+      logg.i("Building ${features.length} EPI markers");
+
+      return features
+          .map<Marker>((feature) {
+            final geometry = feature.geometry;
+            final info = feature.info;
+
+            if (geometry?.type == 'Point' && geometry?.coordinates != null) {
+              final coords = geometry!.coordinates as List;
+              final lng = (coords[0] as num).toDouble();
+              final lat = (coords[1] as num).toDouble();
+              final centerName = info?.name ?? 'EPI Center';
+              final isFixedCenter = info?.isFixedCenter ?? false;
+
+              return Marker(
+                point: LatLng(lat, lng),
+                width: 19,
+                height: 19,
+                child: GestureDetector(
+                  onTap: () => _onEpiMarkerTap(centerName, info?.orgUid ?? ''),
+                  child: Tooltip(
+                    message: centerName,
+                    child: SizedBox(
+                      width: 14, // Force container size with SizedBox
+                      height: 14, // Force container size with SizedBox
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isFixedCenter
+                              ? Colors.blueAccent
+                              : Colors.deepPurple,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 0.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 1,
+                              offset: const Offset(0, 0.5),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: !isFixedCenter
+                              ? FaIcon(
+                                  FontAwesomeIcons.syringe,
+                                  size: 10,
+                                  color: Colors.white,
+                                )
+                              : Icon(Icons.home, color: Colors.white, size: 10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // Return empty marker for invalid geometry
+            return Marker(
+              point: const LatLng(0, 0),
+              child: const SizedBox.shrink(),
+            );
+          })
+          .where(
+            (marker) =>
+                marker.point.latitude != 0 || marker.point.longitude != 0,
+          )
+          .toList();
+    } catch (e) {
+      logg.e("Error parsing EPI data: $e");
+      return [];
+    }
   }
 }

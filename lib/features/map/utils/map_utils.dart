@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'dart:math' as math;
 
 import '../../../config/coverage_colors.dart';
 import '../../../core/utils/utils.dart';
 import '../domain/area_coords_geo_json_response.dart';
 import '../domain/area_polygon.dart';
+import '../domain/center_info.dart';
 import '../../summary/domain/vaccine_coverage_response.dart';
 import 'map_enums.dart';
 
@@ -226,7 +228,7 @@ List<List<LatLng>> _extractAllMultiPolygonRings(
     }
 
     final coordsList = multiPolygonCoords;
-    
+
     // For MultiPolygon: coordinates = [polygon1, polygon2, ...]
     // Each polygon = [exterior_ring, hole1, hole2, ...]
     for (
@@ -238,7 +240,6 @@ List<List<LatLng>> _extractAllMultiPolygonRings(
         final polygonCoords = coordsList[polygonIndex];
 
         if (polygonCoords is! List) {
-         
           continue;
         }
 
@@ -250,7 +251,6 @@ List<List<LatLng>> _extractAllMultiPolygonRings(
             final coords = polygonList[ringIndex];
 
             if (coords is! List) {
-              
               continue;
             }
 
@@ -259,12 +259,10 @@ List<List<LatLng>> _extractAllMultiPolygonRings(
             // COMPREHENSIVE: Process ALL valid coordinate sets
             if (points.length >= 3) {
               allRings.add(points);
-              
             } else if (points.length == 2) {
               // ADAPTIVE: Handle minimal polygons gracefully
               points.add(points.last);
               allRings.add(points);
-              
             } else if (points.length == 1) {
               // FUTURE-PROOF: Handle single points that might represent areas
               final point = points.first;
@@ -274,10 +272,8 @@ List<List<LatLng>> _extractAllMultiPolygonRings(
                 LatLng(point.latitude, point.longitude + 0.001),
               ];
               allRings.add(minimalTriangle);
-              
-            } 
+            }
           } catch (e) {
-            
             // RESILIENT: Continue with other rings
             continue;
           }
@@ -291,7 +287,6 @@ List<List<LatLng>> _extractAllMultiPolygonRings(
     // GRACEFUL: Return what we have
   }
 
-  
   return allRings;
 }
 
@@ -301,7 +296,6 @@ List<LatLng> _extractCoordinates(List<dynamic> coords, String? areaName) {
   int invalidCount = 0;
 
   if (coords.isEmpty) {
-   
     return validCoords;
   }
 
@@ -364,9 +358,7 @@ List<LatLng> _extractCoordinates(List<dynamic> coords, String? areaName) {
         }
       } else {
         invalidCount++;
-        if (invalidCount <= 3) {
-          
-        }
+        if (invalidCount <= 3) {}
       }
     } catch (e) {
       invalidCount++;
@@ -454,5 +446,207 @@ AreaPolygon? _createAreaPolygon(
   } catch (e) {
     logg.e("Error creating area polygon for $areaName: $e");
     return null;
+  }
+}
+
+// ============================================================================
+// MAP UTILITY FUNCTIONS - EXTRACTED FROM MAP_SCREEN.DART FOR BETTER ORGANIZATION
+// ============================================================================
+
+/// Calculate the centroid (center point) of a polygon - OPTIMIZED to prevent freezing
+LatLng calculatePolygonCentroid(List<LatLng> points) {
+  if (points.isEmpty) return const LatLng(0, 0);
+
+  // Prevent freezing with very large polygon data
+  if (points.length > 1000) {
+    logg.w(
+      "Large polygon with ${points.length} points - using sampling for performance",
+    );
+    // Sample every 10th point for very large polygons to prevent freezing
+    final sampledPoints = <LatLng>[];
+    for (int i = 0; i < points.length; i += 10) {
+      sampledPoints.add(points[i]);
+    }
+    points = sampledPoints;
+  }
+
+  double centroidLat = 0;
+  double centroidLng = 0;
+
+  for (final point in points) {
+    centroidLat += point.latitude;
+    centroidLng += point.longitude;
+  }
+
+  return LatLng(centroidLat / points.length, centroidLng / points.length);
+}
+
+/// Calculate bounds of all polygons for auto-zoom
+LatLngBounds calculatePolygonsBounds(List<AreaPolygon> areaPolygons) {
+  if (areaPolygons.isEmpty) {
+    return LatLngBounds(
+      const LatLng(23.6850, 90.3563), // Default Bangladesh center
+      const LatLng(23.6850, 90.3563),
+    );
+  }
+
+  double minLat = double.infinity;
+  double maxLat = double.negativeInfinity;
+  double minLng = double.infinity;
+  double maxLng = double.negativeInfinity;
+
+  for (final areaPolygon in areaPolygons) {
+    for (final point in areaPolygon.polygon.points) {
+      minLat = minLat < point.latitude ? minLat : point.latitude;
+      maxLat = maxLat > point.latitude ? maxLat : point.latitude;
+      minLng = minLng < point.longitude ? minLng : point.longitude;
+      maxLng = maxLng > point.longitude ? maxLng : point.longitude;
+    }
+  }
+
+  return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
+}
+
+/// Calculate approximate area of a polygon (for weighting purposes) - OPTIMIZED to prevent freezing
+double calculatePolygonArea(List<LatLng> points) {
+  if (points.length < 3) return 0.0;
+
+  // Prevent freezing with very large polygon data
+  if (points.length > 500) {
+    logg.w(
+      "Large polygon with ${points.length} points - using sampling for area calculation",
+    );
+    // Sample every 5th point for very large polygons to prevent freezing
+    final sampledPoints = <LatLng>[];
+    for (int i = 0; i < points.length; i += 5) {
+      sampledPoints.add(points[i]);
+    }
+    points = sampledPoints;
+  }
+
+  double area = 0.0;
+  for (int i = 0; i < points.length; i++) {
+    final j = (i + 1) % points.length;
+    area += points[i].longitude * points[j].latitude;
+    area -= points[j].longitude * points[i].latitude;
+  }
+  return area.abs() / 2.0;
+}
+
+/// Calculate weighted centroid for more accurate center point
+LatLng calculateWeightedCentroid(
+  List<AreaPolygon> polygons,
+  LatLngBounds bounds,
+) {
+  if (polygons.length == 1) {
+    return calculatePolygonCentroid(polygons.first.polygon.points);
+  }
+
+  // For multiple polygons, calculate weighted centroid based on polygon area
+  double totalWeightedLat = 0;
+  double totalWeightedLng = 0;
+  double totalWeight = 0;
+
+  for (final polygon in polygons) {
+    final centroid = calculatePolygonCentroid(polygon.polygon.points);
+    final area = calculatePolygonArea(polygon.polygon.points);
+    final weight = math.max(area, 1.0); // Avoid zero weights
+
+    totalWeightedLat += centroid.latitude * weight;
+    totalWeightedLng += centroid.longitude * weight;
+    totalWeight += weight;
+  }
+
+  if (totalWeight > 0) {
+    return LatLng(
+      totalWeightedLat / totalWeight,
+      totalWeightedLng / totalWeight,
+    );
+  } else {
+    // Fallback to center of bounds
+    return LatLng(
+      (bounds.north + bounds.south) / 2,
+      (bounds.east + bounds.west) / 2,
+    );
+  }
+}
+
+/// Calculate center point and appropriate zoom level for current level polygons
+CenterInfo calculateCurrentLevelCenterAndZoom(
+  List<AreaPolygon> polygons,
+  GeographicLevel currentLevel,
+) {
+  if (polygons.isEmpty) {
+    return CenterInfo(
+      center: const LatLng(23.6850, 90.3563),
+      zoom: currentLevel.minZoomLevel,
+    );
+  }
+
+  // Calculate the bounding box of all polygons
+  final bounds = calculatePolygonsBounds(polygons);
+
+  // Calculate center point using weighted centroid for better accuracy
+  LatLng center = calculateWeightedCentroid(polygons, bounds);
+
+  // Calculate appropriate zoom level based on bounds size, level, and polygon density
+  double zoom = calculateZoomForBounds(bounds, currentLevel, polygons.length);
+
+  return CenterInfo(center: center, zoom: zoom);
+}
+
+/// Calculate appropriate zoom level based on bounds size, current level, and polygon count
+double calculateZoomForBounds(
+  LatLngBounds bounds,
+  GeographicLevel currentLevel,
+  int polygonCount,
+) {
+  // Calculate the span of the bounds
+  final latSpan = bounds.north - bounds.south;
+  final lngSpan = bounds.east - bounds.west;
+  final maxSpan = math.max(latSpan, lngSpan);
+
+  // Use centralized zoom calculation from GeographicLevel enum
+  return currentLevel.calculateZoomForBounds(
+    maxSpan: maxSpan,
+    polygonCount: polygonCount,
+  );
+}
+
+/// Centralized auto-zoom function that uses GeographicLevel's zoom capabilities
+void autoZoomToPolygons(
+  List<AreaPolygon> areaPolygons,
+  GeographicLevel currentLevel,
+  MapController mapController,
+) {
+  if (areaPolygons.isEmpty) return;
+
+  final bounds = calculatePolygonsBounds(areaPolygons);
+
+  logg.i(
+    "Auto-zooming to fit polygons: bounds from ${bounds.south}, ${bounds.west} to ${bounds.north}, ${bounds.east}",
+  );
+
+  // Calculate center of bounds
+  final center = LatLng(
+    (bounds.north + bounds.south) / 2,
+    (bounds.east + bounds.west) / 2,
+  );
+
+  // Calculate appropriate zoom level based on bounds size using centralized logic
+  final latSpan = bounds.north - bounds.south;
+  final lngSpan = bounds.east - bounds.west;
+  final maxSpan = math.max(latSpan, lngSpan);
+
+  // Use the centralized zoom calculation from GeographicLevel enum
+  double zoom = currentLevel.getOptimalZoomForSpan(maxSpan);
+
+  try {
+    mapController.moveAndRotate(center, zoom, 0);
+    logg.i("Auto-zoom completed successfully to zoom level $zoom");
+  } catch (e) {
+    logg.e("Error auto-zooming: $e");
+    // Fallback to center bounds with default zoom
+    mapController.moveAndRotate(center, currentLevel.minZoomLevel, 0);
   }
 }

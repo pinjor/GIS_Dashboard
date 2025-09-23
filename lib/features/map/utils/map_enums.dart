@@ -97,6 +97,70 @@ enum GeographicLevel {
     }
   }
 
+  /// Calculate appropriate zoom level based on bounds size and polygon count
+  /// This centralizes zoom calculation logic that was scattered across the app
+  double calculateZoomForBounds({
+    required double maxSpan,
+    required int polygonCount,
+  }) {
+    // Base zoom calculation based on span size
+    double baseZoom;
+    if (maxSpan > 5.0) {
+      baseZoom = 6.0; // Very large area (country level)
+    } else if (maxSpan > 2.0) {
+      baseZoom = 7.5; // Large area (multiple districts)
+    } else if (maxSpan > 1.0) {
+      baseZoom = 8.5; // Medium area (district level)
+    } else if (maxSpan > 0.5) {
+      baseZoom = 9.5; // Smaller area (upazila level)
+    } else if (maxSpan > 0.2) {
+      baseZoom = 11.0; // Small area (union level)
+    } else if (maxSpan > 0.1) {
+      baseZoom = 12.0; // Very small area (ward level)
+    } else {
+      baseZoom = 13.0; // Subblock level
+    }
+
+    // Adjust zoom based on polygon density
+    if (polygonCount > 50) {
+      baseZoom -= 0.5; // Zoom out for many polygons
+    } else if (polygonCount > 20) {
+      baseZoom -= 0.3; // Slight zoom out for moderate polygon count
+    } else if (polygonCount == 1) {
+      baseZoom += 0.5; // Zoom in for single polygon
+    }
+
+    // Use the enum's minZoomLevel method for level-specific minimum zoom
+    // Ensure zoom is within reasonable bounds (6.0 to 15.0)
+    return minZoomLevel > baseZoom
+        ? minZoomLevel
+        : (baseZoom > 15.0 ? 15.0 : baseZoom);
+  }
+
+  /// Get optimal zoom level for auto-zoom based on span size (simplified)
+  /// Used for quick auto-zoom calculations
+  double getOptimalZoomForSpan(double maxSpan) {
+    double zoom;
+    if (maxSpan > 4.0) {
+      zoom = 6.0;
+    } else if (maxSpan > 2.0) {
+      zoom = 7.0;
+    } else if (maxSpan > 1.0) {
+      zoom = 8.0;
+    } else if (maxSpan > 0.5) {
+      zoom = 9.0;
+    } else if (maxSpan > 0.2) {
+      zoom = 10.0;
+    } else if (maxSpan > 0.1) {
+      zoom = 11.0;
+    } else {
+      zoom = 12.0;
+    }
+
+    // Ensure zoom is within reasonable bounds and respects minimum zoom for this level
+    return minZoomLevel > zoom ? minZoomLevel : (zoom > 15.0 ? 15.0 : zoom);
+  }
+
   /// Create GeographicLevel from string value with fallback
   static GeographicLevel fromString(String value) {
     return GeographicLevel.values.firstWhere(
