@@ -14,5 +14,6 @@ abstract class AreaResponseModel with _$AreaResponseModel {
     @JsonKey(name: 'parent_uid') String? parentUid,
   }) = _AreaResponseModel;
 
-  factory AreaResponseModel.fromJson(Map<String, dynamic> json) => _$AreaResponseModelFromJson(json);
+  factory AreaResponseModel.fromJson(Map<String, dynamic> json) =>
+      _$AreaResponseModelFromJson(json);
 }

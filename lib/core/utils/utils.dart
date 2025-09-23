@@ -55,7 +55,7 @@ void showCustomSnackBar({
   );
 }
 
-extension ExcludeParenthesesStrings on String{
+extension ExcludeParenthesesStrings on String {
   // if any string is like "example (text)" it will return "example"
   String excludeParentheses() {
     return replaceAll(RegExp(r'\s*\(.*?\)\s*'), '').trim();

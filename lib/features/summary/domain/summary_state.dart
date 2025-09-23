@@ -12,7 +12,8 @@ class SummaryState {
     this.coverageData,
     this.isLoading = false,
     this.error,
-    this.currentLevel = GeographicLevel.district,
+    this.currentLevel =
+        GeographicLevel.country, // Fixed: Initial level should be country
     this.currentAreaName = 'Bangladesh',
   });
 

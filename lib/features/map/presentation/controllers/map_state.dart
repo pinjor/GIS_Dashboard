@@ -50,7 +50,8 @@ class MapState {
     this.areaCoordsGeoJsonData,
     this.coverageData,
     this.epiCenterCoordsData,
-    this.currentLevel = GeographicLevel.district,
+    this.currentLevel =
+        GeographicLevel.country, // Fixed: Default to country level
     this.navigationStack = const [],
     this.isLoading = false,
     this.error,
@@ -69,7 +70,8 @@ class MapState {
     bool clearError = false,
   }) {
     return MapState(
-      areaCoordsGeoJsonData: areaCoordsGeoJsonData ?? this.areaCoordsGeoJsonData,
+      areaCoordsGeoJsonData:
+          areaCoordsGeoJsonData ?? this.areaCoordsGeoJsonData,
       coverageData: coverageData ?? this.coverageData,
       epiCenterCoordsData: epiCenterCoordsData ?? this.epiCenterCoordsData,
       currentLevel: currentLevel ?? this.currentLevel,

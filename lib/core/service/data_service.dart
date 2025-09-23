@@ -90,7 +90,9 @@ class DataService {
 
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        areaCoordsData = await _mapRepository.fetchAreaGeoJsonCoordsData(urlPath: urlPath);
+        areaCoordsData = await _mapRepository.fetchAreaGeoJsonCoordsData(
+          urlPath: urlPath,
+        );
         // _cachedGeoJson = data;
         // _lastFetchTime = DateTime.now();
         return areaCoordsData;
@@ -124,7 +126,9 @@ class DataService {
     for (int attempt = 1; attempt <= 2; attempt++) {
       // Fewer retries for EPI
       try {
-        final data = await _epiCenterRepository.fetchEpiCenterCoordsData(urlPath: urlPath);
+        final data = await _epiCenterRepository.fetchEpiCenterCoordsData(
+          urlPath: urlPath,
+        );
         return data;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
@@ -200,8 +204,6 @@ class DataService {
     throw lastError ?? Exception('EPI center data unavailable');
   }
 }
-
-
 
 // future plans (detailed)
 

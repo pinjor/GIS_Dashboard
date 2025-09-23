@@ -45,7 +45,7 @@ class _EpiCenterDetailsScreenState
     });
   }
 
-  Future<void> _loadEpiCenterData() async{
+  Future<void> _loadEpiCenterData() async {
     Future.microtask(() {
       final filterState = ref.read(filterControllerProvider);
       final year =

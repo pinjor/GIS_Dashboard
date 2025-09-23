@@ -15,11 +15,12 @@ enum GeographicLevel {
   /// Union level
   union('union'),
 
-  /// Ward level
-  ward('ward'),
+  /// Ward level (terminal level for drilldown)
+  ward('ward');
 
-  /// Smallest administrative unit
-  subblock('subblock');
+  /// Smallest administrative unit - COMMENTED OUT as it's not used in practice
+  /// and causes confusion. Ward is the actual terminal level.
+  // subblock('subblock');
 
   const GeographicLevel(this.value);
 
@@ -29,7 +30,8 @@ enum GeographicLevel {
   GeographicLevel? get nextLevel {
     switch (this) {
       case GeographicLevel.country:
-        return GeographicLevel.district;
+        return GeographicLevel
+            .district; // Map drilldown: Country → District (skip division)
       case GeographicLevel.division:
         return GeographicLevel.district;
       case GeographicLevel.district:
@@ -39,13 +41,12 @@ enum GeographicLevel {
       case GeographicLevel.union:
         return GeographicLevel.ward;
       case GeographicLevel.ward:
-        return GeographicLevel.subblock;
-      case GeographicLevel.subblock:
-        return null; // No further drilldown
+        return null; // Ward is now the terminal level - no further drilldown
     }
   }
 
   /// Get the previous level in the hierarchy for going back
+  /// NOTE: This is primarily used for reference. Actual navigation uses navigation stack context.
   GeographicLevel? get previousLevel {
     switch (this) {
       case GeographicLevel.country:
@@ -53,47 +54,74 @@ enum GeographicLevel {
       case GeographicLevel.division:
         return GeographicLevel.country;
       case GeographicLevel.district:
-        return GeographicLevel.country; // or division depending on context
+        return GeographicLevel
+            .country; // Map navigation: District → Country (filter context may differ)
       case GeographicLevel.upazila:
         return GeographicLevel.district;
       case GeographicLevel.union:
         return GeographicLevel.upazila;
       case GeographicLevel.ward:
         return GeographicLevel.union;
-      case GeographicLevel.subblock:
-        return GeographicLevel.ward;
     }
   }
 
   /// Check if EPI data is available at this level
+  /// EPI centers are available from upazila level and deeper (upazila, union, ward)
   bool get hasEpiData {
-    return this == GeographicLevel.union ||
-        this == GeographicLevel.ward ||
-        this == GeographicLevel.subblock;
+    return this == GeographicLevel.upazila ||
+        this == GeographicLevel.union ||
+        this == GeographicLevel.ward;
   }
 
   /// Check if this level can be drilled down further
   bool get canDrillDown {
-    return this != GeographicLevel.subblock;
+    return this != GeographicLevel.ward;
+  }
+
+  /// Check if this is the root/initial level (country view)
+  bool get isRootLevel {
+    return this == GeographicLevel.country;
+  }
+
+  /// Check if area name labels should be shown on the map
+  /// Labels are shown for all levels except the root country level
+  bool get shouldShowAreaLabels {
+    return !isRootLevel;
+  }
+
+  /// Get the display name for this geographic level
+  String get displayName {
+    switch (this) {
+      case GeographicLevel.country:
+        return 'Country';
+      case GeographicLevel.division:
+        return 'Division';
+      case GeographicLevel.district:
+        return 'District';
+      case GeographicLevel.upazila:
+        return 'Upazila';
+      case GeographicLevel.union:
+        return 'Union';
+      case GeographicLevel.ward:
+        return 'Ward';
+    }
   }
 
   /// Get minimum zoom level for this geographic level
   double get minZoomLevel {
     switch (this) {
       case GeographicLevel.country:
-        return 6.0;
+        return 7.2; // Increased from 6.0 for better country view
       case GeographicLevel.division:
-        return 6.5;
+        return 7.5; // Increased from 6.5
       case GeographicLevel.district:
-        return 6.5;
+        return 7.8; // Increased from 6.5
       case GeographicLevel.upazila:
-        return 8.0;
+        return 9.2; // Increased from 8.0
       case GeographicLevel.union:
-        return 10.0;
+        return 11.5; // Increased from 10.0
       case GeographicLevel.ward:
-        return 11.5;
-      case GeographicLevel.subblock:
-        return 12.5;
+        return 13.0; // Increased from 11.5 - Ward is now the terminal level
     }
   }
 
@@ -106,19 +134,19 @@ enum GeographicLevel {
     // Base zoom calculation based on span size
     double baseZoom;
     if (maxSpan > 5.0) {
-      baseZoom = 6.0; // Very large area (country level)
+      baseZoom = 6.60; // Very large area (country level) - increased from 6.0
     } else if (maxSpan > 2.0) {
-      baseZoom = 7.5; // Large area (multiple districts)
+      baseZoom = 8.8; // Large area (multiple districts) - increased from 7.5
     } else if (maxSpan > 1.0) {
-      baseZoom = 8.5; // Medium area (district level)
+      baseZoom = 9.8; // Medium area (district level) - increased from 8.5
     } else if (maxSpan > 0.5) {
-      baseZoom = 9.5; // Smaller area (upazila level)
+      baseZoom = 10.8; // Smaller area (upazila level) - increased from 9.5
     } else if (maxSpan > 0.2) {
-      baseZoom = 11.0; // Small area (union level)
+      baseZoom = 12.5; // Small area (union level) - increased from 11.0
     } else if (maxSpan > 0.1) {
-      baseZoom = 12.0; // Very small area (ward level)
+      baseZoom = 13.5; // Very small area (ward level) - increased from 12.0
     } else {
-      baseZoom = 13.0; // Subblock level
+      baseZoom = 14.5; // Subblock level - increased from 13.0
     }
 
     // Adjust zoom based on polygon density
@@ -142,19 +170,19 @@ enum GeographicLevel {
   double getOptimalZoomForSpan(double maxSpan) {
     double zoom;
     if (maxSpan > 4.0) {
-      zoom = 6.0;
+      zoom = 7.2; // Increased from 6.0
     } else if (maxSpan > 2.0) {
-      zoom = 7.0;
+      zoom = 8.5; // Increased from 7.0
     } else if (maxSpan > 1.0) {
-      zoom = 8.0;
+      zoom = 9.5; // Increased from 8.0
     } else if (maxSpan > 0.5) {
-      zoom = 9.0;
+      zoom = 10.5; // Increased from 9.0
     } else if (maxSpan > 0.2) {
-      zoom = 10.0;
+      zoom = 11.5; // Increased from 10.0
     } else if (maxSpan > 0.1) {
-      zoom = 11.0;
+      zoom = 12.5; // Increased from 11.0
     } else {
-      zoom = 12.0;
+      zoom = 13.5; // Increased from 12.0
     }
 
     // Ensure zoom is within reasonable bounds and respects minimum zoom for this level

@@ -9,7 +9,7 @@ class AreaPolygon {
   final Polygon polygon;
   final String areaId;
   final String areaName;
-  final String level; 
+  final String level;
   final double? coveragePercentage;
   final String? slug;
   final String? parentSlug;

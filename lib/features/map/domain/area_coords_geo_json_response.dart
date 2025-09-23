@@ -2,7 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'area_coords_geo_json_response.freezed.dart'; 
+part 'area_coords_geo_json_response.freezed.dart';
 part 'area_coords_geo_json_response.g.dart';
 
 @freezed

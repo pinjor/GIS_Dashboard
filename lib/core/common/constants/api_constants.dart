@@ -12,13 +12,11 @@ class ApiConstants {
 
   static String get districtJsonPath => '/shapes/shape.json.gz';
 
-  
   // these two paths needs to be dynamic based on year value, like a getter function like below:::
 
   // static String districtCoveragePath(String year) => '/coverage/$year-coverage.json';
   static String get districtCoveragePath25 => '/coverage/2025-coverage.json';
   static String get districtCoveragePath24 => '/coverage/2024-coverage.json';
-  
 
   static String get filterByArea => '/areas';
 

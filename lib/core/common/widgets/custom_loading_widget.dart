@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CustomLoadingWidget extends ConsumerStatefulWidget {
-  const CustomLoadingWidget({
-    super.key,
-    this.loadingText = 'Loading map...',
-  });
+  const CustomLoadingWidget({super.key, this.loadingText = 'Loading map...'});
   final String loadingText;
 
   @override

@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 import '../../../../core/common/constants/api_constants.dart';
 import '../../../../core/service/data_service.dart';
 import '../../../../core/utils/utils.dart';
@@ -16,64 +15,68 @@ class EpiCenterController extends StateNotifier<EpiCenterState> {
 
   EpiCenterController(this._dataService) : super(const EpiCenterState());
 
- /// Fetch EPI center details data
-Future<void> fetchEpiCenterData({
-  required String epiUid,
-  required int year,
-  String? ccUid, // optional
-}) async {
-  logg.i("🔄 Fetching EPI center data (epiUid: $epiUid, year: $year, ccUid: $ccUid)");
-
-  state = state.copyWith(
-    isLoading: true,
-    hasError: false,
-    errorMessage: null,
-    currentEpiUid: epiUid,
-    currentCcUid: ccUid,
-    selectedYear: year,
-  );
-
-  try {
-    // Build API URL
-    final queryParams = ccUid != null && ccUid.isNotEmpty
-        ? 'year=$year&ccuid=$ccUid&request-from=app'
-        : 'year=$year&request-from=app';
-    final apiUrl = '${ApiConstants.epiCenterDataBaseUrl}/chart/$epiUid?$queryParams';
-
-    final epiCenterData = await _dataService.getEpiCenterDetailsData(urlPath: apiUrl);
+  /// Fetch EPI center details data
+  Future<void> fetchEpiCenterData({
+    required String epiUid,
+    required int year,
+    String? ccUid, // optional
+  }) async {
+    logg.i(
+      "🔄 Fetching EPI center data (epiUid: $epiUid, year: $year, ccUid: $ccUid)",
+    );
 
     state = state.copyWith(
-      isLoading: false,
+      isLoading: true,
       hasError: false,
-      epiCenterData: epiCenterData,
+      errorMessage: null,
+      currentEpiUid: epiUid,
+      currentCcUid: ccUid,
+      selectedYear: year,
     );
 
-    logg.i("✅ Successfully fetched EPI center data (epiUid: $epiUid)");
-  } catch (e) {
-    logg.e("❌ Error fetching EPI center data: $e");
+    try {
+      // Build API URL
+      final queryParams = ccUid != null && ccUid.isNotEmpty
+          ? 'year=$year&ccuid=$ccUid&request-from=app'
+          : 'year=$year&request-from=app';
+      final apiUrl =
+          '${ApiConstants.epiCenterDataBaseUrl}/chart/$epiUid?$queryParams';
 
-    String errorMessage = 'Failed to load EPI center data';
-    if (e.toString().contains('EPI_CENTER_NO_DATA')) {
-      errorMessage = 'No data available for this EPI center';
-    } else if (e.toString().contains('SSL_CERTIFICATE_ERROR')) {
-      errorMessage = 'Connection security error. Please try again.';
-    } else if (e.toString().contains('404')) {
-      errorMessage = 'EPI center data not available';
-    } else if (e.toString().contains('timeout')) {
-      errorMessage = 'Request timeout. Please try again.';
-    } else if (e.toString().contains('No internet connection')) {
-      errorMessage = 'No internet connection. Please check your network.';
+      final epiCenterData = await _dataService.getEpiCenterDetailsData(
+        urlPath: apiUrl,
+      );
+
+      state = state.copyWith(
+        isLoading: false,
+        hasError: false,
+        epiCenterData: epiCenterData,
+      );
+
+      logg.i("✅ Successfully fetched EPI center data (epiUid: $epiUid)");
+    } catch (e) {
+      logg.e("❌ Error fetching EPI center data: $e");
+
+      String errorMessage = 'Failed to load EPI center data';
+      if (e.toString().contains('EPI_CENTER_NO_DATA')) {
+        errorMessage = 'No data available for this EPI center';
+      } else if (e.toString().contains('SSL_CERTIFICATE_ERROR')) {
+        errorMessage = 'Connection security error. Please try again.';
+      } else if (e.toString().contains('404')) {
+        errorMessage = 'EPI center data not available';
+      } else if (e.toString().contains('timeout')) {
+        errorMessage = 'Request timeout. Please try again.';
+      } else if (e.toString().contains('No internet connection')) {
+        errorMessage = 'No internet connection. Please check your network.';
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        hasError: true,
+        errorMessage: errorMessage,
+        epiCenterData: null,
+      );
     }
-
-    state = state.copyWith(
-      isLoading: false,
-      hasError: true,
-      errorMessage: errorMessage,
-      epiCenterData: null,
-    );
   }
-}
-
 
   /// Update selected year and refetch data
   Future<void> updateYear(int year) async {

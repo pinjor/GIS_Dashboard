@@ -33,7 +33,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Timer? _autoZoomTimer;
   DateTime? _lastAutoZoom;
   final double _initialZoom = 6.60;
-
   @override
   void initState() {
     super.initState();
@@ -52,7 +51,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   void _resetToCountryView({required GeographicLevel currentLevel}) {
     // Reset to country level first
-    if (currentLevel != GeographicLevel.district) {
+    if (currentLevel != GeographicLevel.country) {
       ref.read(mapControllerProvider.notifier).resetToCountryLevel();
     }
 
@@ -566,8 +565,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             ),
                           ),
 
-                        // Area name labels - ONLY show when drilled down (not on initial district view)
-                        if (mapState.currentLevel != GeographicLevel.district)
+                        // Area name labels - Use centralized logic from enum
+                        if (mapState.currentLevel.shouldShowAreaLabels)
                           MarkerLayer(
                             markers: _buildAreaNameMarkers(areaPolygons),
                           ),

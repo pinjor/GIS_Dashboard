@@ -38,30 +38,6 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final currentFilter = _filterNotifier.state;
       final selectedYear = currentFilter.selectedYear;
 
-      // Try to get cached data first, but only if it's for the correct year
-      // final cachedCoverageData = _dataService.getCachedCoverageData();
-      // if (cachedCoverageData != null &&
-      //     !forceRefresh &&
-      //     cachedCoverageData.metadata?.year.toString() == selectedYear) {
-      //   logg.i("Using cached map data for year $selectedYear");
-      //   // Still need to load GeoJSON for map rendering
-      //   final geoJson = await _dataService.getGeoJson(
-      //     urlPath: ApiConstants.districtJsonPath,
-      //     forceRefresh: forceRefresh,
-      //   );
-
-      //   state = state.copyWith(
-      //     geoJson: geoJson,
-      //     coverageData: cachedCoverageData,
-      //     currentLevel: GeographicLevel.district,
-      //     navigationStack: [], // Reset to country level
-      //     currentAreaName: 'Bangladesh',
-      //     isLoading: false,
-      //     clearError: true,
-      //   );
-      //   return;
-      // }
-
       // Use dynamic year-based coverage path
       final coveragePath = ApiConstants.getCoveragePath(year: selectedYear);
       logg.i(
@@ -91,7 +67,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: coverageData,
-        currentLevel: GeographicLevel.district,
+        currentLevel: GeographicLevel
+            .country, // Fixed: Country level should use country enum
         navigationStack: [], // Reset to country level
         currentAreaName: 'Bangladesh',
         isLoading: false,
@@ -162,13 +139,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         ),
       ];
 
-      // Add EPI request only when drilling down to a specific area (not for collections)
-      // EPI is only available for specific levels that have EPI data
-      // When drilling down from district->upazila, we load multiple upazilas so no EPI
-      // EPI should only be fetched when clicking on a specific upazila/union/ward/subblock
-      if (newLevelEnum.hasEpiData ||
-          (newLevelEnum == GeographicLevel.upazila &&
-              state.currentLevel != GeographicLevel.district)) {
+      // Add EPI request for levels that have EPI data (centralized logic)
+      if (newLevelEnum.hasEpiData) {
         final epiPath = ApiConstants.getEpiPath(slug: slug);
         logg.i("Fetching EPI data from: $epiPath");
         apiRequests.add(
@@ -184,12 +156,9 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
 
-      // EPI data is available for specific levels that have EPI data (not collections)
+      // EPI data is available for levels that have EPI data (centralized logic)
       EpiCenterCoordsResponse? epiCenterCoordsData;
-      if ((newLevelEnum.hasEpiData ||
-              (newLevelEnum == GeographicLevel.upazila &&
-                  state.currentLevel != GeographicLevel.district)) &&
-          results.length > 2) {
+      if (newLevelEnum.hasEpiData && results.length > 2) {
         epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
         logg.i("Successfully fetched EPI data for $areaName");
       }
@@ -616,14 +585,58 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         parentSlug: null,
       );
 
+      // Build navigation stack properly preserving division hierarchy
+      List<DrilldownLevel> newNavigationStack;
+
+      // Check if there's a division context from filter that should be preserved
+      final selectedDivision = currentFilter.selectedDivision;
+      final hasValidDivisionContext =
+          selectedDivision != 'All' && selectedDivision.isNotEmpty;
+
+      // Check if current navigation stack already has a division level
+      final currentHasDivisionLevel =
+          state.navigationStack.isNotEmpty &&
+          state.navigationStack.any(
+            (level) => level.level == GeographicLevel.division,
+          );
+
+      if (hasValidDivisionContext && !currentHasDivisionLevel) {
+        // We have a division filter but no division in navigation stack
+        // This means user went directly from country -> division -> district via filters
+        // We should preserve the division level in navigation
+        final divisionSlug = ApiConstants.divisionNameToSlug(selectedDivision);
+        final divisionNavLevel = DrilldownLevel(
+          level: GeographicLevel.division,
+          slug: 'divisions/$divisionSlug',
+          name: selectedDivision,
+          parentSlug: null,
+        );
+
+        newNavigationStack = [divisionNavLevel, districtNavLevel];
+        logg.i(
+          "Preserved division '$selectedDivision' in navigation hierarchy",
+        );
+      } else if (currentHasDivisionLevel) {
+        // Current navigation already has division, build upon it
+        final existingStack = List<DrilldownLevel>.from(state.navigationStack);
+        // Remove any existing district/lower levels and add new district
+        existingStack.removeWhere(
+          (level) => level.level.index >= GeographicLevel.district.index,
+        );
+        newNavigationStack = [...existingStack, districtNavLevel];
+        logg.i("Built upon existing division navigation hierarchy");
+      } else {
+        // No division context, start fresh with just district
+        newNavigationStack = [districtNavLevel];
+        logg.i("Starting fresh navigation with district only");
+      }
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: coverageData,
         epiCenterCoordsData: null, // No EPI data for districts from filter
         currentLevel: GeographicLevel.district,
-        navigationStack: [
-          districtNavLevel,
-        ], // Start fresh navigation for district
+        navigationStack: newNavigationStack,
         currentAreaName: districtName,
         isLoading: false,
         clearError: true,
@@ -802,27 +815,6 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       return false;
     }
   }
-
-  // /// Get debug information about available filter data
-  // Map<String, dynamic> getFilterSyncDebugInfo() {
-  //   final filterState = _filterNotifier.state;
-  //   return {
-  //     'divisionsLoaded': filterState.divisions.length,
-  //     'districtsLoaded': filterState.districts.length,
-  //     'isLoadingAreas': filterState.isLoadingAreas,
-  //     'hasError': filterState.areasError != null,
-  //     'selectedDivision': filterState.selectedDivision,
-  //     'selectedDistrict': filterState.selectedDistrict,
-  //     'sampleDistricts': filterState.districts
-  //         .take(3)
-  //         .map((d) => '${d.uid}: ${d.name}')
-  //         .toList(),
-  //     'sampleDivisions': filterState.divisions
-  //         .take(3)
-  //         .map((d) => '${d.uid}: ${d.name}')
-  //         .toList(),
-  //   };
-  // }
 
   /// Check if the filter data is ready for sync operations
   bool get isFilterSyncReady {
