@@ -113,6 +113,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     if (tappedPolygon != null) {
       logg.i("Tapped on: ${tappedPolygon.areaName}");
+
+      // Check if this is a subblock - if so, find EPI center and navigate directly
+      if (tappedPolygon.level == GeographicLevel.ward.value &&
+          tappedPolygon.canDrillDown == false) {
+        _handleSubblockTapForEpiNavigation(tappedPolygon);
+        return;
+      }
+
       // IMPORTANT: Perform filter sync BEFORE drilldown
       // This ensures the filter state is updated to match the tapped area
       _syncFiltersWithTappedArea(tappedPolygon);
@@ -253,6 +261,64 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           currentLevel: null, // TODO: Review if this level conversion is needed
         ),
       ),
+    );
+  }
+
+  /// Handle subblock tap - find EPI center in subblock and navigate to it
+  void _handleSubblockTapForEpiNavigation(AreaPolygon subblockPolygon) {
+    logg.i("Subblock tapped: ${subblockPolygon.areaName}");
+
+    final mapState = ref.read(mapControllerProvider);
+    final epiData = mapState.epiCenterCoordsData;
+
+    if (epiData?.features == null || epiData!.features!.isEmpty) {
+      logg.w("No EPI data available for subblock navigation");
+      showCustomSnackBar(
+        context: context,
+        message: 'EPI center data not available',
+        color: Colors.orangeAccent.shade200,
+      );
+      return;
+    }
+
+    // Find EPI center within this subblock polygon
+    EpiInfo? foundEpiCenter;
+    for (final feature in epiData.features!) {
+      if (feature.geometry?.type == 'Point' &&
+          feature.geometry?.coordinates != null &&
+          feature.info?.orgUid != null) {
+        final coords = feature.geometry!.coordinates!;
+        final lng = (coords[0] as num).toDouble();
+        final lat = (coords[1] as num).toDouble();
+        final epiPoint = LatLng(lat, lng);
+
+        // Check if this EPI center is inside the subblock polygon
+        if (isTappedPointInPolygon(epiPoint, subblockPolygon.polygon.points)) {
+          foundEpiCenter = feature.info;
+          break;
+        }
+      }
+    }
+
+    if (foundEpiCenter == null || foundEpiCenter.orgUid == null) {
+      logg.w(
+        "No EPI center found within subblock: ${subblockPolygon.areaName}",
+      );
+      showCustomSnackBar(
+        context: context,
+        message: 'No EPI center found in this area',
+        color: Colors.orangeAccent.shade200,
+      );
+      return;
+    }
+
+    // Navigate to EPI center details using the same logic as EPI icon tap
+    logg.i(
+      "Found EPI center in subblock: ${foundEpiCenter.name} (${foundEpiCenter.orgUid})",
+    );
+    _onEpiMarkerTap(
+      foundEpiCenter.name ?? 'EPI Center',
+      foundEpiCenter.orgUid!,
     );
   }
 
