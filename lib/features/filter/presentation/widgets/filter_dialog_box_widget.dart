@@ -35,12 +35,42 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     super.didChangeDependencies();
     // Initialize with current filter state
     final currentFilter = ref.read(filterControllerProvider);
+    final filterNotifier = ref.read(filterControllerProvider.notifier);
+
     _selectedAreaType = currentFilter.selectedAreaType;
     _selectedVaccine = currentFilter.selectedVaccine;
-    _selectedDivision = currentFilter.selectedDivision;
-    _selectedCityCorporation = currentFilter.selectedCityCorporation;
-    _selectedDistrict = currentFilter.selectedDistrict;
     _selectedYear = currentFilter.selectedYear;
+
+    // Validate and set division - ensure it exists in dropdown items
+    final availableDivisions = filterNotifier.divisionDropdownItems;
+    if (availableDivisions.contains(currentFilter.selectedDivision)) {
+      _selectedDivision = currentFilter.selectedDivision;
+    } else {
+      _selectedDivision =
+          'All'; // Fallback to 'All' if current selection is invalid
+    }
+
+    // Validate and set city corporation
+    final availableCityCorporations =
+        filterNotifier.cityCorporationDropdownItems;
+    if (currentFilter.selectedCityCorporation != null &&
+        availableCityCorporations.contains(
+          currentFilter.selectedCityCorporation,
+        )) {
+      _selectedCityCorporation = currentFilter.selectedCityCorporation;
+    } else {
+      _selectedCityCorporation = null;
+    }
+
+    // Validate and set district
+    final availableDistricts = filterNotifier.districtDropdownItems;
+    if (currentFilter.selectedDistrict != null &&
+        availableDistricts.contains(currentFilter.selectedDistrict)) {
+      _selectedDistrict = currentFilter.selectedDistrict;
+    } else {
+      _selectedDistrict =
+          null; // This represents 'All' in the district dropdown
+    }
   }
 
   @override
@@ -186,7 +216,12 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
-                      initialValue: _selectedDivision,
+                      initialValue:
+                          filterNotifier.divisionDropdownItems.contains(
+                            _selectedDivision,
+                          )
+                          ? _selectedDivision
+                          : 'All', // Fallback to 'All' if selected division is not in the list
                       items: filterNotifier.divisionDropdownItems
                           .map(
                             (division) => DropdownMenuItem(
@@ -214,20 +249,25 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
                   ),
                   8.h,
-                  DropdownButtonFormField<String>(
+                  DropdownButtonFormField<String?>(
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    initialValue: _selectedDistrict,
+                    initialValue:
+                        _selectedDistrict, // This can be null which represents 'All'
                     hint: const Text('All'),
-                    items: ['All', ...filterNotifier.districtDropdownItems]
-                        .map(
-                          (district) => DropdownMenuItem(
-                            value: district == 'All' ? null : district,
-                            child: Text(district),
-                          ),
-                        )
-                        .toList(),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('All'),
+                      ),
+                      ...filterNotifier.districtDropdownItems.map(
+                        (district) => DropdownMenuItem<String?>(
+                          value: district,
+                          child: Text(district),
+                        ),
+                      ),
+                    ],
                     onChanged: (value) {
                       setState(() {
                         _selectedDistrict = value;
@@ -259,7 +299,12 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
-                      initialValue: _selectedCityCorporation,
+                      initialValue:
+                          filterNotifier.cityCorporationDropdownItems.contains(
+                            _selectedCityCorporation,
+                          )
+                          ? _selectedCityCorporation
+                          : null, // Clear selection if it's not in the available list
                       hint: const Text('Select City Corporation'),
                       items: filterNotifier.cityCorporationDropdownItems
                           .map(

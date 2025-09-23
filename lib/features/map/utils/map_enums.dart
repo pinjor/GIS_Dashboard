@@ -111,17 +111,17 @@ enum GeographicLevel {
   double get minZoomLevel {
     switch (this) {
       case GeographicLevel.country:
-        return 7.2; // Increased from 6.0 for better country view
+        return 6.6; // Exact zoom for country view
       case GeographicLevel.division:
-        return 7.5; // Increased from 6.5
+        return 7.0; // Reduced for better division view
       case GeographicLevel.district:
-        return 7.8; // Increased from 6.5
+        return 7.5; // Reduced for better district view
       case GeographicLevel.upazila:
-        return 9.2; // Increased from 8.0
+        return 8.5; // Reduced for better upazila view
       case GeographicLevel.union:
-        return 11.5; // Increased from 10.0
+        return 10.0; // Reduced for better union view
       case GeographicLevel.ward:
-        return 13.0; // Increased from 11.5 - Ward is now the terminal level
+        return 11.5; // Reduced for better ward view - Ward is now the terminal level
     }
   }
 
@@ -134,19 +134,20 @@ enum GeographicLevel {
     // Base zoom calculation based on span size
     double baseZoom;
     if (maxSpan > 5.0) {
-      baseZoom = 6.60; // Very large area (country level) - increased from 6.0
+      baseZoom =
+          6.2; // Very large area (country level) - reduced for better view
     } else if (maxSpan > 2.0) {
-      baseZoom = 8.8; // Large area (multiple districts) - increased from 7.5
+      baseZoom = 7.5; // Large area (multiple districts) - reduced
     } else if (maxSpan > 1.0) {
-      baseZoom = 9.8; // Medium area (district level) - increased from 8.5
+      baseZoom = 8.5; // Medium area (district level) - reduced
     } else if (maxSpan > 0.5) {
-      baseZoom = 10.8; // Smaller area (upazila level) - increased from 9.5
+      baseZoom = 9.5; // Smaller area (upazila level) - reduced
     } else if (maxSpan > 0.2) {
-      baseZoom = 12.5; // Small area (union level) - increased from 11.0
+      baseZoom = 11.0; // Small area (union level) - reduced
     } else if (maxSpan > 0.1) {
-      baseZoom = 13.5; // Very small area (ward level) - increased from 12.0
+      baseZoom = 12.0; // Very small area (ward level) - reduced
     } else {
-      baseZoom = 14.5; // Subblock level - increased from 13.0
+      baseZoom = 13.0; // Subblock level - reduced
     }
 
     // Adjust zoom based on polygon density
@@ -170,19 +171,19 @@ enum GeographicLevel {
   double getOptimalZoomForSpan(double maxSpan) {
     double zoom;
     if (maxSpan > 4.0) {
-      zoom = 7.2; // Increased from 6.0
+      zoom = 6.6; // Country level - exact zoom as requested
     } else if (maxSpan > 2.0) {
-      zoom = 8.5; // Increased from 7.0
+      zoom = 7.2; // Large areas - reduced
     } else if (maxSpan > 1.0) {
-      zoom = 9.5; // Increased from 8.0
+      zoom = 8.2; // Medium areas - reduced
     } else if (maxSpan > 0.5) {
-      zoom = 10.5; // Increased from 9.0
+      zoom = 9.2; // Smaller areas - reduced
     } else if (maxSpan > 0.2) {
-      zoom = 11.5; // Increased from 10.0
+      zoom = 10.2; // Small areas - reduced
     } else if (maxSpan > 0.1) {
-      zoom = 12.5; // Increased from 11.0
+      zoom = 11.2; // Very small areas - reduced
     } else {
-      zoom = 13.5; // Increased from 12.0
+      zoom = 12.2; // Smallest areas - reduced
     }
 
     // Ensure zoom is within reasonable bounds and respects minimum zoom for this level

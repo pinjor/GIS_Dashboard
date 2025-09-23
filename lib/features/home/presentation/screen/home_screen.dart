@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/widgets/connectivity_status_widget.dart';
+import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 
 import '../../../../core/common/constants/constants.dart';
 import '../../../map/presentation/screen/map_screen.dart';
@@ -26,7 +27,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final primaryColor = Color(Constants.primaryColor);
-
+    final isMapLoading = ref.watch(mapControllerProvider).isLoading;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(Constants.primaryColor),
@@ -55,30 +56,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: SizedBox(
-        height: 56,
-        child: Row(
-          children: [
-            _buildNavItem(
-              0,
-              Constants.mapLocationIconPath,
-              'Map',
-              primaryColor,
+      bottomNavigationBar: isMapLoading
+          ? const SizedBox.shrink()
+          : SizedBox(
+              height: 56,
+              child: Row(
+                children: [
+                  _buildNavItem(
+                    0,
+                    Constants.mapLocationIconPath,
+                    'Map',
+                    primaryColor,
+                  ),
+                  Container(
+                    width: 1,
+                    height: double.infinity,
+                    color: Colors.grey.shade300,
+                  ),
+                  _buildNavItem(
+                    1,
+                    Constants.lineGraphIconPath,
+                    'Summary',
+                    primaryColor,
+                  ),
+                ],
+              ),
             ),
-            Container(
-              width: 1,
-              height: double.infinity,
-              color: Colors.grey.shade300,
-            ),
-            _buildNavItem(
-              1,
-              Constants.lineGraphIconPath,
-              'Summary',
-              primaryColor,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

@@ -19,8 +19,6 @@ import '../../utils/map_enums.dart';
 import '../controllers/map_controller.dart';
 import '../../../epi_center/presentation/screen/epi_center_details_screen.dart';
 
-// Helper class to store center point and zoom information
-
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
@@ -32,7 +30,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final mapController = MapController();
   Timer? _autoZoomTimer;
   DateTime? _lastAutoZoom;
-  final double _initialZoom = 6.60;
+  final double _initialZoom = 6.6;
   @override
   void initState() {
     super.initState();
@@ -379,7 +377,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     // Listen for state changes to trigger auto-zoom after drilldown
-    // ! needs modifications, maybe responsible for not working auto-zoom when district filter applied
     ref.listen<dynamic>(mapControllerProvider, (previous, current) {
       // Hide any loading snackbars when state changes
       if (previous?.isLoading == true && current.isLoading == false) {
@@ -418,9 +415,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         // Cancel any existing timer to prevent overlapping operations
         _autoZoomTimer?.cancel();
-
-        // Show success indicator
-        // _showSuccessSnackBar(current.currentAreaName ?? 'Area');
 
         // Schedule auto-zoom after tiles load
         _autoZoomTimer = Timer(const Duration(milliseconds: 1500), () {
@@ -546,10 +540,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     return Scaffold(
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: HeaderTitleIconFilterWidget(),
-          ),
+          if (!mapState.isLoading)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: HeaderTitleIconFilterWidget(),
+            ),
           10.h,
           // Breadcrumb Navigation
           if (mapState.canGoBack && !mapState.isLoading)
@@ -739,7 +734,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       StaticCompassDirectionIndicatorWidget(),
 
                     // Compass Icon button which centers current level polygon map
-                    if (mapState.currentLevel != GeographicLevel.district)
+                    if (mapState.currentLevel != GeographicLevel.country)
                       Positioned(
                         bottom: 5,
                         left: 5,
