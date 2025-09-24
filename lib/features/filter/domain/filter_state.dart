@@ -54,21 +54,28 @@ class FilterState {
     bool? isLoadingAreas,
     String? areasError,
     DateTime? lastAppliedTimestamp,
+    // Explicit flags for nullable fields to allow setting to null
+    bool clearCityCorporation = false,
+    bool clearDistrict = false,
+    bool clearAreasError = false,
   }) {
     return FilterState(
       selectedVaccine: selectedVaccine ?? this.selectedVaccine,
       selectedAreaType: selectedAreaType ?? this.selectedAreaType,
       selectedDivision: selectedDivision ?? this.selectedDivision,
-      selectedCityCorporation:
-          selectedCityCorporation ?? this.selectedCityCorporation,
-      selectedDistrict: selectedDistrict ?? this.selectedDistrict,
+      selectedCityCorporation: clearCityCorporation
+          ? null
+          : (selectedCityCorporation ?? this.selectedCityCorporation),
+      selectedDistrict: clearDistrict
+          ? null
+          : (selectedDistrict ?? this.selectedDistrict),
       selectedYear: selectedYear ?? this.selectedYear,
       divisions: divisions ?? this.divisions,
       districts: districts ?? this.districts,
       cityCorporations: cityCorporations ?? this.cityCorporations,
       filteredDistricts: filteredDistricts ?? this.filteredDistricts,
       isLoadingAreas: isLoadingAreas ?? this.isLoadingAreas,
-      areasError: areasError ?? this.areasError,
+      areasError: clearAreasError ? null : (areasError ?? this.areasError),
       lastAppliedTimestamp: lastAppliedTimestamp ?? this.lastAppliedTimestamp,
     );
   }

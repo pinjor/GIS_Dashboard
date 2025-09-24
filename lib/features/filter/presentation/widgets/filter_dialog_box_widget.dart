@@ -73,6 +73,48 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     }
   }
 
+  /// Sync local widget state with provider state (used after reset)
+  void _syncLocalStateWithProvider() {
+    final currentFilter = ref.read(filterControllerProvider);
+    final filterNotifier = ref.read(filterControllerProvider.notifier);
+
+    setState(() {
+      // Keep area type and vaccine as they are (don't reset)
+      _selectedYear = currentFilter.selectedYear;
+
+      // Reset specific fields based on area type
+      if (currentFilter.selectedAreaType == AreaType.district) {
+        // For district area type: sync division and district
+        final availableDivisions = filterNotifier.divisionDropdownItems;
+        if (availableDivisions.contains(currentFilter.selectedDivision)) {
+          _selectedDivision = currentFilter.selectedDivision;
+        } else {
+          _selectedDivision = 'All';
+        }
+
+        final availableDistricts = filterNotifier.districtDropdownItems;
+        if (currentFilter.selectedDistrict != null &&
+            availableDistricts.contains(currentFilter.selectedDistrict)) {
+          _selectedDistrict = currentFilter.selectedDistrict;
+        } else {
+          _selectedDistrict = null;
+        }
+      } else if (currentFilter.selectedAreaType == AreaType.cityCorporation) {
+        // For city corporation area type: sync city corporation
+        final availableCityCorporations =
+            filterNotifier.cityCorporationDropdownItems;
+        if (currentFilter.selectedCityCorporation != null &&
+            availableCityCorporations.contains(
+              currentFilter.selectedCityCorporation,
+            )) {
+          _selectedCityCorporation = currentFilter.selectedCityCorporation;
+        } else {
+          _selectedCityCorporation = null;
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final primaryColor = Color(Constants.primaryColor);
@@ -406,6 +448,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                         onPressed: () {
                           // Reset filters to default
                           filterNotifier.resetFilters();
+
+                          // Sync local state with provider state after reset
+                          _syncLocalStateWithProvider();
+
                           Navigator.of(context).pop();
                         },
                         child: const Text(

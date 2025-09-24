@@ -222,6 +222,11 @@ class MapControllerNotifier extends StateNotifier<MapState> {
 
       if (newStack.isEmpty) {
         // Going back to country level
+        logg.i("Going back to country level - resetting geographic filters");
+
+        // Reset geographic filters to country view defaults (preserves vaccine, area type, year)
+        _filterNotifier.resetGeographicFiltersToCountryView();
+
         await loadInitialData(forceRefresh: true);
       } else {
         // Going back to previous drilldown level
@@ -305,25 +310,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   /// Reset to country level
   Future<void> resetToCountryLevel() async {
     logg.i("Resetting to country level");
+
+    // Reset geographic filters to country view defaults (preserves vaccine, area type, year)
+    _filterNotifier.resetGeographicFiltersToCountryView();
+
     await loadInitialData(forceRefresh: false);
   }
-
-  // /// Reload current level data (useful when filter changes)
-  // Future<void> reloadCurrentLevel() async {
-  //   if (state.navigationStack.isEmpty) {
-  //     // At country level
-  //     await loadInitialData(forceRefresh: true);
-  //   } else {
-  //     // At some drilldown level
-  //     final currentLevel = state.navigationStack.last;
-  //     await drillDownToArea(
-  //       areaName: currentLevel.name ?? currentLevel.level,
-  //       slug: currentLevel.slug ?? '',
-  //       newLevel: currentLevel.level,
-  //       parentSlug: currentLevel.parentSlug,
-  //     );
-  //   }
-  // }
 
   /// Refresh coverage data when year changes (keeps GeoJSON unchanged)
   Future<void> refreshCoverageForYearChange() async {

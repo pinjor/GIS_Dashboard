@@ -23,7 +23,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Load all area data (divisions, districts, city corporations) at startup
   Future<void> _loadAllAreas() async {
-    state = state.copyWith(isLoadingAreas: true, areasError: null);
+    state = state.copyWith(isLoadingAreas: true, clearAreasError: true);
 
     try {
       print('FilterProvider: Starting to load all areas...');
@@ -78,7 +78,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       print('FilterProvider: Showing all ${state.districts.length} districts');
       state = state.copyWith(
         filteredDistricts: state.districts,
-        selectedDistrict: null, // Clear district selection when showing all
+        clearDistrict: true, // Clear district selection when showing all
       );
     } else {
       // Find the division by name to get its UID
@@ -99,35 +99,36 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Load all districts for a specific division
+  /// ! maybe not needed if local filtering works fine
   Future<void> _loadDistrictsByDivision(String divisionUid) async {
-    try {
-      print('FilterProvider: Loading districts for division UID: $divisionUid');
-      final filteredDistricts = await _repository.fetchDistrictsByDivisionId(
-        divisionUid,
-      );
-      print(
-        'FilterProvider: Loaded ${filteredDistricts.length} districts for division',
-      );
-      state = state.copyWith(
-        filteredDistricts: filteredDistricts,
-        selectedDistrict:
-            null, // Clear district selection when division changes
-      );
-    } catch (e) {
-      print('FilterProvider: API call failed, filtering locally: $e');
-      // If API call fails, filter from existing districts
-      final filteredDistricts = state.districts
-          .where((district) => district.parentUid == divisionUid)
-          .toList();
+    // try {
+    //   print('FilterProvider: Loading districts for division UID: $divisionUid');
+    //   final filteredDistricts = await _repository.fetchDistrictsByDivisionId(
+    //     divisionUid,
+    //   );
+    //   print(
+    //     'FilterProvider: Loaded ${filteredDistricts.length} districts for division',
+    //   );
+    //   state = state.copyWith(
+    //     filteredDistricts: filteredDistricts,
+    //     selectedDistrict:
+    //         null, // Clear district selection when division changes
+    //   );
+    // } catch (e) {
+    //   print('FilterProvider: API call failed, filtering locally: $e');
+    // If API call fails, filter from existing districts
+    final filteredDistricts = state.districts
+        .where((district) => district.parentUid == divisionUid)
+        .toList();
 
-      print(
-        'FilterProvider: Local filtering found ${filteredDistricts.length} districts',
-      );
-      state = state.copyWith(
-        filteredDistricts: filteredDistricts,
-        selectedDistrict: null,
-      );
-    }
+    print(
+      'FilterProvider: Local filtering found ${filteredDistricts.length} districts',
+    );
+    state = state.copyWith(
+      filteredDistricts: filteredDistricts,
+      clearDistrict: true,
+    );
+    // }
   }
 
   /// Update city corporation selection
@@ -145,38 +146,39 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     state = state.copyWith(selectedYear: year);
   }
 
-  /// Reset all filters to default values
-  /// ! needs attention as this does not reset properly like web, and at all...
+  /// Reset specific filter fields based on area type
+  /// Area type and vaccine selection are preserved
   void resetFilters() {
-    // Define default values
-    const defaultDivision = 'All';
-    const String? defaultCityCorporation = null;
-    const String? defaultDistrict = null;
+    print(
+      'FilterProvider: Resetting filters based on area type: ${state.selectedAreaType}',
+    );
+
+    // Define default values based on area type
     const defaultYear = '2025';
 
-    // Check if the state is actually changed from default
-    final bool isStateChanged =
-        state.selectedDivision != defaultDivision ||
-        state.selectedCityCorporation != defaultCityCorporation ||
-        state.selectedDistrict != defaultDistrict ||
-        state.selectedYear != defaultYear;
+    if (state.selectedAreaType == AreaType.district) {
+      // For district area type: reset period, division, and district
+      const defaultDivision = 'All';
 
-    // Only reset if state has actually changed from default
-    if (!isStateChanged) {
-      print(
-        'FilterProvider: State is already at default values, skipping reset',
+      print('FilterProvider: Resetting district area type filters');
+      state = state.copyWith(
+        selectedDivision: defaultDivision,
+        selectedYear: defaultYear,
+        filteredDistricts: state.districts, // Reset to show all districts
+        clearDistrict: true, // Explicitly clear district selection
       );
-      return;
+    } else if (state.selectedAreaType == AreaType.cityCorporation) {
+      // For city corporation area type: reset period and city corporation
+
+      print('FilterProvider: Resetting city corporation area type filters');
+      state = state.copyWith(
+        selectedYear: defaultYear,
+        clearCityCorporation:
+            true, // Explicitly clear city corporation selection
+      );
     }
 
-    print('FilterProvider: Resetting filters to default values');
-    state = state.copyWith(
-      selectedDivision: defaultDivision,
-      selectedCityCorporation: defaultCityCorporation,
-      selectedDistrict: defaultDistrict,
-      selectedYear: defaultYear,
-      filteredDistricts: state.districts, // Reset to show all districts
-    );
+    print('FilterProvider: Filter reset completed');
   }
 
   /// Retry loading areas if there was an error
@@ -210,6 +212,30 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Get district slug by district name from GeoJSON data
+
+  /// Reset geographic filters to country view defaults
+  /// Preserves area type, vaccine selection, and year
+  /// This is used when navigating back to country level from drilldown
+  void resetGeographicFiltersToCountryView() {
+    print(
+      'FilterProvider: Resetting geographic filters to country view defaults',
+    );
+
+    // Reset geographic selections to country view defaults
+    const defaultDivision = 'All';
+
+    print(
+      'FilterProvider: Resetting to country view - clearing geographic selections',
+    );
+    state = state.copyWith(
+      selectedDivision: defaultDivision,
+      filteredDistricts: state.districts, // Reset to show all districts
+      clearDistrict: true, // Clear district selection
+      clearCityCorporation: true, // Clear city corporation selection
+    );
+
+    print('FilterProvider: Geographic filters reset to country view completed');
+  }
 
   /// Apply filters and mark the timestamp when filters are applied
   ///! also needs attention as this does not work properly maybe!!!

@@ -121,7 +121,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
       // IMPORTANT: Perform filter sync BEFORE drilldown
       // This ensures the filter state is updated to match the tapped area
-      _syncFiltersWithTappedArea(tappedPolygon);
+      _syncFiltersWithTappedArea(
+        tappedPolygon,
+      ); //! should also clear the filter if it is country level
 
       if (tappedPolygon.canDrillDown) {
         logg.i("Drilling down to: ${tappedPolygon.areaName}");
@@ -132,7 +134,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         );
         showCustomSnackBar(
           context: context,
-          message: 'No more detailed data available',
+          message: 'No more detailed map available',
           color: Colors.blueGrey.shade600,
         );
       }
@@ -331,7 +333,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // If going back to country level, also reset map zoom
     if (currentState.navigationStack.length == 1) {
       // This will be the last level, so next will be country
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 100), () {
         logg.i("Resetting zoom to country view after going back");
         mapController.moveAndRotate(LatLng(23.6850, 90.3563), _initialZoom, 0);
       });
@@ -700,6 +702,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
+                                  // Reset geographic filters before retrying initial data load
+                                  ref
+                                      .read(filterControllerProvider.notifier)
+                                      .resetGeographicFiltersToCountryView();
                                   ref
                                       .read(mapControllerProvider.notifier)
                                       .loadInitialData(forceRefresh: true);
