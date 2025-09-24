@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math' as math;
+import '../../../../core/utils/utils.dart';
 import '../../domain/epi_center_details_response.dart';
 
 /// Collection of chart widgets for EPI Center Details
 class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
   final ChartData? chartData;
   final String selectedYear;
-
   const EpiCenterTargetCoverageGraphChartWidget({
     super.key,
     required this.chartData,
@@ -17,6 +17,36 @@ class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
   Color _colorFromHex(String? hexColor) {
     final hex = (hexColor ?? '#000000').replaceAll('#', '');
     return Color(int.parse('ff$hex', radix: 16));
+  }
+
+  String _getShortMonthName(String month) {
+    return monthAbbrevName[month] ?? month;
+  }
+
+  String formatCompactNumber(String number) {
+    if (number.isEmpty) return 'N/A';
+    final parsed = double.tryParse(number);
+    if (parsed == null) return 'N/A';
+    final realNum = parsed;
+    String formatted;
+    if (realNum >= 1e9) {
+      formatted = (realNum / 1e9).toStringAsFixed(2);
+      return '${_trimTrailingZeros(formatted)}B';
+    } else if (realNum >= 1e6) {
+      formatted = (realNum / 1e6).toStringAsFixed(2);
+      return '${_trimTrailingZeros(formatted)}M';
+    } else if (realNum >= 1e3) {
+      formatted = (realNum / 1e3).toStringAsFixed(2);
+      return '${_trimTrailingZeros(formatted)}K';
+    } else {
+      return realNum.toStringAsFixed(0);
+    }
+  }
+
+  String _trimTrailingZeros(String value) {
+    return value
+        .replaceAll(RegExp(r'\.00$'), '') // removes .00
+        .replaceAll(RegExp(r'(\.\d)0$'), r'\1'); // keeps 1 decimal if needed
   }
 
   @override
@@ -75,17 +105,7 @@ class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
           barWidth: (dataset.borderWidth ?? 2).toDouble(),
           isCurved: isCurved,
           curveSmoothness: dataset.tension ?? 0.1,
-          dotData: FlDotData(
-            show: showDots,
-            getDotPainter: (spot, percent, barData, index) {
-              return FlDotCirclePainter(
-                radius: 4, // Increased from default 3 for better visibility
-                color: color,
-                strokeWidth: 2,
-                strokeColor: Colors.white,
-              );
-            },
-          ),
+          dotData: FlDotData(show: showDots),
           dashArray: dashArray,
           belowBarData: BarAreaData(show: false), // No fill
         ),
@@ -114,7 +134,7 @@ class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
           sideTitles: SideTitles(
             showTitles: true,
             interval: 1,
-            reservedSize: 50, // Increased from 40 for better spacing
+            reservedSize: 40,
             getTitlesWidget: (value, meta) {
               final int index = value.toInt();
               if (index < 0 || index >= labels.length) {
@@ -122,46 +142,31 @@ class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
               }
               return SideTitleWidget(
                 meta: meta,
-                fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
-                space: 12, // Increased from 8 for better spacing
+                space: 8,
                 angle: 45 * (math.pi / 180), // Rotate for better fit on mobile
                 child: Text(
-                  labels[index],
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  _getShortMonthName(labels[index]),
+                  style: const TextStyle(fontSize: 10),
                 ),
               );
             },
           ),
         ),
         leftTitles: AxisTitles(
-          axisNameWidget: const Padding(
-            padding: EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              'Coverage Count',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
+          axisNameWidget: const Text(
+            'Number of vaccinations',
+            style: TextStyle(fontSize: 9),
           ),
-          axisNameSize: 20,
           sideTitles: SideTitles(
             showTitles: true,
             interval: interval,
-            reservedSize:
-                50, // Increased from 40 to give more space from Y-axis line
+            reservedSize: 35,
             getTitlesWidget: (value, meta) {
               return Padding(
-                padding: const EdgeInsets.only(
-                  right: 8.0,
-                ), // Add space from Y-axis line
+                padding: const EdgeInsets.only(right: 3.0),
                 child: Text(
-                  value.toInt().toString(),
-                  style: const TextStyle(fontSize: 12),
+                  formatCompactNumber(value.toInt().toString()),
+                  style: const TextStyle(fontSize: 10),
                   textAlign: TextAlign.right,
                 ),
               );
@@ -175,38 +180,18 @@ class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
       ),
       borderData: FlBorderData(
         show: true,
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.5)),
+        border: Border.all(color: Colors.grey.withOpacity(0.5)),
       ),
-      minX: -0.5, // Add padding on left side to prevent congestion
-      maxX: (labels.length - 1).toDouble() + 0.5, // Add padding on right side
+      minX: 0,
+      maxX: (labels.length - 1).toDouble(),
       minY: 0,
       maxY: chartMaxY,
       lineBarsData: lineBars,
       lineTouchData: LineTouchData(
         enabled: true,
         touchTooltipData: LineTouchTooltipData(
-          getTooltipColor: (touchedSpot) =>
-              Colors.blueGrey.withValues(alpha: 0.9),
-          tooltipPadding: const EdgeInsets.all(8),
-          getTooltipItems: (touchedSpots) {
-            return touchedSpots.map((spot) {
-              final datasetIndex = spot.barIndex;
-              final month = labels[spot.x.toInt()];
-              final value = spot.y.toInt();
-              final dataset = datasets[datasetIndex];
-
-              return LineTooltipItem(
-                '$month\n${dataset.label}: $value',
-                const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                ),
-              );
-            }).toList();
-          },
+          getTooltipColor: (touchedSpot) => Colors.blueGrey.withOpacity(0.8),
         ),
-        touchSpotThreshold: 15, // Increased touch area for better UX
       ),
     );
 
@@ -255,14 +240,14 @@ class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
             ),
           ),
           legend,
+          12.h,
           SizedBox(
-            height: 320, // Increased from 300 for better proportions
+            height: 450,
             child: Padding(
               padding: const EdgeInsets.only(
-                right: 20.0, // Increased padding for better spacing
-                bottom: 20.0, // Increased padding for better spacing
-                left: 16.0, // Increased from 8.0 for Y-axis title
-                top: 8.0, // Added top padding
+                right: 10,
+                bottom: 10.0,
+                left: 0.0,
               ),
               child: LineChart(lineChartData),
             ),

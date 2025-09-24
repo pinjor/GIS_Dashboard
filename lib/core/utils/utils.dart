@@ -62,10 +62,18 @@ extension ExcludeParenthesesStrings on String {
   }
 }
 
-/// Get the next hierarchical level for drilldown
-// @Deprecated('Use GeographicLevel.nextLevel instead')
-// String getNextMapViewLevel(String currentLevel) {
-//   final level = GeographicLevel.fromString(currentLevel);
-//   return level.nextLevel?.value ??
-//       GeographicLevel.upazila.value; // Default fallback
-// }
+
+const Map<String, String> monthAbbrevName = {
+  'January': 'Jan',
+  'February': 'Feb',
+  'March': 'Mar',
+  'April': 'Apr',
+  'May': 'May',
+  'June': 'Jun',
+  'July': 'Jul',
+  'August': 'Aug',
+  'September': 'Sep',
+  'October': 'Oct',
+  'November': 'Nov',
+  'December': 'Dec',
+};
