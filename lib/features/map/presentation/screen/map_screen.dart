@@ -389,12 +389,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (previous?.isLoading == true &&
           current.isLoading == false &&
           current.error == null &&
-          // Allow auto-zoom for:
-          // 1. All drilled-down levels (upazila, union, ward, subblock)
-          // 2. Division level from filter
-          // 3. District level from filter (navigationStack will have district entry)
-          // 4. City corporation level from filter
-          (current.currentLevel !=
+           (current.currentLevel !=
                   GeographicLevel.district || // All non-district levels
               (current.currentLevel ==
                       GeographicLevel
@@ -451,12 +446,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
-    // Listen for filter year changes to refresh coverage data
-    //! IMPORTANT: Move this listener AFTER polygon parsing to prevent premature triggers
-    // This ensures we have the latest filter state when polygons are parsed
-    //! ALSO IMPORTANT: This listener must be AFTER polygon parsing to ensure
-    //! we have the latest filter state when polygons are parsed
-    // this reloads coverage data when year changes
+      // this reloads coverage data when year changes
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
       if (previous != null && (previous.selectedYear != current.selectedYear)) {
         logg.i(
@@ -556,7 +546,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 children: [
                   IconButton(
                     onPressed:
-                        _goBack, //! does perform go back but dont understand why :(
+                        _goBack, 
                     icon: const Icon(Icons.arrow_back),
                   ),
                   Expanded(
@@ -587,9 +577,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       color: Colors.black.withValues(alpha: 0.3),
                       child: const Center(child: CustomLoadingWidget()),
                     ),
-                  // REMOVED ERROR SCREEN - No more blocking error displays
-                  // Errors are now handled gracefully with silent degradation
-
+               
                   // Show map when data is loaded successfully (even if polygons are empty)
                   if (!mapState.isLoading &&
                       mapState.areaCoordsGeoJsonData != null &&

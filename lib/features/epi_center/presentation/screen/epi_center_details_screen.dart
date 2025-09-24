@@ -5,15 +5,10 @@ import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_resp
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_center_about_details_widget.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_yearly_session_personnel_widget.dart';
 
-// Core imports
 import '../../../../core/common/widgets/custom_loading_widget.dart';
-
-// Feature imports
 import '../../../../core/utils/utils.dart';
 import '../controllers/epi_center_controller.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
-
-// Widget imports
 import '../widgets/epi_center_widgets.dart';
 
 class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
@@ -74,6 +69,8 @@ class _EpiCenterDetailsScreenState
     final epiState = ref.watch(epiCenterControllerProvider);
     final filterState = ref.watch(filterControllerProvider);
     final selectedYear = filterState.selectedYear;
+    final updatedAt = epiState.epiCenterData?.area?.updatedAt;
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -106,14 +103,16 @@ class _EpiCenterDetailsScreenState
             )
           : epiState.hasError || epiState.epiCenterData == null
           ? EpiCenterEmptyStateWidget(epiCenterName: widget.epiCenterName)
-          : _buildContent(epiState.epiCenterData!, selectedYear),
+          : _buildContent(epiState.epiCenterData!, selectedYear, updatedAt),
     );
   }
 
   Widget _buildContent(
     EpiCenterDetailsResponse? epiCenterData,
     String selectedYear,
+    String? updatedAt,
   ) {
+    final updatedAtTime = formatDateTime(updatedAt);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -121,6 +120,13 @@ class _EpiCenterDetailsScreenState
         children: [
           // Location breadcrumb: Country > Division > District > Upazila > EPI Center
           EpiCenterLocationBreadcrumb(epiData: epiCenterData),
+          if (updatedAtTime != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Last updated at: $updatedAtTime',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+          ],
           const SizedBox(height: 16),
 
           // City corporation info (if available)

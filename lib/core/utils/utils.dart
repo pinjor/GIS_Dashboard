@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
 final logg = Logger(
@@ -62,7 +63,6 @@ extension ExcludeParenthesesStrings on String {
   }
 }
 
-
 const Map<String, String> monthAbbrevName = {
   'January': 'Jan',
   'February': 'Feb',
@@ -77,3 +77,9 @@ const Map<String, String> monthAbbrevName = {
   'November': 'Nov',
   'December': 'Dec',
 };
+
+String? formatDateTime(String? dateTime) {
+  if (dateTime == null || dateTime.isEmpty) return null;
+  final DateFormat formatter = DateFormat('dd MMM yyyy, hh:mm a');
+  return formatter.format(DateTime.parse(dateTime));
+}

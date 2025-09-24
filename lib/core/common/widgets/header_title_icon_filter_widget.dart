@@ -4,6 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 
+import '../../../features/summary/presentation/controllers/summary_controller.dart';
+import '../../utils/utils.dart';
+
 class HeaderTitleIconFilterWidget extends ConsumerWidget {
   final VoidCallback? onFilterTap;
 
@@ -12,46 +15,67 @@ class HeaderTitleIconFilterWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filterState = ref.watch(filterControllerProvider);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final summaryState = ref.watch(summaryControllerProvider);
+    final generatedAt = summaryState.coverageData?.metadata?.generatedAt;
+    final generatedAtTime = formatDateTime(generatedAt);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "Bangladesh, ${filterState.selectedYear}",
-              style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Bangladesh, ${filterState.selectedYear}",
+                  style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                ),
+                Text(
+                  filterState.selectedVaccine,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              filterState.selectedVaccine,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w400),
+            IconButton(
+              icon: SvgPicture.asset(
+                Constants.filterIconPath,
+                width: 24,
+                height: 24,
+                colorFilter: const ColorFilter.mode(
+                  Colors.grey,
+                  BlendMode.srcIn,
+                ),
+              ),
+              onPressed:
+                  onFilterTap ??
+                  () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => Dialog(
+                        backgroundColor: Color(Constants.cardColor),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                        ),
+                        insetPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                        child: const FilterDialogBoxWidget(),
+                      ),
+                    );
+                  },
             ),
           ],
         ),
-        IconButton(
-          icon: SvgPicture.asset(
-            Constants.filterIconPath,
-            width: 24,
-            height: 24,
-            colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+        if (generatedAtTime != null)
+          Text(
+            "Last data synced at: $generatedAtTime",
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
-          onPressed:
-              onFilterTap ??
-              () {
-                showDialog(
-                  context: context,
-                  builder: (_) => Dialog(
-                    backgroundColor: Color(Constants.cardColor),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    insetPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: const FilterDialogBoxWidget(),
-                  ),
-                );
-              },
-        ),
       ],
     );
   }
