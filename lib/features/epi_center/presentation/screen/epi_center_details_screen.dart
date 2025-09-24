@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_center_about_details_widget.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_yearly_session_personnel_widget.dart';
@@ -123,11 +124,12 @@ class _EpiCenterDetailsScreenState
           const SizedBox(height: 16),
 
           // City corporation info (if available)
-          EpiCenterCityCorporationInfo(epiData: epiCenterData),
+          // EpiCenterCityCorporationInfo(epiData: epiCenterData),
+          _buildTargetCard(epiCenterData, selectedYear),
           const SizedBox(height: 16),
 
           // Coverage tables
-          EpiCenterCoverageTables(coverageDropoutData: epiCenterData),
+          EpiCenterCoverageTables(epiCenterDetailsData: epiCenterData),
           const SizedBox(height: 24),
 
           // Chart section
@@ -149,6 +151,37 @@ class _EpiCenterDetailsScreenState
             selectedYear: selectedYear,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTargetCard(
+    EpiCenterDetailsResponse? epiCenterData,
+    String selectedYear,
+  ) {
+    final vaccineTarget =
+        epiCenterData?.area?.vaccineTarget?.child0To11Month[selectedYear];
+    final targetValue = vaccineTarget != null
+        ? ((vaccineTarget.male?.toInt() ?? 0) +
+              (vaccineTarget.female?.toInt() ?? 0))
+        : 'N/A';
+
+    return Card(
+      elevation: 0,
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(Constants.dartImgPath, width: 35),
+            12.w,
+            Text(
+              'Target: $targetValue',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
     );
   }

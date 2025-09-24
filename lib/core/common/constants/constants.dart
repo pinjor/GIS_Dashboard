@@ -16,6 +16,7 @@ class Constants {
   static const String dosesIconPath = 'assets/images/doses.png';
   static const String boyIconPath = 'assets/images/boy.png';
   static const String girlIconPath = 'assets/images/girl.png';
+  static const String dartImgPath = 'assets/images/dart.png';
 
   static const String urlTemplate =
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';

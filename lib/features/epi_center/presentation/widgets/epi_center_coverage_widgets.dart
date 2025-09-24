@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:math' as math;
 import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../../domain/epi_center_details_response.dart';
 
 /// Collection of coverage table widgets for EPI Center Details
 class EpiCenterCoverageTables extends StatelessWidget {
-  final EpiCenterDetailsResponse? coverageDropoutData;
+  final EpiCenterDetailsResponse? epiCenterDetailsData;
 
-  const EpiCenterCoverageTables({super.key, required this.coverageDropoutData});
+  const EpiCenterCoverageTables({
+    super.key,
+    required this.epiCenterDetailsData,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         CoverageSection(
-          coverageData: coverageDropoutData,
+          epiCenterDetailsData: epiCenterDetailsData,
           isDropout: false,
-          epiCenterData: coverageDropoutData,
         ),
         const SizedBox(height: 16),
         CoverageSection(
-          coverageData: coverageDropoutData,
+          epiCenterDetailsData: epiCenterDetailsData,
           isDropout: true,
-          epiCenterData: coverageDropoutData,
         ),
       ],
     );
@@ -30,15 +32,13 @@ class EpiCenterCoverageTables extends StatelessWidget {
 }
 
 class CoverageSection extends StatelessWidget {
-  final dynamic coverageData;
+  final EpiCenterDetailsResponse? epiCenterDetailsData;
   final bool isDropout;
-  final dynamic epiCenterData;
 
   const CoverageSection({
     super.key,
-    required this.coverageData,
+    required this.epiCenterDetailsData,
     required this.isDropout,
-    required this.epiCenterData,
   });
 
   @override
@@ -72,16 +72,26 @@ class CoverageSection extends StatelessWidget {
               height: 350,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 12,
+                itemCount: 13, // 12 months + 1 summary card
                 itemBuilder: (context, index) {
+                  if (index == 12) {
+                    // Summary card as the last item
+                    return Container(
+                      width: 300,
+                      margin: const EdgeInsets.only(right: 16),
+                      child: SummaryCard(
+                        epiCenterDetailsData: epiCenterDetailsData,
+                        isDropout: isDropout,
+                      ),
+                    );
+                  }
                   return Container(
                     width: 280,
                     margin: const EdgeInsets.only(right: 16),
                     child: MonthlyCard(
-                      coverageData: coverageData,
+                      epiCenterDetailsData: epiCenterDetailsData,
                       monthIndex: index,
                       isDropout: isDropout,
-                      epiCenterData: epiCenterData,
                     ),
                   );
                 },
@@ -95,17 +105,15 @@ class CoverageSection extends StatelessWidget {
 }
 
 class MonthlyCard extends ConsumerWidget {
-  final dynamic coverageData;
+  final EpiCenterDetailsResponse? epiCenterDetailsData;
   final int monthIndex;
   final bool isDropout;
-  final dynamic epiCenterData;
 
   const MonthlyCard({
     super.key,
-    required this.coverageData,
+    required this.epiCenterDetailsData,
     required this.monthIndex,
     required this.isDropout,
-    required this.epiCenterData,
   });
 
   @override
@@ -126,110 +134,69 @@ class MonthlyCard extends ConsumerWidget {
     ];
 
     final month = months[monthIndex];
+    final currentMonth = DateTime.now().month; // Get current system month
+    final monthNumber = monthIndex + 1; // Convert to 1-based month number
+    final isFutureMonth = monthNumber > currentMonth;
 
-    // Try to get actual data from API response first
-    Map<String, dynamic>? monthData;
-    if (coverageData is Map<String, dynamic> &&
-        coverageData['months'] is Map<String, dynamic>) {
-      monthData = coverageData['months'][month];
-    }
+    // Get filter state for selected year
+    final filterState = ref.read(filterControllerProvider);
+    final selectedYear = filterState.selectedYear;
 
-    // Extract data for the month from coverageTableData
-    String dataType = isDropout ? 'dropouts' : 'coverages';
-    Map<String, dynamic>? values = monthData?[dataType];
+    // Get yearly target from area.vaccineTarget
+    final vaccineTarget = epiCenterDetailsData
+        ?.area
+        ?.vaccineTarget
+        ?.child0To11Month[selectedYear];
+    final yearlyTarget = vaccineTarget != null
+        ? ((vaccineTarget.male?.toInt() ?? 0) +
+              (vaccineTarget.female?.toInt() ?? 0))
+        : 0;
 
-    // If no coverage data available from coverageTableData, extract from area's vaccine coverage
-    if (values == null && !isDropout) {
-      // Get current year from filter
-      final filterState = ref.read(filterControllerProvider);
-      final currentYear = filterState.selectedYear;
+    // Get dynamic vaccine names from API
+    final vaccineNames =
+        epiCenterDetailsData?.coverageTableData?.vaccineNames ?? [];
 
-      // Try to get coverage data from epiCenterData.area.vaccineCoverage
-      final epiCenterDataLocal =
-          coverageData; // This is the full epiCenterData object
-      if (epiCenterDataLocal?.area?.vaccineCoverage != null) {
-        final yearCoverage = epiCenterDataLocal
-            .area
-            .vaccineCoverage
-            .child0To11Month[currentYear];
+    Map<String, int> vaccines = {};
 
-        if (yearCoverage != null) {
-          // First try to get monthly data
-          final monthNumber = (monthIndex + 1)
-              .toString(); // Convert 0-based index to 1-based month
-
-          if (yearCoverage.months != null &&
-              yearCoverage.months![monthNumber] != null) {
-            final monthDataLocal = yearCoverage.months![monthNumber]!;
-
-            if (monthDataLocal.vaccine != null) {
-              // Convert vaccine array to a map for easier access
-              values = {};
-              for (var vaccineData in monthDataLocal.vaccine!) {
-                final vaccineName = vaccineData.vaccineName;
-                final male = vaccineData.male;
-                final female = vaccineData.female;
-
-                if (vaccineName != null) {
-                  // Calculate total from male + female (handle null values)
-                  int total = 0;
-                  if (male != null) total += (male as int);
-                  if (female != null) total += (female as int);
-                  values[vaccineName] = total;
-                }
-              }
-            }
-          }
-
-          // If no monthly data, try to get cumulative data up to this month
-          if ((values == null || values.isEmpty)) {
-            // Get cumulative data for better representation
-            values = _calculateCumulativeDataUpToMonth(
-              epiCenterDataLocal,
-              monthIndex,
-              currentYear,
-              ref,
-            );
-          }
-
-          // If still no data, try to get total data from the year as last resort
-          if ((values == null || values.isEmpty) &&
-              yearCoverage.vaccine != null) {
-            // Convert vaccine array to a map for easier access
-            values = {};
-            for (var vaccineData in yearCoverage.vaccine!) {
-              final vaccineName = vaccineData.vaccineName;
-              final male = vaccineData.male;
-              final female = vaccineData.female;
-
-              if (vaccineName != null) {
-                // Calculate total from male + female (handle null values)
-                int total = 0;
-                if (male != null) total += (male as int);
-                if (female != null) total += (female as int);
-
-                // For annual display, show the total divided by 12 months as an approximation
-                // This is not ideal, but gives us some data to show
-                values[vaccineName] = (total / 12).round();
-              }
-            }
-          }
+    if (isDropout) {
+      // For dropout calculation: use ceil(yearlyTarget/12) - coverage
+      if (isFutureMonth) {
+        // Future months: show 0 for all dropouts
+        for (final vaccineName in vaccineNames) {
+          vaccines[vaccineName] = 0;
         }
+      } else {
+        // Current & past months: calculate dropout
+        final monthlyTarget = yearlyTarget > 0
+            ? (yearlyTarget / 12).round()
+            : 0;
+        final coverageData =
+            epiCenterDetailsData?.coverageTableData?.months[month]?.coverages ??
+            {};
+
+        for (final vaccineName in vaccineNames) {
+          vaccines[vaccineName] = math.max(
+            0,
+            monthlyTarget - (coverageData[vaccineName] ?? 0),
+          );
+        }
+      }
+    } else {
+      // For coverage: always show API data regardless of month
+      final coverageData =
+          epiCenterDetailsData?.coverageTableData?.months[month]?.coverages ??
+          {};
+
+      for (final vaccineName in vaccineNames) {
+        vaccines[vaccineName] = coverageData[vaccineName] ?? 0;
       }
     }
 
-    // Use actual data if available, otherwise show zeros
-    final vaccines = {
-      'Penta - 1st': values?['Penta - 1st']?.toString() ?? '0',
-      'Penta - 2nd': values?['Penta - 2nd']?.toString() ?? '0',
-      'Penta - 3rd': values?['Penta - 3rd']?.toString() ?? '0',
-      'MR - 1st': values?['MR - 1st']?.toString() ?? '0',
-      'MR - 2nd': values?['MR - 2nd']?.toString() ?? '0',
-      'BCG': values?['BCG']?.toString() ?? '0',
-    };
-
-    final total = _calculateMonthTotal(values);
-    final averagePerformance = _calculateAveragePerformance(vaccines);
+    final total = vaccines.values.fold(0, (sum, value) => sum + value);
+    // final averagePerformance = vaccines.isNotEmpty
+    //     ? vaccines.values.fold(0, (sum, value) => sum + value) /
+    //           vaccines.length.toDouble()
+    //     : 0.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -252,40 +219,13 @@ class MonthlyCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Month Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  month,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isDropout ? Colors.red[800] : Colors.blue[800],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDropout ? Colors.red[100] : Colors.blue[100],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDropout ? Colors.red[200]! : Colors.blue[200]!,
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    '${averagePerformance.toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: isDropout ? Colors.red[700] : Colors.blue[700],
-                    ),
-                  ),
-                ),
-              ],
+            Text(
+              month,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDropout ? Colors.red[800] : Colors.blue[800],
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -342,7 +282,7 @@ class MonthlyCard extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            entry.value,
+                            entry.value.toString(),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -363,75 +303,279 @@ class MonthlyCard extends ConsumerWidget {
       ),
     );
   }
+}
 
-  /// Calculate cumulative data up to the current month by summing monthly data
-  Map<String, dynamic>? _calculateCumulativeDataUpToMonth(
-    dynamic epiCenterData,
-    int monthIndex,
-    String currentYear,
-    WidgetRef ref,
-  ) {
-    if (epiCenterData?.area?.vaccineCoverage == null) return null;
+class SummaryCard extends ConsumerWidget {
+  final EpiCenterDetailsResponse? epiCenterDetailsData;
+  final bool isDropout;
 
-    final yearCoverage =
-        epiCenterData.area.vaccineCoverage.child0To11Month[currentYear];
-    if (yearCoverage?.months == null) return null;
+  const SummaryCard({
+    super.key,
+    required this.epiCenterDetailsData,
+    required this.isDropout,
+  });
 
-    // Sum up data from month 1 to current month (monthIndex + 1)
-    Map<String, int> cumulativeTotals = {};
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
 
-    for (int i = 1; i <= (monthIndex + 1); i++) {
-      final monthNumber = i.toString();
-      final monthData = yearCoverage.months![monthNumber];
+    // Get filter state for selected year
+    final filterState = ref.read(filterControllerProvider);
+    final selectedYear = filterState.selectedYear;
 
-      if (monthData?.vaccine != null) {
-        for (var vaccineData in monthData!.vaccine!) {
-          final vaccineName = vaccineData.vaccineName;
-          final male = vaccineData.male;
-          final female = vaccineData.female;
+    // Get yearly target from area.vaccineTarget
+    final vaccineTarget = epiCenterDetailsData
+        ?.area
+        ?.vaccineTarget
+        ?.child0To11Month[selectedYear];
+    final yearlyTarget = vaccineTarget != null
+        ? ((vaccineTarget.male?.toInt() ?? 0) +
+              (vaccineTarget.female?.toInt() ?? 0))
+        : 0;
 
-          if (vaccineName != null) {
-            // Calculate total from male + female (handle null values)
-            int monthTotal = 0;
-            if (male != null) monthTotal += (male as int);
-            if (female != null) monthTotal += (female as int);
+    // Get dynamic vaccine names from API
+    final vaccineNames =
+        epiCenterDetailsData?.coverageTableData?.vaccineNames ?? [];
 
-            cumulativeTotals[vaccineName] =
-                (cumulativeTotals[vaccineName] ?? 0) + monthTotal;
+    // Calculate accumulated totals for all months
+    Map<String, int> accumulatedVaccines = {};
+    for (final vaccineName in vaccineNames) {
+      accumulatedVaccines[vaccineName] = 0;
+    }
+
+    final currentMonth = DateTime.now().month;
+
+    for (int monthIndex = 0; monthIndex < 12; monthIndex++) {
+      final month = months[monthIndex];
+      final monthNumber = monthIndex + 1;
+      final isFutureMonth = monthNumber > currentMonth;
+
+      if (isDropout) {
+        // For dropout: calculate accumulated dropout
+        if (!isFutureMonth) {
+          final monthlyTarget = yearlyTarget > 0
+              ? (yearlyTarget / 12).round()
+              : 0;
+          final coverageData =
+              epiCenterDetailsData
+                  ?.coverageTableData
+                  ?.months[month]
+                  ?.coverages ??
+              {};
+
+          for (final vaccineName in vaccineNames) {
+            final dropout = math.max(
+              0,
+              monthlyTarget - (coverageData[vaccineName] ?? 0),
+            );
+            accumulatedVaccines[vaccineName] =
+                (accumulatedVaccines[vaccineName] ?? 0) + dropout;
           }
+        }
+      } else {
+        // For coverage: accumulate actual coverage
+        final coverageData =
+            epiCenterDetailsData?.coverageTableData?.months[month]?.coverages ??
+            {};
+
+        for (final vaccineName in vaccineNames) {
+          accumulatedVaccines[vaccineName] =
+              (accumulatedVaccines[vaccineName] ?? 0) +
+              (coverageData[vaccineName] ?? 0);
         }
       }
     }
 
-    // Convert to Map<String, dynamic> for compatibility
-    return cumulativeTotals.map((key, value) => MapEntry(key, value));
-  }
+    final grandTotal = accumulatedVaccines.values.fold(
+      0,
+      (sum, value) => sum + value,
+    );
 
-  double _calculateAveragePerformance(Map<String, String> vaccines) {
-    double total = 0;
-    int count = 0;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDropout
+              ? [Colors.orange[50]!, Colors.orange[100]!]
+              : [Colors.green[50]!, Colors.green[100]!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDropout ? Colors.orange[300]! : Colors.green[300]!,
+          width: 2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Summary Header
+            Row(
+              children: [
+                Icon(
+                  isDropout ? Icons.summarize : Icons.analytics,
+                  color: isDropout ? Colors.orange[800] : Colors.green[800],
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isDropout
+                        ? 'Total Dropout\n(All Months)'
+                        : 'Total Coverage\n(All Months)',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isDropout ? Colors.orange[800] : Colors.green[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
 
-    for (var value in vaccines.values) {
-      final numValue = double.tryParse(value);
-      if (numValue != null) {
-        total += numValue;
-        count++;
-      }
-    }
+            // Grand Total
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDropout ? Colors.orange[200] : Colors.green[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Grand Total',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isDropout ? Colors.orange[800] : Colors.green[800],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    grandTotal.toString(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDropout ? Colors.orange[900] : Colors.green[900],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
 
-    return count > 0 ? total / count : 0;
-  }
+            // Vaccine Totals List
+            Expanded(
+              child: ListView(
+                children: accumulatedVaccines.entries.map((entry) {
+                  // Calculate percentage for coverage (not for dropout)
+                  final percentage = !isDropout && yearlyTarget > 0
+                      ? (entry.value / yearlyTarget * 100).toStringAsFixed(2)
+                      : null;
 
-  int _calculateMonthTotal(Map<String, dynamic>? values) {
-    if (values == null) return 0;
-    int total = 0;
-    values.forEach((key, value) {
-      if (value is int) {
-        total += value;
-      } else if (value is String) {
-        total += int.tryParse(value) ?? 0;
-      }
-    });
-    return total;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Vaccine name
+                        Text(
+                          entry.key,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        // Total and percentage row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Total value
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDropout
+                                    ? Colors.orange[100]
+                                    : Colors.green[100],
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                entry.value.toString(),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDropout
+                                      ? Colors.orange[700]
+                                      : Colors.green[700],
+                                ),
+                              ),
+                            ),
+                            // Percentage (only for coverage)
+                            if (percentage != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[100],
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '$percentage%',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue[700],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
