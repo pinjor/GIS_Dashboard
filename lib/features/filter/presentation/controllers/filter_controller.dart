@@ -166,6 +166,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         selectedYear: defaultYear,
         filteredDistricts: state.districts, // Reset to show all districts
         clearDistrict: true, // Explicitly clear district selection
+        lastAppliedTimestamp: DateTime.now(), // Trigger map update
       );
     } else if (state.selectedAreaType == AreaType.cityCorporation) {
       // For city corporation area type: reset period and city corporation
@@ -175,6 +176,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         selectedYear: defaultYear,
         clearCityCorporation:
             true, // Explicitly clear city corporation selection
+        lastAppliedTimestamp: DateTime.now(), // Trigger map update
       );
     }
 
