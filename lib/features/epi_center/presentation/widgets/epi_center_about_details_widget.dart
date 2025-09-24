@@ -1,24 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 
-class EpiCenterDetailsWidget extends StatelessWidget {
-  const EpiCenterDetailsWidget({super.key});
-
+class EpiCenterAboutDetailsWidget extends StatelessWidget {
+  const EpiCenterAboutDetailsWidget({
+    super.key,
+    required this.epiCenterDetailsData,
+    required this.selectedYear,
+  });
+  final EpiCenterDetailsResponse? epiCenterDetailsData;
+  final String selectedYear;
   @override
   Widget build(BuildContext context) {
+    final demographicsData =
+        epiCenterDetailsData?.area?.additionalData?.demographics[selectedYear];
     final details = [
       {
         'label': 'Name and Address of EPI Center',
-        'value': 'Dr. Khalak, Tanggatipara',
+        'value': demographicsData?.epiCenterNameAddress ?? 'N/A',
       },
-      {'label': 'EPI Center Implementer Name', 'value': 'Nur Jahan'},
-      {'label': 'Distance from CC to EPI Center', 'value': '60'},
-      {'label': 'Transportation', 'value': 'রিকশা (Rickshaw)'},
-      {'label': 'Time required to reach EPI Center (minute)', 'value': '60'},
-      {'label': 'Porter Name', 'value': 'Abdul Alim'},
-      {'label': 'Porter Phone', 'value': 'N/A'},
-      {'label': 'Center Type', 'value': 'Outreach Center'},
-    ];
+      {
+        'label': 'EPI Center Implementer Name',
+        'value': demographicsData?.epiCenterImplementerName ?? 'N/A',
+      },
+      {
+        'label': 'Distance from CC to EPI Center',
+        'value': demographicsData?.distanceFromCcToEpiCenter ?? 'N/A',
+      },
+      {
+        'label': 'Transportation',
 
+        'value': demographicsData?.modeOfTransportationDistribution ?? 'N/A',
+      },
+      {
+        'label': 'Time required to reach EPI Center (minute)',
+        'value': demographicsData?.timeToReachEpiCenter ?? 'N/A',
+      },
+      {'label': 'Porter Name', 'value': demographicsData?.porterName ?? 'N/A'},
+      {'label': 'Porter Phone', 'value': 'N/A'},
+      {
+        'label': 'Center Type',
+        'value': demographicsData?.epiCenterType ?? 'N/A',
+      },
+    ];
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,7 +77,7 @@ class EpiCenterDetailsWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              detail['label'] as String,
+                              detail['label'].toString(),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -63,7 +86,7 @@ class EpiCenterDetailsWidget extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              detail['value'] as String,
+                              detail['value'].toString(),
                               style: const TextStyle(fontSize: 14),
                             ),
                           ],

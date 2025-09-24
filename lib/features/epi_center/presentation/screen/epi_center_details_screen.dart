@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_center_details_widget.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
+import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_center_about_details_widget.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_yearly_session_personnel_widget.dart';
 
 // Core imports
@@ -70,7 +71,8 @@ class _EpiCenterDetailsScreenState
   @override
   Widget build(BuildContext context) {
     final epiState = ref.watch(epiCenterControllerProvider);
-
+    final filterState = ref.watch(filterControllerProvider);
+    final selectedYear = filterState.selectedYear;
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -103,11 +105,14 @@ class _EpiCenterDetailsScreenState
             )
           : epiState.hasError || epiState.epiCenterData == null
           ? EpiCenterEmptyStateWidget(epiCenterName: widget.epiCenterName)
-          : _buildContent(epiState.epiCenterData!),
+          : _buildContent(epiState.epiCenterData!, selectedYear),
     );
   }
 
-  Widget _buildContent(dynamic epiCenterData) {
+  Widget _buildContent(
+    EpiCenterDetailsResponse? epiCenterData,
+    String selectedYear,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -122,21 +127,27 @@ class _EpiCenterDetailsScreenState
           const SizedBox(height: 16),
 
           // Coverage tables
-          EpiCenterCoverageTables(
-            coverageData: epiCenterData,
-            epiCenterData: epiCenterData,
-          ),
+          EpiCenterCoverageTables(coverageDropoutData: epiCenterData),
           const SizedBox(height: 24),
 
           // Chart section
-          EpiCenterChartSection(chartData: epiCenterData),
+          EpiCenterTargetCoverageGraphChartWidget(
+            chartData: epiCenterData?.chartData,
+            selectedYear: selectedYear,
+          ), // datasets field is responsible for the graph
           const SizedBox(height: 24),
           // Microplan section
-          EpiCenterMicroplanSection(epiData: epiCenterData),
+          EpiCenterMicroplanSection(epiCenterDetailsData: epiCenterData),
           const SizedBox(height: 24),
-          EpiCenterDetailsWidget(),
+          EpiCenterAboutDetailsWidget(
+            epiCenterDetailsData: epiCenterData,
+            selectedYear: selectedYear,
+          ),
           SizedBox(height: 10),
-          EpiYearlySessionPersonnelWidget(),
+          EpiYearlySessionPersonnelWidget(
+            epiCenterDetailsData: epiCenterData,
+            selectedYear: selectedYear,
+          ),
         ],
       ),
     );

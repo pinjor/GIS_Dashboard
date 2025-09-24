@@ -1,42 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
+
+import '../../../../core/utils/utils.dart';
 
 class EpiYearlySessionPersonnelWidget extends StatelessWidget {
-  const EpiYearlySessionPersonnelWidget({super.key});
+  const EpiYearlySessionPersonnelWidget({
+    super.key,
+    required this.epiCenterDetailsData,
+    required this.selectedYear,
+  });
+  final EpiCenterDetailsResponse? epiCenterDetailsData;
+  final String selectedYear;
 
   @override
   Widget build(BuildContext context) {
+    final demographicsData =
+        epiCenterDetailsData?.area?.additionalData?.demographics[selectedYear];
+
     final personnel = [
       {
         'category': 'HA/Vaccinator Name 1',
-        'name': 'Habibur Rahman',
-        'designation': 'HA',
+        'name': demographicsData?.haVaccinatorName1 ?? 'N/A',
+        'designation': demographicsData?.haVaccinatorDesignation1 ?? 'N/A',
         'phone': 'N/A',
       },
       {
         'category': 'HA/Vaccinator Name 2',
-        'name': 'Nur Jahan',
-        'designation': 'FWA',
+        'name': demographicsData?.haVaccinatorName2 ?? 'N/A',
+        'designation': demographicsData?.haVaccinatorDesignation2 ?? 'N/A',
         'phone': 'N/A',
       },
       {
         'category': 'Supervisor-1',
-        'name': 'Dilruba Nasrin',
-        'designation': 'AHI',
-        'phone': 'N/A',
-      },
-      {
-        'category': 'Supervisor-2',
-        'name': 'Ab. Gone',
-        'designation': 'HI',
-        'phone': 'N/A',
-      },
-      {
-        'category': 'Supervisor-3',
-        'name': 'N/A',
-        'designation': 'N/A',
+        'name': demographicsData?.supervisor1Name ?? 'N/A',
+        'designation': demographicsData?.supervisor1Designation ?? 'N/A',
         'phone': 'N/A',
       },
     ];
+
+    logg.i(personnel);
 
     return Card(
       elevation: 4,
@@ -67,7 +69,7 @@ class EpiYearlySessionPersonnelWidget extends StatelessWidget {
                         width: 250,
                         child: ListTile(
                           title: Text(
-                            person['category'] as String,
+                            person['category'].toString(),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Column(

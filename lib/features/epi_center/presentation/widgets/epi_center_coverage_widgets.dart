@@ -1,32 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
+import '../../domain/epi_center_details_response.dart';
 
 /// Collection of coverage table widgets for EPI Center Details
 class EpiCenterCoverageTables extends StatelessWidget {
-  final dynamic coverageData;
-  final dynamic epiCenterData;
+  final EpiCenterDetailsResponse? coverageDropoutData;
 
-  const EpiCenterCoverageTables({
-    super.key,
-    required this.coverageData,
-    required this.epiCenterData,
-  });
+  const EpiCenterCoverageTables({super.key, required this.coverageDropoutData});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         CoverageSection(
-          coverageData: coverageData,
+          coverageData: coverageDropoutData,
           isDropout: false,
-          epiCenterData: epiCenterData,
+          epiCenterData: coverageDropoutData,
         ),
         const SizedBox(height: 16),
         CoverageSection(
-          coverageData: coverageData,
+          coverageData: coverageDropoutData,
           isDropout: true,
-          epiCenterData: epiCenterData,
+          epiCenterData: coverageDropoutData,
         ),
       ],
     );
