@@ -485,7 +485,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             current.selectedDistrict == null;
         final bool districtFilterApplied =
             current.selectedAreaType == AreaType.district &&
-            current.selectedDivision == 'All' &&
             current.selectedDistrict != null;
         final bool cityCorporationFilterApplied =
             current.selectedAreaType == AreaType.cityCorporation &&
@@ -497,22 +496,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             (current.selectedAreaType == AreaType.cityCorporation &&
                 current.selectedCityCorporation == null);
 
-        if (divisionFilterApplied) {
-          logg.i("Division filter applied: ${current.selectedDivision}");
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ref
-                  .read(mapControllerProvider.notifier)
-                  .loadDivisionData(divisionName: current.selectedDivision);
-            }
-          });
-        } else if (districtFilterApplied) {
+        if (districtFilterApplied) {
           logg.i("District filter applied: ${current.selectedDistrict}");
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               ref
                   .read(mapControllerProvider.notifier)
                   .loadDistrictData(districtName: current.selectedDistrict!);
+            }
+          });
+        } else if (divisionFilterApplied) {
+          logg.i("Division filter applied: ${current.selectedDivision}");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadDivisionData(divisionName: current.selectedDivision);
             }
           });
         } else if (cityCorporationFilterApplied) {
