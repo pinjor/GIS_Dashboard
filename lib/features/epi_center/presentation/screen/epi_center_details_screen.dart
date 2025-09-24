@@ -129,7 +129,7 @@ class _EpiCenterDetailsScreenState
           const SizedBox(height: 16),
 
           // Coverage tables
-          EpiCenterCoverageTables(epiCenterDetailsData: epiCenterData),
+          EpiCenterCoverageTablesWidget(epiCenterDetailsData: epiCenterData),
           const SizedBox(height: 24),
 
           // Chart section

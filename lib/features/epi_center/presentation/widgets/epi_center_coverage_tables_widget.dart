@@ -5,10 +5,10 @@ import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../../domain/epi_center_details_response.dart';
 
 /// Collection of coverage table widgets for EPI Center Details
-class EpiCenterCoverageTables extends StatelessWidget {
+class EpiCenterCoverageTablesWidget extends StatelessWidget {
   final EpiCenterDetailsResponse? epiCenterDetailsData;
 
-  const EpiCenterCoverageTables({
+  const EpiCenterCoverageTablesWidget({
     super.key,
     required this.epiCenterDetailsData,
   });
