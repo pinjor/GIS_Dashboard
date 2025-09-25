@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_center_about_details_widget.dart';
@@ -7,6 +8,7 @@ import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_yearl
 
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../filter/presentation/widgets/filter_dialog_box_widget.dart';
 import '../controllers/epi_center_controller.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../widgets/epi_center_widgets.dart';
@@ -122,9 +124,40 @@ class _EpiCenterDetailsScreenState
           EpiCenterLocationBreadcrumb(epiData: epiCenterData),
           if (updatedAtTime != null) ...[
             const SizedBox(height: 8),
-            Text(
-              'Last updated at: $updatedAtTime',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Last updated at: $updatedAtTime',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                IconButton(
+                  icon: SvgPicture.asset(
+                    Constants.filterIconPath,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.grey,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => Dialog(
+                        backgroundColor: Color(Constants.cardColor),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                        ),
+                        insetPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                        child: const FilterDialogBoxWidget(turnOff: true),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
           const SizedBox(height: 16),

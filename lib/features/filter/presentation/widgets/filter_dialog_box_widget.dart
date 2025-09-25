@@ -6,7 +6,8 @@ import '../controllers/filter_controller.dart';
 import '../../../map/utils/map_enums.dart';
 
 class FilterDialogBoxWidget extends ConsumerStatefulWidget {
-  const FilterDialogBoxWidget({super.key});
+  const FilterDialogBoxWidget({super.key, this.turnOff = false});
+  final bool turnOff;
 
   @override
   ConsumerState<FilterDialogBoxWidget> createState() =>
@@ -248,7 +249,12 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                         Text('Error: ${filterState.areasError}'),
                         8.h,
                         ElevatedButton(
-                          onPressed: () => filterNotifier.retryLoadAreas(),
+                          onPressed: () => widget.turnOff
+                              ? () {
+                                  // pop the dialog
+                                  Navigator.of(context).pop();
+                                }
+                              : filterNotifier.retryLoadAreas(),
                           child: const Text('Retry'),
                         ),
                       ],
@@ -331,7 +337,12 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                         Text('Error: ${filterState.areasError}'),
                         8.h,
                         ElevatedButton(
-                          onPressed: () => filterNotifier.retryLoadAreas(),
+                          onPressed: () => widget.turnOff
+                              ? () {
+                                  // pop the dialog
+                                  Navigator.of(context).pop();
+                                }
+                              : filterNotifier.retryLoadAreas(),
                           child: const Text('Retry'),
                         ),
                       ],
@@ -411,26 +422,34 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             borderRadius: BorderRadius.all(Radius.circular(5)),
                           ),
                         ),
-                        onPressed: () {
-                          // Apply filters to global state with timestamp
-                          filterNotifier.applyFilters(
-                            vaccine: _selectedVaccine,
-                            areaType: _selectedAreaType,
-                            year: _selectedYear,
-                            division: _selectedAreaType == AreaType.district
-                                ? _selectedDivision
-                                : null,
-                            district: _selectedAreaType == AreaType.district
-                                ? _selectedDistrict
-                                : null,
-                            cityCorporation:
-                                _selectedAreaType == AreaType.cityCorporation
-                                ? _selectedCityCorporation
-                                : null,
-                          );
+                        onPressed: widget.turnOff
+                            ? () {
+                                // pop the dialog
+                                Navigator.of(context).pop();
+                              }
+                            : () {
+                                // Apply filters to global state with timestamp
+                                filterNotifier.applyFilters(
+                                  vaccine: _selectedVaccine,
+                                  areaType: _selectedAreaType,
+                                  year: _selectedYear,
+                                  division:
+                                      _selectedAreaType == AreaType.district
+                                      ? _selectedDivision
+                                      : null,
+                                  district:
+                                      _selectedAreaType == AreaType.district
+                                      ? _selectedDistrict
+                                      : null,
+                                  cityCorporation:
+                                      _selectedAreaType ==
+                                          AreaType.cityCorporation
+                                      ? _selectedCityCorporation
+                                      : null,
+                                );
 
-                          Navigator.of(context).pop();
-                        },
+                                Navigator.of(context).pop();
+                              },
                         child: const Text(
                           'Filter',
                           style: TextStyle(color: Colors.white),
@@ -445,15 +464,20 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             borderRadius: BorderRadius.all(Radius.circular(5)),
                           ),
                         ),
-                        onPressed: () {
-                          // Reset filters to default
-                          filterNotifier.resetFilters();
+                        onPressed: widget.turnOff
+                            ? () {
+                                // pop the dialog
+                                Navigator.of(context).pop();
+                              }
+                            : () {
+                                // Reset filters to default
+                                filterNotifier.resetFilters();
 
-                          // Sync local state with provider state after reset
-                          _syncLocalStateWithProvider();
+                                // Sync local state with provider state after reset
+                                _syncLocalStateWithProvider();
 
-                          Navigator.of(context).pop();
-                        },
+                                Navigator.of(context).pop();
+                              },
                         child: const Text(
                           'Reset',
                           style: TextStyle(color: Colors.black),
