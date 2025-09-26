@@ -389,7 +389,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (previous?.isLoading == true &&
           current.isLoading == false &&
           current.error == null &&
-           (current.currentLevel !=
+          (current.currentLevel !=
                   GeographicLevel.district || // All non-district levels
               (current.currentLevel ==
                       GeographicLevel
@@ -446,7 +446,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
-      // this reloads coverage data when year changes
+    // this reloads coverage data when year changes
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
       if (previous != null && (previous.selectedYear != current.selectedYear)) {
         logg.i(
@@ -468,6 +468,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           current.lastAppliedTimestamp != null &&
           previous.lastAppliedTimestamp != current.lastAppliedTimestamp) {
         logg.i("Filter applied - triggering map data load");
+
+        // Check if only vaccine changed (no geographic filter changes)
+        final bool onlyVaccineChanged =
+            previous.selectedAreaType == current.selectedAreaType &&
+            previous.selectedDivision == current.selectedDivision &&
+            previous.selectedDistrict == current.selectedDistrict &&
+            previous.selectedCityCorporation ==
+                current.selectedCityCorporation &&
+            previous.selectedYear == current.selectedYear &&
+            previous.selectedVaccine != current.selectedVaccine;
+
+        if (onlyVaccineChanged) {
+          logg.i(
+            "Only vaccine changed from ${previous.selectedVaccine} to ${current.selectedVaccine} - no loading needed, map will auto-update",
+          );
+          // DO NOT call any map controller methods for vaccine-only changes
+          // The map will automatically re-render with the new vaccine selection
+          // because the widget build method uses filterState.selectedVaccine
+          return; // Early return to avoid any loading operations
+        }
 
         final bool divisionFilterApplied =
             current.selectedAreaType == AreaType.district &&
@@ -545,8 +565,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed:
-                        _goBack, 
+                    onPressed: _goBack,
                     icon: const Icon(Icons.arrow_back),
                   ),
                   Expanded(
@@ -577,7 +596,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       color: Colors.black.withValues(alpha: 0.3),
                       child: const Center(child: CustomLoadingWidget()),
                     ),
-               
+
                   // Show map when data is loaded successfully (even if polygons are empty)
                   if (!mapState.isLoading &&
                       mapState.areaCoordsGeoJsonData != null &&

@@ -240,7 +240,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Apply filters and mark the timestamp when filters are applied
-  ///! also needs attention as this does not work properly maybe!!!
+  /// Only updates timestamp for non-vaccine changes to prevent unnecessary map loading
   void applyFilters({
     String? vaccine,
     AreaType? areaType,
@@ -249,6 +249,9 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? district,
     String? year,
   }) {
+    // Capture current state before any updates
+    final currentState = state;
+
     // Update individual filter selections
     if (vaccine != null) updateVaccine(vaccine);
     if (areaType != null) updateAreaType(areaType);
@@ -257,7 +260,19 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     if (cityCorporation != null) updateCityCorporation(cityCorporation);
     if (district != null) updateDistrict(district);
 
-    // Mark the timestamp when filters are applied
-    state = state.copyWith(lastAppliedTimestamp: DateTime.now());
+    // Check if any non-vaccine filters actually changed from their previous values
+    final bool hasNonVaccineChanges =
+        (areaType != null && areaType != currentState.selectedAreaType) ||
+        (division != null && division != currentState.selectedDivision) ||
+        (cityCorporation != null &&
+            cityCorporation != currentState.selectedCityCorporation) ||
+        (district != null && district != currentState.selectedDistrict) ||
+        (year != null && year != currentState.selectedYear);
+
+    // Only mark the timestamp when non-vaccine filters actually changed
+    // This prevents map loading when only vaccine changes
+    if (hasNonVaccineChanges) {
+      state = state.copyWith(lastAppliedTimestamp: DateTime.now());
+    }
   }
 }
