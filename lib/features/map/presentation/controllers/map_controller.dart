@@ -443,40 +443,44 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final currentFilter = _filterNotifier.state;
       final selectedYear = currentFilter.selectedYear;
 
-      // Get city corporation slug using proper name conversion
-      final ccSlug = ApiConstants.cityCorporationNameToSlug(
-        cityCorporationName,
-      );
+      // Get city corporation UID from filter state for fallback strategy
+      final ccUid = _filterNotifier.getCityCorporationUid(cityCorporationName);
 
       logg.i(
-        "Loading city corporation data for: $cityCorporationName (slug: $ccSlug)",
+        "Loading city corporation data for: $cityCorporationName (UID: $ccUid)",
       );
 
-      // Construct API paths for city corporation
-      final geoJsonPath = ApiConstants.getCityCorporationGeoJsonPath(
-        ccSlug: ccSlug,
+      // Generate fallback URL paths (UID first, then name-based)
+      final geoJsonPaths = ApiConstants.getCityCorporationGeoJsonPaths(
+        ccUid: ccUid,
+        ccName: cityCorporationName,
       );
-      final coveragePath = ApiConstants.getCityCorporationCoveragePath(
-        ccSlug: ccSlug,
+      final coveragePaths = ApiConstants.getCityCorporationCoveragePaths(
+        ccUid: ccUid,
+        ccName: cityCorporationName,
         year: selectedYear,
       );
-      final epiPath = ApiConstants.getCityCorporationEpiPath(ccSlug: ccSlug);
+      final epiPaths = ApiConstants.getCityCorporationEpiPaths(
+        ccUid: ccUid,
+        ccName: cityCorporationName,
+      );
 
-      logg.i("Fetching city corporation GeoJSON from: $geoJsonPath");
-      logg.i("Fetching city corporation coverage from: $coveragePath");
-      logg.i("Fetching city corporation EPI from: $epiPath");
+      logg.i("City corporation GeoJSON fallback paths: $geoJsonPaths");
+      logg.i("City corporation coverage fallback paths: $coveragePaths");
+      logg.i("City corporation EPI fallback paths: $epiPaths");
 
+      // Use fallback strategy for all three API calls
       final results = await Future.wait([
-        _dataService.fetchAreaGeoJsonCoordsData(
-          urlPath: geoJsonPath,
+        _dataService.fetchAreaGeoJsonCoordsDataWithFallback(
+          urlPaths: geoJsonPaths,
           forceRefresh: true,
         ),
-        _dataService.getVaccinationCoverage(
-          urlPath: coveragePath,
+        _dataService.getVaccinationCoverageWithFallback(
+          urlPaths: coveragePaths,
           forceRefresh: true,
         ),
-        _dataService.getEpiCenterCoordsData(
-          urlPath: epiPath,
+        _dataService.getEpiCenterCoordsDataWithFallback(
+          urlPaths: epiPaths,
           forceRefresh: true,
         ),
       ]);
@@ -485,11 +489,14 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final coverageData = results[1] as VaccineCoverageResponse;
       final epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
 
-      // Create navigation level for city corporation
+      // Create navigation level for city corporation using UID or name-based slug
+      final ccSlug =
+          ccUid?.toLowerCase() ??
+          ApiConstants.cityCorporationNameToSlug(cityCorporationName);
       final ccNavLevel = DrilldownLevel(
         level:
             GeographicLevel.district, // City corporations are at district level
-        slug: 'city-corporations/$ccSlug',
+        slug: ccSlug, // Use direct slug (UID or name-based) without prefix
         name: cityCorporationName,
         parentSlug: null,
       );

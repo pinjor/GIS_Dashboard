@@ -28,7 +28,8 @@ class ApiConstants {
     if (slug == null || slug.isEmpty) {
       return districtJsonPath; // Default country level
     }
-    return '/shapes/$slug/shape.json.gz';
+    // Convert slug to lowercase to handle any UIDs that might be in the slug
+    return '/shapes/${slug.toLowerCase()}/shape.json.gz';
   }
 
   /// Generate coverage path based on slug and year
@@ -37,7 +38,8 @@ class ApiConstants {
     if (slug == null || slug.isEmpty) {
       return '/coverage/$year-coverage.json'; // Default country level
     }
-    return '/coverage/$slug/$year-coverage.json';
+    // Convert slug to lowercase to handle any UIDs that might be in the slug
+    return '/coverage/${slug.toLowerCase()}/$year-coverage.json';
   }
 
   /// Generate EPI path based on slug
@@ -46,7 +48,8 @@ class ApiConstants {
     if (slug == null || slug.isEmpty) {
       return '/epi/epi.json'; // Default if no slug
     }
-    return '/epi/$slug/epi.json';
+    // Convert slug to lowercase to handle any UIDs that might be in the slug
+    return '/epi/${slug.toLowerCase()}/epi.json';
   }
 
   /// Generate division-specific paths
@@ -64,25 +67,93 @@ class ApiConstants {
     return '/coverage/divisions/$divisionSlug/$year-coverage.json';
   }
 
-  /// Generate city corporation-specific paths
-  /// Example: /shapes/city-corporations/dhaka-north-cc/shape.json.gz
+  /// Generate city corporation-specific paths with fallback strategy
+  /// Returns list of URLs to try: [UID-based, name-based]
+  static List<String> getCityCorporationGeoJsonPaths({
+    String? ccUid,
+    String? ccName,
+  }) {
+    List<String> paths = [];
+
+    // Try UID first if available (convert to lowercase for URL)
+    if (ccUid != null && ccUid.isNotEmpty) {
+      final lowercaseUid = ccUid.toLowerCase();
+      paths.add('/shapes/$lowercaseUid/shape.json.gz');
+    }
+
+    // Then try name-based slug if available
+    if (ccName != null && ccName.isNotEmpty) {
+      final ccSlug = cityCorporationNameToSlug(ccName);
+      paths.add('/shapes/$ccSlug/shape.json.gz');
+    }
+
+    return paths;
+  }
+
+  /// Generate city corporation coverage paths with fallback strategy
+  static List<String> getCityCorporationCoveragePaths({
+    String? ccUid,
+    String? ccName,
+    required String year,
+  }) {
+    List<String> paths = [];
+
+    // Try UID first if available (convert to lowercase for URL)
+    if (ccUid != null && ccUid.isNotEmpty) {
+      final lowercaseUid = ccUid.toLowerCase();
+      paths.add('/coverage/$lowercaseUid/$year-coverage.json');
+    }
+
+    // Then try name-based slug if available
+    if (ccName != null && ccName.isNotEmpty) {
+      final ccSlug = cityCorporationNameToSlug(ccName);
+      paths.add('/coverage/$ccSlug/$year-coverage.json');
+    }
+
+    return paths;
+  }
+
+  /// Generate city corporation EPI paths with fallback strategy
+  static List<String> getCityCorporationEpiPaths({
+    String? ccUid,
+    String? ccName,
+  }) {
+    List<String> paths = [];
+
+    // Try UID first if available (convert to lowercase for URL)
+    if (ccUid != null && ccUid.isNotEmpty) {
+      final lowercaseUid = ccUid.toLowerCase();
+      paths.add('/epi/$lowercaseUid/epi.json');
+    }
+
+    // Then try name-based slug if available
+    if (ccName != null && ccName.isNotEmpty) {
+      final ccSlug = cityCorporationNameToSlug(ccName);
+      paths.add('/epi/$ccSlug/epi.json');
+    }
+
+    return paths;
+  }
+
+  /// Legacy single-path methods for backward compatibility
+  /// Example: /shapes/dhaka-north-cc/shape.json.gz
   static String getCityCorporationGeoJsonPath({required String ccSlug}) {
-    return '/shapes/city-corporations/$ccSlug/shape.json.gz';
+    return '/shapes/$ccSlug/shape.json.gz';
   }
 
   /// Generate city corporation coverage path
-  /// Example: /coverage/city-corporations/dhaka-north-cc/2025-coverage.json
+  /// Example: /coverage/dhaka-north-cc/2025-coverage.json
   static String getCityCorporationCoveragePath({
     required String ccSlug,
     required String year,
   }) {
-    return '/coverage/city-corporations/$ccSlug/$year-coverage.json';
+    return '/coverage/$ccSlug/$year-coverage.json';
   }
 
   /// Generate city corporation EPI path
-  /// Example: /epi/city-corporations/dhaka-north-cc/epi.json
+  /// Example: /epi/dhaka-north-cc/epi.json
   static String getCityCorporationEpiPath({required String ccSlug}) {
-    return '/epi/city-corporations/$ccSlug/epi.json';
+    return '/epi/$ccSlug/epi.json';
   }
 
   /// Helper methods to convert names to proper slugs for different types

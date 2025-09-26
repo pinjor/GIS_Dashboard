@@ -203,6 +203,134 @@ class DataService {
     // If all retries failed, throw the last error
     throw lastError ?? Exception('EPI center data unavailable');
   }
+
+  /// Fetch GeoJSON data with fallback URLs (for city corporations)
+  Future<AreaCoordsGeoJsonResponse> fetchAreaGeoJsonCoordsDataWithFallback({
+    required List<String> urlPaths,
+    bool forceRefresh = false,
+  }) async {
+    Exception? lastError;
+
+    for (int i = 0; i < urlPaths.length; i++) {
+      final urlPath = urlPaths[i];
+      final isFirstAttempt = i == 0;
+
+      try {
+        logg.i(
+          "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $urlPath",
+        );
+
+        final result = await fetchAreaGeoJsonCoordsData(
+          urlPath: urlPath,
+          forceRefresh: forceRefresh,
+        );
+
+        logg.i(
+          "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL",
+        );
+        return result;
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        logg.w(
+          "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $e",
+        );
+
+        if (i < urlPaths.length - 1) {
+          logg.i("🔄 Trying next URL strategy...");
+          continue;
+        }
+      }
+    }
+
+    logg.e("💥 All URL strategies failed for city corporation");
+    throw lastError ?? Exception('All city corporation URL strategies failed');
+  }
+
+  /// Fetch coverage data with fallback URLs (for city corporations)
+  Future<VaccineCoverageResponse> getVaccinationCoverageWithFallback({
+    required List<String> urlPaths,
+    bool forceRefresh = false,
+  }) async {
+    Exception? lastError;
+
+    for (int i = 0; i < urlPaths.length; i++) {
+      final urlPath = urlPaths[i];
+      final isFirstAttempt = i == 0;
+
+      try {
+        logg.i(
+          "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL: $urlPath",
+        );
+
+        final result = await getVaccinationCoverage(
+          urlPath: urlPath,
+          forceRefresh: forceRefresh,
+        );
+
+        logg.i(
+          "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL",
+        );
+        return result;
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        logg.w(
+          "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL: $e",
+        );
+
+        if (i < urlPaths.length - 1) {
+          logg.i("🔄 Trying next coverage URL strategy...");
+          continue;
+        }
+      }
+    }
+
+    logg.e("💥 All coverage URL strategies failed for city corporation");
+    throw lastError ??
+        Exception('All city corporation coverage URL strategies failed');
+  }
+
+  /// Fetch EPI data with fallback URLs (for city corporations)
+  Future<EpiCenterCoordsResponse> getEpiCenterCoordsDataWithFallback({
+    required List<String> urlPaths,
+    bool forceRefresh = false,
+  }) async {
+    Exception? lastError;
+
+    for (int i = 0; i < urlPaths.length; i++) {
+      final urlPath = urlPaths[i];
+      final isFirstAttempt = i == 0;
+
+      try {
+        logg.i(
+          "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $urlPath",
+        );
+
+        final result = await getEpiCenterCoordsData(
+          urlPath: urlPath,
+          forceRefresh: forceRefresh,
+        );
+
+        logg.i(
+          "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL",
+        );
+        return result;
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        logg.w(
+          "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $e",
+        );
+
+        if (i < urlPaths.length - 1) {
+          logg.i("🔄 Trying next EPI URL strategy...");
+          continue;
+        }
+      }
+    }
+
+    logg.e("💥 All EPI URL strategies failed for city corporation");
+    throw lastError ??
+        Exception('All city corporation EPI URL strategies failed');
+  }
 }
 
 // future plans (detailed)

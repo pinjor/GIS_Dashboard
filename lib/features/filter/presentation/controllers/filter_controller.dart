@@ -213,6 +213,19 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         .toList();
   }
 
+  /// Get city corporation UID by name for URL generation
+  String? getCityCorporationUid(String ccName) {
+    try {
+      final cc = state.cityCorporations.firstWhere(
+        (corporation) => corporation.name == ccName,
+      );
+      return cc.uid;
+    } catch (e) {
+      print('FilterProvider: City corporation UID not found for: $ccName');
+      return null;
+    }
+  }
+
   /// Get district slug by district name from GeoJSON data
 
   /// Reset geographic filters to country view defaults
