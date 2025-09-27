@@ -68,12 +68,15 @@ class MapState {
     String? error,
     String? currentAreaName,
     bool clearError = false,
+    bool clearEpiData = false,
   }) {
     return MapState(
       areaCoordsGeoJsonData:
           areaCoordsGeoJsonData ?? this.areaCoordsGeoJsonData,
       coverageData: coverageData ?? this.coverageData,
-      epiCenterCoordsData: epiCenterCoordsData ?? this.epiCenterCoordsData,
+      epiCenterCoordsData: clearEpiData
+          ? null
+          : (epiCenterCoordsData ?? this.epiCenterCoordsData),
       currentLevel: currentLevel ?? this.currentLevel,
       navigationStack: navigationStack ?? this.navigationStack,
       isLoading: isLoading ?? this.isLoading,

@@ -184,6 +184,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         currentAreaName: areaName,
         isLoading: false,
         clearError: true,
+        clearEpiData: epiCenterCoordsData == null, // Clear EPI data if null
       );
 
       logg.i("Successfully drilled down to $areaName at level $newLevel");
@@ -453,7 +454,6 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: coverageData,
-        epiCenterCoordsData: null, // No EPI data for divisions
         currentLevel: GeographicLevel.division,
         navigationStack: [
           divisionNavLevel,
@@ -461,6 +461,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         currentAreaName: divisionName,
         isLoading: false,
         clearError: true,
+        clearEpiData: true, // Clear EPI data for divisions
       );
 
       logg.i("Successfully loaded division data for $divisionName");
@@ -672,12 +673,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: coverageData,
-        epiCenterCoordsData: null, // No EPI data for districts from filter
         currentLevel: GeographicLevel.district,
         navigationStack: newNavigationStack,
         currentAreaName: districtName,
         isLoading: false,
         clearError: true,
+        clearEpiData: true, // Clear EPI data for districts from filter
       );
 
       logg.i("Successfully loaded district data for $districtName");
@@ -811,10 +812,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   }
 
   /// Sync filters with tapped district using live backend data
-  /// ! this needs some modifications : should not allow any api calling at all
-  /// ! should just update things at once using existing data in filter state
-  /// ! maybe it is updating district two times
-  /// ! needs further investigation
+
   Future<bool> syncFiltersWithDistrict(String districtUid) async {
     try {
       logg.d(
