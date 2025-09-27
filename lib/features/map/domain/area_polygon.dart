@@ -14,6 +14,7 @@ class AreaPolygon {
   final String? slug;
   final String? parentSlug;
   final bool canDrillDown;
+  final String? orgUid; // For city corporation wards
 
   AreaPolygon({
     required this.polygon,
@@ -24,6 +25,7 @@ class AreaPolygon {
     this.slug,
     this.parentSlug,
     this.canDrillDown = false,
+    this.orgUid,
   });
 
   /// Create a copy with updated properties
@@ -36,6 +38,7 @@ class AreaPolygon {
     String? slug,
     String? parentSlug,
     bool? canDrillDown,
+    String? orgUid,
   }) {
     return AreaPolygon(
       polygon: polygon ?? this.polygon,
@@ -46,6 +49,7 @@ class AreaPolygon {
       slug: slug ?? this.slug,
       parentSlug: parentSlug ?? this.parentSlug,
       canDrillDown: canDrillDown ?? this.canDrillDown,
+      orgUid: orgUid ?? this.orgUid,
     );
   }
 }

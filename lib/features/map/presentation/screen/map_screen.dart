@@ -113,7 +113,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (tappedPolygon != null) {
       logg.i("Tapped on: ${tappedPolygon.areaName}");
 
-      // Check if this is a subblock - if so, find EPI center and navigate directly
+      final mapState = ref.read(mapControllerProvider);
+      final filterState = ref.read(filterControllerProvider);
+      // Check if this is a city corporation ward tap (zone level showing wards)
+      if (mapState.currentLevel == GeographicLevel.zone &&
+          tappedPolygon.orgUid != null &&
+          tappedPolygon.orgUid!.isNotEmpty &&
+          filterState.selectedAreaType == AreaType.cityCorporation) {
+        _handleCityCorporationWardTapForEpiNavigation(tappedPolygon);
+        return;
+      }
+
+      // Check if this is a district ward (subblock) - if so, find EPI center and navigate directly
       if (tappedPolygon.level == GeographicLevel.ward.value &&
           tappedPolygon.canDrillDown == false) {
         _handleSubblockTapForEpiNavigation(tappedPolygon);
@@ -320,6 +331,40 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _onEpiMarkerTap(
       foundEpiCenter.name ?? 'EPI Center',
       foundEpiCenter.orgUid!,
+    );
+  }
+
+  /// Handle city corporation ward tap - navigate directly to EPI details using org_uid
+  void _handleCityCorporationWardTapForEpiNavigation(AreaPolygon wardPolygon) {
+    logg.i("City Corporation Ward tapped: ${wardPolygon.areaName}");
+
+    if (wardPolygon.orgUid == null || wardPolygon.orgUid!.isEmpty) {
+      logg.w("No org_uid available for ward: ${wardPolygon.areaName}");
+      showCustomSnackBar(
+        context: context,
+        message: 'Ward data not available',
+        color: Colors.orangeAccent.shade200,
+      );
+      return;
+    }
+
+    logg.i(
+      "Navigating to EPI details for CC ward: ${wardPolygon.areaName} (org_uid: ${wardPolygon.orgUid})",
+    );
+
+    // Navigate to EPI center details screen using org_uid
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EpiCenterDetailsScreen(
+          epiUid: wardPolygon.orgUid!,
+          epiCenterName: wardPolygon.areaName,
+          ccUid: null, // Not needed for direct org_uid calls
+          currentLevel:
+              GeographicLevel.zone.index, // Ward within city corporation
+          isOrgUidRequest: true, // Flag to use org_uid-based API call
+        ),
+      ),
     );
   }
 
@@ -565,14 +610,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  if (!(mapState.currentLevel ==
-                          GeographicLevel.cityCorporation ||
-                      mapState.currentLevel == GeographicLevel.district ||
-                      mapState.currentLevel == GeographicLevel.division))
-                    IconButton(
-                      onPressed: _goBack,
-                      icon: const Icon(Icons.arrow_back),
-                    ),
+                  IconButton(
+                    onPressed: _goBack,
+                    icon: const Icon(Icons.arrow_back),
+                  ),
                   Expanded(
                     child: Text(
                       'Home > ${mapState.displayPath}',

@@ -18,6 +18,7 @@ class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
   final String epiUid;
   final int? currentLevel;
   final String? ccUid;
+  final bool isOrgUidRequest; // Flag to indicate org_uid-based request
 
   const EpiCenterDetailsScreen({
     super.key,
@@ -25,6 +26,7 @@ class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
     required this.epiUid,
     this.currentLevel,
     this.ccUid,
+    this.isOrgUidRequest = false, // Default to false for backward compatibility
   });
 
   @override
@@ -47,22 +49,31 @@ class _EpiCenterDetailsScreenState
   Future<void> _loadEpiCenterData() async {
     Future.microtask(() {
       final filterState = ref.read(filterControllerProvider);
-      final year =
-          int.tryParse(filterState.selectedYear) ?? DateTime.now().year;
+      final year = filterState.selectedYear;
 
       logg.i('🔍 EPI Center Screen - Loading data for:');
       logg.i('   EPI UID: ${widget.epiUid}');
       logg.i('   Center Name: ${widget.epiCenterName}');
       logg.i('   Year: $year');
       logg.i('   CC UID: ${widget.ccUid}');
+      logg.i('   Is Org UID Request: ${widget.isOrgUidRequest}');
 
-      ref
-          .read(epiCenterControllerProvider.notifier)
-          .fetchEpiCenterData(
-            epiUid: widget.epiUid,
-            year: year,
-            ccUid: widget.ccUid,
-          );
+      final controller = ref.read(epiCenterControllerProvider.notifier);
+
+      if (widget.isOrgUidRequest) {
+        // Use org_uid-based API call for city corporation wards
+        controller.fetchEpiCenterDataByOrgUid(
+          orgUid: widget.epiUid,
+          year: year,
+        );
+      } else {
+        // Use regular API call for district-based EPI centers
+        controller.fetchEpiCenterData(
+          epiUid: widget.epiUid,
+          year: int.tryParse(year) ?? DateTime.now().year,
+          ccUid: widget.ccUid,
+        );
+      }
     });
   }
 

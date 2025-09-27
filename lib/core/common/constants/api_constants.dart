@@ -170,6 +170,15 @@ class ApiConstants {
     return ccName.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
   }
 
+  /// Generate EPI details URL based on org_uid (for city corporation wards)
+  /// Example: https://staging.gisdashboard.online/chart/UQ7up0ejmVn?year=2025&request-from=app
+  static String getEpiDetailsUrlByOrgUid({
+    required String orgUid,
+    required String year,
+  }) {
+    return '$epiCenterDataBaseUrl/chart/$orgUid?year=$year&request-from=app';
+  }
+
   /// Legacy getters for backward compatibility
   static String getCoveragePath25({String? slug}) =>
       getCoveragePath(slug: slug, year: '2025');

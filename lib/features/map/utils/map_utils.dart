@@ -442,6 +442,7 @@ AreaPolygon? _createAreaPolygon(
       parentSlug: parentSlug,
       canDrillDown:
           canDrillDown, // Allow drill-down from division, district, upazila, union, and ward levels
+      orgUid: orgUid, // Add orgUid to AreaPolygon
     );
   } catch (e) {
     logg.e("Error creating area polygon for $areaName: $e");

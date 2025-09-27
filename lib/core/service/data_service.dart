@@ -331,6 +331,24 @@ class DataService {
     throw lastError ??
         Exception('All city corporation EPI URL strategies failed');
   }
+
+  /// Get EPI Center details data by org_uid (for city corporation wards)
+  Future<EpiCenterDetailsResponse> getEpiCenterDetailsByOrgUid({
+    required String orgUid,
+    required String year,
+    bool forceRefresh = false,
+  }) async {
+    try {
+      logg.i('Fetching EPI center details by org_uid: $orgUid, year: $year');
+      return await _epiCenterRepository.fetchEpiCenterDetailsByOrgUid(
+        orgUid: orgUid,
+        year: year,
+      );
+    } catch (e) {
+      logg.e('Error fetching EPI center details by org_uid: $e');
+      rethrow;
+    }
+  }
 }
 
 // future plans (detailed)
