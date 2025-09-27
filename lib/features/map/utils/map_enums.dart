@@ -16,11 +16,17 @@ enum GeographicLevel {
   union('union'),
 
   /// Ward level (terminal level for drilldown)
-  ward('ward');
+  ward('ward'),
 
   /// Smallest administrative unit - COMMENTED OUT as it's not used in practice
   /// and causes confusion. Ward is the actual terminal level.
   // subblock('subblock');
+
+  // for city corporation based drilldown
+  // city corporation level
+  cityCorporation('city_corporation'),
+  /// Zone level (for city corporation)
+  zone('zone');
 
   const GeographicLevel(this.value);
 
@@ -42,6 +48,12 @@ enum GeographicLevel {
         return GeographicLevel.ward;
       case GeographicLevel.ward:
         return null; // Ward is now the terminal level - no further drilldown
+
+      // for city corporation based drilldown
+      case GeographicLevel.cityCorporation:
+        return GeographicLevel.zone;
+      case GeographicLevel.zone:
+        return null; // Zone is terminal level within city corporation context
     }
   }
 
@@ -62,6 +74,12 @@ enum GeographicLevel {
         return GeographicLevel.upazila;
       case GeographicLevel.ward:
         return GeographicLevel.union;
+
+      // for city corporation based drilldown
+      case GeographicLevel.cityCorporation:
+        return GeographicLevel.country; // City corporation goes back to country
+      case GeographicLevel.zone:
+        return GeographicLevel.cityCorporation;
     }
   }
 
@@ -70,12 +88,15 @@ enum GeographicLevel {
   bool get hasEpiData {
     return this == GeographicLevel.upazila ||
         this == GeographicLevel.union ||
-        this == GeographicLevel.ward;
+        this == GeographicLevel.ward ||
+        this == GeographicLevel.cityCorporation ||
+        this == GeographicLevel.zone;
   }
 
   /// Check if this level can be drilled down further
+  /// this means that if the level is ward or zone, it cannot be drilled down further
   bool get canDrillDown {
-    return this != GeographicLevel.ward;
+    return !(this == GeographicLevel.ward || this == GeographicLevel.zone);
   }
 
   /// Check if this is the root/initial level (country view)
@@ -104,6 +125,10 @@ enum GeographicLevel {
         return 'Union';
       case GeographicLevel.ward:
         return 'Ward';
+      case GeographicLevel.cityCorporation:
+        return 'City Corporation';
+      case GeographicLevel.zone:
+        return 'Zone';
     }
   }
 
@@ -122,6 +147,12 @@ enum GeographicLevel {
         return 10.0; // Reduced for better union view
       case GeographicLevel.ward:
         return 11.5; // Reduced for better ward view - Ward is now the terminal level
+
+      // for city corporation based drilldown
+      case GeographicLevel.cityCorporation:
+        return 8.0; // Reduced for better city corporation view
+      case GeographicLevel.zone:
+        return 11.0; // Reduced for better zone view
     }
   }
 

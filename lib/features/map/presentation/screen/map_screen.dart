@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -564,10 +565,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: _goBack,
-                    icon: const Icon(Icons.arrow_back),
-                  ),
+                  if (!(mapState.currentLevel ==
+                          GeographicLevel.cityCorporation ||
+                      mapState.currentLevel == GeographicLevel.district ||
+                      mapState.currentLevel == GeographicLevel.division))
+                    IconButton(
+                      onPressed: _goBack,
+                      icon: const Icon(Icons.arrow_back),
+                    ),
                   Expanded(
                     child: Text(
                       'Home > ${mapState.displayPath}',
@@ -579,10 +584,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
-                    'Level: ${mapState.currentLevel.value.toUpperCase()}',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
+                  if (kDebugMode)
+                    Text(
+                      'Level: ${mapState.currentLevel.value.toUpperCase()}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                 ],
               ),
             ),

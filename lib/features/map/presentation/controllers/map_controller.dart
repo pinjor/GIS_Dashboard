@@ -127,8 +127,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       logg.i("Fetching GeoJSON from: $geoJsonPath");
       logg.i("Fetching coverage from: $coveragePath");
 
-      // For union and deeper levels (not upazila), also fetch EPI data (3 simultaneous requests)
-      List<Future> apiRequests = [
+      // Fetch required data (GeoJSON and coverage) - these must succeed
+      final requiredRequests = [
         _dataService.fetchAreaGeoJsonCoordsData(
           urlPath: geoJsonPath,
           forceRefresh: true, // Always refresh for drilldown
@@ -139,28 +139,28 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         ),
       ];
 
-      // Add EPI request for levels that have EPI data (centralized logic)
+      final requiredResults = await Future.wait(requiredRequests);
+      final areaCoordsGeoJsonData =
+          requiredResults[0] as AreaCoordsGeoJsonResponse;
+      final coverageData = requiredResults[1] as VaccineCoverageResponse;
+
+      // Fetch optional EPI data separately - failures here won't block drilldown
+      EpiCenterCoordsResponse? epiCenterCoordsData;
       if (newLevelEnum.hasEpiData) {
-        final epiPath = ApiConstants.getEpiPath(slug: slug);
-        logg.i("Fetching EPI data from: $epiPath");
-        apiRequests.add(
-          _dataService.getEpiCenterCoordsData(
+        try {
+          final epiPath = ApiConstants.getEpiPath(slug: slug);
+          logg.i("Fetching EPI data from: $epiPath");
+          epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
             urlPath: epiPath,
             forceRefresh: true,
-          ),
-        );
-      }
-
-      final results = await Future.wait(apiRequests);
-
-      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
-      final coverageData = results[1] as VaccineCoverageResponse;
-
-      // EPI data is available for levels that have EPI data (centralized logic)
-      EpiCenterCoordsResponse? epiCenterCoordsData;
-      if (newLevelEnum.hasEpiData && results.length > 2) {
-        epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
-        logg.i("Successfully fetched EPI data for $areaName");
+          );
+          logg.i("Successfully fetched EPI data for $areaName");
+        } catch (e) {
+          logg.w(
+            "EPI data not available for $areaName - continuing without EPI data: $e",
+          );
+          epiCenterCoordsData = null; // Continue with null EPI data
+        }
       }
 
       // Create new navigation level
@@ -234,47 +234,87 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         final currentFilter = _filterNotifier.state;
         final selectedYear = currentFilter.selectedYear;
 
-        final geoJsonPath = ApiConstants.getGeoJsonPath(
-          slug: previousLevel.slug,
-        );
-        final coveragePath = ApiConstants.getCoveragePath(
-          slug: previousLevel.slug,
-          year: selectedYear,
-        );
-
-        // Prepare API requests
-        List<Future> apiRequests = [
-          _dataService.fetchAreaGeoJsonCoordsData(
-            urlPath: geoJsonPath,
-            forceRefresh: true,
-          ),
-          _dataService.getVaccinationCoverage(
-            urlPath: coveragePath,
-            forceRefresh: true,
-          ),
-        ];
-
-        // Add EPI request if going back to a level that has EPI data
-        final previousLevelEnum = previousLevel.level;
-        if (previousLevelEnum.hasEpiData) {
-          final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
-          apiRequests.add(
-            _dataService.getEpiCenterCoordsData(
-              urlPath: epiPath,
+        // Use fallback strategy for city corporation levels
+        List<Future> apiRequests = [];
+        if (previousLevel.level == GeographicLevel.cityCorporation) {
+          // For city corporation, use fallback methods
+          apiRequests = [
+            _dataService.fetchAreaGeoJsonCoordsDataWithFallback(
+              urlPaths: ApiConstants.getCityCorporationGeoJsonPaths(
+                ccUid: previousLevel.slug,
+                ccName: previousLevel.name,
+              ),
               forceRefresh: true,
             ),
+            _dataService.getVaccinationCoverageWithFallback(
+              urlPaths: ApiConstants.getCityCorporationCoveragePaths(
+                ccUid: previousLevel.slug,
+                ccName: previousLevel.name,
+                year: selectedYear,
+              ),
+              forceRefresh: true,
+            ),
+          ];
+        } else {
+          // For regular levels, use standard paths
+          final geoJsonPath = ApiConstants.getGeoJsonPath(
+            slug: previousLevel.slug,
           );
+          final coveragePath = ApiConstants.getCoveragePath(
+            slug: previousLevel.slug,
+            year: selectedYear,
+          );
+
+          apiRequests = [
+            _dataService.fetchAreaGeoJsonCoordsData(
+              urlPath: geoJsonPath,
+              forceRefresh: true,
+            ),
+            _dataService.getVaccinationCoverage(
+              urlPath: coveragePath,
+              forceRefresh: true,
+            ),
+          ];
         }
 
-        final results = await Future.wait(apiRequests);
+        // Fetch required data first
+        final requiredResults = await Future.wait(apiRequests);
+        final areaCoordsGeoJsonData =
+            requiredResults[0] as AreaCoordsGeoJsonResponse;
+        final coverageData = requiredResults[1] as VaccineCoverageResponse;
 
-        final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
-        final coverageData = results[1] as VaccineCoverageResponse;
-
-        // EPI data is available for levels that have EPI data
+        // Handle optional EPI data separately for better error handling
+        final previousLevelEnum = previousLevel.level;
         EpiCenterCoordsResponse? epiCenterCoordsData;
-        if (previousLevelEnum.hasEpiData && results.length > 2) {
-          epiCenterCoordsData = results[2] as EpiCenterCoordsResponse;
+        if (previousLevelEnum.hasEpiData) {
+          try {
+            if (previousLevel.level == GeographicLevel.cityCorporation) {
+              // For city corporation, use fallback methods for EPI data too
+              epiCenterCoordsData = await _dataService
+                  .getEpiCenterCoordsDataWithFallback(
+                    urlPaths: ApiConstants.getCityCorporationEpiPaths(
+                      ccUid: previousLevel.slug,
+                      ccName: previousLevel.name,
+                    ),
+                    forceRefresh: true,
+                  );
+            } else {
+              // For regular levels, use standard EPI path
+              final epiPath = ApiConstants.getEpiPath(slug: previousLevel.slug);
+              epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
+                urlPath: epiPath,
+                forceRefresh: true,
+              );
+            }
+            logg.i(
+              "Successfully fetched EPI data for going back to ${previousLevel.name}",
+            );
+          } catch (e) {
+            logg.w(
+              "EPI data not available for ${previousLevel.name} - continuing without EPI data: $e",
+            );
+            epiCenterCoordsData = null; // Continue with null EPI data
+          }
         }
 
         state = state.copyWith(
@@ -494,9 +534,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           ccUid?.toLowerCase() ??
           ApiConstants.cityCorporationNameToSlug(cityCorporationName);
       final ccNavLevel = DrilldownLevel(
-        level:
-            GeographicLevel.district, // City corporations are at district level
-        slug: ccSlug, // Use direct slug (UID or name-based) without prefix
+        level: GeographicLevel.cityCorporation, // Use city corporation level
+        slug: ccSlug,
         name: cityCorporationName,
         parentSlug: null,
       );
@@ -506,8 +545,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         coverageData: coverageData,
         epiCenterCoordsData:
             epiCenterCoordsData, // Include EPI data for city corporations
-        currentLevel:
-            GeographicLevel.district, // City corporations are at district level
+        currentLevel: GeographicLevel
+            .cityCorporation, // City corporations are at city corporation level
         navigationStack: [
           ccNavLevel,
         ], // Start fresh navigation for city corporation

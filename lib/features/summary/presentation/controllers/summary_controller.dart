@@ -56,20 +56,6 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
     try {
       logg.i("Loading summary data...");
 
-      // Try to get cached data first
-      // final cachedData = _dataService.getCachedCoverageData();
-      // if (cachedData != null && !forceRefresh) {
-      //   logg.i("Using cached summary data");
-      //   state = state.copyWith(
-      //     coverageData: cachedData,
-      //     currentLevel: GeographicLevel.district,
-      //     currentAreaName: 'Bangladesh',
-      //     isLoading: false,
-      //     error: null,
-      //   );
-      //   return;
-      // }
-
       final coverageData = await _dataService.getVaccinationCoverage(
         urlPath: ApiConstants.districtCoveragePath25,
         forceRefresh: forceRefresh,
@@ -99,18 +85,4 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
     await loadSummaryData(forceRefresh: true);
   }
 
-  /// Initialize with cached data without triggering a new load
-  // void initializeWithCachedData() {
-  //   final cachedData = _dataService.getCachedCoverageData();
-  //   if (cachedData != null) {
-  //     logg.i("Initializing summary with cached data");
-  //     state = state.copyWith(
-  //       coverageData: cachedData,
-  //       currentLevel: 'district',
-  //       currentAreaName: 'Bangladesh',
-  //       isLoading: false,
-  //       error: null,
-  //     );
-  //   }
-  // }
 }
