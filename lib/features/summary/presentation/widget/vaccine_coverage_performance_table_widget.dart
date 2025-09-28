@@ -24,16 +24,13 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
     // Get highest performers
     List<Area> highestAreas = [];
     if (selectedVaccine.performance?.highest?.isNotEmpty == true) {
-      highestAreas = selectedVaccine.performance!.highest!;
-    } else if (selectedVaccine.areas?.isNotEmpty == true) {
-      final allAreas = selectedVaccine.areas!
-          .where((area) => area.name != null && area.coveragePercentage != null)
+      // only add the areas to highestAreas if there coverage percentage is above 90%
+
+      highestAreas = selectedVaccine.performance!.highest!
+          .where((area) => (area.coveragePercentage?.round() ?? 0) >= 90)
           .toList();
-      allAreas.sort(
-        (a, b) =>
-            (b.coveragePercentage ?? 0).compareTo(a.coveragePercentage ?? 0),
-      );
-      highestAreas = allAreas.take(5).toList();
+    } else {
+      return performanceData; // No highest performers to add
     }
 
     // Add highest performers with upward indicator
@@ -50,15 +47,8 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
     List<Area> lowestAreas = [];
     if (selectedVaccine.performance?.lowest?.isNotEmpty == true) {
       lowestAreas = selectedVaccine.performance!.lowest!;
-    } else if (selectedVaccine.areas?.isNotEmpty == true) {
-      final allAreas = selectedVaccine.areas!
-          .where((area) => area.name != null && area.coveragePercentage != null)
-          .toList();
-      allAreas.sort(
-        (a, b) =>
-            (a.coveragePercentage ?? 0).compareTo(b.coveragePercentage ?? 0),
-      );
-      lowestAreas = allAreas.take(5).toList();
+    } else {
+      return performanceData; // No lowest performers to add
     }
 
     // Add lowest performers with downward indicator
@@ -355,7 +345,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    '${(area.coveragePercentage ?? 0).toStringAsFixed(2)}%',
+                    '${(area.coveragePercentage ?? 0).round().toStringAsFixed(2)}%',
                     style: const TextStyle(fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
@@ -363,7 +353,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    '${dropoutPercentage.toStringAsFixed(2)}%',
+                    '${dropoutPercentage.round().toStringAsFixed(2)}%',
                     style: const TextStyle(fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
