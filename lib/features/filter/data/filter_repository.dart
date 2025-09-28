@@ -149,7 +149,38 @@ class FilterRepository {
     }
   }
 
-  /// Fetch specific district by its UID
+  /// Fetch areas by parent UID - for hierarchical loading (upazilas, unions, wards, subblocks)
+  Future<List<AreaResponseModel>> fetchAreasByParentUid(
+    String parentUid,
+  ) async {
+    try {
+      // Check internet connectivity first
+      final hasInternet = await _connectivityService.hasInternetConnection();
+      if (!hasInternet) {
+        return Future.error(
+          'No internet connection. Please check your connection and try again.',
+        );
+      }
 
-  /// Fetch specific city corporation by its UID
+      final uri = Uri(
+        scheme: ApiConstants.urlScheme,
+        host: ApiConstants.stagingHost,
+        path: ApiConstants.filterByArea,
+        queryParameters: {'parent_uid': parentUid},
+      ).toString();
+
+      print('FilterRepository: Fetching areas by parent UID from: $uri');
+      final response = await _client.get(uri);
+      print(
+        'FilterRepository: Areas by parent UID response: ${response.statusCode}',
+      );
+
+      return (response.data['data'] as List)
+          .map((item) => AreaResponseModel.fromJson(item))
+          .toList();
+    } catch (e) {
+      print('FilterRepository: Error fetching areas by parent UID: $e');
+      return Future.error('Failed to fetch areas: $e');
+    }
+  }
 }

@@ -146,6 +146,65 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     state = state.copyWith(selectedYear: year);
   }
 
+  /// Update upazila selection and load unions
+  void updateUpazila(String? upazila) {
+    state = state.copyWith(
+      selectedUpazila: upazila,
+      clearUnion: true,
+      clearWard: true,
+      clearSubblock: true,
+      unions: const [],
+      wards: const [],
+      subblocks: const [],
+    );
+
+    if (upazila != null && upazila != 'All') {
+      final upazilaUid = _getUpazilaUid(upazila);
+      if (upazilaUid != null) {
+        _loadUnionsByUpazila(upazilaUid);
+      }
+    }
+  }
+
+  /// Update union selection and load wards
+  void updateUnion(String? union) {
+    state = state.copyWith(
+      selectedUnion: union,
+      clearWard: true,
+      clearSubblock: true,
+      wards: const [],
+      subblocks: const [],
+    );
+
+    if (union != null && union != 'All') {
+      final unionUid = _getUnionUid(union);
+      if (unionUid != null) {
+        _loadWardsByUnion(unionUid);
+      }
+    }
+  }
+
+  /// Update ward selection and load subblocks
+  void updateWard(String? ward) {
+    state = state.copyWith(
+      selectedWard: ward,
+      clearSubblock: true,
+      subblocks: const [],
+    );
+
+    if (ward != null && ward != 'All') {
+      final wardUid = _getWardUid(ward);
+      if (wardUid != null) {
+        _loadSubblocksByWard(wardUid);
+      }
+    }
+  }
+
+  /// Update subblock selection
+  void updateSubblock(String? subblock) {
+    state = state.copyWith(selectedSubblock: subblock);
+  }
+
   /// Reset specific filter fields based on area type
   /// Area type and vaccine selection are preserved
   void resetFilters() {
@@ -228,6 +287,211 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Get district slug by district name from GeoJSON data
 
+  /// Load unions by upazila UID
+  Future<void> _loadUnionsByUpazila(String upazilaUid) async {
+    try {
+      final unions = await _repository.fetchAreasByParentUid(upazilaUid);
+      state = state.copyWith(unions: unions);
+      print(
+        'FilterProvider: Loaded ${unions.length} unions for upazila: $upazilaUid',
+      );
+    } catch (e) {
+      print('FilterProvider: Error loading unions: $e');
+    }
+  }
+
+  /// Load wards by union UID
+  Future<void> _loadWardsByUnion(String unionUid) async {
+    try {
+      final wards = await _repository.fetchAreasByParentUid(unionUid);
+      state = state.copyWith(wards: wards);
+      print(
+        'FilterProvider: Loaded ${wards.length} wards for union: $unionUid',
+      );
+    } catch (e) {
+      print('FilterProvider: Error loading wards: $e');
+    }
+  }
+
+  /// Load subblocks by ward UID
+  Future<void> _loadSubblocksByWard(String wardUid) async {
+    try {
+      final subblocks = await _repository.fetchAreasByParentUid(wardUid);
+      state = state.copyWith(subblocks: subblocks);
+      print(
+        'FilterProvider: Loaded ${subblocks.length} subblocks for ward: $wardUid',
+      );
+    } catch (e) {
+      print('FilterProvider: Error loading subblocks: $e');
+    }
+  }
+
+  /// Get upazila UID by name
+  String? _getUpazilaUid(String upazilaName) {
+    final upazila = state.upazilas.firstWhere(
+      (upazila) => upazila.name == upazilaName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return upazila.uid;
+  }
+
+  /// Get union UID by name
+  String? _getUnionUid(String unionName) {
+    final union = state.unions.firstWhere(
+      (union) => union.name == unionName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return union.uid;
+  }
+
+  /// Get ward UID by name
+  String? _getWardUid(String wardName) {
+    final ward = state.wards.firstWhere(
+      (ward) => ward.name == wardName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return ward.uid;
+  }
+
+  /// Get dropdown items for upazilas
+  List<String> get upazilaDropdownItems {
+    if (state.upazilas.isEmpty) return ['All'];
+    return [
+      'All',
+      ...state.upazilas
+          .map((u) => u.name ?? '')
+          .where((name) => name.isNotEmpty),
+    ];
+  }
+
+  /// Get dropdown items for unions
+  List<String> get unionDropdownItems {
+    if (state.unions.isEmpty) return ['All'];
+    return [
+      'All',
+      ...state.unions.map((u) => u.name ?? '').where((name) => name.isNotEmpty),
+    ];
+  }
+
+  /// Get dropdown items for wards
+  List<String> get wardDropdownItems {
+    if (state.wards.isEmpty) return ['All'];
+    return [
+      'All',
+      ...state.wards.map((w) => w.name ?? '').where((name) => name.isNotEmpty),
+    ];
+  }
+
+  /// Get dropdown items for subblocks
+  List<String> get subblockDropdownItems {
+    if (state.subblocks.isEmpty) return ['All'];
+    return [
+      'All',
+      ...state.subblocks
+          .map((s) => s.name ?? '')
+          .where((name) => name.isNotEmpty),
+    ];
+  }
+
+  /// Get subblock UID by name (for EPI data fetching)
+  String? getSubblockUid(String subblockName) {
+    final subblock = state.subblocks.firstWhere(
+      (subblock) => subblock.name == subblockName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return subblock.uid;
+  }
+
+  /// Initialize filter with EPI data context
+  Future<void> initializeFromEpiData({
+    required dynamic epiData,
+    required bool isEpiDetailsContext,
+  }) async {
+    print('FilterProvider: Initializing from EPI data');
+
+    // Extract hierarchical data from EPI response
+    final String? divisionName = epiData?.divisionName;
+    final String? districtName = epiData?.districtName;
+    final String? upazilaName = epiData?.upazilaName;
+    final String? unionName = epiData?.unionName;
+    final String? wardName = epiData?.wardName;
+    final String? subblockName = epiData?.subBlockName;
+    final String? subblockUid = epiData?.subblockId;
+    final String? cityCorporationName = epiData?.cityCorporationName;
+
+    // Determine area type based on EPI context
+    final AreaType areaType =
+        cityCorporationName != null && cityCorporationName.isNotEmpty
+        ? AreaType.cityCorporation
+        : AreaType.district;
+
+    // Convert to AreaResponseModel lists
+    final List<AreaResponseModel> upazilas =
+        (epiData?.upazilas as List<dynamic>?)
+            ?.map((item) => AreaResponseModel(uid: item.uid, name: item.name))
+            .toList() ??
+        [];
+
+    final List<AreaResponseModel> unions =
+        (epiData?.unions as List<dynamic>?)
+            ?.map((item) => AreaResponseModel(uid: item.uid, name: item.name))
+            .toList() ??
+        [];
+
+    final List<AreaResponseModel> wards =
+        (epiData?.wards as List<dynamic>?)
+            ?.map((item) => AreaResponseModel(uid: item.uid, name: item.name))
+            .toList() ??
+        [];
+
+    final List<AreaResponseModel> subblocks =
+        (epiData?.subblocks as List<dynamic>?)
+            ?.map((item) => AreaResponseModel(uid: item.uid, name: item.name))
+            .toList() ??
+        [];
+
+    // Update state with EPI context data
+    state = state.copyWith(
+      isEpiDetailsContext: isEpiDetailsContext,
+      initialSubblockUid: subblockUid,
+      selectedAreaType: areaType,
+      selectedDivision: divisionName ?? state.selectedDivision,
+      selectedDistrict: districtName,
+      selectedCityCorporation: areaType == AreaType.cityCorporation
+          ? cityCorporationName
+          : null,
+      selectedUpazila: upazilaName,
+      selectedUnion: unionName,
+      selectedWard: wardName,
+      selectedSubblock: subblockName,
+      upazilas: upazilas,
+      unions: unions,
+      wards: wards,
+      subblocks: subblocks,
+    );
+
+    print('FilterProvider: EPI context initialized successfully');
+    print('  Area Type: $areaType');
+    print('  Division: $divisionName');
+    print('  District: $districtName');
+    print('  City Corporation: $cityCorporationName');
+    print('  Upazila: $upazilaName');
+    print('  Union: $unionName');
+    print('  Ward: $wardName');
+    print('  Subblock: $subblockName');
+  }
+
+  /// Reset to initial EPI values (for EPI details context)
+  void resetToInitialEpiValues() {
+    if (!state.isEpiDetailsContext || state.initialSubblockUid == null) return;
+
+    print('FilterProvider: Resetting to initial EPI values');
+
+    // This would reset to the original EPI data values
+    // For now, we'll need to re-initialize from the original EPI data
+    // The EPI details screen should call initializeFromEpiData again
+  }
+
   /// Reset geographic filters to country view defaults
   /// Preserves area type, vaccine selection, and year
   /// This is used when navigating back to country level from drilldown
@@ -260,6 +524,10 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? division,
     String? cityCorporation,
     String? district,
+    String? upazila,
+    String? union,
+    String? ward,
+    String? subblock,
     String? year,
   }) {
     // Capture current state before any updates
@@ -272,6 +540,10 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     if (division != null) updateDivision(division);
     if (cityCorporation != null) updateCityCorporation(cityCorporation);
     if (district != null) updateDistrict(district);
+    if (upazila != null) updateUpazila(upazila);
+    if (union != null) updateUnion(union);
+    if (ward != null) updateWard(ward);
+    if (subblock != null) updateSubblock(subblock);
 
     // Check if any non-vaccine filters actually changed from their previous values
     final bool hasNonVaccineChanges =
@@ -280,6 +552,10 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         (cityCorporation != null &&
             cityCorporation != currentState.selectedCityCorporation) ||
         (district != null && district != currentState.selectedDistrict) ||
+        (upazila != null && upazila != currentState.selectedUpazila) ||
+        (union != null && union != currentState.selectedUnion) ||
+        (ward != null && ward != currentState.selectedWard) ||
+        (subblock != null && subblock != currentState.selectedSubblock) ||
         (year != null && year != currentState.selectedYear);
 
     // Only mark the timestamp when non-vaccine filters actually changed

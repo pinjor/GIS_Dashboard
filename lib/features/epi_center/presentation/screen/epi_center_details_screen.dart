@@ -11,6 +11,8 @@ import '../../../../core/utils/utils.dart';
 import '../../../filter/presentation/widgets/filter_dialog_box_widget.dart';
 import '../controllers/epi_center_controller.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
+import '../../../filter/domain/filter_state.dart';
+import '../../../map/utils/map_enums.dart';
 import '../widgets/epi_center_widgets.dart';
 
 class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
@@ -46,6 +48,43 @@ class _EpiCenterDetailsScreenState
     });
   }
 
+  /// Handle filter changes in EPI context
+  void _handleFilterChange(
+    String selectedYear,
+    DateTime? lastAppliedTimestamp,
+  ) {
+    final filterState = ref.read(filterControllerProvider);
+
+    // Only handle filter changes if we're in EPI context and filters were actually applied
+    if (!filterState.isEpiDetailsContext || lastAppliedTimestamp == null) {
+      return;
+    }
+
+    logg.i('🔄 EPI Filter Applied - Reloading data');
+
+    // For district area type with subblock selection, fetch EPI data by subblock UID
+    if (filterState.selectedAreaType == AreaType.district &&
+        filterState.selectedSubblock != null &&
+        filterState.selectedSubblock != 'All') {
+      final filterController = ref.read(filterControllerProvider.notifier);
+      final subblockUid = filterController.getSubblockUid(
+        filterState.selectedSubblock!,
+      );
+
+      if (subblockUid != null) {
+        logg.i(
+          '   Loading EPI data for subblock: ${filterState.selectedSubblock} (UID: $subblockUid)',
+        );
+        final epiController = ref.read(epiCenterControllerProvider.notifier);
+        epiController.fetchEpiCenterData(
+          epiUid: subblockUid,
+          year: int.tryParse(selectedYear) ?? DateTime.now().year,
+          ccUid: null,
+        );
+      }
+    }
+  }
+
   Future<void> _loadEpiCenterData() async {
     Future.microtask(() {
       final filterState = ref.read(filterControllerProvider);
@@ -77,12 +116,39 @@ class _EpiCenterDetailsScreenState
     });
   }
 
+  /// Initialize filter context with EPI data
+  void _initializeFilterWithEpiData(dynamic epiData) {
+    if (epiData == null) return;
+
+    Future.microtask(() {
+      final filterController = ref.read(filterControllerProvider.notifier);
+      filterController.initializeFromEpiData(
+        epiData: epiData,
+        isEpiDetailsContext: true,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final epiState = ref.watch(epiCenterControllerProvider);
     final filterState = ref.watch(filterControllerProvider);
     final selectedYear = filterState.selectedYear;
     final updatedAt = epiState.epiCenterData?.area?.updatedAt;
+
+    // Initialize filter context when EPI data is loaded
+    if (epiState.epiCenterData != null && !filterState.isEpiDetailsContext) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializeFilterWithEpiData(epiState.epiCenterData);
+      });
+    }
+
+    // Listen for filter changes in EPI context
+    ref.listen<FilterState>(filterControllerProvider, (previous, current) {
+      if (previous?.lastAppliedTimestamp != current.lastAppliedTimestamp) {
+        _handleFilterChange(current.selectedYear, current.lastAppliedTimestamp);
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -163,7 +229,7 @@ class _EpiCenterDetailsScreenState
                         insetPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                         ),
-                        child: const FilterDialogBoxWidget(turnOff: true),
+                        child: const FilterDialogBoxWidget(),
                       ),
                     );
                   },
