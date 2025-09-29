@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,6 +40,8 @@ class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
 
 class _EpiCenterDetailsScreenState
     extends ConsumerState<EpiCenterDetailsScreen> {
+  Timer? _reloadTimer;
+
   @override
   void initState() {
     super.initState();
@@ -48,40 +52,96 @@ class _EpiCenterDetailsScreenState
     });
   }
 
+  @override
+  void dispose() {
+    // Clean up any resources
+    _reloadTimer?.cancel();
+    super.dispose();
+  }
+
   /// Handle filter changes in EPI context
-  void _handleFilterChange(
-    String selectedYear,
-    DateTime? lastAppliedTimestamp,
-  ) {
+  Future<void> _reloadEpiDetailsDataForFilterChange(String selectedYear) async {
+    // Cancel any previous reload timer
+    _reloadTimer?.cancel();
+
+    // Start a new timer - wait 400ms before executing
+    _reloadTimer = Timer(const Duration(milliseconds: 400), () async {
+      await _performEpiReload(selectedYear);
+    });
+  }
+
+  Future<void> _performEpiReload(String selectedYear) async {
     final filterState = ref.read(filterControllerProvider);
 
-    // Only handle filter changes if we're in EPI context and filters were actually applied
-    if (!filterState.isEpiDetailsContext || lastAppliedTimestamp == null) {
-      return;
-    }
+    logg.i('🔔 EPI Filter Change Detected:');
+    logg.i('   isEpiDetailsContext: ${filterState.isEpiDetailsContext}');
 
-    logg.i('🔄 EPI Filter Applied - Reloading data');
+    logg.i('🔄 EPI Filter Applied - Reloading data for year #$selectedYear');
 
-    // For district area type with subblock selection, fetch EPI data by subblock UID
-    if (filterState.selectedAreaType == AreaType.district &&
-        filterState.selectedSubblock != null &&
-        filterState.selectedSubblock != 'All') {
+    // For district area type, handle hierarchical filtering at any level
+    if (filterState.selectedAreaType == AreaType.district) {
       final filterController = ref.read(filterControllerProvider.notifier);
-      final subblockUid = filterController.getSubblockUid(
-        filterState.selectedSubblock!,
-      );
+      final epiController = ref.read(epiCenterControllerProvider.notifier);
 
-      if (subblockUid != null) {
-        logg.i(
-          '   Loading EPI data for subblock: ${filterState.selectedSubblock} (UID: $subblockUid)',
+      String? targetUid;
+      String? targetName;
+
+      // Determine the most specific level selected (bottom-up approach)
+      // Bottom-up hierarchical selection (most specific first)
+      if (filterState.selectedSubblock != null &&
+          filterState.selectedSubblock != 'All') {
+        targetUid = filterController.getSubblockUid(
+          filterState.selectedSubblock!,
         );
-        final epiController = ref.read(epiCenterControllerProvider.notifier);
-        epiController.fetchEpiCenterData(
-          epiUid: subblockUid,
-          year: int.tryParse(selectedYear) ?? DateTime.now().year,
-          ccUid: null,
+        targetName = filterState.selectedSubblock;
+      } else if (filterState.selectedWard != null &&
+          filterState.selectedWard != 'All') {
+        targetUid = filterController.getWardUid(filterState.selectedWard!);
+        targetName = filterState.selectedWard;
+      } else if (filterState.selectedUnion != null &&
+          filterState.selectedUnion != 'All') {
+        targetUid = filterController.getUnionUid(filterState.selectedUnion!);
+        targetName = filterState.selectedUnion;
+      } else if (filterState.selectedUpazila != null &&
+          filterState.selectedUpazila != 'All') {
+        targetUid = filterController.getUpazilaUid(
+          filterState.selectedUpazila!,
+        );
+        targetName = filterState.selectedUpazila;
+      }
+
+      if (targetUid != null && targetName != null) {
+        logg.i('📍 Loading EPI data for: $targetName (UID: $targetUid)');
+
+        try {
+          // <-- ADD AWAIT HERE! This is the key fix
+          await epiController.fetchEpiCenterData(
+            epiUid: targetUid,
+            year: int.tryParse(selectedYear) ?? DateTime.now().year,
+            ccUid: null,
+          );
+          logg.i('✅ Successfully reloaded EPI data for filter change');
+        } catch (e) {
+          logg.e('❌ Failed to reload EPI data: $e');
+          // Handle error appropriately
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to load EPI data: ${e.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } else {
+        logg.i(
+          '📍 No specific hierarchical level selected - keeping current EPI data',
         );
       }
+    } else {
+      logg.i(
+        '   Area type is not district - no hierarchical filtering applied',
+      );
     }
   }
 
@@ -89,13 +149,6 @@ class _EpiCenterDetailsScreenState
     Future.microtask(() {
       final filterState = ref.read(filterControllerProvider);
       final year = filterState.selectedYear;
-
-      logg.i('🔍 EPI Center Screen - Loading data for:');
-      logg.i('   EPI UID: ${widget.epiUid}');
-      logg.i('   Center Name: ${widget.epiCenterName}');
-      logg.i('   Year: $year');
-      logg.i('   CC UID: ${widget.ccUid}');
-      logg.i('   Is Org UID Request: ${widget.isOrgUidRequest}');
 
       final controller = ref.read(epiCenterControllerProvider.notifier);
 
@@ -118,14 +171,19 @@ class _EpiCenterDetailsScreenState
 
   /// Initialize filter context with EPI data
   void _initializeFilterWithEpiData(dynamic epiData) {
-    if (epiData == null) return;
+    if (epiData == null) {
+      logg.w('🚫 EPI Filter Initialization: EPI data is null');
+      return;
+    }
 
+    logg.i('🔧 EPI Filter Initialization: Starting with EPI data');
     Future.microtask(() {
       final filterController = ref.read(filterControllerProvider.notifier);
       filterController.initializeFromEpiData(
         epiData: epiData,
         isEpiDetailsContext: true,
       );
+      logg.i('✅ EPI Filter Initialization: Completed');
     });
   }
 
@@ -138,6 +196,7 @@ class _EpiCenterDetailsScreenState
 
     // Initialize filter context when EPI data is loaded
     if (epiState.epiCenterData != null && !filterState.isEpiDetailsContext) {
+      logg.i('🔧 EPI Screen: Initializing filter context with EPI data');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _initializeFilterWithEpiData(epiState.epiCenterData);
       });
@@ -145,8 +204,17 @@ class _EpiCenterDetailsScreenState
 
     // Listen for filter changes in EPI context
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
-      if (previous?.lastAppliedTimestamp != current.lastAppliedTimestamp) {
-        _handleFilterChange(current.selectedYear, current.lastAppliedTimestamp);
+      logg.i(
+        '👂 EPI Screen: Filter state changed: ${current.lastAppliedTimestamp != previous?.lastAppliedTimestamp}',
+      );
+      if (previous?.lastAppliedTimestamp != current.lastAppliedTimestamp && 
+          current.lastAppliedTimestamp != null) {
+        logg.i(
+          '🔔 EPI Screen: Detected filter application - reloading EPI data',
+        );
+        _reloadEpiDetailsDataForFilterChange(
+          current.selectedYear,
+        );
       }
     });
 
@@ -229,7 +297,7 @@ class _EpiCenterDetailsScreenState
                         insetPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                         ),
-                        child: const FilterDialogBoxWidget(),
+                        child: const FilterDialogBoxWidget(isEpiContext: true),
                       ),
                     );
                   },

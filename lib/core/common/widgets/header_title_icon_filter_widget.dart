@@ -64,7 +64,7 @@ class HeaderTitleIconFilterWidget extends ConsumerWidget {
                         insetPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                         ),
-                        child: const FilterDialogBoxWidget(),
+                        child: const FilterDialogBoxWidget(isEpiContext: false),
                       ),
                     );
                   },

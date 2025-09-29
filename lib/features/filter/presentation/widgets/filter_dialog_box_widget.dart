@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
-import 'package:gis_dashboard/core/common/widgets/custom_loading_widget.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
+import 'package:gis_dashboard/features/filter/presentation/widgets/custom_radio_button.dart';
 import '../../domain/filter_state.dart';
 import '../controllers/filter_controller.dart';
 import '../../../map/utils/map_enums.dart';
 import '../../../epi_center/presentation/controllers/epi_center_controller.dart';
 
 class FilterDialogBoxWidget extends ConsumerStatefulWidget {
-  const FilterDialogBoxWidget({super.key});
+  final bool isEpiContext;
+
+  const FilterDialogBoxWidget({super.key, this.isEpiContext = false});
 
   @override
   ConsumerState<FilterDialogBoxWidget> createState() =>
@@ -31,6 +33,18 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   String? _selectedWard;
   String? _selectedSubblock;
 
+  // Store initial values for reset functionality and change detection
+  late AreaType _initialAreaType;
+  late String _initialVaccine;
+  late String _initialDivision;
+  String? _initialCityCorporation;
+  String? _initialDistrict;
+  late String _initialYear;
+  String? _initialUpazila;
+  String? _initialUnion;
+  String? _initialWard;
+  String? _initialSubblock;
+
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -45,6 +59,14 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _initializeFilterState();
   }
 
+  @override
+  void dispose() {
+    // Clean up any resources
+    _formKey.currentState?.dispose();
+
+    super.dispose();
+  }
+
   /// Initialize filter state properly for both normal and EPI contexts
   void _initializeFilterState() {
     final currentFilter = ref.read(filterControllerProvider);
@@ -55,23 +77,17 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _selectedVaccine = currentFilter.selectedVaccine;
     _selectedYear = currentFilter.selectedYear;
 
+    // Store initial values for reset functionality and change detection
+    _initialAreaType = currentFilter.selectedAreaType;
+    _initialVaccine = currentFilter.selectedVaccine;
+    _initialYear = currentFilter.selectedYear;
+
     // Initialize based on area type
     if (_selectedAreaType == AreaType.district) {
       _initializeDistrictAreaType(currentFilter, filterNotifier);
     } else if (_selectedAreaType == AreaType.cityCorporation) {
       _initializeCityCorporationAreaType(currentFilter, filterNotifier);
     }
-
-    print('Filter Dialog Initialized:');
-    print('  Area Type: $_selectedAreaType');
-    print('  Division: $_selectedDivision');
-    print('  District: $_selectedDistrict');
-    print('  City Corporation: $_selectedCityCorporation');
-    print('  Is EPI Context: ${currentFilter.isEpiDetailsContext}');
-    print('  Upazila: $_selectedUpazila');
-    print('  Union: $_selectedUnion');
-    print('  Ward: $_selectedWard');
-    print('  Subblock: $_selectedSubblock');
   }
 
   /// Initialize district area type selections
@@ -98,8 +114,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
           null; // This represents 'All' in the district dropdown
     }
 
+    // Store initial values for district area type
+    _initialDivision = _selectedDivision;
+    _initialDistrict = _selectedDistrict;
+    _initialCityCorporation = null;
+
     // Initialize extended hierarchical selections (for EPI details screen)
-    if (currentFilter.isEpiDetailsContext) {
+    if (widget.isEpiContext) {
       // For EPI context, properly validate hierarchical selections
       final availableUpazilas = filterNotifier.upazilaDropdownItems;
       if (currentFilter.selectedUpazila != null &&
@@ -132,15 +153,33 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       } else {
         _selectedSubblock = null;
       }
+
+      // Store initial hierarchical values
+      _initialUpazila = _selectedUpazila;
+      _initialUnion = _selectedUnion;
+      _initialWard = _selectedWard;
+      _initialSubblock = _selectedSubblock;
+
+      logg.i('🔧 EPI Filter Dialog: Initial hierarchical values stored');
+      logg.i('   Initial Upazila: $_initialUpazila');
+      logg.i('   Initial Union: $_initialUnion');
+      logg.i('   Initial Ward: $_initialWard');
+      logg.i('   Initial Subblock: $_initialSubblock');
     } else {
       // For normal context, clear hierarchical selections
       _selectedUpazila = null;
       _selectedUnion = null;
       _selectedWard = null;
       _selectedSubblock = null;
+
+      // Store initial hierarchical values as null for normal context
+      _initialUpazila = null;
+      _initialUnion = null;
+      _initialWard = null;
+      _initialSubblock = null;
     }
 
-    // Clear city corporation selection for district area type
+    // Clear city corporation selection for district area type any way
     _selectedCityCorporation = null;
   }
 
@@ -168,41 +207,53 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _selectedUnion = null;
     _selectedWard = null;
     _selectedSubblock = null;
+
+    // Store initial values for city corporation area type
+    _initialDivision = 'All';
+    _initialDistrict = null;
+    _initialCityCorporation = _selectedCityCorporation;
+    _initialUpazila = null;
+    _initialUnion = null;
+    _initialWard = null;
+    _initialSubblock = null;
   }
 
   /// Initialize state when area type changes via radio buttons
-  void _initializeForAreaTypeChange() {
+  void _handleFilterViewOnRadioButtonTap() {
     final currentFilter = ref.read(filterControllerProvider);
 
-    if (_selectedAreaType == AreaType.district) {
-      // For district: set to current filter values or defaults
-      _selectedDivision = currentFilter.selectedDivision.isNotEmpty
-          ? currentFilter.selectedDivision
-          : 'All';
-      _selectedDistrict = currentFilter.selectedDistrict;
-      _selectedCityCorporation = null;
-
-      // For EPI context, preserve hierarchical selections
-      if (currentFilter.isEpiDetailsContext) {
-        _selectedUpazila = currentFilter.selectedUpazila;
-        _selectedUnion = currentFilter.selectedUnion;
-        _selectedWard = currentFilter.selectedWard;
-        _selectedSubblock = currentFilter.selectedSubblock;
-      } else {
-        _selectedUpazila = null;
-        _selectedUnion = null;
-        _selectedWard = null;
-        _selectedSubblock = null;
-      }
-    } else if (_selectedAreaType == AreaType.cityCorporation) {
-      // For city corporation: clear district fields
-      _selectedDivision = 'All';
-      _selectedDistrict = null;
+    if (!widget.isEpiContext) {
+      // For normal context, reset hierarchical selections
       _selectedUpazila = null;
       _selectedUnion = null;
       _selectedWard = null;
       _selectedSubblock = null;
-      _selectedCityCorporation = currentFilter.selectedCityCorporation;
+
+      if (_selectedAreaType == AreaType.district &&
+          currentFilter.selectedAreaType == AreaType.cityCorporation) {
+        // Switching from CC to District: reset to defaults
+        _selectedDivision = 'All';
+        _selectedDistrict = null;
+      } else if (_selectedAreaType == AreaType.cityCorporation &&
+          currentFilter.selectedAreaType == AreaType.district) {
+        // Switching from District to CC: reset to defaults
+        _selectedCityCorporation = null;
+      }
+    } else {
+      if (_selectedAreaType == AreaType.district &&
+          currentFilter.selectedAreaType == AreaType.cityCorporation) {
+        // Switching from CC to District: reset to defaults
+        _selectedDivision = 'All';
+        _selectedDistrict = null;
+        _selectedUpazila = null;
+        _selectedUnion = null;
+        _selectedWard = null;
+        _selectedSubblock = null;
+      } else if (_selectedAreaType == AreaType.cityCorporation &&
+          currentFilter.selectedAreaType == AreaType.district) {
+        // Switching from District to CC: reset to defaults for only CC as hierarchical levels will be preserved
+        _selectedCityCorporation = null;
+      }
     }
   }
 
@@ -213,13 +264,76 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     });
   }
 
+  /// Check if any values have changed from initial values
+  bool _hasValuesChanged() {
+    final hasChanged =
+        _selectedAreaType != _initialAreaType ||
+        _selectedVaccine != _initialVaccine ||
+        _selectedDivision != _initialDivision ||
+        _selectedCityCorporation != _initialCityCorporation ||
+        _selectedDistrict != _initialDistrict ||
+        _selectedYear != _initialYear ||
+        _selectedUpazila != _initialUpazila ||
+        _selectedUnion != _initialUnion ||
+        _selectedWard != _initialWard ||
+        _selectedSubblock != _initialSubblock;
+
+    // if (hasChanged) {
+    //   logg.i('🔄 Filter values changed detected:');
+    //   if (_selectedAreaType != _initialAreaType) {
+    //     logg.i('   AreaType: $_initialAreaType → $_selectedAreaType');
+    //   }
+    //   if (_selectedVaccine != _initialVaccine) {
+    //     logg.i('   Vaccine: $_initialVaccine → $_selectedVaccine');
+    //   }
+    //   if (_selectedDivision != _initialDivision) {
+    //     logg.i('   Division: $_initialDivision → $_selectedDivision');
+    //   }
+    //   if (_selectedDistrict != _initialDistrict) {
+    //     logg.i('   District: $_initialDistrict → $_selectedDistrict');
+    //   }
+    //   if (_selectedYear != _initialYear) {
+    //     logg.i('   Year: $_initialYear → $_selectedYear');
+    //   }
+    //   if (_selectedUpazila != _initialUpazila) {
+    //     logg.i('   Upazila: $_initialUpazila → $_selectedUpazila');
+    //   }
+    //   if (_selectedUnion != _initialUnion) {
+    //     logg.i('   Union: $_initialUnion → $_selectedUnion');
+    //   }
+    //   if (_selectedWard != _initialWard) {
+    //     logg.i('   Ward: $_initialWard → $_selectedWard');
+    //   }
+    //   if (_selectedSubblock != _initialSubblock) {
+    //     logg.i('   Subblock: $_initialSubblock → $_selectedSubblock');
+    //   }
+    // }
+
+    return hasChanged;
+  }
+
+  /// Reset all selections to initial values
+  void _resetToInitialValues() {
+    setState(() {
+      _selectedAreaType = _initialAreaType;
+      _selectedVaccine = _initialVaccine;
+      _selectedDivision = _initialDivision;
+      _selectedCityCorporation = _initialCityCorporation;
+      _selectedDistrict = _initialDistrict;
+      _selectedYear = _initialYear;
+      _selectedUpazila = _initialUpazila;
+      _selectedUnion = _initialUnion;
+      _selectedWard = _initialWard;
+      _selectedSubblock = _initialSubblock;
+    });
+  }
+
   void _applyFilters({
     required FilterState filterState,
     required FilterControllerNotifier filterNotifier,
   }) {
     // Apply filters to global state with timestamp
-    final isEpiContext = filterState.isEpiDetailsContext;
-
+    final isEpiContext = widget.isEpiContext;
     // Check if EPI is from City Corporation (detect by checking current EPI data)
     final epiState = ref.read(epiCenterControllerProvider);
     final epiData = epiState.epiCenterData;
@@ -229,37 +343,74 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
 
     // For EPI from City Corporation: buttons do nothing (null behavior)
     if (isEpiContext && isEpiFromCC) {
+      Navigator.of(context).pop();
       return; // Do nothing - no navigation pop, no filter application
     }
 
+    // Check if any values have changed from initial values
+    if (!_hasValuesChanged()) {
+      logg.i('🔄 No filter changes detected - closing dialog');
+      Navigator.of(context).pop();
+      return;
+    }
+
+    logg.i(
+      'Applying filters: AreaType=$_selectedAreaType, Vaccine=$_selectedVaccine, Year=$_selectedYear, Division=$_selectedDivision, District=$_selectedDistrict, CityCorporation=$_selectedCityCorporation, Upazila=$_selectedUpazila, Union=$_selectedUnion, Ward=$_selectedWard, Subblock=$_selectedSubblock',
+    );
+
+    // Only apply the changed values to avoid triggering unnecessary hierarchical loading
+    final Map<String, dynamic> changedValues = {};
+
+    if (_selectedAreaType != _initialAreaType) {
+      changedValues['areaType'] = _selectedAreaType;
+    }
+    if (!isEpiContext && _selectedVaccine != _initialVaccine) {
+      changedValues['vaccine'] = _selectedVaccine;
+    }
+    if (_selectedYear != _initialYear) {
+      changedValues['year'] = _selectedYear;
+    }
+
+    if (_selectedAreaType == AreaType.district) {
+      if (_selectedDivision != _initialDivision) {
+        changedValues['division'] = _selectedDivision;
+      }
+      if (_selectedDistrict != _initialDistrict) {
+        changedValues['district'] = _selectedDistrict;
+      }
+
+      if (isEpiContext) {
+        if (_selectedUpazila != _initialUpazila) {
+          changedValues['upazila'] = _selectedUpazila;
+        }
+        if (_selectedUnion != _initialUnion) {
+          changedValues['union'] = _selectedUnion;
+        }
+        if (_selectedWard != _initialWard) {
+          changedValues['ward'] = _selectedWard;
+        }
+        if (_selectedSubblock != _initialSubblock) {
+          changedValues['subblock'] = _selectedSubblock;
+        }
+      }
+    } else if (_selectedAreaType == AreaType.cityCorporation) {
+      if (_selectedCityCorporation != _initialCityCorporation) {
+        changedValues['cityCorporation'] = _selectedCityCorporation;
+      }
+    }
+
+    // Apply only the changed values to minimize side effects
     filterNotifier.applyFilters(
-      vaccine: isEpiContext
-          ? null
-          : _selectedVaccine, // No vaccine selection in EPI context
-      areaType: _selectedAreaType,
-      year: _selectedYear,
-      division: _selectedAreaType == AreaType.district
-          ? _selectedDivision
-          : null,
-      district: _selectedAreaType == AreaType.district
-          ? _selectedDistrict
-          : null,
-      cityCorporation: _selectedAreaType == AreaType.cityCorporation
-          ? _selectedCityCorporation
-          : null,
-      // Extended hierarchical fields (for EPI context)
-      upazila: _selectedAreaType == AreaType.district && isEpiContext
-          ? _selectedUpazila
-          : null,
-      union: _selectedAreaType == AreaType.district && isEpiContext
-          ? _selectedUnion
-          : null,
-      ward: _selectedAreaType == AreaType.district && isEpiContext
-          ? _selectedWard
-          : null,
-      subblock: _selectedAreaType == AreaType.district && isEpiContext
-          ? _selectedSubblock
-          : null,
+      vaccine: changedValues['vaccine'],
+      areaType: changedValues['areaType'],
+      year: changedValues['year'],
+      division: changedValues['division'],
+      district: changedValues['district'],
+      cityCorporation: changedValues['cityCorporation'],
+      upazila: changedValues['upazila'],
+      union: changedValues['union'],
+      ward: changedValues['ward'],
+      subblock: changedValues['subblock'],
     );
 
     Navigator.of(context).pop();
@@ -269,7 +420,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     required FilterState filterState,
     required FilterControllerNotifier filterNotifier,
   }) {
-    final isEpiContext = filterState.isEpiDetailsContext;
+    final isEpiContext = widget.isEpiContext;
 
     // Check if EPI is from City Corporation (detect by checking current EPI data)
     final epiState = ref.read(epiCenterControllerProvider);
@@ -283,23 +434,46 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       return; // Do nothing - no navigation pop, no filter application
     }
 
+    logg.i('🔄 Resetting filters to initial values');
+
     if (isEpiContext) {
-      // For EPI context, reset to initial EPI values instead of clearing everything
-      filterNotifier.resetToInitialEpiValues();
+      // For EPI context, reset to initial values (the values when dialog was first opened)
+      _resetToInitialValues();
+
+      // Apply the reset values to the provider to restore the EPI context
+      filterNotifier.applyFilters(
+        vaccine: null, // No vaccine in EPI context
+        areaType: _initialAreaType,
+        year: _initialYear,
+        division: _initialAreaType == AreaType.district
+            ? _initialDivision
+            : null,
+        district: _initialAreaType == AreaType.district
+            ? _initialDistrict
+            : null,
+        cityCorporation: _initialAreaType == AreaType.cityCorporation
+            ? _initialCityCorporation
+            : null,
+        upazila: _initialAreaType == AreaType.district ? _initialUpazila : null,
+        union: _initialAreaType == AreaType.district ? _initialUnion : null,
+        ward: _initialAreaType == AreaType.district ? _initialWard : null,
+        subblock: _initialAreaType == AreaType.district
+            ? _initialSubblock
+            : null,
+      );
     } else {
       // For normal context, reset filters to default
       filterNotifier.resetFilters();
+      // Sync local state with provider state after reset
+      _syncLocalStateWithProvider();
     }
-
-    // Sync local state with provider state after reset
-    _syncLocalStateWithProvider();
 
     Navigator.of(context).pop();
   }
 
-  /// Check if all required fields are selected for district-based EPI context
+  /// Check if filter button should be enabled
   bool _isFilterButtonEnabled(FilterState filterState) {
-    final isEpiContext = filterState.isEpiDetailsContext;
+    final isEpiContext = widget.isEpiContext;
 
     // Check if EPI is from City Corporation
     final epiState = ref.read(epiCenterControllerProvider);
@@ -308,24 +482,39 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         epiData?.cityCorporationName != null &&
         epiData!.cityCorporationName!.isNotEmpty;
 
-    // For non-EPI context or EPI from CC, always enable
-    if (!isEpiContext || isEpiFromCC) {
+    // For EPI from City Corporation, disable both buttons (no filtering allowed)
+    if (isEpiContext && isEpiFromCC) {
+      return false;
+    }
+
+    // For non-EPI context, always enable (basic filtering always allowed)
+    if (!isEpiContext) {
       return true;
     }
 
-    // For district-based EPI context, check if all fields are selected
-    if (_selectedAreaType == AreaType.district) {
-      return _selectedDivision != 'All' &&
-          _selectedDistrict != null &&
-          _selectedUpazila != null &&
-          _selectedUnion != null &&
-          _selectedWard != null &&
-          _selectedSubblock != null;
+    // Ensure hierarchical consistency
+    if (_selectedWard != null && _selectedUnion == null) {
+      return false; // Invalid state
     }
 
-    // For CC area type in EPI context, disable
+    // For district-based EPI context, enable if any hierarchical level is selected
+    // (or if values have changed from initial - allow reset to work)
+    // if areatype is district and any specific level is not selected then button is disabled
+    if (_selectedAreaType == AreaType.district) {
+      // Allow if any specific level is selected OR if values have changed
+      // Option 1: Require ALL fields to be selected (strict)
+      return (_selectedDivision != 'All' &&
+              _selectedDistrict != null &&
+              _selectedUpazila != null &&
+              _selectedUnion != null &&
+              _selectedWard != null &&
+              _selectedSubblock != null) ||
+          _hasValuesChanged();
+    }
+
+    // For CC area type in EPI context, enable if CC is selected
     if (_selectedAreaType == AreaType.cityCorporation) {
-      return _selectedCityCorporation != null;
+      return _selectedCityCorporation != null || _hasValuesChanged();
     }
 
     return true;
@@ -337,12 +526,6 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     final filterState = ref.watch(filterControllerProvider);
     final filterNotifier = ref.read(filterControllerProvider.notifier);
 
-    // Debug logging for filter dialog state
-    print('Filter Dialog Build:');
-    print('  Current Provider Area Type: ${filterState.selectedAreaType}');
-    print('  Local Selected Area Type: $_selectedAreaType');
-    print('  Is EPI Context: ${filterState.isEpiDetailsContext}');
-
     // Sync local selections with provider state when dropdown items change
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
@@ -353,7 +536,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         }
 
         // Validate hierarchical selections (for EPI context)
-        if (filterState.isEpiDetailsContext) {
+        if (widget.isEpiContext) {
           // Validate upazila selection
           if (_selectedUpazila != null &&
               !filterNotifier.upazilaDropdownItems.contains(_selectedUpazila)) {
@@ -383,571 +566,552 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       });
     });
 
-    return filterState.isLoadingAreas
-        ? const Center(
-            child: CustomLoadingWidget(loadingText: 'Updating filter...'),
-          )
-        : Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 16,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-            ),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Material(
-                  color: Color(Constants.cardColor),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      5.h,
-                      // Area Type Selection
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedAreaType = AreaType.district;
-                                _initializeForAreaTypeChange();
-                              });
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<AreaType>(
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: VisualDensity.compact,
-                                  activeColor: primaryColor,
-                                  value: AreaType.district,
-                                  groupValue: _selectedAreaType,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedAreaType = value!;
-                                      _initializeForAreaTypeChange();
-                                    });
-                                  },
-                                ),
-                                const Text('District'),
-                              ],
-                            ),
-                          ),
-                          12.w,
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedAreaType = AreaType.cityCorporation;
-                                _initializeForAreaTypeChange();
-                              });
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<AreaType>(
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: VisualDensity.compact,
-                                  activeColor: primaryColor,
-                                  value: AreaType.cityCorporation,
-                                  groupValue: _selectedAreaType,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedAreaType = value!;
-                                      _initializeForAreaTypeChange();
-                                    });
-                                  },
-                                ),
-                                const Text('City Corporation'),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      16.h,
-                      // Period Selection
-                      const Text(
-                        'Period',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                        ),
-                      ),
-                      8.h,
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        initialValue: _selectedYear,
-                        items: ['2025', '2024']
-                            .map(
-                              (year) => DropdownMenuItem(
-                                value: year,
-                                child: Text(year),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedYear = value;
-                            });
-                          }
-                        },
-                      ),
-                      16.h,
-                      // Area-specific dropdowns
-                      if (_selectedAreaType == AreaType.district) ...[
-                        // Division Dropdown
-                        const Text(
-                          'Division',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                          ),
-                        ),
-                        8.h,
-                        if (filterState.isLoadingAreas)
-                          const Center(child: CircularProgressIndicator())
-                        else if (filterState.areasError != null)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Failed to load divisions'),
-                              8.h,
-                              ElevatedButton(
-                                onPressed: () =>
-                                    filterNotifier.retryLoadAreas(),
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          )
-                        else
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            initialValue:
-                                filterNotifier.divisionDropdownItems.contains(
-                                  _selectedDivision,
-                                )
-                                ? _selectedDivision
-                                : 'All', // Fallback to 'All' if selected division is not in the list
-                            items: filterNotifier.divisionDropdownItems
-                                .map(
-                                  (division) => DropdownMenuItem(
-                                    value: division,
-                                    child: Text(division),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _selectedDivision = value;
-                                  _selectedDistrict =
-                                      null; // Clear district when division changes
-                                });
-                                // Update the provider to filter districts based on selected division
-                                filterNotifier.updateDivision(value);
-                              }
-                            },
-                          ),
-                        16.h,
-                        // District Dropdown
-                        const Text(
-                          'District',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                          ),
-                        ),
-                        8.h,
-                        DropdownButtonFormField<String?>(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                          ),
-                          initialValue:
-                              _selectedDistrict, // This can be null which represents 'All'
-                          hint: const Text('All'),
-                          items: [
-                            const DropdownMenuItem<String?>(
-                              value: null,
-                              child: Text('All'),
-                            ),
-                            ...filterNotifier.districtDropdownItems.map(
-                              (district) => DropdownMenuItem<String?>(
-                                value: district,
-                                child: Text(district),
-                              ),
-                            ),
-                          ],
+    return
+    //  filterState.isLoadingAreas
+    //     ? const Center(
+    //         child: CustomLoadingWidget(loadingText: 'Updating filter...'),
+    //       )
+    //     :
+    Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Material(
+            color: Color(Constants.cardColor),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                5.h,
+                // Area Type Selection
+                Row(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Radio<AreaType>(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                          activeColor: primaryColor,
+                          value: AreaType.district,
+                          groupValue: _selectedAreaType,
                           onChanged: (value) {
                             setState(() {
-                              _selectedDistrict = value;
+                              _selectedAreaType = value!;
+                              _handleFilterViewOnRadioButtonTap();
                             });
                           },
                         ),
-
-                        // Extended hierarchical fields (only for EPI details context)
-                        if (filterState.isEpiDetailsContext) ...[
-                          16.h,
-                          // Upazila Dropdown
-                          const Text(
-                            'Upazila',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                            ),
-                          ),
-                          8.h,
-                          DropdownButtonFormField<String?>(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            initialValue:
-                                filterNotifier.upazilaDropdownItems.contains(
-                                  _selectedUpazila,
-                                )
-                                ? _selectedUpazila
-                                : null,
-                            hint: const Text('All'),
-                            items: [
-                              const DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text('All'),
-                              ),
-                              ...filterNotifier.upazilaDropdownItems
-                                  .where((item) => item != 'All')
-                                  .map(
-                                    (upazila) => DropdownMenuItem<String?>(
-                                      value: upazila,
-                                      child: Text(upazila),
-                                    ),
-                                  ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedUpazila = value;
-                                _selectedUnion = null;
-                                _selectedWard = null;
-                                _selectedSubblock = null;
-                              });
-                              filterNotifier.updateUpazila(value);
-                            },
-                          ),
-                          16.h,
-                          // Union Dropdown
-                          const Text(
-                            'Union',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                            ),
-                          ),
-                          8.h,
-                          DropdownButtonFormField<String?>(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            initialValue:
-                                filterNotifier.unionDropdownItems.contains(
-                                  _selectedUnion,
-                                )
-                                ? _selectedUnion
-                                : null,
-                            hint: const Text('All'),
-                            items: [
-                              const DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text('All'),
-                              ),
-                              ...filterNotifier.unionDropdownItems
-                                  .where((item) => item != 'All')
-                                  .map(
-                                    (union) => DropdownMenuItem<String?>(
-                                      value: union,
-                                      child: Text(union),
-                                    ),
-                                  ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedUnion = value;
-                                _selectedWard = null;
-                                _selectedSubblock = null;
-                              });
-                              filterNotifier.updateUnion(value);
-                            },
-                          ),
-                          16.h,
-                          // Ward Dropdown
-                          const Text(
-                            'Ward',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                            ),
-                          ),
-                          8.h,
-                          DropdownButtonFormField<String?>(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            initialValue:
-                                filterNotifier.wardDropdownItems.contains(
-                                  _selectedWard,
-                                )
-                                ? _selectedWard
-                                : null,
-                            hint: const Text('All'),
-                            items: [
-                              const DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text('All'),
-                              ),
-                              ...filterNotifier.wardDropdownItems
-                                  .where((item) => item != 'All')
-                                  .map(
-                                    (ward) => DropdownMenuItem<String?>(
-                                      value: ward,
-                                      child: Text(ward),
-                                    ),
-                                  ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedWard = value;
-                                _selectedSubblock = null;
-                              });
-                              filterNotifier.updateWard(value);
-                            },
-                          ),
-                          16.h,
-                          // Subblock Dropdown
-                          const Text(
-                            'Sub Block',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                            ),
-                          ),
-                          8.h,
-                          DropdownButtonFormField<String?>(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            initialValue:
-                                filterNotifier.subblockDropdownItems.contains(
-                                  _selectedSubblock,
-                                )
-                                ? _selectedSubblock
-                                : null,
-                            hint: const Text('All'),
-                            items: [
-                              const DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text('All'),
-                              ),
-                              ...filterNotifier.subblockDropdownItems
-                                  .where((item) => item != 'All')
-                                  .map(
-                                    (subblock) => DropdownMenuItem<String?>(
-                                      value: subblock,
-                                      child: Text(subblock),
-                                    ),
-                                  ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedSubblock = value;
-                              });
-                              filterNotifier.updateSubblock(value);
-                            },
-                          ),
-                        ],
-                      ] else if (_selectedAreaType ==
-                          AreaType.cityCorporation) ...[
-                        // City Corporation Dropdown
-                        const Text(
-                          'City Corporation',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                          ),
-                        ),
-                        8.h,
-                        if (filterState.isLoadingAreas)
-                          const Center(child: CircularProgressIndicator())
-                        else if (filterState.areasError != null)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Failed to load city corporations'),
-                              8.h,
-                              ElevatedButton(
-                                onPressed: () =>
-                                    filterNotifier.retryLoadAreas(),
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          )
-                        else
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            initialValue:
-                                filterNotifier.cityCorporationDropdownItems
-                                    .contains(_selectedCityCorporation)
-                                ? _selectedCityCorporation
-                                : null, // Clear selection if it's not in the available list
-                            hint: const Text('Select City Corporation'),
-                            items: filterNotifier.cityCorporationDropdownItems
-                                .map(
-                                  (corporation) => DropdownMenuItem(
-                                    value: corporation,
-                                    child: Text(corporation),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedCityCorporation = value;
-                              });
-                            },
-                          ),
+                        const Text('District'),
                       ],
-                      16.h,
-                      // Vaccine Selection (hidden in EPI details context)
-                      if (!filterState.isEpiDetailsContext) ...[
-                        const Text(
-                          'Select Vaccine',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
-                          ),
+                    ),
+                    12.w,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Radio<AreaType>(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                          activeColor: primaryColor,
+                          value: AreaType.cityCorporation,
+                          groupValue: _selectedAreaType,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedAreaType = value!;
+                              _handleFilterViewOnRadioButtonTap();
+                            });
+                          },
                         ),
+                        const Text('City Corporation'),
+                      ],
+                    ),
+                  ],
+                ),
+                16.h,
+                // Period Selection
+                const Text(
+                  'Period',
+                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                ),
+                8.h,
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  initialValue: _selectedYear,
+                  items: ['2025', '2024']
+                      .map(
+                        (year) =>
+                            DropdownMenuItem(value: year, child: Text(year)),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedYear = value;
+                      });
+                    }
+                  },
+                ),
+                16.h,
+                // Area-specific dropdowns
+                if (_selectedAreaType == AreaType.district) ...[
+                  // Division Dropdown
+                  const Text(
+                    'Division',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                  ),
+                  8.h,
+                  if (filterState.areasError != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Failed to load divisions'),
                         8.h,
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // First column
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 4,
-                                children: [
-                                  _buildRadio('Penta - 1st', primaryColor),
-                                  _buildRadio('Penta - 2nd', primaryColor),
-                                  _buildRadio('Penta - 3rd', primaryColor),
-                                ],
+                        ElevatedButton(
+                          onPressed: () => filterNotifier.retryLoadAreas(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    )
+                  else if (!filterState.isLoadingAreas)
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      initialValue:
+                          filterNotifier.divisionDropdownItems.contains(
+                            _selectedDivision,
+                          )
+                          ? _selectedDivision
+                          : 'All', // Fallback to 'All' if selected division is not in the list
+                      items: filterNotifier.divisionDropdownItems
+                          .map(
+                            (division) => DropdownMenuItem(
+                              value: division,
+                              child: Text(division),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedDivision = value;
+                            _selectedDistrict =
+                                null; // Clear district when division changes
+                          });
+                          // Update the provider to filter districts based on selected division
+                          filterNotifier.updateDivision(value);
+                        }
+                      },
+                    ),
+                  16.h,
+                  // District Dropdown
+                  const Text(
+                    'District',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                  ),
+                  8.h,
+                  DropdownButtonFormField<String?>(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    initialValue:
+                        _selectedDistrict, // This can be null which represents 'All'
+                    hint: const Text('All'),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('All'),
+                      ),
+                      ...filterNotifier.districtDropdownItems.map(
+                        (district) => DropdownMenuItem<String?>(
+                          value: district,
+                          child: Text(district),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedDistrict = value;
+                      });
+                    },
+                  ),
+
+                  // Extended hierarchical fields (only for EPI details context)
+                  if (widget.isEpiContext) ...[
+                    16.h,
+                    // Upazila Dropdown
+                    const Text(
+                      'Upazila',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
+                    ),
+                    8.h,
+                    DropdownButtonFormField<String?>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      initialValue:
+                          filterNotifier.upazilaDropdownItems.contains(
+                            _selectedUpazila,
+                          )
+                          ? _selectedUpazila
+                          : null,
+                      hint: const Text('All'),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All'),
+                        ),
+                        ...filterNotifier.upazilaDropdownItems
+                            .where((item) => item != 'All')
+                            .map(
+                              (upazila) => DropdownMenuItem<String?>(
+                                value: upazila,
+                                child: Text(upazila),
                               ),
                             ),
-                            // Second column
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 4,
-                                children: [
-                                  _buildRadio('MR - 1st', primaryColor),
-                                  _buildRadio('MR - 2nd', primaryColor),
-                                  _buildRadio('BCG', primaryColor),
-                                ],
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedUpazila = value;
+                          _selectedUnion = null;
+                          _selectedWard = null;
+                          _selectedSubblock = null;
+                        });
+                        filterNotifier.updateUpazila(value);
+                      },
+                    ),
+                    16.h,
+                    // Union Dropdown
+                    const Text(
+                      'Union',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
+                    ),
+                    8.h,
+                    DropdownButtonFormField<String?>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      initialValue:
+                          filterNotifier.unionDropdownItems.contains(
+                            _selectedUnion,
+                          )
+                          ? _selectedUnion
+                          : null,
+                      hint: const Text('All'),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All'),
+                        ),
+                        ...filterNotifier.unionDropdownItems
+                            .where((item) => item != 'All')
+                            .map(
+                              (union) => DropdownMenuItem<String?>(
+                                value: union,
+                                child: Text(union),
                               ),
+                            ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedUnion = value;
+                          _selectedWard = null;
+                          _selectedSubblock = null;
+                        });
+                        filterNotifier.updateUnion(value);
+                      },
+                    ),
+                    16.h,
+                    // Ward Dropdown
+                    const Text(
+                      'Ward',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
+                    ),
+                    8.h,
+                    DropdownButtonFormField<String?>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      initialValue:
+                          filterNotifier.wardDropdownItems.contains(
+                            _selectedWard,
+                          )
+                          ? _selectedWard
+                          : null,
+                      hint: const Text('All'),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All'),
+                        ),
+                        ...filterNotifier.wardDropdownItems
+                            .where((item) => item != 'All')
+                            .map(
+                              (ward) => DropdownMenuItem<String?>(
+                                value: ward,
+                                child: Text(ward),
+                              ),
+                            ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedWard = value;
+                          _selectedSubblock = null;
+                        });
+                        filterNotifier.updateWard(value);
+                      },
+                    ),
+                    16.h,
+                    // Subblock Dropdown
+                    const Text(
+                      'Sub Block',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
+                    ),
+                    8.h,
+                    DropdownButtonFormField<String?>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      initialValue:
+                          filterNotifier.subblockDropdownItems.contains(
+                            _selectedSubblock,
+                          )
+                          ? _selectedSubblock
+                          : null,
+                      hint: const Text('All'),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All'),
+                        ),
+                        ...filterNotifier.subblockDropdownItems
+                            .where((item) => item != 'All')
+                            .map(
+                              (subblock) => DropdownMenuItem<String?>(
+                                value: subblock,
+                                child: Text(subblock),
+                              ),
+                            ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedSubblock = value;
+                        });
+                        filterNotifier.updateSubblock(value);
+                      },
+                    ),
+                  ],
+                ] else if (_selectedAreaType == AreaType.cityCorporation) ...[
+                  // City Corporation Dropdown
+                  const Text(
+                    'City Corporation',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                  ),
+                  8.h,
+                  if (filterState.areasError != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Failed to load city corporations'),
+                        8.h,
+                        ElevatedButton(
+                          onPressed: () => filterNotifier.retryLoadAreas(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    )
+                  else if (!filterState.isLoadingAreas)
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      initialValue:
+                          filterNotifier.cityCorporationDropdownItems.contains(
+                            _selectedCityCorporation,
+                          )
+                          ? _selectedCityCorporation
+                          : null, // Clear selection if it's not in the available list
+                      hint: const Text('Select City Corporation'),
+                      items: filterNotifier.cityCorporationDropdownItems
+                          .map(
+                            (corporation) => DropdownMenuItem(
+                              value: corporation,
+                              child: Text(corporation),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCityCorporation = value;
+                        });
+                      },
+                    ),
+                ],
+                16.h,
+                // Vaccine Selection (hidden in EPI details context)
+                if (!widget.isEpiContext) ...[
+                  const Text(
+                    'Select Vaccine',
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                  ),
+                  8.h,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // First column
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4,
+                          children: [
+                            CustomRadioButton(
+                              label: 'Penta - 1st',
+                              primaryColor: primaryColor,
+                              selectedVaccine: _selectedVaccine,
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedVaccine = val;
+                                });
+                              },
+                            ),
+                            CustomRadioButton(
+                              label: 'Penta - 2nd',
+                              primaryColor: primaryColor,
+                              selectedVaccine: _selectedVaccine,
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedVaccine = val;
+                                });
+                              },
+                            ),
+                            CustomRadioButton(
+                              label: 'Penta - 3rd',
+                              primaryColor: primaryColor,
+                              selectedVaccine: _selectedVaccine,
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedVaccine = val;
+                                });
+                              },
                             ),
                           ],
                         ),
-                        24.h,
-                      ] else ...[
-                        16.h, // Spacing when vaccine selection is hidden
-                      ],
-                      // Action Buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    _isFilterButtonEnabled(filterState)
-                                    ? Colors.blue
-                                    : Colors.grey,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(5),
-                                  ),
-                                ),
-                              ),
-                              onPressed: _isFilterButtonEnabled(filterState)
-                                  ? () => _applyFilters(
-                                      filterNotifier: filterNotifier,
-                                      filterState: filterState,
-                                    )
-                                  : null,
-                              child: const Text(
-                                'Filter',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                      ),
+                      // Second column
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4,
+                          children: [
+                            CustomRadioButton(
+                              label: 'MR - 1st',
+                              primaryColor: primaryColor,
+                              selectedVaccine: _selectedVaccine,
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedVaccine = val;
+                                });
+                              },
                             ),
-                          ),
-                          8.w,
-                          Expanded(
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(5),
-                                  ),
-                                ),
-                              ),
-                              onPressed: () => _resetFilters(
-                                filterNotifier: filterNotifier,
-                                filterState: filterState,
-                              ),
-                              child: const Text(
-                                'Reset',
-                                style: TextStyle(color: Colors.black),
-                              ),
+                            CustomRadioButton(
+                              label: 'MR - 2nd',
+                              primaryColor: primaryColor,
+                              selectedVaccine: _selectedVaccine,
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedVaccine = val;
+                                });
+                              },
                             ),
-                          ),
-                        ],
+                            CustomRadioButton(
+                              label: 'BCG',
+                              primaryColor: primaryColor,
+                              selectedVaccine: _selectedVaccine,
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedVaccine = val;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
+                  24.h,
+                ] else ...[
+                  16.h, // Spacing when vaccine selection is hidden
+                ],
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _isFilterButtonEnabled(filterState)
+                              ? Colors.blue
+                              : Colors.grey,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                        ),
+                        onPressed: _isFilterButtonEnabled(filterState)
+                            ? () => _applyFilters(
+                                filterNotifier: filterNotifier,
+                                filterState: filterState,
+                              )
+                            : null,
+                        child: const Text(
+                          'Filter',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    8.w,
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                        ),
+                        onPressed: () => _resetFilters(
+                          filterNotifier: filterNotifier,
+                          filterState: filterState,
+                        ),
+                        child: const Text(
+                          'Reset',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+              ],
             ),
-          );
-  }
-
-  Widget _buildRadio(String label, Color primaryColor) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedVaccine = label;
-        });
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Radio(
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.compact,
-            activeColor: primaryColor,
-            value: label,
-            groupValue: _selectedVaccine,
-            onChanged: (value) {
-              setState(() {
-                _selectedVaccine = value!;
-              });
-            },
           ),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-          ),
-        ],
+        ),
       ),
     );
   }

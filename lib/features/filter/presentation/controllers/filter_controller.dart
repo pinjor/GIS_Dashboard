@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/filter_state.dart';
 import '../../domain/area_response_model.dart';
 import '../../data/filter_repository.dart';
@@ -402,6 +403,33 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     return subblock.uid;
   }
 
+  /// Get upazila UID by name (for EPI data fetching)
+  String? getUpazilaUid(String upazilaName) {
+    final upazila = state.upazilas.firstWhere(
+      (upazila) => upazila.name == upazilaName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return upazila.uid;
+  }
+
+  /// Get union UID by name (for EPI data fetching)
+  String? getUnionUid(String unionName) {
+    final union = state.unions.firstWhere(
+      (union) => union.name == unionName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return union.uid;
+  }
+
+  /// Get ward UID by name (for EPI data fetching)
+  String? getWardUid(String wardName) {
+    final ward = state.wards.firstWhere(
+      (ward) => ward.name == wardName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return ward.uid;
+  }
+
   /// Initialize filter with EPI data context
   Future<void> initializeFromEpiData({
     required dynamic epiData,
@@ -531,7 +559,24 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? year,
   }) {
     // Capture current state before any updates
-    final currentState = state;
+    // ✅ Capture individual values BEFORE any updates
+    final oldAreaType = state.selectedAreaType;
+    final oldDivision = state.selectedDivision;
+    final oldCityCorporation = state.selectedCityCorporation;
+    final oldDistrict = state.selectedDistrict;
+    final oldUpazila = state.selectedUpazila;
+    final oldUnion = state.selectedUnion;
+    final oldWard = state.selectedWard;
+    final oldSubblock = state.selectedSubblock;
+    final oldYear = state.selectedYear;
+
+    // Log old values
+    logg.i(
+      'Old values: areaType=$oldAreaType, division=$oldDivision, '
+      'cityCorporation=$oldCityCorporation, district=$oldDistrict, '
+      'upazila=$oldUpazila, union=$oldUnion, ward=$oldWard, '
+      'subblock=$oldSubblock, year=$oldYear',
+    );
 
     // Update individual filter selections
     if (vaccine != null) updateVaccine(vaccine);
@@ -545,23 +590,41 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     if (ward != null) updateWard(ward);
     if (subblock != null) updateSubblock(subblock);
 
-    // Check if any non-vaccine filters actually changed from their previous values
-    final bool hasNonVaccineChanges =
-        (areaType != null && areaType != currentState.selectedAreaType) ||
-        (division != null && division != currentState.selectedDivision) ||
-        (cityCorporation != null &&
-            cityCorporation != currentState.selectedCityCorporation) ||
-        (district != null && district != currentState.selectedDistrict) ||
-        (upazila != null && upazila != currentState.selectedUpazila) ||
-        (union != null && union != currentState.selectedUnion) ||
-        (ward != null && ward != currentState.selectedWard) ||
-        (subblock != null && subblock != currentState.selectedSubblock) ||
-        (year != null && year != currentState.selectedYear);
+    // Log new values after updates
+    logg.i(
+      'New values: areaType=${state.selectedAreaType}, '
+      'division=${state.selectedDivision}, '
+      'cityCorporation=${state.selectedCityCorporation}, '
+      'district=${state.selectedDistrict}, '
+      'upazila=${state.selectedUpazila}, '
+      'union=${state.selectedUnion}, '
+      'ward=${state.selectedWard}, '
+      'subblock=${state.selectedSubblock}, '
+      'year=${state.selectedYear}',
+    );
 
+    // Check if any non-vaccine filters actually changed from their previous values
+    // ✅ Now compare with the captured old values
+    final bool hasNonVaccineChanges =
+        (areaType != null && areaType != oldAreaType) ||
+        (division != null && division != oldDivision) ||
+        (cityCorporation != null && cityCorporation != oldCityCorporation) ||
+        (district != null && district != oldDistrict) ||
+        (upazila != null && upazila != oldUpazila) ||
+        (union != null && union != oldUnion) ||
+        (ward != null && ward != oldWard) ||
+        (subblock != null && subblock != oldSubblock) ||
+        (year != null && year != oldYear);
+
+    logg.i(
+      'FilterProvider: Non-vaccine changes detected: $hasNonVaccineChanges',
+    );
     // Only mark the timestamp when non-vaccine filters actually changed
     // This prevents map loading when only vaccine changes
     if (hasNonVaccineChanges) {
       state = state.copyWith(lastAppliedTimestamp: DateTime.now());
+    } else {
+      logg.i('FilterProvider: No non-vaccine changes, timestamp not updated');
     }
   }
 }
