@@ -36,6 +36,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () {
+      // 🛡️ SAFETY CHECK: Ensure EPI context is cleared when map screen initializes
+      // This handles edge cases like navigation stack resets, app state restoration, etc.
+      final filterState = ref.read(filterControllerProvider);
+      if (filterState.isEpiDetailsContext) {
+        logg.w(
+          "🚨 Map: EPI context still active when initializing map screen - clearing it",
+        );
+        ref.read(filterControllerProvider.notifier).clearEpiDetailsContext();
+      }
+
       ref.read(mapControllerProvider.notifier).loadInitialData();
       // Dynamic sync service is now initialized through Riverpod providers
       // No manual initialization needed - uses live FilterController state
@@ -494,9 +504,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // this reloads coverage data when year changes
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
+      // 🛡️ COMPREHENSIVE EPI CONTEXT CHECK - Skip ALL map operations when in EPI context
+      if (current.isEpiDetailsContext) {
+        logg.i("🚫 Map: Ignoring filter changes - in EPI context");
+        logg.i(
+          "   Context details: isEpiDetailsContext=${current.isEpiDetailsContext}",
+        );
+        return; // Skip all map reload operations when in EPI context
+      }
+
+      // ✅ Normal map operations (only when NOT in EPI context)
       if (previous != null && (previous.selectedYear != current.selectedYear)) {
         logg.i(
-          "Filter year changed from ${previous.selectedYear} to ${current.selectedYear}",
+          "Map: Year changed from ${previous.selectedYear} to ${current.selectedYear}",
         );
 
         // Refresh coverage data for the new year
@@ -513,7 +533,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (previous != null &&
           current.lastAppliedTimestamp != null &&
           previous.lastAppliedTimestamp != current.lastAppliedTimestamp) {
-        logg.i("Filter applied - triggering map data load");
+        // 🛡️ DOUBLE-CHECK: Additional safety check for EPI context
+        // (Belt and suspenders approach - should already be caught above)
+        if (current.isEpiDetailsContext) {
+          logg.w(
+            "🚨 Map: EPI context detected in filter application - this should have been caught earlier!",
+          );
+          logg.w("   Skipping map reload as safety measure");
+          return;
+        }
+
+        logg.i("✅ Map: Filter applied - triggering map data load");
 
         // Check if only vaccine changed (no geographic filter changes)
         final bool onlyVaccineChanged =

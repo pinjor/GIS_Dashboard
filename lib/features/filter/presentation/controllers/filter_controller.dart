@@ -9,7 +9,13 @@ import '../../../map/utils/map_enums.dart';
 final filterControllerProvider =
     StateNotifierProvider<FilterControllerNotifier, FilterState>((ref) {
       final repository = ref.watch(filterRepositoryProvider);
-      return FilterControllerNotifier(repository: repository);
+      final controller = FilterControllerNotifier(repository: repository);
+
+      ref.onDispose(() {
+        controller.clearEpiDetailsContext();
+      });
+
+      return controller;
     });
 
 class FilterControllerNotifier extends StateNotifier<FilterState> {
@@ -577,6 +583,32 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     );
 
     print('FilterProvider: Geographic filters reset to country view completed');
+  }
+
+  /// Clear EPI context when navigating away from EPI details screens
+  /// This ensures map functionality returns to normal when EPI screens are closed
+  void clearEpiDetailsContext() {
+    if (!state.isEpiDetailsContext) {
+      print('FilterProvider: EPI context already cleared');
+      return;
+    }
+
+    print('FilterProvider: 🧹 Clearing EPI details context');
+    state = state.copyWith(
+      isEpiDetailsContext: false,
+      clearInitialSubblockUid: true,
+      // Clear extended hierarchical selections that were loaded for EPI context
+      clearUpazila: true,
+      clearUnion: true,
+      clearWard: true,
+      clearSubblock: true,
+      // Clear hierarchical data lists that were loaded for EPI context
+      upazilas: const [],
+      unions: const [],
+      wards: const [],
+      subblocks: const [],
+    );
+    print('FilterProvider: ✅ EPI context cleared - map functionality restored');
   }
 
   /// Apply filters with initial values for proper change detection

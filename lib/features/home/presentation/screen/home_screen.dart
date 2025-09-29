@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/widgets/connectivity_status_widget.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
+import 'package:gis_dashboard/features/filter/filter.dart';
 
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/utils/utils.dart';
@@ -97,6 +98,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onTap: () {
           // make it somewhat unresponsive or kind of inactive/disabled when map is loading
           if (!isMapLoading) {
+            // 🧹 SAFETY: Clear EPI context when navigating between main tabs
+            // This ensures clean state when switching from Map to Summary or vice versa
+            final filterController = ref.read(
+              filterControllerProvider.notifier,
+            );
+            final filterState = ref.read(filterControllerProvider);
+            if (filterState.isEpiDetailsContext) {
+              logg.i('🧹 Home: Clearing EPI context on tab switch');
+              filterController.clearEpiDetailsContext();
+            }
+
             setState(() {
               _selectedIndex = index;
             });
