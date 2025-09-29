@@ -544,6 +544,113 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     print('FilterProvider: Geographic filters reset to country view completed');
   }
 
+  /// Apply filters with initial values for proper change detection
+  /// This method receives both current and initial values to determine what actually changed
+  void applyFiltersWithInitialValues({
+    // Current selections
+    String? vaccine,
+    AreaType? areaType,
+    String? division,
+    String? cityCorporation,
+    String? district,
+    String? upazila,
+    String? union,
+    String? ward,
+    String? subblock,
+    String? year,
+    // Initial values for comparison
+    required String initialVaccine,
+    required AreaType initialAreaType,
+    required String initialYear,
+    required String initialDivision,
+    String? initialDistrict,
+    String? initialCityCorporation,
+    String? initialUpazila,
+    String? initialUnion,
+    String? initialWard,
+    String? initialSubblock,
+  }) {
+    logg.i('🔍 FilterProvider: Comparing current vs initial values:');
+
+    // Compare current values with initial values to detect changes
+    final bool hasNonVaccineChanges =
+        (areaType != null && areaType != initialAreaType) ||
+        (division != null && division != initialDivision) ||
+        (cityCorporation != null &&
+            cityCorporation != initialCityCorporation) ||
+        (district != null && district != initialDistrict) ||
+        (upazila != null && upazila != initialUpazila) ||
+        (union != null && union != initialUnion) ||
+        (ward != null && ward != initialWard) ||
+        (subblock != null && subblock != initialSubblock) ||
+        (year != null && year != initialYear);
+
+    // Log detailed comparison
+    if (areaType != null) {
+      logg.i(
+        '   AreaType: $areaType vs $initialAreaType = ${areaType != initialAreaType}',
+      );
+    }
+    if (division != null) {
+      logg.i(
+        '   Division: $division vs $initialDivision = ${division != initialDivision}',
+      );
+    }
+    if (cityCorporation != null) {
+      logg.i(
+        '   CityCorporation: $cityCorporation vs $initialCityCorporation = ${cityCorporation != initialCityCorporation}',
+      );
+    }
+    if (district != null) {
+      logg.i(
+        '   District: $district vs $initialDistrict = ${district != initialDistrict}',
+      );
+    }
+    if (upazila != null) {
+      logg.i(
+        '   Upazila: $upazila vs $initialUpazila = ${upazila != initialUpazila}',
+      );
+    }
+    if (union != null) {
+      logg.i('   Union: $union vs $initialUnion = ${union != initialUnion}');
+    }
+    if (ward != null) {
+      logg.i('   Ward: $ward vs $initialWard = ${ward != initialWard}');
+    }
+    if (subblock != null) {
+      logg.i(
+        '   Subblock: $subblock vs $initialSubblock = ${subblock != initialSubblock}',
+      );
+    }
+    if (year != null) {
+      logg.i('   Year: $year vs $initialYear = ${year != initialYear}');
+    }
+
+    // Update individual filter selections
+    if (vaccine != null) updateVaccine(vaccine);
+    if (areaType != null) updateAreaType(areaType);
+    if (year != null) updateYear(year);
+    if (division != null) updateDivision(division);
+    if (cityCorporation != null) updateCityCorporation(cityCorporation);
+    if (district != null) updateDistrict(district);
+    if (upazila != null) updateUpazila(upazila);
+    if (union != null) updateUnion(union);
+    if (ward != null) updateWard(ward);
+    if (subblock != null) updateSubblock(subblock);
+
+    logg.i(
+      'FilterProvider: Non-vaccine changes detected: $hasNonVaccineChanges',
+    );
+
+    // Only mark the timestamp when non-vaccine filters actually changed
+    if (hasNonVaccineChanges) {
+      state = state.copyWith(lastAppliedTimestamp: DateTime.now());
+      logg.i('✅ FilterProvider: Timestamp updated - EPI screen will reload');
+    } else {
+      logg.i('FilterProvider: No non-vaccine changes, timestamp not updated');
+    }
+  }
+
   /// Apply filters and mark the timestamp when filters are applied
   /// Only updates timestamp for non-vaccine changes to prevent unnecessary map loading
   void applyFilters({

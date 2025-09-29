@@ -77,10 +77,22 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _selectedVaccine = currentFilter.selectedVaccine;
     _selectedYear = currentFilter.selectedYear;
 
-    // Store initial values for reset functionality and change detection
+    // ✅ CRITICAL: Store initial values ONCE when dialog first opens
+    // These values must NEVER be updated during the dialog's lifetime
+    // This ensures we can compare against the original state in applyFilters
     _initialAreaType = currentFilter.selectedAreaType;
     _initialVaccine = currentFilter.selectedVaccine;
     _initialYear = currentFilter.selectedYear;
+
+    logg.i('🎯 Filter Dialog: Capturing initial values from provider state:');
+    logg.i('   Provider AreaType: ${currentFilter.selectedAreaType}');
+    logg.i('   Provider Division: ${currentFilter.selectedDivision}');
+    logg.i('   Provider District: ${currentFilter.selectedDistrict}');
+    logg.i('   Provider Upazila: ${currentFilter.selectedUpazila}');
+    logg.i('   Provider Union: ${currentFilter.selectedUnion}');
+    logg.i('   Provider Ward: ${currentFilter.selectedWard}');
+    logg.i('   Provider Subblock: ${currentFilter.selectedSubblock}');
+    logg.i('   Provider Year: ${currentFilter.selectedYear}');
 
     // Initialize based on area type
     if (_selectedAreaType == AreaType.district) {
@@ -114,7 +126,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
           null; // This represents 'All' in the district dropdown
     }
 
-    // Store initial values for district area type
+    // Store initial values for district area type - NEVER update these during dialog lifetime
     _initialDivision = _selectedDivision;
     _initialDistrict = _selectedDistrict;
     _initialCityCorporation = null;
@@ -154,7 +166,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         _selectedSubblock = null;
       }
 
-      // Store initial hierarchical values
+      // Store initial hierarchical values - NEVER update these during dialog lifetime
       _initialUpazila = _selectedUpazila;
       _initialUnion = _selectedUnion;
       _initialWard = _selectedWard;
@@ -165,6 +177,15 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       logg.i('   Initial Union: $_initialUnion');
       logg.i('   Initial Ward: $_initialWard');
       logg.i('   Initial Subblock: $_initialSubblock');
+
+      // Debug log all initial values for comparison
+      logg.i('🔍 All Initial Values Captured:');
+      logg.i('   _initialAreaType: $_initialAreaType');
+      logg.i('   _initialVaccine: $_initialVaccine');
+      logg.i('   _initialYear: $_initialYear');
+      logg.i('   _initialDivision: $_initialDivision');
+      logg.i('   _initialDistrict: $_initialDistrict');
+      logg.i('   _initialCityCorporation: $_initialCityCorporation');
     } else {
       // For normal context, clear hierarchical selections
       _selectedUpazila = null;
@@ -208,7 +229,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _selectedWard = null;
     _selectedSubblock = null;
 
-    // Store initial values for city corporation area type
+    // Store initial values for city corporation area type - NEVER update these during dialog lifetime
     _initialDivision = 'All';
     _initialDistrict = null;
     _initialCityCorporation = _selectedCityCorporation;
@@ -354,9 +375,25 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       return;
     }
 
+    logg.i('🚀 Applying filters with current selections:');
     logg.i(
-      'Applying filters: AreaType=$_selectedAreaType, Vaccine=$_selectedVaccine, Year=$_selectedYear, Division=$_selectedDivision, District=$_selectedDistrict, CityCorporation=$_selectedCityCorporation, Upazila=$_selectedUpazila, Union=$_selectedUnion, Ward=$_selectedWard, Subblock=$_selectedSubblock',
+      '   Current AreaType: $_selectedAreaType vs Initial: $_initialAreaType',
     );
+    logg.i(
+      '   Current Division: $_selectedDivision vs Initial: $_initialDivision',
+    );
+    logg.i(
+      '   Current District: $_selectedDistrict vs Initial: $_initialDistrict',
+    );
+    logg.i(
+      '   Current Upazila: $_selectedUpazila vs Initial: $_initialUpazila',
+    );
+    logg.i('   Current Union: $_selectedUnion vs Initial: $_initialUnion');
+    logg.i('   Current Ward: $_selectedWard vs Initial: $_initialWard');
+    logg.i(
+      '   Current Subblock: $_selectedSubblock vs Initial: $_initialSubblock',
+    );
+    logg.i('   Current Year: $_selectedYear vs Initial: $_initialYear');
 
     // Only apply the changed values to avoid triggering unnecessary hierarchical loading
     final Map<String, dynamic> changedValues = {};
@@ -399,18 +436,46 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       }
     }
 
-    // Apply only the changed values to minimize side effects
-    filterNotifier.applyFilters(
-      vaccine: changedValues['vaccine'],
-      areaType: changedValues['areaType'],
-      year: changedValues['year'],
-      division: changedValues['division'],
-      district: changedValues['district'],
-      cityCorporation: changedValues['cityCorporation'],
-      upazila: changedValues['upazila'],
-      union: changedValues['union'],
-      ward: changedValues['ward'],
-      subblock: changedValues['subblock'],
+    // ✅ Apply all current selections (not just changed values) but pass initial values for comparison
+    // The key insight: we pass the current _selectedXXX values but the controller will use
+    // our stored _initialXXX values to determine what actually changed
+    filterNotifier.applyFiltersWithInitialValues(
+      // Current selections
+      vaccine: !isEpiContext ? _selectedVaccine : null,
+      areaType: _selectedAreaType,
+      year: _selectedYear,
+      division: _selectedAreaType == AreaType.district
+          ? _selectedDivision
+          : null,
+      district: _selectedAreaType == AreaType.district
+          ? _selectedDistrict
+          : null,
+      cityCorporation: _selectedAreaType == AreaType.cityCorporation
+          ? _selectedCityCorporation
+          : null,
+      upazila: _selectedAreaType == AreaType.district && isEpiContext
+          ? _selectedUpazila
+          : null,
+      union: _selectedAreaType == AreaType.district && isEpiContext
+          ? _selectedUnion
+          : null,
+      ward: _selectedAreaType == AreaType.district && isEpiContext
+          ? _selectedWard
+          : null,
+      subblock: _selectedAreaType == AreaType.district && isEpiContext
+          ? _selectedSubblock
+          : null,
+      // Initial values for comparison
+      initialVaccine: _initialVaccine,
+      initialAreaType: _initialAreaType,
+      initialYear: _initialYear,
+      initialDivision: _initialDivision,
+      initialDistrict: _initialDistrict,
+      initialCityCorporation: _initialCityCorporation,
+      initialUpazila: _initialUpazila,
+      initialUnion: _initialUnion,
+      initialWard: _initialWard,
+      initialSubblock: _initialSubblock,
     );
 
     Navigator.of(context).pop();
