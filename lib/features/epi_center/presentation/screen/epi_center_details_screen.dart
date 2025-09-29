@@ -85,14 +85,25 @@ class _EpiCenterDetailsScreenState
 
       String? targetUid;
       String? targetName;
-
+      final selectedSubblock = filterState.selectedSubblock;
+      logg.i('Selected Subblock: $selectedSubblock');
+      logg.i('All subblocks: ${filterState.subblocks}');
+      logg.i('Selected Ward: ${filterState.selectedWard}');
+      logg.i('All wards: ${filterState.wards}');
+      logg.i('Selected Union: ${filterState.selectedUnion}');
+      logg.i('All unions: ${filterState.unions}');
+      logg.i('Selected Upazila: ${filterState.selectedUpazila}');
+      logg.i('All upazilas: ${filterState.upazilas}');
+      logg.i('Selected District: ${filterState.selectedDistrict}');
+      logg.i('All districts: ${filterState.districts}');
+      logg.i('Selected Division: ${filterState.selectedDivision}');
+      logg.i('All divisions: ${filterState.divisions}');
+      
       // Determine the most specific level selected (bottom-up approach)
       // Bottom-up hierarchical selection (most specific first)
       if (filterState.selectedSubblock != null &&
           filterState.selectedSubblock != 'All') {
-        targetUid = filterController.getSubblockUid(
-          filterState.selectedSubblock!,
-        );
+        targetUid = filterController.getSubblockUid(selectedSubblock!);
         targetName = filterState.selectedSubblock;
       } else if (filterState.selectedWard != null &&
           filterState.selectedWard != 'All') {
@@ -207,14 +218,12 @@ class _EpiCenterDetailsScreenState
       logg.i(
         '👂 EPI Screen: Filter state changed: ${current.lastAppliedTimestamp != previous?.lastAppliedTimestamp}',
       );
-      if (previous?.lastAppliedTimestamp != current.lastAppliedTimestamp && 
+      if (previous?.lastAppliedTimestamp != current.lastAppliedTimestamp &&
           current.lastAppliedTimestamp != null) {
         logg.i(
           '🔔 EPI Screen: Detected filter application - reloading EPI data',
         );
-        _reloadEpiDetailsDataForFilterChange(
-          current.selectedYear,
-        );
+        _reloadEpiDetailsDataForFilterChange(current.selectedYear);
       }
     });
 

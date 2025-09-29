@@ -585,46 +585,46 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         (subblock != null && subblock != initialSubblock) ||
         (year != null && year != initialYear);
 
-    // Log detailed comparison
-    if (areaType != null) {
-      logg.i(
-        '   AreaType: $areaType vs $initialAreaType = ${areaType != initialAreaType}',
-      );
-    }
-    if (division != null) {
-      logg.i(
-        '   Division: $division vs $initialDivision = ${division != initialDivision}',
-      );
-    }
-    if (cityCorporation != null) {
-      logg.i(
-        '   CityCorporation: $cityCorporation vs $initialCityCorporation = ${cityCorporation != initialCityCorporation}',
-      );
-    }
-    if (district != null) {
-      logg.i(
-        '   District: $district vs $initialDistrict = ${district != initialDistrict}',
-      );
-    }
-    if (upazila != null) {
-      logg.i(
-        '   Upazila: $upazila vs $initialUpazila = ${upazila != initialUpazila}',
-      );
-    }
-    if (union != null) {
-      logg.i('   Union: $union vs $initialUnion = ${union != initialUnion}');
-    }
-    if (ward != null) {
-      logg.i('   Ward: $ward vs $initialWard = ${ward != initialWard}');
-    }
-    if (subblock != null) {
-      logg.i(
-        '   Subblock: $subblock vs $initialSubblock = ${subblock != initialSubblock}',
-      );
-    }
-    if (year != null) {
-      logg.i('   Year: $year vs $initialYear = ${year != initialYear}');
-    }
+    // // Log detailed comparison
+    // if (areaType != null) {
+    //   logg.i(
+    //     '   AreaType: $areaType vs $initialAreaType = ${areaType != initialAreaType}',
+    //   );
+    // }
+    // if (division != null) {
+    //   logg.i(
+    //     '   Division: $division vs $initialDivision = ${division != initialDivision}',
+    //   );
+    // }
+    // if (cityCorporation != null) {
+    //   logg.i(
+    //     '   CityCorporation: $cityCorporation vs $initialCityCorporation = ${cityCorporation != initialCityCorporation}',
+    //   );
+    // }
+    // if (district != null) {
+    //   logg.i(
+    //     '   District: $district vs $initialDistrict = ${district != initialDistrict}',
+    //   );
+    // }
+    // if (upazila != null) {
+    //   logg.i(
+    //     '   Upazila: $upazila vs $initialUpazila = ${upazila != initialUpazila}',
+    //   );
+    // }
+    // if (union != null) {
+    //   logg.i('   Union: $union vs $initialUnion = ${union != initialUnion}');
+    // }
+    // if (ward != null) {
+    //   logg.i('   Ward: $ward vs $initialWard = ${ward != initialWard}');
+    // }
+    // if (subblock != null) {
+    //   logg.i(
+    //     '   Subblock: $subblock vs $initialSubblock = ${subblock != initialSubblock}',
+    //   );
+    // }
+    // if (year != null) {
+    //   logg.i('   Year: $year vs $initialYear = ${year != initialYear}');
+    // }
 
     // Update individual filter selections
     if (vaccine != null) updateVaccine(vaccine);
