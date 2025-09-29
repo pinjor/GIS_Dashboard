@@ -98,7 +98,7 @@ class _EpiCenterDetailsScreenState
       logg.i('All districts: ${filterState.districts}');
       logg.i('Selected Division: ${filterState.selectedDivision}');
       logg.i('All divisions: ${filterState.divisions}');
-      
+
       // Determine the most specific level selected (bottom-up approach)
       // Bottom-up hierarchical selection (most specific first)
       if (filterState.selectedSubblock != null &&
@@ -145,6 +145,10 @@ class _EpiCenterDetailsScreenState
           }
         }
       } else {
+        logg.w(
+          '🚫 targetUid is NULL - Filter button may have cleared hierarchical data!',
+        );
+        logg.w('   This should now be FIXED with the smart update methods');
         logg.i(
           '📍 No specific hierarchical level selected - keeping current EPI data',
         );

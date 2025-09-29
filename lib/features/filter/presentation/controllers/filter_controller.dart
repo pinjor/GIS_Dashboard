@@ -149,55 +149,90 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Update upazila selection and load unions
   void updateUpazila(String? upazila) {
-    state = state.copyWith(
-      selectedUpazila: upazila,
-      clearUnion: true,
-      clearWard: true,
-      clearSubblock: true,
-      unions: const [],
-      wards: const [],
-      subblocks: const [],
-    );
+    // Only clear child data if the selection actually changed
+    if (state.selectedUpazila != upazila) {
+      print(
+        'FilterProvider: Upazila changed from ${state.selectedUpazila} to $upazila - clearing child data',
+      );
+      state = state.copyWith(
+        selectedUpazila: upazila,
+        clearUnion: true,
+        clearWard: true,
+        clearSubblock: true,
+        unions: const [],
+        wards: const [],
+        subblocks: const [],
+      );
 
-    if (upazila != null && upazila != 'All') {
-      final upazilaUid = _getUpazilaUid(upazila);
-      if (upazilaUid != null) {
-        _loadUnionsByUpazila(upazilaUid);
+      // Load new data only if changed and valid
+      if (upazila != null && upazila != 'All') {
+        final upazilaUid = _getUpazilaUid(upazila);
+        if (upazilaUid != null) {
+          _loadUnionsByUpazila(upazilaUid);
+        }
       }
+    } else {
+      // Same value - just update the selection without clearing children
+      print(
+        'FilterProvider: Upazila unchanged ($upazila) - preserving child data',
+      );
+      state = state.copyWith(selectedUpazila: upazila);
     }
   }
 
   /// Update union selection and load wards
   void updateUnion(String? union) {
-    state = state.copyWith(
-      selectedUnion: union,
-      clearWard: true,
-      clearSubblock: true,
-      wards: const [],
-      subblocks: const [],
-    );
+    // Only clear child data if the selection actually changed
+    if (state.selectedUnion != union) {
+      print(
+        'FilterProvider: Union changed from ${state.selectedUnion} to $union - clearing child data',
+      );
+      state = state.copyWith(
+        selectedUnion: union,
+        clearWard: true,
+        clearSubblock: true,
+        wards: const [],
+        subblocks: const [],
+      );
 
-    if (union != null && union != 'All') {
-      final unionUid = _getUnionUid(union);
-      if (unionUid != null) {
-        _loadWardsByUnion(unionUid);
+      // Load new data only if changed and valid
+      if (union != null && union != 'All') {
+        final unionUid = _getUnionUid(union);
+        if (unionUid != null) {
+          _loadWardsByUnion(unionUid);
+        }
       }
+    } else {
+      // Same value - just update the selection without clearing children
+      print('FilterProvider: Union unchanged ($union) - preserving child data');
+      state = state.copyWith(selectedUnion: union);
     }
   }
 
   /// Update ward selection and load subblocks
   void updateWard(String? ward) {
-    state = state.copyWith(
-      selectedWard: ward,
-      clearSubblock: true,
-      subblocks: const [],
-    );
+    // Only clear child data if the selection actually changed
+    if (state.selectedWard != ward) {
+      print(
+        'FilterProvider: Ward changed from ${state.selectedWard} to $ward - clearing child data',
+      );
+      state = state.copyWith(
+        selectedWard: ward,
+        clearSubblock: true,
+        subblocks: const [],
+      );
 
-    if (ward != null && ward != 'All') {
-      final wardUid = _getWardUid(ward);
-      if (wardUid != null) {
-        _loadSubblocksByWard(wardUid);
+      // Load new data only if changed and valid
+      if (ward != null && ward != 'All') {
+        final wardUid = _getWardUid(ward);
+        if (wardUid != null) {
+          _loadSubblocksByWard(wardUid);
+        }
       }
+    } else {
+      // Same value - just update the selection without clearing children
+      print('FilterProvider: Ward unchanged ($ward) - preserving child data');
+      state = state.copyWith(selectedWard: ward);
     }
   }
 
