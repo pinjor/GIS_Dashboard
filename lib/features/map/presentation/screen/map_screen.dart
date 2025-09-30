@@ -483,20 +483,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               );
 
               if (freshPolygons.isNotEmpty) {
-                logg.i(
-                  "Auto-zooming to ${freshPolygons.length} polygons at level: ${current.currentLevel}",
-                );
+                // logg.i(
+                //   "Auto-zooming to ${freshPolygons.length} polygons at level: ${current.currentLevel}",
+                // );
                 _autoZoomToPolygons(
                   freshPolygons,
                 ); //? what if we try with old polygons e.g. areaPolygons?
               } else {
-                logg.w("No polygons available for auto-zoom");
+                // logg.w("No polygons available for auto-zoom");
               }
             } else {
-              logg.w("Skipping auto-zoom - widget unmounted");
+              // logg.w("Skipping auto-zoom - widget unmounted");
             }
           } catch (e) {
-            logg.w("Auto-zoom failed: $e");
+            // logg.w("Auto-zoom failed: $e");
           }
         });
       }
@@ -880,15 +880,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // With comprehensive polygon rendering, we might have many more polygons now
     if (mainAreaPolygons.length > 150) {
-      logg.w(
-        "Too many areas (${mainAreaPolygons.length}) for name markers, skipping labels",
-      );
+      // logg.w(
+      //   "Too many areas (${mainAreaPolygons.length}) for name markers, skipping labels",
+      // );
       return [];
     }
 
-    logg.i(
-      "Building ${mainAreaPolygons.length} area name markers from ${areaPolygons.length} total polygons",
-    );
+    // logg.i(
+    //   "Building ${mainAreaPolygons.length} area name markers from ${areaPolygons.length} total polygons",
+    // );
 
     return mainAreaPolygons.map((areaPolygon) {
       // Calculate centroid of the polygon using centralized function

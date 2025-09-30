@@ -593,7 +593,15 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       return;
     }
 
-    print('FilterProvider: 🧹 Clearing EPI details context');
+    logg.i('FilterProvider: 🧹 Clearing EPI details context...');
+    // old state values
+    logg.i('BEFORE: isEpiDetailsContext: ${state.isEpiDetailsContext}');
+    logg.i('BEFORE: initialSubblockUid: ${state.initialSubblockUid}');
+    logg.i('BEFORE: selectedUpazila: ${state.selectedUpazila}');
+    logg.i('BEFORE: selectedUnion: ${state.selectedUnion}');
+    logg.i('BEFORE: selectedWard: ${state.selectedWard}');
+    logg.i('BEFORE: selectedSubblock: ${state.selectedSubblock}');
+
     state = state.copyWith(
       isEpiDetailsContext: false,
       clearInitialSubblockUid: true,
@@ -608,7 +616,18 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       wards: const [],
       subblocks: const [],
     );
-    print('FilterProvider: ✅ EPI context cleared - map functionality restored');
+
+    logg.i(
+      'FilterProvider: ✅ EPI context cleared - map functionality restored',
+    );
+
+    // new state values
+    logg.i('AFTER: isEpiDetailsContext: ${state.isEpiDetailsContext}');
+    logg.i('AFTER: initialSubblockUid: ${state.initialSubblockUid}');
+    logg.i('AFTER: selectedUpazila: ${state.selectedUpazila}');
+    logg.i('AFTER: selectedUnion: ${state.selectedUnion}');
+    logg.i('AFTER: selectedWard: ${state.selectedWard}');
+    logg.i('AFTER: selectedSubblock: ${state.selectedSubblock}');
   }
 
   /// Apply filters with initial values for proper change detection

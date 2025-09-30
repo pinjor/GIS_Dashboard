@@ -93,6 +93,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     logg.i('   Provider Ward: ${currentFilter.selectedWard}');
     logg.i('   Provider Subblock: ${currentFilter.selectedSubblock}');
     logg.i('   Provider Year: ${currentFilter.selectedYear}');
+    logg.i('isEpiContext: ${widget.isEpiContext}');
 
     // Initialize based on area type
     if (_selectedAreaType == AreaType.district) {

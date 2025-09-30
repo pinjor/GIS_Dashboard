@@ -172,13 +172,13 @@ class DataService {
     // Try multiple times for EPI center data
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        logg.i("Fetching EPI center data (attempt $attempt): $urlPath");
+        // logg.i("Fetching EPI center data (attempt $attempt): $urlPath");
 
         final data = await _epiCenterRepository.fetchEpiCenterDetailsData(
           urlPath: urlPath,
         );
 
-        logg.i("Successfully fetched EPI center data on attempt $attempt");
+        // logg.i("Successfully fetched EPI center data on attempt $attempt");
         return data;
       } catch (e) {
         lastError = e as Exception;
@@ -216,24 +216,24 @@ class DataService {
       final isFirstAttempt = i == 0;
 
       try {
-        logg.i(
-          "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $urlPath",
-        );
+        // logg.i(
+        //   "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $urlPath",
+        // );
 
         final result = await fetchAreaGeoJsonCoordsData(
           urlPath: urlPath,
           forceRefresh: forceRefresh,
         );
 
-        logg.i(
-          "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL",
-        );
+        // logg.i(
+        //   "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL",
+        // );
         return result;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
-        logg.w(
-          "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $e",
-        );
+        // logg.w(
+        //   "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $e",
+        // );
 
         if (i < urlPaths.length - 1) {
           logg.i("🔄 Trying next URL strategy...");
@@ -242,7 +242,7 @@ class DataService {
       }
     }
 
-    logg.e("💥 All URL strategies failed for city corporation");
+    // logg.e("💥 All URL strategies failed for city corporation");
     throw lastError ?? Exception('All city corporation URL strategies failed');
   }
 
@@ -258,33 +258,33 @@ class DataService {
       final isFirstAttempt = i == 0;
 
       try {
-        logg.i(
-          "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL: $urlPath",
-        );
+        // logg.i(
+        //   "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL: $urlPath",
+        // );
 
         final result = await getVaccinationCoverage(
           urlPath: urlPath,
           forceRefresh: forceRefresh,
         );
 
-        logg.i(
-          "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL",
-        );
+        // logg.i(
+        //   "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL",
+        // );
         return result;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
-        logg.w(
-          "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL: $e",
-        );
+        // logg.w(
+        //   "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL: $e",
+        // );
 
         if (i < urlPaths.length - 1) {
-          logg.i("🔄 Trying next coverage URL strategy...");
+          // logg.i("🔄 Trying next coverage URL strategy...");
           continue;
         }
       }
     }
 
-    logg.e("💥 All coverage URL strategies failed for city corporation");
+    // logg.e("💥 All coverage URL strategies failed for city corporation");
     throw lastError ??
         Exception('All city corporation coverage URL strategies failed');
   }
@@ -301,33 +301,33 @@ class DataService {
       final isFirstAttempt = i == 0;
 
       try {
-        logg.i(
-          "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $urlPath",
-        );
+        // logg.i(
+        //   "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $urlPath",
+        // );
 
         final result = await getEpiCenterCoordsData(
           urlPath: urlPath,
           forceRefresh: forceRefresh,
         );
 
-        logg.i(
-          "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL",
-        );
+        // logg.i(
+        //   "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL",
+        // );
         return result;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
-        logg.w(
-          "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $e",
-        );
+        // logg.w(
+        //   "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $e",
+        // );
 
         if (i < urlPaths.length - 1) {
-          logg.i("🔄 Trying next EPI URL strategy...");
+          // logg.i("🔄 Trying next EPI URL strategy...");
           continue;
         }
       }
     }
 
-    logg.e("💥 All EPI URL strategies failed for city corporation");
+    // logg.e("💥 All EPI URL strategies failed for city corporation");
     throw lastError ??
         Exception('All city corporation EPI URL strategies failed');
   }
@@ -339,13 +339,13 @@ class DataService {
     bool forceRefresh = false,
   }) async {
     try {
-      logg.i('Fetching EPI center details by org_uid: $orgUid, year: $year');
+      // logg.i('Fetching EPI center details by org_uid: $orgUid, year: $year');
       return await _epiCenterRepository.fetchEpiCenterDetailsByOrgUid(
         orgUid: orgUid,
         year: year,
       );
     } catch (e) {
-      logg.e('Error fetching EPI center details by org_uid: $e');
+      // logg.e('Error fetching EPI center details by org_uid: $e');
       rethrow;
     }
   }

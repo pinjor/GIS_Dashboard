@@ -59,6 +59,11 @@ class _EpiCenterDetailsScreenState
     super.dispose();
   }
 
+  void _clearEpiContextOfFilter() {
+    final filterController = ref.read(filterControllerProvider.notifier);
+    filterController.clearEpiDetailsContext();
+  }
+
   /// Handle filter changes in EPI context
   Future<void> _reloadEpiDetailsDataForFilterChange(String selectedYear) async {
     // Cancel any previous reload timer
@@ -73,8 +78,8 @@ class _EpiCenterDetailsScreenState
   Future<void> _performEpiReload(String selectedYear) async {
     final filterState = ref.read(filterControllerProvider);
 
-    logg.i('🔔 EPI Filter Change Detected:');
-    logg.i('   isEpiDetailsContext: ${filterState.isEpiDetailsContext}');
+    logg.i('🔔 EPI Filter Change Detected');
+    logg.i('isEpiDetailsContext: ${filterState.isEpiDetailsContext}');
 
     logg.i('🔄 EPI Filter Applied - Reloading data for year #$selectedYear');
 
@@ -86,18 +91,18 @@ class _EpiCenterDetailsScreenState
       String? targetUid;
       String? targetName;
       final selectedSubblock = filterState.selectedSubblock;
-      logg.i('Selected Subblock: $selectedSubblock');
-      logg.i('All subblocks: ${filterState.subblocks}');
-      logg.i('Selected Ward: ${filterState.selectedWard}');
-      logg.i('All wards: ${filterState.wards}');
-      logg.i('Selected Union: ${filterState.selectedUnion}');
-      logg.i('All unions: ${filterState.unions}');
-      logg.i('Selected Upazila: ${filterState.selectedUpazila}');
-      logg.i('All upazilas: ${filterState.upazilas}');
-      logg.i('Selected District: ${filterState.selectedDistrict}');
-      logg.i('All districts: ${filterState.districts}');
-      logg.i('Selected Division: ${filterState.selectedDivision}');
-      logg.i('All divisions: ${filterState.divisions}');
+      // logg.i('Selected Subblock: $selectedSubblock');
+      // logg.i('All subblocks: ${filterState.subblocks}');
+      // logg.i('Selected Ward: ${filterState.selectedWard}');
+      // logg.i('All wards: ${filterState.wards}');
+      // logg.i('Selected Union: ${filterState.selectedUnion}');
+      // logg.i('All unions: ${filterState.unions}');
+      // logg.i('Selected Upazila: ${filterState.selectedUpazila}');
+      // logg.i('All upazilas: ${filterState.upazilas}');
+      // logg.i('Selected District: ${filterState.selectedDistrict}');
+      // logg.i('All districts: ${filterState.districts}');
+      // logg.i('Selected Division: ${filterState.selectedDivision}');
+      // logg.i('All divisions: ${filterState.divisions}');
 
       // Determine the most specific level selected (bottom-up approach)
       // Bottom-up hierarchical selection (most specific first)
@@ -231,39 +236,58 @@ class _EpiCenterDetailsScreenState
       }
     });
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.epiCenterName,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            if (widget.currentLevel != null)
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          // Clear EPI context when navigating back
+          _clearEpiContextOfFilter();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: AppBar(
+          leading: BackButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Clear EPI context when navigating back
+              _clearEpiContextOfFilter();
+            },
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                'EPI Center Details',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.normal,
+                widget.epiCenterName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-          ],
+              if (widget.currentLevel != null)
+                Text(
+                  'EPI Center Details',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+            ],
+          ),
+          backgroundColor: Colors.white,
+          elevation: 2,
         ),
-        backgroundColor: Colors.white,
-        elevation: 2,
+        body: epiState.isLoading
+            ? const Center(
+                child: CustomLoadingWidget(
+                  loadingText: 'Loading EPI Center data...',
+                ),
+              )
+            : epiState.hasError || epiState.epiCenterData == null
+            ? EpiCenterEmptyStateWidget(epiCenterName: widget.epiCenterName)
+            : _buildContent(epiState.epiCenterData!, selectedYear, updatedAt),
       ),
-      body: epiState.isLoading
-          ? const Center(
-              child: CustomLoadingWidget(
-                loadingText: 'Loading EPI Center data...',
-              ),
-            )
-          : epiState.hasError || epiState.epiCenterData == null
-          ? EpiCenterEmptyStateWidget(epiCenterName: widget.epiCenterName)
-          : _buildContent(epiState.epiCenterData!, selectedYear, updatedAt),
     );
   }
 

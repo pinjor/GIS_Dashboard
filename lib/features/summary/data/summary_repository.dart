@@ -38,7 +38,7 @@ class SummaryRepository {
         );
       }
 
-      logg.i("Fetching vaccination coverage from $urlPath");
+      // logg.i("Fetching vaccination coverage from $urlPath");
       final response = await _client.get(
         urlPath,
         options: Options(
@@ -48,7 +48,7 @@ class SummaryRepository {
         ),
       );
       final vaccineCoverageData = response.data as Map<String, dynamic>;
-      logg.i('Successfully received vaccination coverage data');
+      // logg.i('Successfully received vaccination coverage data');
 
       return VaccineCoverageResponse.fromJson(vaccineCoverageData);
     } on DioException catch (e) {

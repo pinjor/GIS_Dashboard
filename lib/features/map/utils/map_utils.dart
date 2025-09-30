@@ -4,7 +4,6 @@ import 'package:latlong2/latlong.dart';
 import 'dart:math' as math;
 
 import '../../../config/coverage_colors.dart';
-import '../../../core/utils/utils.dart';
 import '../domain/area_coords_geo_json_response.dart';
 import '../domain/area_polygon.dart';
 import '../domain/center_info.dart';
@@ -17,9 +16,9 @@ bool isTappedPointInPolygon(LatLng point, List<LatLng> polygon) {
 
   // Prevent freezing with very large polygon data
   if (polygon.length > 1000) {
-    logg.d(
-      "Large polygon with ${polygon.length} points - using sampling for hit testing",
-    );
+    // logg.d(
+    //   "Large polygon with ${polygon.length} points - using sampling for hit testing",
+    // );
     // Sample every 20th point for very large polygons to prevent freezing
     final sampledPolygon = <LatLng>[];
     for (int i = 0; i < polygon.length; i += 20) {
@@ -63,7 +62,7 @@ List<AreaPolygon> parseGeoJsonToPolygons(
       : null;
 
   if (selectedVaccineData == null) {
-    logg.e("No vaccine data found for $selectedVaccine");
+    // logg.e("No vaccine data found for $selectedVaccine");
     return [];
   }
 
@@ -78,7 +77,7 @@ List<AreaPolygon> parseGeoJsonToPolygons(
 
   final List<AreaPolygon> polygonList = [];
   if (features == null || features.isEmpty) {
-    logg.w("No features found in GeoJSON data");
+    // logg.w("No features found in GeoJSON data");
     return polygonList;
   }
   // FUTURE-PROOF: Process each feature individually to render ALL valid polygons
@@ -158,12 +157,12 @@ List<List<LatLng>> _extractAllPolygonRings(
 
     // ADAPTIVE: Handle different coordinate structures that may come from future APIs
     if (polygonCoords == null) {
-      logg.w("$areaName: No coordinates found in polygon geometry");
+      // logg.w("$areaName: No coordinates found in polygon geometry");
       return rings;
     }
 
     final coordsList = polygonCoords;
-    logg.d("$areaName: Processing Polygon with ${coordsList.length} rings");
+    // logg.d("$areaName: Processing Polygon with ${coordsList.length} rings");
 
     // For Polygon: coordinates = [exterior_ring, hole1, hole2, ...]
     for (int ringIndex = 0; ringIndex < coordsList.length; ringIndex++) {
@@ -171,9 +170,9 @@ List<List<LatLng>> _extractAllPolygonRings(
         final coords = coordsList[ringIndex];
 
         if (coords is! List) {
-          logg.w(
-            "$areaName: Unexpected ring coordinate type at $ringIndex: ${coords.runtimeType}",
-          );
+          // logg.w(
+          //   "$areaName: Unexpected ring coordinate type at $ringIndex: ${coords.runtimeType}",
+          // );
           continue;
         }
 
@@ -204,7 +203,7 @@ List<List<LatLng>> _extractAllPolygonRings(
       }
     }
   } catch (e) {
-    logg.e("Error extracting polygon rings for $areaName: $e");
+    // logg.e("Error extracting polygon rings for $areaName: $e");
     // GRACEFUL: Return what we have instead of empty list
   }
 
@@ -223,7 +222,7 @@ List<List<LatLng>> _extractAllMultiPolygonRings(
 
     // ADAPTIVE: Handle different coordinate structures
     if (multiPolygonCoords == null) {
-      logg.w("$areaName: No coordinates found in multipolygon geometry");
+      // logg.w("$areaName: No coordinates found in multipolygon geometry");
       return allRings;
     }
 
@@ -351,9 +350,9 @@ List<LatLng> _extractCoordinates(List<dynamic> coords, String? areaName) {
           invalidCount++;
           if (invalidCount <= 3) {
             // Log first few invalid coordinates for debugging API changes
-            logg.d(
-              "$areaName: Invalid coordinate at index $i: lat=$lat, lng=$lng (possible API change or data quality issue)",
-            );
+            // logg.d(
+            //   "$areaName: Invalid coordinate at index $i: lat=$lat, lng=$lng (possible API change or data quality issue)",
+            // );
           }
         }
       } else {
@@ -363,7 +362,7 @@ List<LatLng> _extractCoordinates(List<dynamic> coords, String? areaName) {
     } catch (e) {
       invalidCount++;
       if (invalidCount <= 3) {
-        logg.e("$areaName: Error processing coordinate at index $i: $e");
+        // logg.e("$areaName: Error processing coordinate at index $i: $e");
       }
       // RESILIENT: Continue processing other coordinates
       continue;
@@ -372,13 +371,13 @@ List<LatLng> _extractCoordinates(List<dynamic> coords, String? areaName) {
 
   // INFORMATIVE: Log summary for monitoring API changes
   if (invalidCount > 0) {
-    logg.w(
-      "$areaName: Processed ${coords.length} coordinates, found $invalidCount invalid (${((invalidCount / coords.length) * 100).toStringAsFixed(1)}% invalid rate)",
-    );
+    // logg.w(
+    //   "$areaName: Processed ${coords.length} coordinates, found $invalidCount invalid (${((invalidCount / coords.length) * 100).toStringAsFixed(1)}% invalid rate)",
+    // );
   } else {
-    logg.d(
-      "$areaName: Successfully processed ${validCoords.length} coordinates with 100% validity",
-    );
+    // logg.d(
+    //   "$areaName: Successfully processed ${validCoords.length} coordinates with 100% validity",
+    // );
   }
 
   return validCoords;
@@ -445,7 +444,7 @@ AreaPolygon? _createAreaPolygon(
       orgUid: orgUid, // Add orgUid to AreaPolygon
     );
   } catch (e) {
-    logg.e("Error creating area polygon for $areaName: $e");
+    // logg.e("Error creating area polygon for $areaName: $e");
     return null;
   }
 }
@@ -460,9 +459,6 @@ LatLng calculatePolygonCentroid(List<LatLng> points) {
 
   // Prevent freezing with very large polygon data
   if (points.length > 1000) {
-    logg.w(
-      "Large polygon with ${points.length} points - using sampling for performance",
-    );
     // Sample every 10th point for very large polygons to prevent freezing
     final sampledPoints = <LatLng>[];
     for (int i = 0; i < points.length; i += 10) {
@@ -514,9 +510,9 @@ double calculatePolygonArea(List<LatLng> points) {
 
   // Prevent freezing with very large polygon data
   if (points.length > 500) {
-    logg.w(
-      "Large polygon with ${points.length} points - using sampling for area calculation",
-    );
+    // logg.w(
+    //   "Large polygon with ${points.length} points - using sampling for area calculation",
+    // );
     // Sample every 5th point for very large polygons to prevent freezing
     final sampledPoints = <LatLng>[];
     for (int i = 0; i < points.length; i += 5) {
@@ -624,9 +620,9 @@ void autoZoomToPolygons(
 
   final bounds = calculatePolygonsBounds(areaPolygons);
 
-  logg.i(
-    "Auto-zooming to fit polygons: bounds from ${bounds.south}, ${bounds.west} to ${bounds.north}, ${bounds.east}",
-  );
+  // logg.i(
+  //   "Auto-zooming to fit polygons: bounds from ${bounds.south}, ${bounds.west} to ${bounds.north}, ${bounds.east}",
+  // );
 
   // Calculate center of bounds
   final center = LatLng(
@@ -644,9 +640,9 @@ void autoZoomToPolygons(
 
   try {
     mapController.moveAndRotate(center, zoom, 0);
-    logg.i("Auto-zoom completed successfully to zoom level $zoom");
+    // logg.i("Auto-zoom completed successfully to zoom level $zoom");
   } catch (e) {
-    logg.e("Error auto-zooming: $e");
+    // logg.e("Error auto-zooming: $e");
     // Fallback to center bounds with default zoom
     mapController.moveAndRotate(center, currentLevel.minZoomLevel, 0);
   }

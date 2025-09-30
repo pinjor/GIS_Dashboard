@@ -57,12 +57,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
 
       final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
-      logg.i(
-        'metadata: ${coverageData.metadata} year: ${coverageData.metadata?.year}',
-      );
-      logg.i(
-        "Loaded Coverage data for ${coverageData.vaccines?.first.vaccineName} and ${coverageData.vaccines?.first.areas?.length} coverage areas",
-      );
+      // logg.i(
+      //   'metadata: ${coverageData.metadata} year: ${coverageData.metadata?.year}',
+      // );
+      // logg.i(
+      //   "Loaded Coverage data for ${coverageData.vaccines?.first.vaccineName} and ${coverageData.vaccines?.first.areas?.length} coverage areas",
+      // );
 
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
@@ -464,7 +464,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         clearEpiData: true, // Clear EPI data for divisions
       );
 
-      logg.i("Successfully loaded division data for $divisionName");
+      // logg.i("Successfully loaded division data for $divisionName");
     } catch (e) {
       logg.e("Error loading division data for $divisionName: $e");
       state = state.copyWith(
@@ -681,7 +681,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         clearEpiData: true, // Clear EPI data for districts from filter
       );
 
-      logg.i("Successfully loaded district data for $districtName");
+      // logg.i("Successfully loaded district data for $districtName");
     } catch (e) {
       logg.e("Error loading district data for $districtName: $e");
       state = state.copyWith(
