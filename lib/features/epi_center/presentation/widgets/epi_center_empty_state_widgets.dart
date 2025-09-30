@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Collection of empty state widgets for EPI Center Details screen
 class EpiCenterEmptyStateWidget extends StatelessWidget {
-  final String epiCenterName;
-
-  const EpiCenterEmptyStateWidget({super.key, required this.epiCenterName});
+  const EpiCenterEmptyStateWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +12,7 @@ class EpiCenterEmptyStateWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Empty Coverage Tables
-          _buildEmptyStateMessage(
-            'No coverage data available for $epiCenterName',
-          ),
+          _buildEmptyStateMessage('No coverage data available'),
 
           _buildEmptyCoverageTables(),
           const SizedBox(height: 24),

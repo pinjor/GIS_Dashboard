@@ -4,12 +4,16 @@ import '../../domain/filter_state.dart';
 import '../../domain/area_response_model.dart';
 import '../../data/filter_repository.dart';
 import '../../../map/utils/map_enums.dart';
+import '../../../epi_center/presentation/controllers/epi_center_controller.dart';
 
 /// Global filter state provider
 final filterControllerProvider =
     StateNotifierProvider<FilterControllerNotifier, FilterState>((ref) {
       final repository = ref.watch(filterRepositoryProvider);
-      final controller = FilterControllerNotifier(repository: repository);
+      final controller = FilterControllerNotifier(
+        repository: repository,
+        ref: ref,
+      );
 
       ref.onDispose(() {
         controller.clearEpiDetailsContext();
@@ -20,10 +24,14 @@ final filterControllerProvider =
 
 class FilterControllerNotifier extends StateNotifier<FilterState> {
   final FilterRepository _repository;
+  final Ref _ref;
 
-  FilterControllerNotifier({required FilterRepository repository})
-    : _repository = repository,
-      super(const FilterState()) {
+  FilterControllerNotifier({
+    required FilterRepository repository,
+    required Ref ref,
+  }) : _repository = repository,
+       _ref = ref,
+       super(const FilterState()) {
     // Initialize area data when provider is created
     _loadAllAreas();
   }
@@ -601,6 +609,17 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     logg.i('BEFORE: selectedUnion: ${state.selectedUnion}');
     logg.i('BEFORE: selectedWard: ${state.selectedWard}');
     logg.i('BEFORE: selectedSubblock: ${state.selectedSubblock}');
+
+    // ✅ RACE CONDITION FIX: Clear EPI data to prevent re-initialization
+    // This breaks the race condition because epiState.epiCenterData becomes null
+    try {
+      final epiController = _ref.read(epiCenterControllerProvider.notifier);
+      epiController.reset();
+      logg.i('FilterProvider: 🗑️ EPI data cleared to prevent race condition');
+    } catch (e) {
+      logg.w('FilterProvider: ⚠️ Could not clear EPI data: $e');
+      // Continue with filter context clearing even if EPI data clearing fails
+    }
 
     state = state.copyWith(
       isEpiDetailsContext: false,

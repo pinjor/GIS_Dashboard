@@ -238,11 +238,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   /// Handle EPI marker tap - navigate to EPI center details screen
   void _onEpiMarkerTap(
-    String centerName,
     String epiUid,
     // EpiInfo? info,
   ) {
-    logg.i("EPI marker tapped: $centerName (UID: $epiUid)");
+    logg.i("EPI marker tapped: (UID: $epiUid)");
 
     if (epiUid.isEmpty) {
       logg.w("EPI marker has no UID, cannot navigate to details");
@@ -269,7 +268,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // Navigate to EPI center details screen
     logg.i("🚀 Navigating to EPI center details:");
     logg.i("   EPI UID: $epiUid");
-    logg.i("   Center Name: $centerName");
     logg.i("   CC UID: $ccUid");
     logg.i("   Current Level: ${currentState.currentLevel}");
 
@@ -278,7 +276,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       MaterialPageRoute(
         builder: (context) => EpiCenterDetailsScreen(
           epiUid: epiUid,
-          epiCenterName: centerName,
           ccUid: ccUid,
           currentLevel: null, // TODO: Review if this level conversion is needed
         ),
@@ -338,10 +335,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     logg.i(
       "Found EPI center in subblock: ${foundEpiCenter.name} (${foundEpiCenter.orgUid})",
     );
-    _onEpiMarkerTap(
-      foundEpiCenter.name ?? 'EPI Center',
-      foundEpiCenter.orgUid!,
-    );
+    _onEpiMarkerTap(foundEpiCenter.orgUid!);
   }
 
   /// Handle city corporation ward tap - navigate directly to EPI details using org_uid
@@ -368,7 +362,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       MaterialPageRoute(
         builder: (context) => EpiCenterDetailsScreen(
           epiUid: wardPolygon.orgUid!,
-          epiCenterName: wardPolygon.areaName,
           ccUid: null, // Not needed for direct org_uid calls
           currentLevel:
               GeographicLevel.zone.index, // Ward within city corporation
@@ -958,7 +951,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 width: 19,
                 height: 19,
                 child: GestureDetector(
-                  onTap: () => _onEpiMarkerTap(centerName, info?.orgUid ?? ''),
+                  onTap: () => _onEpiMarkerTap(info?.orgUid ?? ''),
                   child: Tooltip(
                     message: centerName,
                     child: SizedBox(

@@ -18,7 +18,6 @@ import '../../../map/utils/map_enums.dart';
 import '../widgets/epi_center_widgets.dart';
 
 class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
-  final String epiCenterName;
   final String epiUid;
   final int? currentLevel;
   final String? ccUid;
@@ -26,7 +25,6 @@ class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
 
   const EpiCenterDetailsScreen({
     super.key,
-    required this.epiCenterName,
     required this.epiUid,
     this.currentLevel,
     this.ccUid,
@@ -258,21 +256,21 @@ class _EpiCenterDetailsScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.epiCenterName,
+                'EPI Center Details',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              if (widget.currentLevel != null)
-                Text(
-                  'EPI Center Details',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
+              // if (widget.currentLevel != null)
+              //   Text(
+              //     'EPI Center Details',
+              //     style: TextStyle(
+              //       fontSize: 14,
+              //       color: Colors.grey[600],
+              //       fontWeight: FontWeight.normal,
+              //     ),
+              //   ),
             ],
           ),
           backgroundColor: Colors.white,
@@ -285,7 +283,7 @@ class _EpiCenterDetailsScreenState
                 ),
               )
             : epiState.hasError || epiState.epiCenterData == null
-            ? EpiCenterEmptyStateWidget(epiCenterName: widget.epiCenterName)
+            ? EpiCenterEmptyStateWidget()
             : _buildContent(epiState.epiCenterData!, selectedYear, updatedAt),
       ),
     );
