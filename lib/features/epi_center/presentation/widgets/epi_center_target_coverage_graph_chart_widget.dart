@@ -1,259 +1,412 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'dart:math' as math;
-import '../../../../core/utils/utils.dart';
+import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+
 import '../../domain/epi_center_details_response.dart';
 
-/// Collection of chart widgets for EPI Center Details
-class EpiCenterTargetCoverageGraphChartWidget extends StatelessWidget {
+/// Chart widget using Syncfusion Flutter Charts with interactive legend
+class EpiCenterTargetCoverageGraphChartWidget extends StatefulWidget {
   final ChartData? chartData;
   final String selectedYear;
+
   const EpiCenterTargetCoverageGraphChartWidget({
     super.key,
     required this.chartData,
     required this.selectedYear,
   });
 
-  Color _colorFromHex(String? hexColor) {
-    final hex = (hexColor ?? '#000000').replaceAll('#', '');
-    return Color(int.parse('ff$hex', radix: 16));
+  @override
+  State<EpiCenterTargetCoverageGraphChartWidget> createState() =>
+      _EpiCenterTargetCoverageGraphChartWidgetState();
+}
+
+class _EpiCenterTargetCoverageGraphChartWidgetState
+    extends State<EpiCenterTargetCoverageGraphChartWidget> {
+  // Track visibility of each series
+  late Map<String, bool> _seriesVisibility;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSeriesVisibility();
   }
 
-  String _getShortMonthName(String month) {
-    return monthAbbrevName[month] ?? month;
-  }
-
-  String formatCompactNumber(String number) {
-    if (number.isEmpty) return 'N/A';
-    final parsed = double.tryParse(number);
-    if (parsed == null) return 'N/A';
-    final realNum = parsed;
-    String formatted;
-    if (realNum >= 1e9) {
-      formatted = (realNum / 1e9).toStringAsFixed(2);
-      return '${_trimTrailingZeros(formatted)}B';
-    } else if (realNum >= 1e6) {
-      formatted = (realNum / 1e6).toStringAsFixed(2);
-      return '${_trimTrailingZeros(formatted)}M';
-    } else if (realNum >= 1e3) {
-      formatted = (realNum / 1e3).toStringAsFixed(2);
-      return '${_trimTrailingZeros(formatted)}K';
-    } else {
-      return realNum.toStringAsFixed(0);
+  @override
+  void didUpdateWidget(EpiCenterTargetCoverageGraphChartWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.chartData != widget.chartData) {
+      _initializeSeriesVisibility();
     }
   }
 
-  String _trimTrailingZeros(String value) {
-    return value
-        .replaceAll(RegExp(r'\.00$'), '') // removes .00
-        .replaceAll(RegExp(r'(\.\d)0$'), r'\1'); // keeps 1 decimal if needed
+  void _initializeSeriesVisibility() {
+    _seriesVisibility = {};
+    if (widget.chartData != null) {
+      for (var dataset in widget.chartData!.datasets) {
+        final seriesName = dataset.label ?? 'Series';
+        _seriesVisibility[seriesName] = true; // All series visible by default
+      }
+    }
+  }
+
+  void _toggleSeriesVisibility(String seriesName) {
+    setState(() {
+      _seriesVisibility[seriesName] = !(_seriesVisibility[seriesName] ?? true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (chartData == null || (chartData?.datasets.isEmpty ?? true)) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('No chart data available'),
+    // Early return if chartData is null or empty
+    if (widget.chartData == null || widget.chartData!.datasets.isEmpty) {
+      return Card(
+        margin: const EdgeInsets.all(8),
+        elevation: 2,
+        child: Container(
+          height: 450,
+          padding: const EdgeInsets.all(16),
+          child: const Center(
+            child: Text(
+              'No chart data available',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ),
         ),
       );
     }
 
-    final labels = chartData!.labels;
-    final datasets = chartData!.datasets;
+    final List<CartesianSeries<_ChartPoint, String>> seriesList = [];
 
-    if (labels.isEmpty || datasets.isEmpty) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('No chart data available'),
-        ),
-      );
-    }
+    // Build datasets as Syncfusion LineSeries/SplineSeries
+    for (var dataset in widget.chartData!.datasets) {
+      // Skip datasets with null or empty data
+      if (dataset.data.isEmpty || widget.chartData!.labels.isEmpty) continue;
 
-    // Compute cumulative data and maxY for each dataset
-    double maxY = 0;
-    final List<LineChartBarData> lineBars = [];
-    for (final dataset in datasets) {
-      final rawData = dataset.data;
-      final List<double> cumData = [];
-      double sum = 0;
-      for (final num? d in rawData) {
-        sum += (d?.toDouble() ?? 0);
-        cumData.add(sum);
+      final seriesName = dataset.label ?? 'Series';
+
+      // Skip if series is hidden
+      if (_seriesVisibility[seriesName] == false) continue;
+
+      final List<_ChartPoint> points = [];
+
+      // Ensure we don't exceed available labels
+      final dataLength = dataset.data.length;
+      final labelsLength = widget.chartData!.labels.length;
+      final maxLength = dataLength < labelsLength ? dataLength : labelsLength;
+
+      // Use raw data values directly without any cumulative calculation
+      for (int i = 0; i < maxLength; i++) {
+        final value = dataset.data[i].toDouble(); // Use raw value directly
+        final label = _getShortMonthName(widget.chartData!.labels[i]);
+        points.add(_ChartPoint(label, value)); // No cumulation
       }
-      maxY = math.max(maxY, sum);
 
-      final spots = cumData
-          .asMap()
-          .entries
-          .map((e) => FlSpot(e.key.toDouble(), e.value))
-          .toList();
+      // Skip if no valid points
+      if (points.isEmpty) continue;
 
-      final color = _colorFromHex(dataset.borderColor);
-      final bool isCurved = (dataset.tension ?? 0) > 0;
-      final bool showDots = (dataset.pointRadius ?? 0) > 0;
-      final List<int>? dashArray = (dataset.borderDash.isNotEmpty)
-          ? dataset.borderDash
-          : null;
+      final color = _colorFromHex(dataset.borderColor ?? '#000000');
+      final isDashed = dataset.borderDash.isNotEmpty;
+      final borderWidth = (dataset.borderWidth ?? 2).toDouble();
+      final pointRadius = (dataset.pointRadius ?? 3).toDouble();
 
-      lineBars.add(
-        LineChartBarData(
-          spots: spots,
-          color: color,
-          barWidth: (dataset.borderWidth ?? 2).toDouble(),
-          isCurved: isCurved,
-          curveSmoothness: dataset.tension ?? 0.1,
-          dotData: FlDotData(show: showDots),
-          dashArray: dashArray,
-          belowBarData: BarAreaData(show: false), // No fill
-        ),
-      );
+      if (dataset.tension != null && dataset.tension! > 0) {
+        // Smooth curve
+        seriesList.add(
+          SplineSeries<_ChartPoint, String>(
+            name: seriesName,
+            dataSource: points,
+            xValueMapper: (point, _) => point.month,
+            yValueMapper: (point, _) => point.value,
+            color: color,
+            width: borderWidth,
+            dashArray: isDashed ? <double>[4, 2] : null,
+            markerSettings: MarkerSettings(
+              isVisible: pointRadius > 0,
+              width: pointRadius,
+              height: pointRadius,
+            ),
+          ),
+        );
+      } else {
+        // Straight line
+        seriesList.add(
+          LineSeries<_ChartPoint, String>(
+            name: seriesName,
+            dataSource: points,
+            xValueMapper: (point, _) => point.month,
+            yValueMapper: (point, _) => point.value,
+            color: color,
+            width: borderWidth,
+            dashArray: isDashed ? <double>[4, 2] : null,
+            markerSettings: MarkerSettings(
+              isVisible: pointRadius > 0,
+              width: pointRadius,
+              height: pointRadius,
+            ),
+          ),
+        );
+      }
     }
-
-    // Calculate a reasonable interval for y-axis
-    double interval = math.max(1, (maxY / 5).ceil().toDouble());
-    final double chartMaxY = maxY + interval;
-
-    // LineChartData configuration
-    final lineChartData = LineChartData(
-      gridData: FlGridData(
-        show: true,
-        drawVerticalLine: false,
-        horizontalInterval: interval,
-        getDrawingHorizontalLine: (value) => const FlLine(
-          color: Colors.grey,
-          strokeWidth: 0.5,
-          dashArray: [2, 2],
-        ),
-      ),
-      titlesData: FlTitlesData(
-        show: true,
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            interval: 1,
-            reservedSize: 40,
-            getTitlesWidget: (value, meta) {
-              final int index = value.toInt();
-              if (index < 0 || index >= labels.length) {
-                return const SizedBox.shrink();
-              }
-              return SideTitleWidget(
-                meta: meta,
-                space: 8,
-                angle: 45 * (math.pi / 180), // Rotate for better fit on mobile
-                child: Text(
-                  _getShortMonthName(labels[index]),
-                  style: const TextStyle(fontSize: 10),
-                ),
-              );
-            },
-          ),
-        ),
-        leftTitles: AxisTitles(
-          axisNameWidget: const Text(
-            'Number of vaccinations',
-            style: TextStyle(fontSize: 9),
-          ),
-          sideTitles: SideTitles(
-            showTitles: true,
-            interval: interval,
-            reservedSize: 35,
-            getTitlesWidget: (value, meta) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 3.0),
-                child: Text(
-                  formatCompactNumber(value.toInt().toString()),
-                  style: const TextStyle(fontSize: 10),
-                  textAlign: TextAlign.right,
-                ),
-              );
-            },
-          ),
-        ),
-        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-      ),
-      borderData: FlBorderData(
-        show: true,
-        border: Border.all(color: Colors.grey.withOpacity(0.5)),
-      ),
-      minX: 0,
-      maxX: (labels.length - 1).toDouble(),
-      minY: 0,
-      maxY: chartMaxY,
-      lineBarsData: lineBars,
-      lineTouchData: LineTouchData(
-        enabled: true,
-        touchTooltipData: LineTouchTooltipData(
-          getTooltipColor: (touchedSpot) => Colors.blueGrey.withOpacity(0.8),
-        ),
-      ),
-    );
-
-    // Custom legend
-    final legend = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 8,
-        children: datasets.map((dataset) {
-          final color = _colorFromHex(dataset.borderColor);
-          final isDashed = (dataset.borderDash.isNotEmpty);
-          final lineIndicator = isDashed
-              ? Row(
-                  children: List.generate(
-                    4,
-                    (index) => index % 2 == 0
-                        ? Container(width: 4, height: 2, color: color)
-                        : const SizedBox(width: 2),
-                  ),
-                )
-              : Container(width: 16, height: 2, color: color);
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              lineIndicator,
-              const SizedBox(width: 4),
-              Text(dataset.label ?? 'Unknown'),
-            ],
-          );
-        }).toList(),
-      ),
-    );
 
     return Card(
+      margin: const EdgeInsets.all(8),
       elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Monthly Cumulative Target vs Coverage ($selectedYear)',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              'Monthly Target vs Coverage (${widget.selectedYear})',
+              style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
-          ),
-          legend,
-          12.h,
-          SizedBox(
-            height: 450,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                right: 10,
-                bottom: 10.0,
-                left: 0.0,
-              ),
-              child: LineChart(lineChartData),
+            const SizedBox(height: 12),
+            // Interactive Custom Legend with rectangular tap targets
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: widget.chartData!.datasets.map((dataset) {
+                final seriesName = dataset.label ?? 'Series';
+                final color = _colorFromHex(dataset.borderColor ?? '#000000');
+                final isDashed = dataset.borderDash.isNotEmpty;
+                final isVisible = _seriesVisibility[seriesName] ?? true;
+
+                return GestureDetector(
+                  onTap: () => _toggleSeriesVisibility(seriesName),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isVisible
+                          ? Colors.transparent
+                          : Colors.grey.shade200,
+                      border: Border.all(
+                        color: isVisible
+                            ? Colors.grey.shade300
+                            : Colors.grey.shade400,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Rectangular color indicator (better tap target)
+                        Container(
+                          width: 24,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: isVisible ? color : Colors.grey.shade400,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: isDashed
+                              ? CustomPaint(
+                                  painter: _LegendRectanglePainter(
+                                    isVisible ? color : Colors.grey.shade400,
+                                    true,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          seriesName,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: isVisible ? null : Colors.grey.shade600,
+                                decoration: isVisible
+                                    ? null
+                                    : TextDecoration.lineThrough,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+
+            // Chart area with fixed height and tooltip
+            SizedBox(
+              height: 450,
+              child: SfCartesianChart(
+                // Remove default margins around the chart
+                margin: const EdgeInsets.all(0),
+                // Add crosshair for better interaction
+                crosshairBehavior: CrosshairBehavior(
+                  enable: true,
+                  activationMode: ActivationMode.singleTap,
+                  lineType: CrosshairLineType.vertical,
+                  lineDashArray: [4, 3],
+                  lineColor: Colors.grey.shade400,
+                  lineWidth: 1,
+                ),
+                tooltipBehavior: TooltipBehavior(
+                  enable: true,
+                  canShowMarker: true,
+                  // Enhanced tooltip format showing series name and value
+                  format: 'series.name: point.y',
+                  // Show month as header
+                  header: 'point.x',
+                  tooltipPosition: TooltipPosition.auto,
+                  // Enable shared tooltip to show all series at the point
+                  shared: true,
+                  // Better styling
+                  color: Colors.black87,
+                  textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+                  // Add some padding and border radius
+                  borderWidth: 1,
+                  borderColor: Colors.grey.shade300,
+                  duration: 200, // Animation duration
+                ),
+                // Add trackball for enhanced interaction - shows all values at cursor position
+                trackballBehavior: TrackballBehavior(
+                  enable: true,
+                  activationMode: ActivationMode.singleTap,
+                  lineType: TrackballLineType.vertical,
+                  lineDashArray: [4, 3],
+                  lineColor: Colors.blue.shade300,
+                  lineWidth: 1.5,
+                  // Customize trackball tooltip
+                  tooltipSettings: const InteractiveTooltip(
+                    enable: true,
+                    color: Colors.black87,
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    borderColor: Colors.transparent,
+                    borderWidth: 0,
+                    format: 'point.x\nseries.name: point.y',
+                  ),
+                  // Show marker at each data point
+                  markerSettings: const TrackballMarkerSettings(
+                    markerVisibility: TrackballVisibilityMode.visible,
+                    width: 6,
+                    height: 6,
+                    borderWidth: 2,
+                    borderColor: Colors.white,
+                  ),
+                ),
+                primaryXAxis: CategoryAxis(
+                  // how to make the x axis values smaller
+                  labelStyle: const TextStyle(fontSize: 9),
+                  labelRotation: 45,
+                  majorGridLines: const MajorGridLines(width: 0),
+                  // Force all months to be displayed
+                  maximumLabels: 12,
+                  labelIntersectAction: AxisLabelIntersectAction.rotate45,
+                  // Remove spacing/padding between axis and first point
+                  labelPlacement: LabelPlacement.onTicks,
+                  edgeLabelPlacement: EdgeLabelPlacement.shift,
+                ),
+                primaryYAxis: NumericAxis(
+                  // y axis label
+                  title: AxisTitle(
+                    text: 'Number of Vaccinations',
+                    textStyle: const TextStyle(fontSize: 10),
+                  ),
+                  axisLine: const AxisLine(width: 0),
+                  majorTickLines: const MajorTickLines(size: 0),
+                  labelFormat: '{value}',
+                  numberFormat: NumberFormat.compact(),
+                ),
+                // Remove plot area borders and padding
+                plotAreaBorderWidth: 0,
+                series: seriesList,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+/// Chart data point for Syncfusion series
+class _ChartPoint {
+  final String month;
+  final double value;
+  _ChartPoint(this.month, this.value);
+}
+
+/// Custom rectangular legend painter for dashed patterns
+class _LegendRectanglePainter extends CustomPainter {
+  final Color color;
+  final bool dashed;
+
+  _LegendRectanglePainter(this.color, this.dashed);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!dashed) return; // Only paint for dashed patterns
+
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5;
+
+    // Draw dashed pattern across the rectangle
+    const dashWidth = 3.0;
+    const dashSpace = 2.0;
+    double startX = 0;
+
+    while (startX < size.width) {
+      canvas.drawLine(
+        Offset(startX, size.height / 2),
+        Offset((startX + dashWidth).clamp(0, size.width), size.height / 2),
+        paint,
+      );
+      startX += dashWidth + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Convert color hex string to Flutter Color with null safety
+Color _colorFromHex(String? hex) {
+  // Default to black if hex is null or empty
+  if (hex == null || hex.isEmpty) return Colors.black;
+
+  try {
+    final cleanHex = hex.replaceFirst('#', '');
+    final buffer = StringBuffer();
+
+    // Add alpha channel if not present
+    if (cleanHex.length == 6) {
+      buffer.write('ff');
+    }
+    buffer.write(cleanHex);
+
+    return Color(int.parse(buffer.toString(), radix: 16));
+  } catch (e) {
+    // Return black if parsing fails
+    return Colors.black;
+  }
+}
+
+/// Convert full month to short form with null safety
+String _getShortMonthName(String? fullMonth) {
+  if (fullMonth == null || fullMonth.isEmpty) return 'N/A';
+
+  final months = {
+    'January': 'Jan',
+    'February': 'Feb',
+    'March': 'Mar',
+    'April': 'Apr',
+    'May': 'May',
+    'June': 'Jun',
+    'July': 'Jul',
+    'August': 'Aug',
+    'September': 'Sep',
+    'October': 'Oct',
+    'November': 'Nov',
+    'December': 'Dec',
+  };
+  return months[fullMonth] ?? fullMonth;
 }
