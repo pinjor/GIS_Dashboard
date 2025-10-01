@@ -86,8 +86,8 @@ class _EpiCenterDetailsScreenState
       final filterController = ref.read(filterControllerProvider.notifier);
       final epiController = ref.read(epiCenterControllerProvider.notifier);
 
-      // ✅ NEW APPROACH: Wait for hierarchical data to load if needed
-      await _ensureHierarchicalDataLoaded(filterState, filterController);
+      // ✅ PLAN A: Hierarchical data (unions, wards, subblocks) is instantly
+      // available from cached lists - no need to load or wait for API calls!
 
       String? targetUid;
       String? targetName;
@@ -163,59 +163,6 @@ class _EpiCenterDetailsScreenState
         '   Area type is not district - no hierarchical filtering applied',
       );
     }
-  }
-
-  /// Ensure hierarchical data is loaded for the current selections
-  /// This fixes the issue where changing higher-level fields (Union/Ward)
-  /// doesn't load the child data needed for EPI reload
-  Future<void> _ensureHierarchicalDataLoaded(
-    FilterState filterState,
-    FilterControllerNotifier filterController,
-  ) async {
-    logg.i('🔄 Ensuring hierarchical data is loaded...');
-
-    // If Upazila is selected but unions are not loaded, load them
-    if (filterState.selectedUpazila != null &&
-        filterState.selectedUpazila != 'All' &&
-        filterState.unions.isEmpty) {
-      final upazilaUid = filterController.getUpazilaUid(
-        filterState.selectedUpazila!,
-      );
-      if (upazilaUid != null) {
-        logg.i('📥 Loading unions for upazila: ${filterState.selectedUpazila}');
-        filterController.updateUpazila(filterState.selectedUpazila);
-        // Wait a bit for the data to load
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
-    }
-
-    // If Union is selected but wards are not loaded, load them
-    if (filterState.selectedUnion != null &&
-        filterState.selectedUnion != 'All' &&
-        filterState.wards.isEmpty) {
-      final unionUid = filterController.getUnionUid(filterState.selectedUnion!);
-      if (unionUid != null) {
-        logg.i('📥 Loading wards for union: ${filterState.selectedUnion}');
-        filterController.updateUnion(filterState.selectedUnion);
-        // Wait a bit for the data to load
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
-    }
-
-    // If Ward is selected but subblocks are not loaded, load them
-    if (filterState.selectedWard != null &&
-        filterState.selectedWard != 'All' &&
-        filterState.subblocks.isEmpty) {
-      final wardUid = filterController.getWardUid(filterState.selectedWard!);
-      if (wardUid != null) {
-        logg.i('📥 Loading subblocks for ward: ${filterState.selectedWard}');
-        filterController.updateWard(filterState.selectedWard);
-        // Wait a bit for the data to load
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
-    }
-
-    logg.i('✅ Hierarchical data loading completed');
   }
 
   Future<void> _loadEpiCenterData() async {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 
-import '../../../../core/utils/utils.dart';
 
 class EpiYearlySessionPersonnelWidget extends StatelessWidget {
   const EpiYearlySessionPersonnelWidget({
@@ -37,8 +36,6 @@ class EpiYearlySessionPersonnelWidget extends StatelessWidget {
         'phone': 'N/A',
       },
     ];
-
-    logg.i(personnel);
 
     return Card(
       elevation: 4,

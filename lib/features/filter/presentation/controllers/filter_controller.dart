@@ -537,6 +537,55 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
             .toList() ??
         [];
 
+    // ✅ PLAN A: Cache complete hierarchical lists and UIDs on first initialization
+    String? cachedUpazilaUid;
+    String? cachedUnionUid;
+    String? cachedWardUid;
+    String? cachedSubblockUid;
+
+    if (isFirstEpiInitialization) {
+      // Find UIDs for selected items from the hierarchical data
+      cachedUpazilaUid = upazilas
+          .firstWhere(
+            (item) => item.name == upazilaName,
+            orElse: () => AreaResponseModel(uid: '', name: ''),
+          )
+          .uid;
+
+      cachedUnionUid = unions
+          .firstWhere(
+            (item) => item.name == unionName,
+            orElse: () => AreaResponseModel(uid: '', name: ''),
+          )
+          .uid;
+
+      cachedWardUid = wards
+          .firstWhere(
+            (item) => item.name == wardName,
+            orElse: () => AreaResponseModel(uid: '', name: ''),
+          )
+          .uid;
+
+      cachedSubblockUid = subblocks
+          .firstWhere(
+            (item) => item.name == subblockName,
+            orElse: () => AreaResponseModel(uid: '', name: ''),
+          )
+          .uid;
+
+      logg.i('🗄️ PLAN A: Caching hierarchical state for instant reset');
+      logg.i(
+        '   Caching ${upazilas.length} upazilas (selected UID: $cachedUpazilaUid)',
+      );
+      logg.i(
+        '   Caching ${unions.length} unions (selected UID: $cachedUnionUid)',
+      );
+      logg.i('   Caching ${wards.length} wards (selected UID: $cachedWardUid)');
+      logg.i(
+        '   Caching ${subblocks.length} subblocks (selected UID: $cachedSubblockUid)',
+      );
+    }
+
     // Update state with EPI context data
     state = state.copyWith(
       isEpiDetailsContext: isEpiDetailsContext,
@@ -575,6 +624,31 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       originalYear: isFirstEpiInitialization
           ? state.selectedYear
           : state.originalYear,
+      // ✅ PLAN A: Cache complete hierarchical data for instant reset
+      originalUpazilasList: isFirstEpiInitialization
+          ? [...upazilas]
+          : state.originalUpazilasList,
+      originalUnionsList: isFirstEpiInitialization
+          ? [...unions]
+          : state.originalUnionsList,
+      originalWardsList: isFirstEpiInitialization
+          ? [...wards]
+          : state.originalWardsList,
+      originalSubblocksList: isFirstEpiInitialization
+          ? [...subblocks]
+          : state.originalSubblocksList,
+      originalUpazilaUid: isFirstEpiInitialization
+          ? cachedUpazilaUid
+          : state.originalUpazilaUid,
+      originalUnionUid: isFirstEpiInitialization
+          ? cachedUnionUid
+          : state.originalUnionUid,
+      originalWardUid: isFirstEpiInitialization
+          ? cachedWardUid
+          : state.originalWardUid,
+      originalSubblockUid: isFirstEpiInitialization
+          ? cachedSubblockUid
+          : state.originalSubblockUid,
     );
 
     print('FilterProvider: EPI context initialized successfully');
@@ -589,25 +663,42 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
     // ✅ DEBUG: Log captured original values
     if (isFirstEpiInitialization) {
-      logg.i('📸 Original State Captured:');
+      logg.i('📸 PLAN A: Original State + Cached Data Captured:');
       logg.i('   originalEpiUid: ${state.originalEpiUid}');
       logg.i('   originalCcUid: ${state.originalCcUid}');
       logg.i('   originalDivision: ${state.originalDivision}');
       logg.i('   originalDistrict: ${state.originalDistrict}');
-      logg.i('   originalUpazila: ${state.originalUpazila}');
-      logg.i('   originalUnion: ${state.originalUnion}');
-      logg.i('   originalWard: ${state.originalWard}');
-      logg.i('   originalSubblock: ${state.originalSubblock}');
+      logg.i(
+        '   originalUpazila: ${state.originalUpazila} (UID: ${state.originalUpazilaUid})',
+      );
+      logg.i(
+        '   originalUnion: ${state.originalUnion} (UID: ${state.originalUnionUid})',
+      );
+      logg.i(
+        '   originalWard: ${state.originalWard} (UID: ${state.originalWardUid})',
+      );
+      logg.i(
+        '   originalSubblock: ${state.originalSubblock} (UID: ${state.originalSubblockUid})',
+      );
       logg.i('   originalYear: ${state.originalYear}');
+      logg.i(
+        '   Cached Lists: ${state.originalUpazilasList?.length ?? 0} upazilas, '
+        '${state.originalUnionsList?.length ?? 0} unions, '
+        '${state.originalWardsList?.length ?? 0} wards, '
+        '${state.originalSubblocksList?.length ?? 0} subblocks',
+      );
     } else {
-      logg.i('🔄 Subsequent initialization - original state preserved');
+      logg.i(
+        '🔄 Subsequent initialization - original state and cached data preserved',
+      );
     }
   }
 
-  /// Reset to original EPI state (First EDS configuration)
-  /// This method restores the exact filter configuration from when user first entered EPI context
+  /// ✅ PLAN A: Reset to original EPI state using cached hierarchical data
+  /// This method instantly restores complete filter state + hierarchical lists for optimal UX
   void resetToOriginalEpiState() {
-    logg.i('FilterProvider: 🔄 Reset to Original EPI State requested');
+    final timestamp = DateTime.now();
+    logg.i('🚀 PLAN A: Instant Reset to Original EPI State [$timestamp]');
 
     if (!state.isEpiDetailsContext) {
       // Non-EPI context: use normal reset
@@ -616,9 +707,11 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       return;
     }
 
-    // Check if we have original state to restore
-    if (state.originalEpiUid == null) {
-      logg.w('FilterProvider: ⚠️ No original EPI state found, skipping reset');
+    // Check if we have original state and cached data to restore
+    if (state.originalEpiUid == null || state.originalUpazilasList == null) {
+      logg.w(
+        'FilterProvider: ⚠️ No original EPI state or cached data found, skipping reset',
+      );
       return;
     }
 
@@ -628,18 +721,24 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       return;
     }
 
-    logg.i('FilterProvider: 🔄 Restoring to original First EDS state...');
-    logg.i('BEFORE RESET:');
+    logg.i('🔄 BEFORE RESET:');
     logg.i('  Division: ${state.selectedDivision}');
     logg.i('  District: ${state.selectedDistrict}');
     logg.i('  Upazila: ${state.selectedUpazila}');
     logg.i('  Union: ${state.selectedUnion}');
     logg.i('  Ward: ${state.selectedWard}');
     logg.i('  Subblock: ${state.selectedSubblock}');
-    logg.i('  Year: ${state.selectedYear}');
+    logg.i(
+      '  Lists: ${state.upazilas.length} upazilas, ${state.unions.length} unions, ${state.wards.length} wards, ${state.subblocks.length} subblocks',
+    );
 
-    // Restore to original First EDS state
+    // ✅ PLAN A: Atomic restoration using cached data
+    logg.i(
+      '⚡ Performing INSTANT restoration using cached hierarchical data...',
+    );
+
     state = state.copyWith(
+      // Restore original selections
       selectedDivision: state.originalDivision ?? 'All',
       selectedDistrict: state.originalDistrict,
       selectedUpazila: state.originalUpazila,
@@ -647,19 +746,30 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       selectedWard: state.originalWard,
       selectedSubblock: state.originalSubblock,
       selectedYear: state.originalYear ?? state.selectedYear,
-      // Trigger reload by updating timestamp
-      lastAppliedTimestamp: DateTime.now(),
+
+      // ✅ PLAN A: Instantly restore complete hierarchical lists from cache
+      upazilas: [...(state.originalUpazilasList ?? [])],
+      unions: [...(state.originalUnionsList ?? [])],
+      wards: [...(state.originalWardsList ?? [])],
+      subblocks: [...(state.originalSubblocksList ?? [])],
+
+      // Trigger EPI reload by updating timestamp
+      lastAppliedTimestamp: timestamp,
     );
 
-    logg.i('AFTER RESET:');
+    logg.i('✅ AFTER RESET (INSTANT):');
     logg.i('  Division: ${state.selectedDivision}');
     logg.i('  District: ${state.selectedDistrict}');
     logg.i('  Upazila: ${state.selectedUpazila}');
     logg.i('  Union: ${state.selectedUnion}');
     logg.i('  Ward: ${state.selectedWard}');
     logg.i('  Subblock: ${state.selectedSubblock}');
-    logg.i('  Year: ${state.selectedYear}');
-    logg.i('FilterProvider: ✅ Original EPI state restored - EDS will reload');
+    logg.i(
+      '  Restored Lists: ${state.upazilas.length} upazilas, ${state.unions.length} unions, ${state.wards.length} wards, ${state.subblocks.length} subblocks',
+    );
+    logg.i(
+      '🎯 PLAN A: Instant reset completed! EPI screen will now reload with first subblock.',
+    );
   }
 
   /// Check if current state matches original EPI state
@@ -748,6 +858,8 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       clearOriginalWard: true,
       clearOriginalSubblock: true,
       clearOriginalYear: true,
+      // ✅ PLAN A: Clear cached hierarchical data
+      clearOriginalCachedData: true,
     );
 
     logg.i(

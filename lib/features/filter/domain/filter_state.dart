@@ -48,6 +48,16 @@ class FilterState {
   final String? originalSubblock;
   final String? originalYear;
 
+  // ✅ PLAN A: Cached hierarchical lists and UIDs for instant reset
+  final List<AreaResponseModel>? originalUpazilasList;
+  final List<AreaResponseModel>? originalUnionsList;
+  final List<AreaResponseModel>? originalWardsList;
+  final List<AreaResponseModel>? originalSubblocksList;
+  final String? originalUpazilaUid;
+  final String? originalUnionUid;
+  final String? originalWardUid;
+  final String? originalSubblockUid;
+
   // Filter application tracking
   final DateTime? lastAppliedTimestamp;
 
@@ -88,6 +98,15 @@ class FilterState {
     this.originalWard,
     this.originalSubblock,
     this.originalYear,
+    // Cached hierarchical lists and UIDs for instant reset
+    this.originalUpazilasList,
+    this.originalUnionsList,
+    this.originalWardsList,
+    this.originalSubblocksList,
+    this.originalUpazilaUid,
+    this.originalUnionUid,
+    this.originalWardUid,
+    this.originalSubblockUid,
     this.lastAppliedTimestamp,
   });
 
@@ -128,6 +147,15 @@ class FilterState {
     String? originalWard,
     String? originalSubblock,
     String? originalYear,
+    // Cached hierarchical lists and UIDs
+    List<AreaResponseModel>? originalUpazilasList,
+    List<AreaResponseModel>? originalUnionsList,
+    List<AreaResponseModel>? originalWardsList,
+    List<AreaResponseModel>? originalSubblocksList,
+    String? originalUpazilaUid,
+    String? originalUnionUid,
+    String? originalWardUid,
+    String? originalSubblockUid,
     DateTime? lastAppliedTimestamp,
     // Explicit flags for nullable fields to allow setting to null
     bool clearCityCorporation = false,
@@ -147,6 +175,7 @@ class FilterState {
     bool clearOriginalWard = false,
     bool clearOriginalSubblock = false,
     bool clearOriginalYear = false,
+    bool clearOriginalCachedData = false,
   }) {
     return FilterState(
       selectedVaccine: selectedVaccine ?? this.selectedVaccine,
@@ -213,6 +242,31 @@ class FilterState {
       originalYear: clearOriginalYear
           ? null
           : (originalYear ?? this.originalYear),
+      // Cached hierarchical lists and UIDs
+      originalUpazilasList: clearOriginalCachedData
+          ? null
+          : (originalUpazilasList ?? this.originalUpazilasList),
+      originalUnionsList: clearOriginalCachedData
+          ? null
+          : (originalUnionsList ?? this.originalUnionsList),
+      originalWardsList: clearOriginalCachedData
+          ? null
+          : (originalWardsList ?? this.originalWardsList),
+      originalSubblocksList: clearOriginalCachedData
+          ? null
+          : (originalSubblocksList ?? this.originalSubblocksList),
+      originalUpazilaUid: clearOriginalCachedData
+          ? null
+          : (originalUpazilaUid ?? this.originalUpazilaUid),
+      originalUnionUid: clearOriginalCachedData
+          ? null
+          : (originalUnionUid ?? this.originalUnionUid),
+      originalWardUid: clearOriginalCachedData
+          ? null
+          : (originalWardUid ?? this.originalWardUid),
+      originalSubblockUid: clearOriginalCachedData
+          ? null
+          : (originalSubblockUid ?? this.originalSubblockUid),
       lastAppliedTimestamp: lastAppliedTimestamp ?? this.lastAppliedTimestamp,
     );
   }

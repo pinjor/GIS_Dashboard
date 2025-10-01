@@ -51,3 +51,4 @@ app.*.map.json
 *.g.dart
 *.freezed.dart
 /assets/tmp/
+PLAN_A_IMPLEMENTATION.md
