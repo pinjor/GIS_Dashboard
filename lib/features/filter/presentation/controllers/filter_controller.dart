@@ -492,7 +492,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     logg.i('   ccUid: $ccUid');
     logg.i('   isEpiDetailsContext: $isEpiDetailsContext');
 
-    // ✅ CAPTURE ORIGINAL STATE: Only on first EPI initialization
+    // ✅ CAPTURE ORIGINAL STATE: Only on first EPI initialization OR CC context change
     final bool isFirstEpiInitialization = !state.isEpiDetailsContext;
     logg.i('   isFirstEpiInitialization: $isFirstEpiInitialization');
 
@@ -506,11 +506,42 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     final String? subblockUid = epiData?.subblockId;
     final String? cityCorporationName = epiData?.cityCorporationName;
 
-    // Determine area type based on EPI context
-    final AreaType areaType =
-        cityCorporationName != null && cityCorporationName.isNotEmpty
+    // ✅ FIX: Determine area type based on ccUid parameter (more reliable than EPI data fields)
+    final AreaType areaType = ccUid != null && ccUid.isNotEmpty
         ? AreaType.cityCorporation
         : AreaType.district;
+
+    // Use ccUid as CC name if EPI data doesn't have cityCorporationName
+    final String? effectiveCcName = cityCorporationName ?? ccUid;
+
+    // ✅ FIX: Detect CC context change to reset filter state appropriately
+    logg.i('🔍 CC Context Analysis:');
+    logg.i('   Area Type: $areaType');
+    logg.i('   Current Filter CC: ${state.selectedCityCorporation}');
+    logg.i('   EPI cityCorporationName: $cityCorporationName');
+    logg.i('   EPI ccUid: $ccUid');
+    logg.i('   Effective CC Name: $effectiveCcName');
+    logg.i('   Is EPI Details Context: ${state.isEpiDetailsContext}');
+
+    // ✅ FIX: Always update CC context when we have valid CC data, especially when filter has different CC
+    final bool shouldUpdateCcContext =
+        areaType == AreaType.cityCorporation &&
+        effectiveCcName != null &&
+        (state.selectedCityCorporation == null ||
+            state.selectedCityCorporation != effectiveCcName);
+
+    if (shouldUpdateCcContext) {
+      logg.i('🔄 CC Context Update Detected:');
+      logg.i('   Current Filter CC: ${state.selectedCityCorporation}');
+      logg.i('   New EPI Data CC: $effectiveCcName');
+      logg.i('   → Updating filter state to match EPI data CC');
+    } else if (areaType == AreaType.cityCorporation) {
+      if (effectiveCcName != null) {
+        logg.i('🔄 CC Context Status: Will maintain CC as $effectiveCcName');
+      } else {
+        logg.i('🔄 CC Context Status: No effective CC name found');
+      }
+    }
 
     // Convert to AreaResponseModel lists
     final List<AreaResponseModel> upazilas =
@@ -543,7 +574,11 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? cachedWardUid;
     String? cachedSubblockUid;
 
-    if (isFirstEpiInitialization) {
+    // ✅ FIX: Cache hierarchical data on first initialization OR CC context update
+    final bool shouldCacheHierarchicalData =
+        isFirstEpiInitialization || shouldUpdateCcContext;
+
+    if (shouldCacheHierarchicalData) {
       // Find UIDs for selected items from the hierarchical data
       cachedUpazilaUid = upazilas
           .firstWhere(
@@ -573,7 +608,12 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
           )
           .uid;
 
-      logg.i('🗄️ PLAN A: Caching hierarchical state for instant reset');
+      final String cacheReason = isFirstEpiInitialization
+          ? 'first initialization'
+          : 'CC context change';
+      logg.i(
+        '🗄️ PLAN A: Caching hierarchical state for instant reset ($cacheReason)',
+      );
       logg.i(
         '   Caching ${upazilas.length} upazilas (selected UID: $cachedUpazilaUid)',
       );
@@ -594,7 +634,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       selectedDivision: divisionName ?? state.selectedDivision,
       selectedDistrict: districtName,
       selectedCityCorporation: areaType == AreaType.cityCorporation
-          ? cityCorporationName
+          ? effectiveCcName
           : null,
       selectedUpazila: upazilaName,
       selectedUnion: unionName,
@@ -604,49 +644,53 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       unions: unions,
       wards: wards,
       subblocks: subblocks,
-      // ✅ CAPTURE ORIGINAL STATE: Only on first EPI initialization
-      originalEpiUid: isFirstEpiInitialization ? epiUid : state.originalEpiUid,
-      originalCcUid: isFirstEpiInitialization ? ccUid : state.originalCcUid,
-      originalDivision: isFirstEpiInitialization
+      // ✅ CAPTURE ORIGINAL STATE: On first EPI initialization OR CC context change
+      originalEpiUid: shouldCacheHierarchicalData
+          ? epiUid
+          : state.originalEpiUid,
+      originalCcUid: shouldCacheHierarchicalData ? ccUid : state.originalCcUid,
+      originalDivision: shouldCacheHierarchicalData
           ? (divisionName ?? state.selectedDivision)
           : state.originalDivision,
-      originalDistrict: isFirstEpiInitialization
+      originalDistrict: shouldCacheHierarchicalData
           ? districtName
           : state.originalDistrict,
-      originalUpazila: isFirstEpiInitialization
+      originalUpazila: shouldCacheHierarchicalData
           ? upazilaName
           : state.originalUpazila,
-      originalUnion: isFirstEpiInitialization ? unionName : state.originalUnion,
-      originalWard: isFirstEpiInitialization ? wardName : state.originalWard,
-      originalSubblock: isFirstEpiInitialization
+      originalUnion: shouldCacheHierarchicalData
+          ? unionName
+          : state.originalUnion,
+      originalWard: shouldCacheHierarchicalData ? wardName : state.originalWard,
+      originalSubblock: shouldCacheHierarchicalData
           ? subblockName
           : state.originalSubblock,
-      originalYear: isFirstEpiInitialization
+      originalYear: shouldCacheHierarchicalData
           ? state.selectedYear
           : state.originalYear,
       // ✅ PLAN A: Cache complete hierarchical data for instant reset
-      originalUpazilasList: isFirstEpiInitialization
+      originalUpazilasList: shouldCacheHierarchicalData
           ? [...upazilas]
           : state.originalUpazilasList,
-      originalUnionsList: isFirstEpiInitialization
+      originalUnionsList: shouldCacheHierarchicalData
           ? [...unions]
           : state.originalUnionsList,
-      originalWardsList: isFirstEpiInitialization
+      originalWardsList: shouldCacheHierarchicalData
           ? [...wards]
           : state.originalWardsList,
-      originalSubblocksList: isFirstEpiInitialization
+      originalSubblocksList: shouldCacheHierarchicalData
           ? [...subblocks]
           : state.originalSubblocksList,
-      originalUpazilaUid: isFirstEpiInitialization
+      originalUpazilaUid: shouldCacheHierarchicalData
           ? cachedUpazilaUid
           : state.originalUpazilaUid,
-      originalUnionUid: isFirstEpiInitialization
+      originalUnionUid: shouldCacheHierarchicalData
           ? cachedUnionUid
           : state.originalUnionUid,
-      originalWardUid: isFirstEpiInitialization
+      originalWardUid: shouldCacheHierarchicalData
           ? cachedWardUid
           : state.originalWardUid,
-      originalSubblockUid: isFirstEpiInitialization
+      originalSubblockUid: shouldCacheHierarchicalData
           ? cachedSubblockUid
           : state.originalSubblockUid,
     );
@@ -655,15 +699,18 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     print('  Area Type: $areaType');
     print('  Division: $divisionName');
     print('  District: $districtName');
-    print('  City Corporation: $cityCorporationName');
+    print('  City Corporation: $effectiveCcName');
     print('  Upazila: $upazilaName');
     print('  Union: $unionName');
     print('  Ward: $wardName');
     print('  Subblock: $subblockName');
 
     // ✅ DEBUG: Log captured original values
-    if (isFirstEpiInitialization) {
-      logg.i('📸 PLAN A: Original State + Cached Data Captured:');
+    if (shouldCacheHierarchicalData) {
+      final String logReason = isFirstEpiInitialization
+          ? 'first initialization'
+          : 'CC context change';
+      logg.i('📸 PLAN A: Original State + Cached Data Captured ($logReason):');
       logg.i('   originalEpiUid: ${state.originalEpiUid}');
       logg.i('   originalCcUid: ${state.originalCcUid}');
       logg.i('   originalDivision: ${state.originalDivision}');
@@ -915,47 +962,6 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         (ward != null && ward != initialWard) ||
         (subblock != null && subblock != initialSubblock) ||
         (year != null && year != initialYear);
-
-    // // Log detailed comparison
-    // if (areaType != null) {
-    //   logg.i(
-    //     '   AreaType: $areaType vs $initialAreaType = ${areaType != initialAreaType}',
-    //   );
-    // }
-    // if (division != null) {
-    //   logg.i(
-    //     '   Division: $division vs $initialDivision = ${division != initialDivision}',
-    //   );
-    // }
-    // if (cityCorporation != null) {
-    //   logg.i(
-    //     '   CityCorporation: $cityCorporation vs $initialCityCorporation = ${cityCorporation != initialCityCorporation}',
-    //   );
-    // }
-    // if (district != null) {
-    //   logg.i(
-    //     '   District: $district vs $initialDistrict = ${district != initialDistrict}',
-    //   );
-    // }
-    // if (upazila != null) {
-    //   logg.i(
-    //     '   Upazila: $upazila vs $initialUpazila = ${upazila != initialUpazila}',
-    //   );
-    // }
-    // if (union != null) {
-    //   logg.i('   Union: $union vs $initialUnion = ${union != initialUnion}');
-    // }
-    // if (ward != null) {
-    //   logg.i('   Ward: $ward vs $initialWard = ${ward != initialWard}');
-    // }
-    // if (subblock != null) {
-    //   logg.i(
-    //     '   Subblock: $subblock vs $initialSubblock = ${subblock != initialSubblock}',
-    //   );
-    // }
-    // if (year != null) {
-    //   logg.i('   Year: $year vs $initialYear = ${year != initialYear}');
-    // }
 
     // Update individual filter selections
     if (vaccine != null) updateVaccine(vaccine);

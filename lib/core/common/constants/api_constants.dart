@@ -2,14 +2,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
   static final String urlScheme = dotenv.env['URL_SCHEME'] ?? '';
-  static final String stagingHost = dotenv.env['STAGING_HOST'] ?? '';
+  static final String stagingServerHost = dotenv.env['STAGING_SERVER_HOST'] ?? '';
   // static final String prodHost = dotenv.env['PROD_HOST'] ?? '';
   // static final String baseUrlProd = dotenv.env['PROD_SERVER_URL'] ?? '';
-  static final String baseUrlStaging = dotenv.env['STAGING_SERVER_URL'] ?? '';
+  static final String stagingServerFullUrl = dotenv.env['STAGING_SERVER_FULL_URL'] ?? '';
   static final String urlCommonPath = dotenv.env['URL_COMMON_PATH'] ?? '';
-  static final String epiCenterDataBaseUrl =
-      dotenv.env['EPI_CENTER_DATA_BASE_URL'] ?? '';
-
+  
   static String get districtJsonPath => '/shapes/shape.json.gz';
 
   // these two paths needs to be dynamic based on year value, like a getter function like below:::
@@ -176,7 +174,7 @@ class ApiConstants {
     required String orgUid,
     required String year,
   }) {
-    return '$epiCenterDataBaseUrl/chart/$orgUid?year=$year&request-from=app';
+    return '${ApiConstants.stagingServerFullUrl}/chart/$orgUid?year=$year&request-from=app';
   }
 
   /// Legacy getters for backward compatibility

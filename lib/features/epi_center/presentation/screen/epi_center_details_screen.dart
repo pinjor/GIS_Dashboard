@@ -12,6 +12,7 @@ import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../filter/presentation/widgets/filter_dialog_box_widget.dart';
 import '../controllers/epi_center_controller.dart';
+import '../../domain/epi_center_state.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../../../filter/domain/filter_state.dart';
 import '../../../map/utils/map_enums.dart';
@@ -235,6 +236,35 @@ class _EpiCenterDetailsScreenState
           '🔔 EPI Screen: Detected filter application - reloading EPI data',
         );
         _reloadEpiDetailsDataForFilterChange(current.selectedYear);
+      }
+    });
+
+    // ✅ FIX: Listen for EPI state changes to update filter when new CC data is loaded
+    ref.listen<EpiCenterState>(epiCenterControllerProvider, (
+      previous,
+      current,
+    ) {
+      // Get current filter state inside the listener
+      final currentFilterState = ref.read(filterControllerProvider);
+
+      // Check if EPI data was successfully loaded and it's different from previous
+      if (previous?.epiCenterData != current.epiCenterData &&
+          current.epiCenterData != null &&
+          !current.isLoading &&
+          !current.hasError &&
+          currentFilterState.isEpiDetailsContext) {
+        logg.i('🔄 EPI Screen: New EPI data loaded - updating filter state');
+        logg.i(
+          '   Previous EPI data: ${previous?.epiCenterData?.cityCorporationName}',
+        );
+        logg.i(
+          '   Current EPI data: ${current.epiCenterData?.cityCorporationName}',
+        );
+
+        // Update filter state to reflect the newly loaded CC data
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _initializeFilterWithEpiData(current.epiCenterData);
+        });
       }
     });
 

@@ -41,7 +41,7 @@ class FilterRepository {
 
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
-        host: ApiConstants.stagingHost,
+        host: ApiConstants.stagingServerHost,
         path: ApiConstants.filterByArea,
         queryParameters: {'type': 'division'},
       ).toString();
@@ -74,7 +74,7 @@ class FilterRepository {
 
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
-        host: ApiConstants.stagingHost,
+        host: ApiConstants.stagingServerHost,
         path: ApiConstants.filterByArea,
         queryParameters: {'type': 'district'},
       ).toString();
@@ -106,7 +106,7 @@ class FilterRepository {
       }
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
-        host: ApiConstants.stagingHost,
+        host: ApiConstants.stagingServerHost,
         path: ApiConstants.filterByArea,
         queryParameters: {'type': 'city-corporation'},
       ).toString();
@@ -136,7 +136,7 @@ class FilterRepository {
 
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
-        host: ApiConstants.stagingHost,
+        host: ApiConstants.stagingServerHost,
         path: ApiConstants.filterByArea,
         queryParameters: {'parent_uid': divisionId},
       ).toString();
@@ -164,7 +164,7 @@ class FilterRepository {
 
       final uri = Uri(
         scheme: ApiConstants.urlScheme,
-        host: ApiConstants.stagingHost,
+        host: ApiConstants.stagingServerHost,
         path: ApiConstants.filterByArea,
         queryParameters: {'parent_uid': parentUid},
       ).toString();

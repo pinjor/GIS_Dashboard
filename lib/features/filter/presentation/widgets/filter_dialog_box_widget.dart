@@ -95,8 +95,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     logg.i('   Provider Year: ${currentFilter.selectedYear}');
     logg.i('isEpiContext: ${widget.isEpiContext}');
 
-    // Initialize based on area type
-    if (_selectedAreaType == AreaType.district) {
+    // ✅ FIX: Initialize based on area type - prioritize CC view in EPI+CC context
+    if (widget.isEpiContext &&
+        currentFilter.selectedAreaType == AreaType.cityCorporation) {
+      // Show CC filter view first when in EPI context with CC area type
+      logg.i('🎯 EPI+CC Context: Showing CC filter view directly');
+      _initializeCityCorporationAreaType(currentFilter, filterNotifier);
+    } else if (_selectedAreaType == AreaType.district) {
       _initializeDistrictAreaType(currentFilter, filterNotifier);
     } else if (_selectedAreaType == AreaType.cityCorporation) {
       _initializeCityCorporationAreaType(currentFilter, filterNotifier);
@@ -210,7 +215,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     FilterState currentFilter,
     FilterControllerNotifier filterNotifier,
   ) {
-    // Validate and set city corporation
+    // ✅ FIX: Always show current CC, especially in EPI context
     final availableCityCorporations =
         filterNotifier.cityCorporationDropdownItems;
     if (currentFilter.selectedCityCorporation != null &&
@@ -218,8 +223,18 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
           currentFilter.selectedCityCorporation,
         )) {
       _selectedCityCorporation = currentFilter.selectedCityCorporation;
+      logg.i('✅ CC Field: Set to current CC - $_selectedCityCorporation');
     } else {
-      _selectedCityCorporation = null;
+      // In EPI context, still try to set the current CC even if validation fails
+      if (widget.isEpiContext &&
+          currentFilter.selectedCityCorporation != null) {
+        _selectedCityCorporation = currentFilter.selectedCityCorporation;
+        logg.i(
+          '🔧 EPI Context: Force setting CC field - $_selectedCityCorporation',
+        );
+      } else {
+        _selectedCityCorporation = null;
+      }
     }
 
     // Clear district-related selections for city corporation area type
@@ -356,17 +371,63 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   }) {
     // Apply filters to global state with timestamp
     final isEpiContext = widget.isEpiContext;
-    // Check if EPI is from City Corporation (detect by checking current EPI data)
-    final epiState = ref.read(epiCenterControllerProvider);
-    final epiData = epiState.epiCenterData;
+    // ✅ FIX: Check if EPI is from City Corporation using filter state (more reliable)
+    final filterState = ref.read(filterControllerProvider);
     final isEpiFromCC =
-        epiData?.cityCorporationName != null &&
-        epiData!.cityCorporationName!.isNotEmpty;
+        filterState.selectedAreaType == AreaType.cityCorporation;
 
-    // For EPI from City Corporation: buttons do nothing (null behavior)
+    // ✅ FIX: Enhanced CC+EPI context handling - fetch CC data if different CC selected
     if (isEpiContext && isEpiFromCC) {
+      logg.i('🏙️ CC+EPI Context: Checking for CC changes');
+      logg.i('   Selected CC: $_selectedCityCorporation');
+      logg.i('   Initial CC: $_initialCityCorporation');
+
+      // ✅ FIX: Always fetch CC data (supports both refresh same CC + switch to different CC)
+      if (_selectedCityCorporation != null) {
+        final isRefreshingSameCC =
+            _selectedCityCorporation == _initialCityCorporation;
+
+        logg.i(
+          isRefreshingSameCC
+              ? '🔄 Same CC selected: Refreshing data for $_selectedCityCorporation'
+              : '🔄 CC Changed: Fetching whole CC EPI data for $_selectedCityCorporation',
+        );
+
+        // Get CC UID for API call
+        final ccUid = filterNotifier.getCityCorporationUid(
+          _selectedCityCorporation!,
+        );
+        if (ccUid != null) {
+          // ✅ FIX: Update initial values before API call (avoids setState after pop)
+          _initialCityCorporation = _selectedCityCorporation;
+          logg.i(
+            '🔄 Updated _initialCityCorporation to: $_initialCityCorporation',
+          );
+
+          // Fetch whole CC's EPI data using existing method
+          final epiController = ref.read(epiCenterControllerProvider.notifier);
+          Future.microtask(() async {
+            try {
+              await epiController.fetchEpiCenterDataByOrgUid(
+                orgUid: ccUid,
+                year: _selectedYear,
+              );
+              logg.i(
+                '✅ Successfully loaded whole CC EPI data for $_selectedCityCorporation',
+              );
+            } catch (e) {
+              logg.e('❌ Error loading CC EPI data: $e');
+            }
+          });
+        } else {
+          logg.w('⚠️ Could not find UID for CC: $_selectedCityCorporation');
+        }
+      } else {
+        logg.w('⚠️ No CC selected for fetching');
+      }
+
       Navigator.of(context).pop();
-      return; // Do nothing - no navigation pop, no filter application
+      return;
     }
 
     // Check if any values have changed from initial values
@@ -385,6 +446,9 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     );
     logg.i(
       '   Current District: $_selectedDistrict vs Initial: $_initialDistrict',
+    );
+    logg.i(
+      '   Current CityCorporation: $_selectedCityCorporation vs Initial: $_initialCityCorporation',
     );
     logg.i(
       '   Current Upazila: $_selectedUpazila vs Initial: $_initialUpazila',
@@ -495,9 +559,11 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         epiData?.cityCorporationName != null &&
         epiData!.cityCorporationName!.isNotEmpty;
 
-    // For EPI from City Corporation: buttons do nothing (null behavior)
+    // ✅ FIX: CC+EPI context reset - just pop dialog, no actual reset
     if (isEpiContext && isEpiFromCC) {
-      return; // Do nothing - no navigation pop, no filter application
+      logg.i('🏙️ CC+EPI Context: Reset just closes dialog (no actual reset)');
+      Navigator.of(context).pop();
+      return;
     }
 
     logg.i('🔄 Resetting filters to initial values');
@@ -521,15 +587,14 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     final isEpiContext = widget.isEpiContext;
 
     // Check if EPI is from City Corporation
-    final epiState = ref.read(epiCenterControllerProvider);
-    final epiData = epiState.epiCenterData;
+    // ✅ FIX: Check if EPI is from City Corporation using filter state (more reliable)
     final isEpiFromCC =
-        epiData?.cityCorporationName != null &&
-        epiData!.cityCorporationName!.isNotEmpty;
+        filterState.selectedAreaType == AreaType.cityCorporation;
 
-    // For EPI from City Corporation, disable both buttons (no filtering allowed)
+    // ✅ FIX: CC+EPI context - always enable for any CC selection (allows refresh + switching)
     if (isEpiContext && isEpiFromCC) {
-      return false;
+      // Enable for any CC selection (same CC = refresh data, different CC = switch CC)
+      return _selectedCityCorporation != null;
     }
 
     // For non-EPI context, always enable (basic filtering always allowed)
@@ -608,6 +673,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
             _selectedSubblock = null;
           }
         }
+
+        // ✅ REMOVED: Automatic CC sync was interfering with user dropdown selections
+        // Provider sync should only happen after successful API calls, not continuously
+        // The sync logic is now handled in the _applyFilters method after API success
       });
     });
 

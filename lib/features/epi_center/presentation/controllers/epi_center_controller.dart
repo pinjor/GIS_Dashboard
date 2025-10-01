@@ -98,7 +98,7 @@ class EpiCenterController extends StateNotifier<EpiCenterState> {
           ? 'year=$year&ccuid=$ccUid&request-from=app'
           : 'year=$year&request-from=app';
       final apiUrl =
-          '${ApiConstants.epiCenterDataBaseUrl}/chart/$epiUid?$queryParams';
+          '${ApiConstants.stagingServerFullUrl}/chart/$epiUid?$queryParams';
 
       final epiCenterData = await _dataService.getEpiCenterDetailsData(
         urlPath: apiUrl,

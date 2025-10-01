@@ -6,7 +6,7 @@ import 'package:gis_dashboard/core/network/interceptors/logging_interceptor.dart
 final dioClientProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: '${ApiConstants.baseUrlStaging}${ApiConstants.urlCommonPath}',
+      baseUrl: '${ApiConstants.stagingServerFullUrl}${ApiConstants.urlCommonPath}',
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 15),
