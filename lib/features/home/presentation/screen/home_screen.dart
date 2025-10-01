@@ -28,6 +28,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMapLoading = ref.watch(mapControllerProvider).isLoading;
     final primaryColor = Color(Constants.primaryColor);
     return Scaffold(
       appBar: AppBar(
@@ -57,30 +58,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: SizedBox(
-        height: 56,
-        child: Row(
-          children: [
-            _buildNavItem(
-              0,
-              Constants.mapLocationIconPath,
-              'Map',
-              primaryColor,
+      bottomNavigationBar: isMapLoading
+          ? SizedBox.shrink()
+          : SizedBox(
+              height: 56,
+              child: Row(
+                children: [
+                  _buildNavItem(
+                    0,
+                    Constants.mapLocationIconPath,
+                    'Map',
+                    primaryColor,
+                  ),
+                  Container(
+                    width: 1,
+                    height: double.infinity,
+                    color: Colors.grey.shade300,
+                  ),
+                  _buildNavItem(
+                    1,
+                    Constants.lineGraphIconPath,
+                    'Summary',
+                    primaryColor,
+                  ),
+                ],
+              ),
             ),
-            Container(
-              width: 1,
-              height: double.infinity,
-              color: Colors.grey.shade300,
-            ),
-            _buildNavItem(
-              1,
-              Constants.lineGraphIconPath,
-              'Summary',
-              primaryColor,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -97,6 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: InkWell(
         onTap: () {
           // make it somewhat unresponsive or kind of inactive/disabled when map is loading
+          // fallback logic,if map is loading, do not allow navigation
           if (!isMapLoading) {
             // 🧹 SAFETY: Clear EPI context when navigating between main tabs
             // This ensures clean state when switching from Map to Summary or vice versa

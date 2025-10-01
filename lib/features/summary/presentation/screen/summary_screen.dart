@@ -7,6 +7,7 @@ import 'package:gis_dashboard/core/utils/utils.dart';
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/common/widgets/header_title_icon_filter_widget.dart';
+import '../../../map/presentation/controllers/map_controller.dart';
 import '../controllers/summary_controller.dart';
 import '../widget/summary_card_widget.dart';
 import '../widget/vaccine_performance_graph_widget.dart';
@@ -33,6 +34,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
   Widget build(BuildContext context) {
     final summaryState = ref.watch(summaryControllerProvider);
     final filterState = ref.watch(filterControllerProvider);
+    final isMapLoading = ref.watch(mapControllerProvider).isLoading;
 
     // Find the selected vaccine data
     final vaccines = summaryState.coverageData?.vaccines ?? [];
@@ -64,6 +66,11 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                     .read(summaryControllerProvider.notifier)
                     .refreshSummaryData();
               },
+            )
+          : isMapLoading
+          ? Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: const Center(child: CustomLoadingWidget()),
             )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(8),
