@@ -413,7 +413,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           filterState.selectedVaccine,
           mapState.currentLevel.value,
         );
-        logg.i("Successfully parsed ${areaPolygons.length} polygons");
+        // logg.i("Successfully parsed ${areaPolygons.length} polygons");
 
         // Clear any existing errors when data is successfully loaded and parsed
         if (mapState.error != null && !mapState.isLoading) {
@@ -932,7 +932,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
       if (features == null || features.isEmpty) return [];
 
-      logg.i("Building ${features.length} EPI markers");
+      // logg.i("Building ${features.length} EPI markers");
 
       return features
           .map<Marker>((feature) {

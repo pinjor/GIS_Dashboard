@@ -57,7 +57,7 @@ class MapRepository {
       // final bytes = response.data as List<int>;
       final archive = GZipDecoder().decodeBytes(response.data as List<int>);
       final areaCoordsGeoJsonData = String.fromCharCodes(archive);
-      logg.i('Successfully decompressed GeoJSON data');
+      // logg.i('Successfully decompressed GeoJSON data');
       return AreaCoordsGeoJsonResponse.fromJson(
         jsonDecode(areaCoordsGeoJsonData) as Map<String, dynamic>,
       );

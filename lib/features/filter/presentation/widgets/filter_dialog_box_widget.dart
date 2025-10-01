@@ -334,21 +334,21 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     return hasChanged;
   }
 
-  /// Reset all selections to initial values
-  void _resetToInitialValues() {
-    setState(() {
-      _selectedAreaType = _initialAreaType;
-      _selectedVaccine = _initialVaccine;
-      _selectedDivision = _initialDivision;
-      _selectedCityCorporation = _initialCityCorporation;
-      _selectedDistrict = _initialDistrict;
-      _selectedYear = _initialYear;
-      _selectedUpazila = _initialUpazila;
-      _selectedUnion = _initialUnion;
-      _selectedWard = _initialWard;
-      _selectedSubblock = _initialSubblock;
-    });
-  }
+  // /// Reset all selections to initial values
+  // void _resetToInitialValues() {
+  //   setState(() {
+  //     _selectedAreaType = _initialAreaType;
+  //     _selectedVaccine = _initialVaccine;
+  //     _selectedDivision = _initialDivision;
+  //     _selectedCityCorporation = _initialCityCorporation;
+  //     _selectedDistrict = _initialDistrict;
+  //     _selectedYear = _initialYear;
+  //     _selectedUpazila = _initialUpazila;
+  //     _selectedUnion = _initialUnion;
+  //     _selectedWard = _initialWard;
+  //     _selectedSubblock = _initialSubblock;
+  //   });
+  // }
 
   void _applyFilters({
     required FilterState filterState,
@@ -503,30 +503,9 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     logg.i('🔄 Resetting filters to initial values');
 
     if (isEpiContext) {
-      // For EPI context, reset to initial values (the values when dialog was first opened)
-      _resetToInitialValues();
-
-      // Apply the reset values to the provider to restore the EPI context
-      filterNotifier.applyFilters(
-        vaccine: null, // No vaccine in EPI context
-        areaType: _initialAreaType,
-        year: _initialYear,
-        division: _initialAreaType == AreaType.district
-            ? _initialDivision
-            : null,
-        district: _initialAreaType == AreaType.district
-            ? _initialDistrict
-            : null,
-        cityCorporation: _initialAreaType == AreaType.cityCorporation
-            ? _initialCityCorporation
-            : null,
-        upazila: _initialAreaType == AreaType.district ? _initialUpazila : null,
-        union: _initialAreaType == AreaType.district ? _initialUnion : null,
-        ward: _initialAreaType == AreaType.district ? _initialWard : null,
-        subblock: _initialAreaType == AreaType.district
-            ? _initialSubblock
-            : null,
-      );
+      // ✅ NEW: Extended filter reset - return to original First EDS
+      logg.i('🔄 Extended Filter Reset: Restoring to original First EDS');
+      filterNotifier.resetToOriginalEpiState();
     } else {
       // For normal context, reset filters to default
       filterNotifier.resetFilters();

@@ -86,21 +86,18 @@ class _EpiCenterDetailsScreenState
       final filterController = ref.read(filterControllerProvider.notifier);
       final epiController = ref.read(epiCenterControllerProvider.notifier);
 
+      // ✅ NEW APPROACH: Wait for hierarchical data to load if needed
+      await _ensureHierarchicalDataLoaded(filterState, filterController);
+
       String? targetUid;
       String? targetName;
       final selectedSubblock = filterState.selectedSubblock;
-      // logg.i('Selected Subblock: $selectedSubblock');
-      // logg.i('All subblocks: ${filterState.subblocks}');
-      // logg.i('Selected Ward: ${filterState.selectedWard}');
-      // logg.i('All wards: ${filterState.wards}');
-      // logg.i('Selected Union: ${filterState.selectedUnion}');
-      // logg.i('All unions: ${filterState.unions}');
-      // logg.i('Selected Upazila: ${filterState.selectedUpazila}');
-      // logg.i('All upazilas: ${filterState.upazilas}');
-      // logg.i('Selected District: ${filterState.selectedDistrict}');
-      // logg.i('All districts: ${filterState.districts}');
-      // logg.i('Selected Division: ${filterState.selectedDivision}');
-      // logg.i('All divisions: ${filterState.divisions}');
+
+      logg.i('🔍 Determining target level from filter state:');
+      logg.i('   Selected Subblock: $selectedSubblock');
+      logg.i('   Selected Ward: ${filterState.selectedWard}');
+      logg.i('   Selected Union: ${filterState.selectedUnion}');
+      logg.i('   Selected Upazila: ${filterState.selectedUpazila}');
 
       // Determine the most specific level selected (bottom-up approach)
       // Bottom-up hierarchical selection (most specific first)
@@ -108,27 +105,30 @@ class _EpiCenterDetailsScreenState
           filterState.selectedSubblock != 'All') {
         targetUid = filterController.getSubblockUid(selectedSubblock!);
         targetName = filterState.selectedSubblock;
+        logg.i('🎯 Target level: SUBBLOCK ($targetName, UID: $targetUid)');
       } else if (filterState.selectedWard != null &&
           filterState.selectedWard != 'All') {
         targetUid = filterController.getWardUid(filterState.selectedWard!);
         targetName = filterState.selectedWard;
+        logg.i('🎯 Target level: WARD ($targetName, UID: $targetUid)');
       } else if (filterState.selectedUnion != null &&
           filterState.selectedUnion != 'All') {
         targetUid = filterController.getUnionUid(filterState.selectedUnion!);
         targetName = filterState.selectedUnion;
+        logg.i('🎯 Target level: UNION ($targetName, UID: $targetUid)');
       } else if (filterState.selectedUpazila != null &&
           filterState.selectedUpazila != 'All') {
         targetUid = filterController.getUpazilaUid(
           filterState.selectedUpazila!,
         );
         targetName = filterState.selectedUpazila;
+        logg.i('🎯 Target level: UPAZILA ($targetName, UID: $targetUid)');
       }
 
       if (targetUid != null && targetName != null) {
         logg.i('📍 Loading EPI data for: $targetName (UID: $targetUid)');
 
         try {
-          // <-- ADD AWAIT HERE! This is the key fix
           await epiController.fetchEpiCenterData(
             epiUid: targetUid,
             year: int.tryParse(selectedYear) ?? DateTime.now().year,
@@ -149,9 +149,11 @@ class _EpiCenterDetailsScreenState
         }
       } else {
         logg.w(
-          '🚫 targetUid is NULL - Filter button may have cleared hierarchical data!',
+          '🚫 targetUid is NULL - this indicates hierarchical data is not loaded yet or selection is invalid',
         );
-        logg.w('   This should now be FIXED with the smart update methods');
+        logg.w(
+          '   This should be fixed by ensuring hierarchical data is loaded first',
+        );
         logg.i(
           '📍 No specific hierarchical level selected - keeping current EPI data',
         );
@@ -161,6 +163,59 @@ class _EpiCenterDetailsScreenState
         '   Area type is not district - no hierarchical filtering applied',
       );
     }
+  }
+
+  /// Ensure hierarchical data is loaded for the current selections
+  /// This fixes the issue where changing higher-level fields (Union/Ward)
+  /// doesn't load the child data needed for EPI reload
+  Future<void> _ensureHierarchicalDataLoaded(
+    FilterState filterState,
+    FilterControllerNotifier filterController,
+  ) async {
+    logg.i('🔄 Ensuring hierarchical data is loaded...');
+
+    // If Upazila is selected but unions are not loaded, load them
+    if (filterState.selectedUpazila != null &&
+        filterState.selectedUpazila != 'All' &&
+        filterState.unions.isEmpty) {
+      final upazilaUid = filterController.getUpazilaUid(
+        filterState.selectedUpazila!,
+      );
+      if (upazilaUid != null) {
+        logg.i('📥 Loading unions for upazila: ${filterState.selectedUpazila}');
+        filterController.updateUpazila(filterState.selectedUpazila);
+        // Wait a bit for the data to load
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+    }
+
+    // If Union is selected but wards are not loaded, load them
+    if (filterState.selectedUnion != null &&
+        filterState.selectedUnion != 'All' &&
+        filterState.wards.isEmpty) {
+      final unionUid = filterController.getUnionUid(filterState.selectedUnion!);
+      if (unionUid != null) {
+        logg.i('📥 Loading wards for union: ${filterState.selectedUnion}');
+        filterController.updateUnion(filterState.selectedUnion);
+        // Wait a bit for the data to load
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+    }
+
+    // If Ward is selected but subblocks are not loaded, load them
+    if (filterState.selectedWard != null &&
+        filterState.selectedWard != 'All' &&
+        filterState.subblocks.isEmpty) {
+      final wardUid = filterController.getWardUid(filterState.selectedWard!);
+      if (wardUid != null) {
+        logg.i('📥 Loading subblocks for ward: ${filterState.selectedWard}');
+        filterController.updateWard(filterState.selectedWard);
+        // Wait a bit for the data to load
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+    }
+
+    logg.i('✅ Hierarchical data loading completed');
   }
 
   Future<void> _loadEpiCenterData() async {
@@ -200,6 +255,8 @@ class _EpiCenterDetailsScreenState
       filterController.initializeFromEpiData(
         epiData: epiData,
         isEpiDetailsContext: true,
+        epiUid: widget.epiUid, // ✅ FIX: Pass the EPI UID from screen
+        ccUid: widget.ccUid, // ✅ FIX: Pass the CC UID from screen
       );
       logg.i('✅ EPI Filter Initialization: Completed');
     });

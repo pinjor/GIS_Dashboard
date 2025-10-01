@@ -483,8 +483,18 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   Future<void> initializeFromEpiData({
     required dynamic epiData,
     required bool isEpiDetailsContext,
+    String? epiUid,
+    String? ccUid,
   }) async {
     print('FilterProvider: Initializing from EPI data');
+    logg.i('🔧 EPI Initialization Parameters:');
+    logg.i('   epiUid: $epiUid');
+    logg.i('   ccUid: $ccUid');
+    logg.i('   isEpiDetailsContext: $isEpiDetailsContext');
+
+    // ✅ CAPTURE ORIGINAL STATE: Only on first EPI initialization
+    final bool isFirstEpiInitialization = !state.isEpiDetailsContext;
+    logg.i('   isFirstEpiInitialization: $isFirstEpiInitialization');
 
     // Extract hierarchical data from EPI response
     final String? divisionName = epiData?.divisionName;
@@ -545,6 +555,26 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       unions: unions,
       wards: wards,
       subblocks: subblocks,
+      // ✅ CAPTURE ORIGINAL STATE: Only on first EPI initialization
+      originalEpiUid: isFirstEpiInitialization ? epiUid : state.originalEpiUid,
+      originalCcUid: isFirstEpiInitialization ? ccUid : state.originalCcUid,
+      originalDivision: isFirstEpiInitialization
+          ? (divisionName ?? state.selectedDivision)
+          : state.originalDivision,
+      originalDistrict: isFirstEpiInitialization
+          ? districtName
+          : state.originalDistrict,
+      originalUpazila: isFirstEpiInitialization
+          ? upazilaName
+          : state.originalUpazila,
+      originalUnion: isFirstEpiInitialization ? unionName : state.originalUnion,
+      originalWard: isFirstEpiInitialization ? wardName : state.originalWard,
+      originalSubblock: isFirstEpiInitialization
+          ? subblockName
+          : state.originalSubblock,
+      originalYear: isFirstEpiInitialization
+          ? state.selectedYear
+          : state.originalYear,
     );
 
     print('FilterProvider: EPI context initialized successfully');
@@ -556,17 +586,91 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     print('  Union: $unionName');
     print('  Ward: $wardName');
     print('  Subblock: $subblockName');
+
+    // ✅ DEBUG: Log captured original values
+    if (isFirstEpiInitialization) {
+      logg.i('📸 Original State Captured:');
+      logg.i('   originalEpiUid: ${state.originalEpiUid}');
+      logg.i('   originalCcUid: ${state.originalCcUid}');
+      logg.i('   originalDivision: ${state.originalDivision}');
+      logg.i('   originalDistrict: ${state.originalDistrict}');
+      logg.i('   originalUpazila: ${state.originalUpazila}');
+      logg.i('   originalUnion: ${state.originalUnion}');
+      logg.i('   originalWard: ${state.originalWard}');
+      logg.i('   originalSubblock: ${state.originalSubblock}');
+      logg.i('   originalYear: ${state.originalYear}');
+    } else {
+      logg.i('🔄 Subsequent initialization - original state preserved');
+    }
   }
 
-  /// Reset to initial EPI values (for EPI details context)
-  void resetToInitialEpiValues() {
-    if (!state.isEpiDetailsContext || state.initialSubblockUid == null) return;
+  /// Reset to original EPI state (First EDS configuration)
+  /// This method restores the exact filter configuration from when user first entered EPI context
+  void resetToOriginalEpiState() {
+    logg.i('FilterProvider: 🔄 Reset to Original EPI State requested');
 
-    print('FilterProvider: Resetting to initial EPI values');
+    if (!state.isEpiDetailsContext) {
+      // Non-EPI context: use normal reset
+      logg.i('FilterProvider: Not in EPI context, using normal reset');
+      resetFilters();
+      return;
+    }
 
-    // This would reset to the original EPI data values
-    // For now, we'll need to re-initialize from the original EPI data
-    // The EPI details screen should call initializeFromEpiData again
+    // Check if we have original state to restore
+    if (state.originalEpiUid == null) {
+      logg.w('FilterProvider: ⚠️ No original EPI state found, skipping reset');
+      return;
+    }
+
+    // Check if already at original state
+    if (_isAlreadyAtOriginalState()) {
+      logg.i('FilterProvider: ✅ Already at original state, no reload needed');
+      return;
+    }
+
+    logg.i('FilterProvider: 🔄 Restoring to original First EDS state...');
+    logg.i('BEFORE RESET:');
+    logg.i('  Division: ${state.selectedDivision}');
+    logg.i('  District: ${state.selectedDistrict}');
+    logg.i('  Upazila: ${state.selectedUpazila}');
+    logg.i('  Union: ${state.selectedUnion}');
+    logg.i('  Ward: ${state.selectedWard}');
+    logg.i('  Subblock: ${state.selectedSubblock}');
+    logg.i('  Year: ${state.selectedYear}');
+
+    // Restore to original First EDS state
+    state = state.copyWith(
+      selectedDivision: state.originalDivision ?? 'All',
+      selectedDistrict: state.originalDistrict,
+      selectedUpazila: state.originalUpazila,
+      selectedUnion: state.originalUnion,
+      selectedWard: state.originalWard,
+      selectedSubblock: state.originalSubblock,
+      selectedYear: state.originalYear ?? state.selectedYear,
+      // Trigger reload by updating timestamp
+      lastAppliedTimestamp: DateTime.now(),
+    );
+
+    logg.i('AFTER RESET:');
+    logg.i('  Division: ${state.selectedDivision}');
+    logg.i('  District: ${state.selectedDistrict}');
+    logg.i('  Upazila: ${state.selectedUpazila}');
+    logg.i('  Union: ${state.selectedUnion}');
+    logg.i('  Ward: ${state.selectedWard}');
+    logg.i('  Subblock: ${state.selectedSubblock}');
+    logg.i('  Year: ${state.selectedYear}');
+    logg.i('FilterProvider: ✅ Original EPI state restored - EDS will reload');
+  }
+
+  /// Check if current state matches original EPI state
+  bool _isAlreadyAtOriginalState() {
+    return state.selectedDivision == state.originalDivision &&
+        state.selectedDistrict == state.originalDistrict &&
+        state.selectedUpazila == state.originalUpazila &&
+        state.selectedUnion == state.originalUnion &&
+        state.selectedWard == state.originalWard &&
+        state.selectedSubblock == state.originalSubblock &&
+        state.selectedYear == state.originalYear;
   }
 
   /// Reset geographic filters to country view defaults
@@ -634,6 +738,16 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       unions: const [],
       wards: const [],
       subblocks: const [],
+      // ✅ CLEAR ORIGINAL STATE: Clean up when exiting EPI context
+      clearOriginalEpiUid: true,
+      clearOriginalCcUid: true,
+      clearOriginalDivision: true,
+      clearOriginalDistrict: true,
+      clearOriginalUpazila: true,
+      clearOriginalUnion: true,
+      clearOriginalWard: true,
+      clearOriginalSubblock: true,
+      clearOriginalYear: true,
     );
 
     logg.i(

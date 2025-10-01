@@ -37,6 +37,17 @@ class FilterState {
   final bool isEpiDetailsContext;
   final String? initialSubblockUid; // For reset functionality in EPI context
 
+  // Original EPI state (captured when first entering EPI context)
+  final String? originalEpiUid;
+  final String? originalCcUid;
+  final String? originalDivision;
+  final String? originalDistrict;
+  final String? originalUpazila;
+  final String? originalUnion;
+  final String? originalWard;
+  final String? originalSubblock;
+  final String? originalYear;
+
   // Filter application tracking
   final DateTime? lastAppliedTimestamp;
 
@@ -67,6 +78,16 @@ class FilterState {
     this.areasError,
     this.isEpiDetailsContext = false,
     this.initialSubblockUid,
+    // Original EPI state
+    this.originalEpiUid,
+    this.originalCcUid,
+    this.originalDivision,
+    this.originalDistrict,
+    this.originalUpazila,
+    this.originalUnion,
+    this.originalWard,
+    this.originalSubblock,
+    this.originalYear,
     this.lastAppliedTimestamp,
   });
 
@@ -97,6 +118,16 @@ class FilterState {
     String? areasError,
     bool? isEpiDetailsContext,
     String? initialSubblockUid,
+    // Original EPI state
+    String? originalEpiUid,
+    String? originalCcUid,
+    String? originalDivision,
+    String? originalDistrict,
+    String? originalUpazila,
+    String? originalUnion,
+    String? originalWard,
+    String? originalSubblock,
+    String? originalYear,
     DateTime? lastAppliedTimestamp,
     // Explicit flags for nullable fields to allow setting to null
     bool clearCityCorporation = false,
@@ -107,6 +138,15 @@ class FilterState {
     bool clearSubblock = false,
     bool clearAreasError = false,
     bool clearInitialSubblockUid = false,
+    bool clearOriginalEpiUid = false,
+    bool clearOriginalCcUid = false,
+    bool clearOriginalDivision = false,
+    bool clearOriginalDistrict = false,
+    bool clearOriginalUpazila = false,
+    bool clearOriginalUnion = false,
+    bool clearOriginalWard = false,
+    bool clearOriginalSubblock = false,
+    bool clearOriginalYear = false,
   }) {
     return FilterState(
       selectedVaccine: selectedVaccine ?? this.selectedVaccine,
@@ -145,6 +185,34 @@ class FilterState {
       initialSubblockUid: clearInitialSubblockUid
           ? null
           : (initialSubblockUid ?? this.initialSubblockUid),
+      // Original EPI state
+      originalEpiUid: clearOriginalEpiUid
+          ? null
+          : (originalEpiUid ?? this.originalEpiUid),
+      originalCcUid: clearOriginalCcUid
+          ? null
+          : (originalCcUid ?? this.originalCcUid),
+      originalDivision: clearOriginalDivision
+          ? null
+          : (originalDivision ?? this.originalDivision),
+      originalDistrict: clearOriginalDistrict
+          ? null
+          : (originalDistrict ?? this.originalDistrict),
+      originalUpazila: clearOriginalUpazila
+          ? null
+          : (originalUpazila ?? this.originalUpazila),
+      originalUnion: clearOriginalUnion
+          ? null
+          : (originalUnion ?? this.originalUnion),
+      originalWard: clearOriginalWard
+          ? null
+          : (originalWard ?? this.originalWard),
+      originalSubblock: clearOriginalSubblock
+          ? null
+          : (originalSubblock ?? this.originalSubblock),
+      originalYear: clearOriginalYear
+          ? null
+          : (originalYear ?? this.originalYear),
       lastAppliedTimestamp: lastAppliedTimestamp ?? this.lastAppliedTimestamp,
     );
   }
