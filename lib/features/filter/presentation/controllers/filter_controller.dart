@@ -37,39 +37,86 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Load all area data (divisions, districts, city corporations) at startup
+  ///
+  /// Uses individual error handling instead of Future.wait() to provide graceful degradation:
+  /// - If one data type fails, others can still load successfully
+  /// - Partial data is better than complete failure
+  /// - Map sync requires divisions + districts (city corporations optional)
   Future<void> _loadAllAreas() async {
     state = state.copyWith(isLoadingAreas: true, clearAreasError: true);
 
+    print('FilterProvider: Starting to load all areas...');
+
+    bool hasAnySuccess = false;
+    List<String> failedTypes = [];
+    List<AreaResponseModel> divisions = [];
+    List<AreaResponseModel> districts = [];
+    List<AreaResponseModel> cityCorporations = [];
+
+    // Load divisions independently
     try {
-      print('FilterProvider: Starting to load all areas...');
-
-      // Fetch all area types in parallel
-      final results = await Future.wait([
-        _repository.fetchAllDivisions(),
-        _repository.fetchAllDistricts(),
-        _repository.fetchAllCityCorporations(),
-      ]);
-
-      final divisions = results[0];
-      final districts = results[1];
-      final cityCorporations = results[2];
-
-      print(
-        'FilterProvider: Loaded ${divisions.length} divisions, ${districts.length} districts, ${cityCorporations.length} city corporations',
-      );
-
-      state = state.copyWith(
-        divisions: divisions,
-        districts: districts,
-        cityCorporations: cityCorporations,
-        filteredDistricts: districts, // Initially show all districts
-        isLoadingAreas: false,
-      );
-
-      print('FilterProvider: All areas loaded successfully');
+      divisions = await _repository.fetchAllDivisions();
+      print('FilterProvider: ✅ Loaded ${divisions.length} divisions');
+      hasAnySuccess = true;
     } catch (e) {
-      print('FilterProvider: Error loading areas: $e');
-      state = state.copyWith(isLoadingAreas: false, areasError: e.toString());
+      print('FilterProvider: ❌ Failed to load divisions: $e');
+      logg.e('Failed to load divisions: $e');
+      failedTypes.add('divisions');
+    }
+
+    // Load districts independently
+    try {
+      districts = await _repository.fetchAllDistricts();
+      print('FilterProvider: ✅ Loaded ${districts.length} districts');
+      hasAnySuccess = true;
+    } catch (e) {
+      print('FilterProvider: ❌ Failed to load districts: $e');
+      logg.e('Failed to load districts: $e');
+      failedTypes.add('districts');
+    }
+
+    // Load city corporations independently
+    try {
+      cityCorporations = await _repository.fetchAllCityCorporations();
+      print(
+        'FilterProvider: ✅ Loaded ${cityCorporations.length} city corporations',
+      );
+      hasAnySuccess = true;
+    } catch (e) {
+      print('FilterProvider: ❌ Failed to load city corporations: $e');
+      logg.e('Failed to load city corporations: $e');
+      failedTypes.add('city corporations');
+    }
+
+    // Update state with whatever data was successfully loaded
+    state = state.copyWith(
+      divisions: divisions,
+      districts: districts,
+      cityCorporations: cityCorporations,
+      filteredDistricts:
+          districts, // Initially show all successfully loaded districts
+      isLoadingAreas: false,
+      areasError: hasAnySuccess
+          ? (failedTypes.isEmpty
+                ? null
+                : 'Partial load: ${failedTypes.join(", ")} failed to load')
+          : 'Failed to load all area data - please check your internet connection',
+    );
+
+    if (hasAnySuccess) {
+      if (failedTypes.isEmpty) {
+        print('FilterProvider: ✅ All areas loaded successfully');
+      } else {
+        print(
+          'FilterProvider: ⚠️ Partial success - ${failedTypes.join(", ")} failed',
+        );
+        logg.w(
+          'Partial area data loaded - ${failedTypes.join(", ")} unavailable',
+        );
+      }
+    } else {
+      print('FilterProvider: ❌ Complete failure - no area data loaded');
+      logg.e('Critical: All area data types failed to load');
     }
   }
 

@@ -9,26 +9,31 @@ class ConnectivityService {
   final Connectivity _connectivity = Connectivity();
 
   /// Check if device has internet connection
+  ///
+  /// Uses a two-tier approach for optimal performance:
+  /// 1. Quick instant check with connectivity_plus (detects airplane mode, no WiFi/data)
+  /// 2. Actual internet verification with 2s timeout (reduced from 5s for faster UX)
   Future<bool> hasInternetConnection() async {
     try {
-      // First check connectivity state
+      // TIER 1: Instant connectivity check (no network latency)
       final connectivityResult = await _connectivity.checkConnectivity();
-      print(connectivityResult);
+      logg.d('Connectivity status: $connectivityResult');
 
-      // If no connectivity, return false immediately
+      // If no connectivity detected, return false immediately (saves 2s timeout)
       if (connectivityResult.contains(ConnectivityResult.none)) {
-        logg.w('No connectivity detected');
+        logg.w('No connectivity detected - skipping internet verification');
         return false;
       }
 
-      // Even if connectivity shows available, verify with actual network call
+      // TIER 2: Verify actual internet access (2s timeout - 60% faster than before)
+      // This catches cases where WiFi/mobile is connected but no actual internet
       final result = await InternetAddress.lookup(
         'google.com',
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 2)); // Reduced from 5s to 2s
 
       final hasConnection =
           result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-      logg.i('Internet connection status: $hasConnection');
+      logg.i('Internet connection verified: $hasConnection');
       return hasConnection;
     } catch (e) {
       logg.e('Error checking internet connection: $e');
@@ -37,11 +42,12 @@ class ConnectivityService {
   }
 
   /// Check connectivity with a custom host
+  /// Uses 3s timeout for custom hosts (may be slower than google.com)
   Future<bool> canReachHost(String host) async {
     try {
       final result = await InternetAddress.lookup(
         host,
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 3)); // Reduced from 5s to 3s
 
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } catch (e) {
