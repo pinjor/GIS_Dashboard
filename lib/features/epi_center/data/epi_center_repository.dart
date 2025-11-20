@@ -102,13 +102,12 @@ class EpiCenterRepository {
               return client;
             };
       }
-
+      logg.i('Fetching EPI details from $urlPath');
       final response = await epiDio.get(urlPath);
-
+      logg.i('Received response for EPI details...');
       if (response.statusCode != 200) {
         throw Exception('Server returned status code: ${response.statusCode}');
       }
-
       final rawData = response.data;
       final contentType = response.headers.value('content-type') ?? '';
 
@@ -119,10 +118,90 @@ class EpiCenterRepository {
       }
 
       // Decode and parse
+      logg.i('Decoding and parsing EPI details JSON...');
       final parsedJson = decodeEpiCenterDetailsNestedJson(rawData);
-      return EpiCenterDetailsResponse.fromJson(
-        parsedJson as Map<String, dynamic>,
-      );
+
+      try {
+        logg.i('Creating EpiCenterDetailsResponse from parsed JSON...');
+        final result = EpiCenterDetailsResponse.fromJson(
+          parsedJson as Map<String, dynamic>,
+        );
+        logg.i('✅ Successfully created EpiCenterDetailsResponse');
+        return result;
+      } catch (parseError, stackTrace) {
+        logg.e('❌ ERROR parsing JSON to EpiCenterDetailsResponse: $parseError');
+        logg.e('Stack trace: $stackTrace');
+
+        // Try to isolate which field is causing the issue
+        try {
+          final jsonMap = parsedJson as Map<String, dynamic>;
+          logg.i('Testing individual fields...');
+
+          if (jsonMap.containsKey('coverageTableData')) {
+            logg.i(
+              '✓ coverageTableData exists - type: ${jsonMap['coverageTableData'].runtimeType}',
+            );
+            final coverageData = jsonMap['coverageTableData'];
+            if (coverageData is Map) {
+              logg.i('  coverageTableData keys: ${coverageData.keys.toList()}');
+
+              // Check totals field specifically - THIS IS THE ISSUE
+              if (coverageData.containsKey('totals')) {
+                final totals = coverageData['totals'];
+                logg.e('  ⚠️ TOTALS type: ${totals.runtimeType}');
+                logg.e('  ⚠️ TOTALS is List: ${totals is List}');
+                logg.e('  ⚠️ TOTALS is Map: ${totals is Map}');
+                if (totals is List) {
+                  logg.e('  ⚠️ TOTALS List length: ${totals.length}');
+                }
+                if (totals is Map) {
+                  logg.e('  ⚠️ TOTALS Map keys: ${totals.keys.toList()}');
+                  if (totals.containsKey('coverages')) {
+                    final coverages = totals['coverages'];
+                    logg.e(
+                      '  ⚠️ TOTALS.coverages type: ${coverages.runtimeType}',
+                    );
+                  }
+                  if (totals.containsKey('dropouts')) {
+                    final dropouts = totals['dropouts'];
+                    logg.e(
+                      '  ⚠️ TOTALS.dropouts type: ${dropouts.runtimeType}',
+                    );
+                  }
+                }
+              }
+
+              if (coverageData.containsKey('months')) {
+                final months = coverageData['months'];
+                logg.i('  months type: ${months.runtimeType}');
+                if (months is Map) {
+                  logg.i('  months keys: ${months.keys.take(3).toList()}');
+                  final firstMonthKey = months.keys.first;
+                  final firstMonth = months[firstMonthKey];
+                  logg.i(
+                    '  first month ($firstMonthKey) type: ${firstMonth.runtimeType}',
+                  );
+                  if (firstMonth is Map) {
+                    logg.i('  first month keys: ${firstMonth.keys.toList()}');
+                    if (firstMonth.containsKey('coverages')) {
+                      final coverages = firstMonth['coverages'];
+                      logg.i('  coverages type: ${coverages.runtimeType}');
+                    }
+                    if (firstMonth.containsKey('dropouts')) {
+                      final dropouts = firstMonth['dropouts'];
+                      logg.i('  dropouts type: ${dropouts.runtimeType}');
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (debugError) {
+          logg.e('Error during field debugging: $debugError');
+        }
+
+        rethrow;
+      }
     } on DioException catch (e) {
       // SSL specific handling
       if (e.error.toString().contains('CERTIFICATE_VERIFY_FAILED') ||
@@ -175,9 +254,9 @@ class EpiCenterRepository {
               return client;
             };
       }
-
+      logg.i('Fetching EPI details from $urlPath');
       final response = await epiDio.get(urlPath);
-
+      logg.i('Received response for EPI details...');
       if (response.statusCode != 200) {
         throw Exception('Server returned status code: ${response.statusCode}');
       }
@@ -192,10 +271,63 @@ class EpiCenterRepository {
       }
 
       // Decode and parse
+      logg.i('Decoding and parsing EPI details JSON...');
       final parsedJson = decodeEpiCenterDetailsNestedJson(rawData);
-      return EpiCenterDetailsResponse.fromJson(
-        parsedJson as Map<String, dynamic>,
-      );
+
+      try {
+        logg.i('Creating EpiCenterDetailsResponse from parsed JSON...');
+        final result = EpiCenterDetailsResponse.fromJson(
+          parsedJson as Map<String, dynamic>,
+        );
+        logg.i('✅ Successfully created EpiCenterDetailsResponse');
+        return result;
+      } catch (parseError, stackTrace) {
+        logg.e('❌ ERROR parsing JSON to EpiCenterDetailsResponse: $parseError');
+        logg.e('Stack trace: $stackTrace');
+
+        // Try to isolate which field is causing the issue
+        try {
+          final jsonMap = parsedJson as Map<String, dynamic>;
+          logg.i('Testing individual fields...');
+
+          if (jsonMap.containsKey('coverageTableData')) {
+            logg.i(
+              '✓ coverageTableData exists - type: ${jsonMap['coverageTableData'].runtimeType}',
+            );
+            final coverageData = jsonMap['coverageTableData'];
+            if (coverageData is Map) {
+              logg.i('  coverageTableData keys: ${coverageData.keys.toList()}');
+              if (coverageData.containsKey('months')) {
+                final months = coverageData['months'];
+                logg.i('  months type: ${months.runtimeType}');
+                if (months is Map) {
+                  logg.i('  months keys: ${months.keys.take(3).toList()}');
+                  final firstMonthKey = months.keys.first;
+                  final firstMonth = months[firstMonthKey];
+                  logg.i(
+                    '  first month ($firstMonthKey) type: ${firstMonth.runtimeType}',
+                  );
+                  if (firstMonth is Map) {
+                    logg.i('  first month keys: ${firstMonth.keys.toList()}');
+                    if (firstMonth.containsKey('coverages')) {
+                      final coverages = firstMonth['coverages'];
+                      logg.i('  coverages type: ${coverages.runtimeType}');
+                    }
+                    if (firstMonth.containsKey('dropouts')) {
+                      final dropouts = firstMonth['dropouts'];
+                      logg.i('  dropouts type: ${dropouts.runtimeType}');
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (debugError) {
+          logg.e('Error during field debugging: $debugError');
+        }
+
+        rethrow;
+      }
     } on DioException catch (e) {
       // SSL specific handling
       if (e.error.toString().contains('CERTIFICATE_VERIFY_FAILED') ||

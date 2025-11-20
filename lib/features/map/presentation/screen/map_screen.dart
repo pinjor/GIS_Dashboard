@@ -125,11 +125,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
       final mapState = ref.read(mapControllerProvider);
       final filterState = ref.read(filterControllerProvider);
-      // Check if this is a city corporation ward tap (zone level showing wards)
-      if (mapState.currentLevel == GeographicLevel.zone &&
+
+      // Check if this is a city corporation ward tap
+      // FIX: Accept BOTH zone AND cityCorporation levels to handle both:
+      // 1. Manual drilldown (currentLevel = zone)
+      // 2. Filter-triggered reload after EPI return (currentLevel = cityCorporation)
+      // Also validate polygon level for extra safety
+      if (((mapState.currentLevel == GeographicLevel.zone ||
+                  mapState.currentLevel == GeographicLevel.cityCorporation) &&
+              (tappedPolygon.level == GeographicLevel.zone.value ||
+                  tappedPolygon.level == 'ward')) &&
           tappedPolygon.orgUid != null &&
           tappedPolygon.orgUid!.isNotEmpty &&
           filterState.selectedAreaType == AreaType.cityCorporation) {
+        logg.i(
+          "🎯 CC Ward detected: level=${tappedPolygon.level}, mapLevel=${mapState.currentLevel.value}, orgUid=${tappedPolygon.orgUid}",
+        );
         _handleCityCorporationWardTapForEpiNavigation(tappedPolygon);
         return;
       }

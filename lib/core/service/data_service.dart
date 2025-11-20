@@ -177,6 +177,7 @@ class DataService {
         final data = await _epiCenterRepository.fetchEpiCenterDetailsData(
           urlPath: urlPath,
         );
+        logg.i("Successfully fetched EPI center data on attempt $attempt");
 
         // logg.i("Successfully fetched EPI center data on attempt $attempt");
         return data;
@@ -213,11 +214,10 @@ class DataService {
 
     for (int i = 0; i < urlPaths.length; i++) {
       final urlPath = urlPaths[i];
-      final isFirstAttempt = i == 0;
 
       try {
         // logg.i(
-        //   "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $urlPath",
+        //   "Trying ${i == 0 ? 'UID-based' : 'name-based'} URL: $urlPath",
         // );
 
         final result = await fetchAreaGeoJsonCoordsData(
@@ -226,13 +226,13 @@ class DataService {
         );
 
         // logg.i(
-        //   "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL",
+        //   "✅ Success with ${i == 0 ? 'UID-based' : 'name-based'} URL",
         // );
         return result;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
         // logg.w(
-        //   "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} URL: $e",
+        //   "❌ Failed with ${i == 0 ? 'UID-based' : 'name-based'} URL: $e",
         // );
 
         if (i < urlPaths.length - 1) {
@@ -255,11 +255,10 @@ class DataService {
 
     for (int i = 0; i < urlPaths.length; i++) {
       final urlPath = urlPaths[i];
-      final isFirstAttempt = i == 0;
 
       try {
         // logg.i(
-        //   "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} coverage URL: $urlPath",
+        //   "Trying ${i == 0 ? 'UID-based' : 'name-based'} coverage URL: $urlPath",
         // );
 
         final result = await getVaccinationCoverage(
@@ -298,11 +297,10 @@ class DataService {
 
     for (int i = 0; i < urlPaths.length; i++) {
       final urlPath = urlPaths[i];
-      final isFirstAttempt = i == 0;
 
       try {
         // logg.i(
-        //   "Trying ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $urlPath",
+        //   "Trying ${i == 0 ? 'UID-based' : 'name-based'} EPI URL: $urlPath",
         // );
 
         final result = await getEpiCenterCoordsData(
@@ -311,13 +309,13 @@ class DataService {
         );
 
         // logg.i(
-        //   "✅ Success with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL",
+        //   "✅ Success with ${i == 0 ? 'UID-based' : 'name-based'} EPI URL",
         // );
         return result;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
         // logg.w(
-        //   "❌ Failed with ${isFirstAttempt ? 'UID-based' : 'name-based'} EPI URL: $e",
+        //   "❌ Failed with ${i == 0 ? 'UID-based' : 'name-based'} EPI URL: $e",
         // );
 
         if (i < urlPaths.length - 1) {
