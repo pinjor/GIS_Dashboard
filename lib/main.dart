@@ -5,7 +5,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/core/common/screens/splash_screen.dart';
-import 'package:gis_dashboard/features/gis_methodology/presentation/screens/gis_methodology_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,8 +29,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       title: Constants.appTitle,
-      // home: const SplashScreen(),
-      home: const GisMethodologyScreen(),
+      home: const SplashScreen(),
     );
   }
 }

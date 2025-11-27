@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gis_dashboard/core/common/widgets/connectivity_status_widget.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
+import 'package:gis_dashboard/features/gis_methodology/presentation/screens/gis_methodology_screen.dart';
 
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/utils/utils.dart';
@@ -19,12 +20,27 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
+  String _currentScreen =
+      'Home'; // Track current screen: 'Home' or 'Methodology'
 
   // Create screens once and reuse them
   static final List<Widget> _screens = [
     const MapScreen(),
     const SummaryScreen(),
   ];
+
+  void _navigateToMethodology() {
+    Navigator.pop(context); // Close drawer
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const GisMethodologyScreen()),
+    ).then((_) {
+      // When returning from methodology, ensure we're back on Home
+      setState(() {
+        _currentScreen = 'Home';
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,21 +49,115 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(Constants.primaryColor),
+        leading: isMapLoading
+            ? const SizedBox.shrink()
+            : Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.white),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
         title: Row(
           children: [
-            Image.asset(Constants.bdMapLogoPath, height: 40),
-            const SizedBox(width: 10),
-            const Text(
-              'Geo-enabled Microplanning - EPI',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            // Image.asset(Constants.bdMapLogoPath, height: 40),
+            const Expanded(
+              child: Text(
+                'Geo-enabled Microplanning - EPI',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
         ),
       ),
+      drawer: isMapLoading
+          ? null
+          : Drawer(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  DrawerHeader(
+                    decoration: BoxDecoration(color: primaryColor),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          Constants.bdMapLogoPath,
+                          height: 60,
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'GIS Dashboard',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.dashboard,
+                      color: _currentScreen == 'Home'
+                          ? primaryColor
+                          : Colors.grey,
+                    ),
+                    title: Text(
+                      'Home',
+                      style: TextStyle(
+                        fontWeight: _currentScreen == 'Home'
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: _currentScreen == 'Home'
+                            ? primaryColor
+                            : Colors.black87,
+                      ),
+                    ),
+                    selected: _currentScreen == 'Home',
+                    selectedTileColor: primaryColor.withOpacity(0.1),
+                    onTap: () {
+                      Navigator.pop(context); // Close drawer
+                      setState(() {
+                        _currentScreen = 'Home';
+                      });
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.menu_book,
+                      color: _currentScreen == 'Methodology'
+                          ? primaryColor
+                          : Colors.grey,
+                    ),
+                    title: Text(
+                      'Methodology',
+                      style: TextStyle(
+                        fontWeight: _currentScreen == 'Methodology'
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: _currentScreen == 'Methodology'
+                            ? primaryColor
+                            : Colors.black87,
+                      ),
+                    ),
+                    selected: _currentScreen == 'Methodology',
+                    selectedTileColor: primaryColor.withOpacity(0.1),
+                    onTap: () {
+                      setState(() {
+                        _currentScreen = 'Methodology';
+                      });
+                      _navigateToMethodology();
+                    },
+                  ),
+                ],
+              ),
+            ),
       body: Column(
         children: [
           // Connectivity status bar
