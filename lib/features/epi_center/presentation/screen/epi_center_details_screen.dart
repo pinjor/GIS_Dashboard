@@ -296,15 +296,6 @@ class _EpiCenterDetailsScreenState
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              // if (widget.currentLevel != null)
-              //   Text(
-              //     'EPI Center Details',
-              //     style: TextStyle(
-              //       fontSize: 14,
-              //       color: Colors.grey[600],
-              //       fontWeight: FontWeight.normal,
-              //     ),
-              //   ),
             ],
           ),
           backgroundColor: Colors.white,
@@ -341,9 +332,15 @@ class _EpiCenterDetailsScreenState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Last updated at: $updatedAtTime',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                Row(
+                  children: [
+                    Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Data last updated at: $updatedAtTime',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
                 IconButton(
                   icon: SvgPicture.asset(
