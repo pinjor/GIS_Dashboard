@@ -1,0 +1,785 @@
+{
+    "cityCorporations": [
+        {
+            "uid": "AGuxsoFsYIv",
+            "name": "Dhaka South CC"
+        },
+        {
+            "uid": "znW8Rsl2Kxv",
+            "name": "Gazipur CC"
+        },
+        {
+            "uid": "VzxNxkhNrgy",
+            "name": "Narayanganj CC"
+        },
+        {
+            "uid": "nyiKx41WXYX",
+            "name": "Khulna CC"
+        },
+        {
+            "uid": "DAO7d4HVHuk",
+            "name": "Rangpur CC"
+        },
+        {
+            "uid": "XPeIlpEDvpn",
+            "name": "Dhaka North CC"
+        },
+        {
+            "uid": "I8zluOsInxz",
+            "name": "Sylhet CC"
+        },
+        {
+            "uid": "Wxc3qhC6nKd",
+            "name": "Chattogram CC"
+        }
+    ],
+    "districts": [
+        {
+            "uid": "Mw6T3cMzFCS",
+            "name": "Bogura"
+        },
+        {
+            "uid": "QcTlB4zamGB",
+            "name": "Dhaka"
+        },
+        {
+            "uid": "QYrmONYNCy2",
+            "name": "Dinajpur"
+        },
+        {
+            "uid": "W9KrpQU6TLm",
+            "name": "Gaibandha"
+        },
+        {
+            "uid": "Dm5f5xHNXLC",
+            "name": "Gazipur"
+        },
+        {
+            "uid": "JaqS7PoUpef",
+            "name": "Habiganj"
+        },
+        {
+            "uid": "dXz4nlHTmUG",
+            "name": "Joypurhat"
+        },
+        {
+            "uid": "cvH8QAmvQMx",
+            "name": "Lalmonirhat"
+        },
+        {
+            "uid": "fyZy2EnOurX",
+            "name": "Munshiganj"
+        },
+        {
+            "uid": "iOGsTH3jTn2",
+            "name": "Narsingdi"
+        },
+        {
+            "uid": "nO6YhCOhfzs",
+            "name": "Nilphamari"
+        },
+        {
+            "uid": "yWcChyPavg3",
+            "name": "Rangpur"
+        },
+        {
+            "uid": "yd7wviaF3wA",
+            "name": "Sunamganj"
+        },
+        {
+            "uid": "wpHsNmBZBIw",
+            "name": "Sylhet"
+        },
+        {
+            "uid": "Bur9WC3b50G",
+            "name": "Thakurgaon"
+        },
+        {
+            "uid": "tJ23nFn03ns",
+            "name": "Barguna"
+        },
+        {
+            "uid": "zVxk7ilIDvv",
+            "name": "Panchagarh"
+        },
+        {
+            "uid": "svplE3L1nVM",
+            "name": "Narayanganj"
+        },
+        {
+            "uid": "lPUmKj10UW0",
+            "name": "Maulvibazar"
+        },
+        {
+            "uid": "yUizLVMh15J",
+            "name": "Manikganj"
+        },
+        {
+            "uid": "SsBgIrBMR8w",
+            "name": "Bhola"
+        }
+    ],
+    "divisions": [
+        {
+            "uid": "kSKR2jNO8OD",
+            "name": "Barishal Division"
+        },
+        {
+            "uid": "VlP0kOsZC3u",
+            "name": "Rajshahi Division"
+        },
+        {
+            "uid": "g5RJ0OisMH9",
+            "name": "Dhaka Division"
+        },
+        {
+            "uid": "ZFDuFWPSZvV",
+            "name": "Rangpur Division"
+        },
+        {
+            "uid": "G0Apq8AyXEe",
+            "name": "Sylhet Division"
+        },
+        {
+            "uid": "M3MmuROriS5",
+            "name": "Khulna Division"
+        },
+        {
+            "uid": "emH4Bs634AJ",
+            "name": "Chattogram Division"
+        },
+        {
+            "uid": "rz8pgTi6avt",
+            "name": "Mymensingh Division"
+        }
+    ],
+    "area": {
+        "id": 35156,
+        "type": "subblock",
+        "uid": "Gwa7AvZ9Bnk",
+        "name": "KHA2",
+        "etracker_name": "Gwa7AvZ9Bnk",
+        "geo_name": "KHA2",
+        "parent_uid": "Mxz4DFv9TFR",
+        "json_file_path": "/var/www/html/staging/codes/storage/app/public/uploads/import/shapes/area-data/Sylhet_District_wpHsNmBZBIw_6091/Gowainghat_Upazila_JUBx8og1UXQ_60910041/Rustampur_Union_TEv3zrA4jbe_6091004100677/Ward 3_Ward_6091004100677W3/KHA2_Subblock_Gwa7AvZ9Bnk_6091004100677W3KHA2/KHA2_Subblock_Gwa7AvZ9Bnk_6091004100677W3KHA2.json",
+        "is_bulk_imported": true,
+        "vaccine_target": "{\"child_0_to_11_month\":{\"2025\":{\"male\":51,\"female\":52},\"2024\":{\"male\":56,\"female\":54}}}",
+        "vaccine_coverage": "{\"child_0_to_11_month\":{\"2024\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":47,\"female\":50},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":48,\"female\":56},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":51,\"female\":47},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":47,\"female\":52},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":47,\"female\":46},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":52,\"female\":54}],\"months\":{\"1\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":3,\"female\":5},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":6,\"female\":5},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":5,\"female\":5},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":5,\"female\":3},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":4,\"female\":3},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":5,\"female\":4}]},\"2\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":4,\"female\":3},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":3,\"female\":5},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":6,\"female\":5},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":3,\"female\":2},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":2,\"female\":3},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":3,\"female\":8}]},\"3\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":3,\"female\":9},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":8,\"female\":3},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":5,\"female\":5}]},\"4\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":7,\"female\":5},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":3,\"female\":4},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":6,\"female\":3}]},\"5\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":12,\"female\":13},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":4,\"female\":4},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":5,\"female\":3},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":2,\"female\":3},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":5,\"female\":5},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":4,\"female\":5}]},\"6\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":5,\"female\":6},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":7,\"female\":11},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":4,\"female\":4},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":3,\"female\":4},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":7,\"female\":1},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":5,\"female\":2}]},\"7\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":5,\"female\":2},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":5,\"female\":9},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":6,\"female\":9},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":4,\"female\":6},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":3,\"female\":5},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":4,\"female\":3}]},\"8\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":3,\"female\":3},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":7,\"female\":3},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":5,\"female\":5},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":null,\"female\":null}]},\"9\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":2,\"female\":6},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":5,\"female\":3},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":7,\"female\":4},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":9,\"female\":7},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":6,\"female\":8},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":5,\"female\":13}]},\"10\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":4,\"female\":7},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":2,\"female\":6},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":5,\"female\":4},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":4,\"female\":8},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":4,\"female\":9},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":5,\"female\":4}]},\"11\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":4,\"female\":4},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":5,\"female\":5},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":4,\"female\":3},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":7,\"female\":5},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":5,\"female\":5},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":4,\"female\":3}]},\"12\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":5,\"female\":1},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":4,\"female\":5},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":4,\"female\":5},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":6,\"female\":4}]}}},\"2025\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":21,\"female\":16},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":21,\"female\":14},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":18,\"female\":14},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":23,\"female\":18},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":25,\"female\":20},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":18,\"female\":17}],\"months\":{\"1\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":6,\"female\":4},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":5,\"female\":1},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":4,\"female\":4},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":9,\"female\":8},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":12,\"female\":8},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":5,\"female\":4}]},\"2\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":5,\"female\":4},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":5,\"female\":4},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":5,\"female\":2},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":6,\"female\":2},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":7,\"female\":4},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":3,\"female\":7}]},\"3\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":4,\"female\":6},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":5,\"female\":4},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":4,\"female\":4},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":5,\"female\":2},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":2,\"female\":4},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":6,\"female\":2}]},\"4\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":6,\"female\":2},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":6,\"female\":5},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":5,\"female\":4},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":3,\"female\":6},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":4,\"female\":4},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":4,\"female\":4}]},\"5\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":null,\"female\":null}]},\"6\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":null,\"female\":null}]},\"7\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":null,\"female\":null}]},\"8\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":null,\"female\":null}]},\"9\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":null,\"female\":null}]}}}}}",
+        "additional_data": "{\"demographics\":{\"2024\":{\"population\":{\"female\":1838,\"male\":1858},\"child_0_15_month\":{\"female\":68,\"male\":65},\"child_0_11_month\":{\"female\":54,\"male\":56},\"number_of_sessions_in_year\":null,\"women_15_to_49\":3696,\"ha_vaccinator_designation1\":null,\"ha_vaccinator_name1\":null,\"ha_vaccinator_designation2\":null,\"ha_vaccinator_name2\":null,\"supervisor1_designation\":null,\"supervisor1_name\":null,\"epi_center_name_address\":null,\"epi_center_implementer_name\":null,\"distance_from_cc_to_epi_center\":null,\"mode_of_transportation_distribution\":null,\"mode_of_transportation_uhc\":null,\"time_to_reach_distribution_point\":40,\"time_to_reach_epi_center\":40,\"porter_name\":null,\"porter_mobile\":1765461173,\"epi_center_type\":null},\"2025\":{\"population\":{\"female\":1885,\"male\":1925},\"child_0_15_month\":{\"female\":52,\"male\":51},\"child_0_11_month\":{\"female\":52,\"male\":51},\"number_of_sessions_in_year\":null,\"women_15_to_49\":3810,\"ha_vaccinator_designation1\":null,\"ha_vaccinator_name1\":null,\"ha_vaccinator_designation2\":null,\"ha_vaccinator_name2\":null,\"supervisor1_designation\":null,\"supervisor1_name\":null,\"epi_center_name_address\":null,\"epi_center_implementer_name\":null,\"distance_from_cc_to_epi_center\":null,\"mode_of_transportation_distribution\":null,\"mode_of_transportation_uhc\":null,\"time_to_reach_distribution_point\":50,\"time_to_reach_epi_center\":30,\"porter_name\":null,\"porter_mobile\":1765461173,\"epi_center_type\":null}}}",
+        "epi_uids": null,
+        "remarks": null,
+        "build_at": "2025-09-11 02:39:23 PM",
+        "created_at": "2025-08-08T08:14:58.000000Z",
+        "updated_at": "2025-09-15T21:40:42.000000Z",
+        "status": "active",
+        "parent": {
+            "id": 35148,
+            "type": "ward",
+            "uid": "Mxz4DFv9TFR",
+            "name": "Ward 3",
+            "etracker_name": "Mxz4DFv9TFR",
+            "geo_name": "Ward 3",
+            "parent_uid": "TEv3zrA4jbe",
+            "json_file_path": "/var/www/html/staging/codes/storage/app/public/uploads/import/shapes/area-data/Sylhet_District_wpHsNmBZBIw_6091/Gowainghat_Upazila_JUBx8og1UXQ_60910041/Rustampur_Union_TEv3zrA4jbe_6091004100677/Ward 3_Ward_6091004100677W3/Ward 3_Ward_6091004100677W3.json",
+            "is_bulk_imported": true,
+            "vaccine_target": "{\"child_0_to_11_month\":{\"2025\":{\"male\":305,\"female\":332},\"2024\":{\"male\":338,\"female\":332}}}",
+            "vaccine_coverage": "{\"child_0_to_11_month\":{\"2024\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":293,\"female\":336},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":279,\"female\":346},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":297,\"female\":329},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":306,\"female\":341},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":296,\"female\":339},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":301,\"female\":343}],\"months\":{\"1\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":19,\"female\":21},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":24,\"female\":23},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":29,\"female\":29},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":24,\"female\":20},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":27,\"female\":33},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":25,\"female\":29}]},\"2\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":27,\"female\":28},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":20,\"female\":25},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":25,\"female\":24},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":26,\"female\":24},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":27,\"female\":29},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":40,\"female\":26}]},\"3\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":null,\"female\":null},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":25,\"female\":33},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":32,\"female\":31},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":19,\"female\":36}]},\"4\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":21,\"female\":20},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":9,\"female\":13},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":11,\"female\":9},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":25,\"female\":31},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":24,\"female\":28},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":23,\"female\":31}]},\"5\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":52,\"female\":61},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":26,\"female\":31},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":24,\"female\":28},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":25,\"female\":22},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":24,\"female\":31},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":25,\"female\":23}]},\"6\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":26,\"female\":33},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":43,\"female\":55},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":27,\"female\":30},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":26,\"female\":28},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":23,\"female\":20},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":17,\"female\":28}]},\"7\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":19,\"female\":32},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":29,\"female\":41},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":31,\"female\":47},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":10,\"female\":18},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":11,\"female\":16},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":11,\"female\":11}]},\"8\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":11,\"female\":16},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":16,\"female\":22},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":23,\"female\":22},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":18,\"female\":15},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":14,\"female\":12},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":11,\"female\":16}]},\"9\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":32,\"female\":35},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":27,\"female\":37},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":31,\"female\":42},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":37,\"female\":38},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":33,\"female\":33},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":44,\"female\":58}]},\"10\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":24,\"female\":38},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":28,\"female\":40},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":30,\"female\":33},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":36,\"female\":52},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":37,\"female\":52},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":29,\"female\":25}]},\"11\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":30,\"female\":24},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":30,\"female\":31},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":33,\"female\":33},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":34,\"female\":34},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":25,\"female\":32},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":27,\"female\":33}]},\"12\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":32,\"female\":28},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":27,\"female\":28},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":33,\"female\":32},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":20,\"female\":26},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":19,\"female\":22},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":30,\"female\":27}]}}},\"2025\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":117,\"female\":105},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":129,\"female\":98},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":122,\"female\":110},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":98,\"female\":131},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":110,\"female\":123},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":116,\"female\":102}],\"months\":{\"1\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":30,\"female\":25},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":33,\"female\":23},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":26,\"female\":30},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":26,\"female\":38},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":30,\"female\":35},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":32,\"female\":26}]},\"2\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":24,\"female\":28},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":33,\"female\":26},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":33,\"female\":24},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":24,\"female\":39},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":29,\"female\":32},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":28,\"female\":22}]},\"3\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":28,\"female\":23},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":24,\"female\":26},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":29,\"female\":25},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":16,\"female\":22},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":18,\"female\":20},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":25,\"female\":20}]},\"4\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":29,\"female\":22},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":30,\"female\":21},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":27,\"female\":28},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":25,\"female\":28},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":27,\"female\":30},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":26,\"female\":29}]},\"5\":{\"vaccine\":[{\"vaccine_uid\":\"HOq1Ax6xB19\",\"vaccine_name\":\"Penta - 1st\",\"male\":6,\"female\":7},{\"vaccine_uid\":\"NCu55gLH6Te\",\"vaccine_name\":\"Penta - 2nd\",\"male\":9,\"female\":2},{\"vaccine_uid\":\"b3FM2S2oaAd\",\"vaccine_name\":\"Penta - 3rd\",\"male\":7,\"female\":3},{\"vaccine_uid\":\"xyVY5CmifZP\",\"vaccine_name\":\"MR - 1st\",\"male\":7,\"female\":4},{\"vaccine_uid\":\"nHwxXPJziO2\",\"vaccine_name\":\"MR - 2nd\",\"male\":6,\"female\":6},{\"vaccine_uid\":\"x3aIDdpR65a\",\"vaccine_name\":\"BCG\",\"male\":5,\"female\":5}]}}}}}",
+            "additional_data": null,
+            "epi_uids": null,
+            "remarks": null,
+            "build_at": "2025-09-15 03:23:00 PM",
+            "created_at": "2025-08-08T08:14:58.000000Z",
+            "updated_at": "2025-09-15T09:23:00.000000Z",
+            "status": "active"
+        }
+    },
+    "coverageTableData": {
+        "months": {
+            "January": {
+                "coverages": {
+                    "Penta - 1st": 10,
+                    "Penta - 2nd": 6,
+                    "Penta - 3rd": 8,
+                    "MR - 1st": 17,
+                    "MR - 2nd": 20,
+                    "BCG": 9
+                },
+                "dropouts": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 3,
+                    "Penta - 3rd": 1,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                }
+            },
+            "February": {
+                "coverages": {
+                    "Penta - 1st": 9,
+                    "Penta - 2nd": 9,
+                    "Penta - 3rd": 7,
+                    "MR - 1st": 8,
+                    "MR - 2nd": 11,
+                    "BCG": 10
+                },
+                "dropouts": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 2,
+                    "MR - 1st": 1,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                }
+            },
+            "March": {
+                "coverages": {
+                    "Penta - 1st": 10,
+                    "Penta - 2nd": 9,
+                    "Penta - 3rd": 8,
+                    "MR - 1st": 7,
+                    "MR - 2nd": 6,
+                    "BCG": 8
+                },
+                "dropouts": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 1,
+                    "MR - 1st": 2,
+                    "MR - 2nd": 3,
+                    "BCG": 1
+                }
+            },
+            "April": {
+                "coverages": {
+                    "Penta - 1st": 8,
+                    "Penta - 2nd": 11,
+                    "Penta - 3rd": 9,
+                    "MR - 1st": 9,
+                    "MR - 2nd": 8,
+                    "BCG": 8
+                },
+                "dropouts": {
+                    "Penta - 1st": 1,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 1,
+                    "BCG": 1
+                }
+            },
+            "May": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 9,
+                    "Penta - 2nd": 9,
+                    "Penta - 3rd": 9,
+                    "MR - 1st": 9,
+                    "MR - 2nd": 9,
+                    "BCG": 9
+                }
+            },
+            "June": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 9,
+                    "Penta - 2nd": 9,
+                    "Penta - 3rd": 9,
+                    "MR - 1st": 9,
+                    "MR - 2nd": 9,
+                    "BCG": 9
+                }
+            },
+            "July": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 9,
+                    "Penta - 2nd": 9,
+                    "Penta - 3rd": 9,
+                    "MR - 1st": 9,
+                    "MR - 2nd": 9,
+                    "BCG": 9
+                }
+            },
+            "August": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 9,
+                    "Penta - 2nd": 9,
+                    "Penta - 3rd": 9,
+                    "MR - 1st": 9,
+                    "MR - 2nd": 9,
+                    "BCG": 9
+                }
+            },
+            "September": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 9,
+                    "Penta - 2nd": 9,
+                    "Penta - 3rd": 9,
+                    "MR - 1st": 9,
+                    "MR - 2nd": 9,
+                    "BCG": 9
+                }
+            },
+            "October": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                }
+            },
+            "November": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                }
+            },
+            "December": {
+                "coverages": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                },
+                "dropouts": {
+                    "Penta - 1st": 0,
+                    "Penta - 2nd": 0,
+                    "Penta - 3rd": 0,
+                    "MR - 1st": 0,
+                    "MR - 2nd": 0,
+                    "BCG": 0
+                }
+            }
+        },
+        "totals": {
+            "coverages": {
+                "Penta - 1st": 37,
+                "Penta - 2nd": 35,
+                "Penta - 3rd": 32,
+                "MR - 1st": 41,
+                "MR - 2nd": 45,
+                "BCG": 35
+            },
+            "dropouts": {
+                "Penta - 1st": 46,
+                "Penta - 2nd": 48,
+                "Penta - 3rd": 49,
+                "MR - 1st": 48,
+                "MR - 2nd": 49,
+                "BCG": 47
+            }
+        },
+        "vaccine_names": [
+            "Penta - 1st",
+            "Penta - 2nd",
+            "Penta - 3rd",
+            "MR - 1st",
+            "MR - 2nd",
+            "BCG"
+        ],
+        "targets": {
+            "year": 103,
+            "month": 9
+        },
+        "coverage_percentages": {
+            "Penta - 1st": 35.920000000000002,
+            "Penta - 2nd": 33.979999999999997,
+            "Penta - 3rd": 31.07,
+            "MR - 1st": 39.810000000000002,
+            "MR - 2nd": 43.689999999999998,
+            "BCG": 33.979999999999997
+        }
+    },
+    "chartData": {
+        "labels": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ],
+        "datasets": [
+            {
+                "label": "Monthly Target",
+                "data": [
+                    9,
+                    9,
+                    9,
+                    9,
+                    9,
+                    9,
+                    9,
+                    9,
+                    9,
+                    9,
+                    9,
+                    9
+                ],
+                "borderColor": "#ff0000",
+                "backgroundColor": "transparent",
+                "borderWidth": 2,
+                "borderDash": [
+                    5,
+                    5
+                ],
+                "pointRadius": 0
+            },
+            {
+                "label": "Penta - 1st",
+                "data": [
+                    10,
+                    9,
+                    10,
+                    8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "borderColor": "#4e73df",
+                "backgroundColor": "transparent",
+                "borderWidth": 2,
+                "pointRadius": 3,
+                "tension": 0.10000000000000001
+            },
+            {
+                "label": "Penta - 2nd",
+                "data": [
+                    6,
+                    9,
+                    9,
+                    11,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "borderColor": "#1cc88a",
+                "backgroundColor": "transparent",
+                "borderWidth": 2,
+                "pointRadius": 3,
+                "tension": 0.10000000000000001
+            },
+            {
+                "label": "Penta - 3rd",
+                "data": [
+                    8,
+                    7,
+                    8,
+                    9,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "borderColor": "#36b9cc",
+                "backgroundColor": "transparent",
+                "borderWidth": 2,
+                "pointRadius": 3,
+                "tension": 0.10000000000000001
+            },
+            {
+                "label": "MR - 1st",
+                "data": [
+                    17,
+                    8,
+                    7,
+                    9,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "borderColor": "#f6c23e",
+                "backgroundColor": "transparent",
+                "borderWidth": 2,
+                "pointRadius": 3,
+                "tension": 0.10000000000000001
+            },
+            {
+                "label": "MR - 2nd",
+                "data": [
+                    20,
+                    11,
+                    6,
+                    8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "borderColor": "#e74a3b",
+                "backgroundColor": "transparent",
+                "borderWidth": 2,
+                "pointRadius": 3,
+                "tension": 0.10000000000000001
+            },
+            {
+                "label": "BCG",
+                "data": [
+                    9,
+                    10,
+                    8,
+                    8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "borderColor": "#858796",
+                "backgroundColor": "transparent",
+                "borderWidth": 2,
+                "pointRadius": 3,
+                "tension": 0.10000000000000001
+            }
+        ]
+    },
+    "uid": "Gwa7AvZ9Bnk",
+    "nameList": "KHA2",
+    "subblocks": [
+        {
+            "uid": "wiI6iVN0aWX",
+            "name": "GA1"
+        },
+        {
+            "uid": "cYg7aZh0rFG",
+            "name": "GA2"
+        },
+        {
+            "uid": "IUK2BcY8uZz",
+            "name": "GHA1"
+        },
+        {
+            "uid": "fcG2VbB9vcS",
+            "name": "GHA2"
+        },
+        {
+            "uid": "HuP5gGD0BLC",
+            "name": "KA1"
+        },
+        {
+            "uid": "LiA5Jsz6VXa",
+            "name": "KA2"
+        },
+        {
+            "uid": "qUH2zUV1HPH",
+            "name": "KHA1"
+        },
+        {
+            "uid": "Gwa7AvZ9Bnk",
+            "name": "KHA2"
+        }
+    ],
+    "wards": [
+        {
+            "uid": "Ung2myh3yAG",
+            "name": "Ward 1"
+        },
+        {
+            "uid": "aKs0KCI8yFq",
+            "name": "Ward 2"
+        },
+        {
+            "uid": "Mxz4DFv9TFR",
+            "name": "Ward 3"
+        }
+    ],
+    "unions": [
+        {
+            "uid": "SaQ3Hpm8OTj",
+            "name": "Alirgaon"
+        },
+        {
+            "uid": "ysx4ZWz5nzL",
+            "name": "Dowbari"
+        },
+        {
+            "uid": "JQC5cQK0Tmo",
+            "name": "Fatehpur"
+        },
+        {
+            "uid": "DyK8CiJ9cXo",
+            "name": "Lengura"
+        },
+        {
+            "uid": "mpn8TbS6XQf",
+            "name": "Nandirgaon"
+        },
+        {
+            "uid": "aQA4fWH2aUi",
+            "name": "Paschim Jaflong"
+        },
+        {
+            "uid": "prh9Lmm2cxe",
+            "name": "Purba Jaflong"
+        },
+        {
+            "uid": "TEv3zrA4jbe",
+            "name": "Rustampur"
+        },
+        {
+            "uid": "gDM5ZVG6wJw",
+            "name": "Towakul"
+        }
+    ],
+    "upazilas": [
+        {
+            "uid": "FGkLWagWU1f",
+            "name": "Balaganj"
+        },
+        {
+            "uid": "SuUWVSwjM7S",
+            "name": "Beani Bazar"
+        },
+        {
+            "uid": "XjlsitfZGmc",
+            "name": "Bishwanath"
+        },
+        {
+            "uid": "vckzCSjvbrm",
+            "name": "Companiganj"
+        },
+        {
+            "uid": "O5dBLXALEZA",
+            "name": "Dakshin Surma"
+        },
+        {
+            "uid": "E68yUQYVr9K",
+            "name": "Fenchuganj"
+        },
+        {
+            "uid": "Hrr3fS3Z9Zs",
+            "name": "Golabganj"
+        },
+        {
+            "uid": "JUBx8og1UXQ",
+            "name": "Gowainghat"
+        },
+        {
+            "uid": "ZK8x9hGHUqc",
+            "name": "Jaintiapur"
+        },
+        {
+            "uid": "Z0mirEbD13D",
+            "name": "Kanaighat"
+        },
+        {
+            "uid": "RccE4Q2rjQo",
+            "name": "Sylhet Sadar"
+        },
+        {
+            "uid": "P73ghpGnxYm",
+            "name": "Zakiganj"
+        }
+    ],
+    "subblockId": "Gwa7AvZ9Bnk",
+    "wardId": "Mxz4DFv9TFR",
+    "unionId": "TEv3zrA4jbe",
+    "upazilaId": "JUBx8og1UXQ",
+    "districtId": "wpHsNmBZBIw",
+    "divisionId": "G0Apq8AyXEe",
+    "type": "ward",
+    "subBlockName": "KHA2",
+    "wardName": "Ward 3",
+    "unionName": "Rustampur",
+    "upazilaName": "Gowainghat",
+    "districtName": "Sylhet",
+    "divisionName": "Sylhet Division",
+    "cityCorporationName": "",
+    "ccZoneName": "",
+    "ccWardName": "",
+    "ccUid": "",
+    "selectedYear": "2025"
+}

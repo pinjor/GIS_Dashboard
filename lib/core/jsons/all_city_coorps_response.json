@@ -1,0 +1,80 @@
+{
+    "current_page": 1,
+    "data": [
+        {
+            "uid": "XPeIlpEDvpn",
+            "name": "Dhaka North CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        },
+        {
+            "uid": "AGuxsoFsYIv",
+            "name": "Dhaka South CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        },
+        {
+            "uid": "VzxNxkhNrgy",
+            "name": "Narayanganj CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        },
+        {
+            "uid": "znW8Rsl2Kxv",
+            "name": "Gazipur CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        },
+        {
+            "uid": "Wxc3qhC6nKd",
+            "name": "Chattogram CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        },
+        {
+            "uid": "DAO7d4HVHuk",
+            "name": "Rangpur CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        },
+        {
+            "uid": "I8zluOsInxz",
+            "name": "Sylhet CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        },
+        {
+            "uid": "nyiKx41WXYX",
+            "name": "Khulna CC",
+            "type": "city-corporation",
+            "parent_uid": null
+        }
+    ],
+    "first_page_url": "http://46.250.234.81/areas?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://46.250.234.81/areas?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://46.250.234.81/areas?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://46.250.234.81/areas",
+    "per_page": 100,
+    "prev_page_url": null,
+    "to": 8,
+    "total": 8
+}

@@ -44,12 +44,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-.env
-/lib/core/jsons/
+# .env
+# /lib/core/jsons/
 
 # freezed, generated files
 *.g.dart
 *.freezed.dart
-/assets/tmp/
-PLAN_A_IMPLEMENTATION.md
-CC_EPI_FILTER_IMPLEMENTATION.md
+# /assets/tmp/
+# PLAN_A_IMPLEMENTATION.md
+# CC_EPI_FILTER_IMPLEMENTATION.md

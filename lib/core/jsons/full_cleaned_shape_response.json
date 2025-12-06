@@ -1,0 +1,1373 @@
+{
+  "type": "FeatureCollection",
+  "info": {
+    "type": "districts",
+    "created_at": "2025-08-14 07:42:41 PM"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.66775009179335
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Bagerhat",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.61377405399999
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Bandarban",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.27324860600008
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Barguna",
+        "org_uid": "tJ23nFn03ns",
+        "parent_slug": "divisions/barishal-division",
+        "slug": "barguna"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.4178151796269
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Barishal",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.73877250154976
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Bhola",
+        "org_uid": "SsBgIrBMR8w",
+        "parent_slug": "divisions/barishal-division",
+        "slug": "bhola"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.64663305700002
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Bogura",
+        "org_uid": "Mw6T3cMzFCS",
+        "parent_slug": "divisions/rajshahi-division",
+        "slug": "bogura-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.79626427900004
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Brahmanbaria",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                88.33109336900009
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Chapainawabganj",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.5508809398037
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Chandpur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                91.91995148287486
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Chattogram",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              89.01434543600006
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Chuadanga",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.65766642748214
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Cumilla",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                92.32719129800009
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Cox's Bazar",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.16538816497147
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Dhaka",
+        "org_uid": "QcTlB4zamGB",
+        "parent_slug": "divisions/dhaka-division",
+        "slug": "dhaka-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88.62479927800007
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Dinajpur",
+        "org_uid": "QYrmONYNCy2",
+        "parent_slug": "divisions/rangpur-division",
+        "slug": "dinajpur"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.16878845323764
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Faridpur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                91.45128143400002
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Feni",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.62200378714525
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Gaibandha",
+        "org_uid": "W9KrpQU6TLm",
+        "parent_slug": "divisions/rangpur-division",
+        "slug": "gaibandha"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              90.65144474500003
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Gazipur",
+        "org_uid": "Dm5f5xHNXLC",
+        "parent_slug": "divisions/dhaka-division",
+        "slug": "gazipur-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              90.02271322500006
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Gopalganj",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              91.65005609000005
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Habiganj",
+        "org_uid": "JaqS7PoUpef",
+        "parent_slug": "divisions/sylhet-division",
+        "slug": "habiganj-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.81100094
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Jamalpur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              89.25662998200005
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Jashore",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.1766415697992
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Jhalokati",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              89.29835307300007
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Jhenaidah",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              89.20852930700002
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Joypurhat",
+        "org_uid": "dXz4nlHTmUG",
+        "parent_slug": "divisions/rajshahi-division",
+        "slug": "joypurhat-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.07805165600008
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Khagrachhari",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.58007633485512
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Khulna",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                91.0267898660001
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Kishoreganj",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.70900198500004
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Kurigram",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.14027315200006
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Kushtia",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.93143800700007
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Lakshmipur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.45338324444123
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Lalmonirhat",
+        "org_uid": "cvH8QAmvQMx",
+        "parent_slug": "divisions/rangpur-division",
+        "slug": "lalmonirhat"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.26028161220687
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Madaripur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              89.49784086000003
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Magura",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.94650344687678
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Manikganj",
+        "org_uid": "yUizLVMh15J",
+        "parent_slug": "divisions/dhaka-division",
+        "slug": "manikganj-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              91.64734991900005
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Maulvibazar",
+        "org_uid": "lPUmKj10UW0",
+        "parent_slug": "divisions/sylhet-division",
+        "slug": "maulvibazar-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88.85873443000006
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Meherpur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.44299565372651
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Munshiganj",
+        "org_uid": "fyZy2EnOurX",
+        "parent_slug": "divisions/dhaka-division",
+        "slug": "munshiganj-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              90.61800079000008
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Mymensingh",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88.92331091700002
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Naogaon",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              89.62053239400005
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Narail",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.57803123135646
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Narayanganj",
+        "org_uid": "svplE3L1nVM",
+        "parent_slug": "divisions/dhaka-division",
+        "slug": "narayanganj-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.72129585571933
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Narsingdi",
+        "org_uid": "iOGsTH3jTn2",
+        "parent_slug": "divisions/dhaka-division",
+        "slug": "narsingdi-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                88.9955114470957
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Natore",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              90.96215505600009
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Netrakona",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.13061665000008
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Nilphamari",
+        "org_uid": "nO6YhCOhfzs",
+        "parent_slug": "divisions/rangpur-division",
+        "slug": "nilphamari"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                91.02018997948413
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Noakhali",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.53592358660424
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Pabna",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88.76083738400011
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Panchagarh",
+        "org_uid": "zVxk7ilIDvv",
+        "parent_slug": "divisions/rangpur-division",
+        "slug": "panchagarh"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.44240040595419
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Patuakhali",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.12581279367248
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Pirojpur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.6431673970578
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Rajbari",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                88.83468108556373
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Rajshahi",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                92.327416858
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Rangamati",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.52423761427453
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Rangpur",
+        "org_uid": "yWcChyPavg3",
+        "parent_slug": "divisions/rangpur-division",
+        "slug": "rangpur"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.24389243398878
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Satkhira",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                90.47270944000012
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Shariatpur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              90.26411103700005
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Sherpur",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.73265519600002
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Sirajganj",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              91.70273456600005
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Sunamganj",
+        "org_uid": "yd7wviaF3wA",
+        "parent_slug": "divisions/sylhet-division",
+        "slug": "sunamganj-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.25088961300011
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Sylhet",
+        "org_uid": "wpHsNmBZBIw",
+        "parent_slug": "divisions/sylhet-division",
+        "slug": "sylhet-district"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                89.79241153363849
+              ]
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Tangail",
+        "org_uid": null,
+        "parent_slug": null,
+        "slug": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88.31999230200005
+            ]
+          ]
+        ]
+      },
+      "info": {
+        "type": "district",
+        "name": "Thakurgaon",
+        "org_uid": "Bur9WC3b50G",
+        "parent_slug": "divisions/rangpur-division",
+        "slug": "thakurgaon"
+      }
+    }
+  ]
+}

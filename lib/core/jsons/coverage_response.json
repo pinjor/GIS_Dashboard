@@ -1,0 +1,99 @@
+{
+    "metadata": {
+        "year": 2025,
+        "area_type": "district",
+        "generated_at": "2025-08-05 16:07:14",
+        "data_structure": "gender_specific"      
+    },  
+    "vaccines": [
+        {
+            "vaccine_uid": "HOq1Ax6xB19",
+            "vaccine_name": "Penta - 1st",
+            "total_target": 45138016,
+            "total_target_male": 390569,
+            "total_target_female": 44747445,
+            "total_coverage": 2832353,
+            "total_coverage_male": 2696968,
+            "total_coverage_female": 135385,
+            "total_coverage_percentage": 6.27,
+            "total_coverage_percentage_male": 100,
+            "total_coverage_percentage_female": 0.3,
+            "areas": [
+                {
+                    "name": "Dhaka",
+                    "uid": "QcTlB4zamGB",
+                    "target": 73159,
+                    "target_male": 35038,
+                    "target_female": 38121,
+                    "coverage": 5268,
+                    "coverage_male": 2649,
+                    "coverage_female": 2619,
+                    "coverage_percentage": 7.2,
+                    "coverage_percentage_male": 7.56,
+                    "coverage_percentage_female": 6.87,
+                    "dropout": 67890.67,
+                    "dropout_male": 32389,
+                    "dropout_female": 35501.67,
+                    "monthly_coverages": {
+                        "1": {
+                            "coverage": 1209,
+                            "coverage_male": 604,
+                            "coverage_female": 605,
+                            "coverage_percentage": 19.83,
+                            "coverage_percentage_male": 20.69,
+                            "coverage_percentage_female": 19.04
+                        }
+                    }
+                }
+            ],
+            "month_wise_total_coverages": {
+                "1": {
+                    "coverage": 46176,
+                    "coverage_male": 23887,
+                    "coverage_female": 22289,
+                    "coverage_percentage": 1.23,
+                    "coverage_percentage_male": 73.39,
+                    "coverage_percentage_female": 0.6
+                }
+            },
+            "performance": {
+                "highest": [
+                    {
+                        "name": "Nilphamari",
+                        "uid": "nO6YhCOhfzs",
+                        "target": 30178,
+                        "target_male": 14946,
+                        "target_female": 15232,
+                        "coverage": 118505,
+                        "coverage_male": 115070,
+                        "coverage_female": 3435,
+                        "coverage_percentage": 100,
+                        "coverage_percentage_male": 100,
+                        "coverage_percentage_female": 22.55,
+                        "dropout": -88327,
+                        "dropout_male": -100124,
+                        "dropout_female": 11797
+                    }
+                ],
+                "lowest": [
+                    {
+                        "name": "Maulvibazar",
+                        "uid": "lPUmKj10UW0",
+                        "target": 43817829,
+                        "target_male": 14187,
+                        "target_female": 43803642,
+                        "coverage": 124029,
+                        "coverage_male": 117794,
+                        "coverage_female": 6235,
+                        "coverage_percentage": 0.28,
+                        "coverage_percentage_male": 100,
+                        "coverage_percentage_female": 0.01,
+                        "dropout": 43693799.67,
+                        "dropout_male": -103607.33,
+                        "dropout_female": 43797407
+                    }
+                ]
+            }
+        }
+    ]
+}

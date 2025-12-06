@@ -1,0 +1,6165 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "FCy4wQK5uXt"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04124414030491,
+                    23.976964262191018
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "QXU8quS2MHY"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04838190020462,
+                    23.980772900049374
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "NMi7tld0iCv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04156479987569,
+                    23.979185799884817
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ga-1) EPI Center",
+                "org_uid": "zbG5HvS8UoM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04795108447502,
+                    23.97712383789485
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "KAH2Uvs0Fty"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.03996410016316,
+                    23.971604599572686
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "Nrc3AeU0ZOa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07334480042226,
+                    24.0105336995706
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "fUB5MOf4nJi"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.060982099944,
+                    24.00334669999029
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "gQQ4xPA3lOu"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06013609960138,
+                    24.000569099784173
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "VIE2ZoZ2DpP"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05252169991655,
+                    24.005328099812004
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "NSw1UIL2xdB"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06188300030027,
+                    24.001729399692067
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "jMI2cak8koz"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.068712200108,
+                    24.009457099565566
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "HzZ3Akx5Kgz"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06919800038747,
+                    24.01178840041439
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "pRj0Hns4Wgk"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07088819973069,
+                    24.013373600311468
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "EPi2sog9dSO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04547969982832,
+                    23.997580800113894
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "MNs7TEe4WlI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05090560021335,
+                    23.999301199590718
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "NgR4aBw8QTq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05413779961981,
+                    24.003918100440046
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "tEz7fOZ9GmR"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05752199974057,
+                    23.999956499592827
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "kBb7TTF4mIb"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05317780031527,
+                    23.990601999882415
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "tpT7nZA7Beh"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05670249972064,
+                    23.988597199701076
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "spv7NOS4Yba"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05438420037063,
+                    23.980584199801058
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "jIx0LPG5wsp"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0530021995919,
+                    23.981250600135127
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "gXD0Wii7CdP"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15691600217184,
+                    24.003889041546074
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "DXH3zjS9ubE"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16557200024766,
+                    24.00765009987225
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "bvt7GCw8PAy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18116909987413,
+                    23.995777199857912
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "fuK3Qpz3YJR"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15976830006707,
+                    24.017320099742847
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "FIL6eFd2Sjm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15201540029057,
+                    24.020575900057793
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "qcP5lKz8cMS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15654090034235,
+                    24.010168299627367
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "auQ3EuC2WQd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17146190044639,
+                    23.99915350033382
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "LDK3fzs3atq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18368059967997,
+                    23.993025699776297
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "eQr5urq1HwQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17156660041832,
+                    23.993535000240115
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "BfF6FeQ0BbZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1625749996366,
+                    23.993921699726684
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "DVP7aVG5giD"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16032329958068,
+                    23.99426999996058
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "oQv5Fhm8eJe"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16188829980524,
+                    23.99692490026399
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "gxQ3mBB7qRv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14782989973014,
+                    23.988600500212954
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "iCd7EFB8sFS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15165670029654,
+                    24.002490000413218
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "YwU6gPf6wFa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14453780007949,
+                    24.000052200049026
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "wpt2qwY9Vhg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14288469956927,
+                    24.00304490010211
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "VYI0yXe6Qxg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14745989975461,
+                    23.982882500027415
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "nsc8TTb4IDq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.142101800158,
+                    23.998328000037247
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "OPg1SXm2LNb"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14737280041447,
+                    24.01368250034716
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "VkV8Qft7fnv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13605749985379,
+                    23.984346500090965
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "UjD7naa3tcp"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13198960004007,
+                    23.99327149977995
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "OkJ9hmR8Hhd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13022980036504,
+                    23.996602100306745
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "uml9LCy8EfE"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13069829678903,
+                    23.996627269632825
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "ksM3Vbv3nhM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11701250022674,
+                    23.985782700311404
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "pLj3nLv4kZs"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06962200015522,
+                    23.98350940033862
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "pfP6sXx9tDM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09386200013125,
+                    24.002703700015786
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "Ban6WUj4geG"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07479550041205,
+                    23.974733900349293
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "KQb3QqW6tgb"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07507320026804,
+                    23.977640600033737
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "qHh7Aoj0IeA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06842189985088,
+                    23.97635209996946
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "NiM6xqk1saG"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06532509967366,
+                    23.966210599939302
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "lZC6rCc3soB"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05783740007604,
+                    23.96157029962967
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "zui2Qik5nRy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05393609967132,
+                    23.961890999669947
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "cor1tIS9HbM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06968779995208,
+                    23.964975900017805
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "csp1KGo0oZZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0718984999159,
+                    23.964987399648805
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "Mii3rmm0zLx"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06867570022342,
+                    23.981453800152792
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "HDK8IQr2KKV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06343759986538,
+                    23.986313099769802
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "iaJ9BeY2vkQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06127190287606,
+                    23.98748938422773
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-2) EPI Center",
+                "org_uid": "ZKT8eGD8RlM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06957062008809,
+                    23.99237160936235
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "fDp9yVL0rGv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06967460959561,
+                    23.98752786801674
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "stx8eyd0yjC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08411069974903,
+                    23.972283200109644
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "Xzr7FCg7DJn"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08495454441675,
+                    23.999492896380104
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "eEu3fLE6TCu"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08977160017929,
+                    23.98856150021311
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "NKj0cKU5lFD"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09109379963922,
+                    23.992887599882863
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "Bmq5Fab6Jot"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09627339999747,
+                    23.99291339963372
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "PqM3zxe8MJH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0838056002483,
+                    24.00896820022234
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "xpf3RGJ9oTO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0789121434807,
+                    24.014819724550705
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "kRP3Vbi7pmY"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07876740029536,
+                    24.009043799931476
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "hQs0Zyw9WNa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18313917003672,
+                    23.95428522987953
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "Eml7fBZ3aCc"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20283063022947,
+                    23.961749280005336
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "MQZ3Oau3MHs"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20443554956103,
+                    23.96573437024506
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "Cuv2iZz3JyW"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22249603256591,
+                    23.93999038814593
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "APw4shS1rbp"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22672758291168,
+                    23.941145675232804
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "LBq7Oui3EMk"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.2282694516739,
+                    23.938523833108434
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "HEU7mYf9qPH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22325116810697,
+                    23.936841554094485
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "DpT8DFw3cYS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22604063666608,
+                    23.93265275751878
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "LHw5egP6ZTQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22221292508647,
+                    23.933790699381348
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "PKm7zHl3Qyr"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.2180027624176,
+                    23.93557245510476
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "OzN0Gni1htA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22716389979422,
+                    23.93610179965839
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "XLe9UEt4XDU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19400469985709,
+                    23.96909009962843
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "VUJ3vwo4zRr"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19461250036665,
+                    23.975022199614898
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "kJQ9SKc2BbU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18990220042627,
+                    23.976006100201403
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "deL3PFW2TJC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18660029996391,
+                    23.98041439970484
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "NcV4riX3auR"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18277899965119,
+                    23.973621599956914
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "Tvd1WXH6yau"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20351008961899,
+                    23.95968150030103
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "IWp3YkP9DDd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18200010042437,
+                    23.977278399878287
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "YAw5wzN8KzH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20613870004104,
+                    23.958679199585447
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "iXU7nZT2LyK"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17062310007606,
+                    23.972585599845615
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "Klp4Fyl9gbV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.2025335499834,
+                    23.95546090010049
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "QSl1cgw3YWJ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17571920018099,
+                    23.974572300271518
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "AWm5LGk3XPD"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20081806979812,
+                    23.949431020425322
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "Oyb5Ulk2Xmm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19083994420811,
+                    23.958458515847894
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "Dox9yYw2NVa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.02506910035873,
+                    24.030289900158834
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "Awb2vBR5wPS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.01529329974602,
+                    24.0386965000435
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "DhD8PHS9ICA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.01233499966054,
+                    24.01439640017378
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "MYX4XTZ5oNj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.01163530012906,
+                    24.01147140018503
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "ChB9hNV3fpZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.02836420014779,
+                    24.015698399961252
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "rvn8Ykd3Mwv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.03505499968855,
+                    24.011448999871504
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "cve1Tkp9tDJ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.02972689967675,
+                    24.00632199996039
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "hDz3iHh2anK"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07455529958747,
+                    24.025875399829886
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "LKF3FhJ7tRI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06885060037496,
+                    24.025510400084954
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "Tyr4jJA7zJq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.068557999652,
+                    24.021364699921037
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "ZvQ2Cee6avV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06278200038906,
+                    24.014483200039706
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "sjz3vLo8kjX"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06711499965758,
+                    24.03376400010859
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "GPj6IZW3Mxj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05388169968074,
+                    24.022609799602606
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "tAU7cTb6iMV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04206459990144,
+                    24.02387330031263
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "oxg0qcS1xYc"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04841559960028,
+                    24.014465499583196
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "IcW3hXZ8KfA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08610040031328,
+                    24.01858499979795
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "jCh8WdC2Ujr"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07654719989341,
+                    24.02078959966036
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "eSF9XjW1rAy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05557330016774,
+                    24.028272100277263
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "DZX7Rnw1PYy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.077551999825,
+                    24.037220899624856
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "mNg0VRC9uov"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07527709995827,
+                    24.03145320020508
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "hoX9zIp4enE"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07699610009001,
+                    24.029571900322992
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "Kds6BUI2QGA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08406180001214,
+                    24.030953500004046
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "MkO5OOM3tzS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.03296429986261,
+                    24.02137160041906
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "USK3dBP0DFz"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07587079999746,
+                    24.019430099919248
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "Sor2FEX3Web"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21884259970625,
+                    23.919792699573463
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "mlV3oUb9css"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22379599988557,
+                    23.919312100073398
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "Aqf2KNm1ije"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22253810015326,
+                    23.9157400999257
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "xXC7mcf6Exi"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.204820599691,
+                    23.921536500309287
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "vWi8zox0tdI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.2036745000782,
+                    23.93003030025818
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "yVk7RjV4YYL"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20962560004148,
+                    23.926531899727422
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "Oro5hKg4IgT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20297540039445,
+                    23.921046900394174
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "IaJ6fig7jaU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22782090041426,
+                    23.908703100068067
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "Div3EdE2gcN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22353289962365,
+                    23.92625639961318
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "Ezv2zdl8VRk"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22082339968023,
+                    23.92607330034258
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "QIx8glH2kHW"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20279829960191,
+                    23.9327944996665
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "THE7QAy1sHy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21223369962559,
+                    23.91509349996511
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "FaF3xjh1dxh"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21916319992181,
+                    23.911502099642234
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "yIo2tCd6aoH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22120270044434,
+                    23.92046970021653
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "NtU9lZU7qGg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20436939992794,
+                    23.94055949982112
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "Rpd7bZZ4LfV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21809169997204,
+                    23.931579899592748
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "wCJ5tbS7Tdc"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20844439988917,
+                    23.924941499950307
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "zBy9ORz0kzI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21929109970455,
+                    23.916402599900096
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "bEx9pIm5Hii"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21326241073172,
+                    23.920555411003477
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "sWs8uoX0QGL"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21032929975746,
+                    23.92311290034013
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "QNu3CjN7LFP"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21075866128325,
+                    23.920653712299043
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "kjB0asH8eJa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.2119774998618,
+                    23.918948499673547
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "wOu9TZi3mnn"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21209930044245,
+                    23.917438299637865
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "HGY5Nuu3vSh"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21638930042593,
+                    23.917452300283458
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "WVl7HDv9Xjd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06927260005051,
+                    23.913328799884255
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "ZmV9bSm7wMF"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07753149977896,
+                    23.91099320027604
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "XhO2jKE5rEc"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08639950043664,
+                    23.930259200201988
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-1) EPI Center",
+                "org_uid": "fts5yYx1VMd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07399365947987,
+                    23.921139213104254
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "Smr5Sdd2GGT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07591840021405,
+                    23.928292200324847
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "KMn3dEY4lMl"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07539400013303,
+                    23.922258799803842
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "rxI1jVZ7iQG"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0815980002476,
+                    23.929519999748265
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "yif2COz5lFJ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08098668518744,
+                    23.95443126449129
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "jAX8Lhy7ewW"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07944472559365,
+                    23.945194139797763
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "qZh3fJb2iJt"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08532656876622,
+                    23.948208746436535
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "Bik5OCY0DqQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08838717482831,
+                    23.953591675415566
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "nOC7jwu1mUF"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08738613046563,
+                    23.957178476605463
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "STF4pZR2XxO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08193422348569,
+                    23.957521326048436
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "jMx1JUt7jTo"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08023573958775,
+                    23.956154658710602
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "MKf9Rjb6rnQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09065020004675,
+                    23.947801199765593
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "pSo1HlL3spZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0735195998497,
+                    23.929965600332253
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "PlR4Apx4drR"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07109279999281,
+                    23.933091400048113
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "vSF1eUA1BxA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07139490025452,
+                    23.939749500239316
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "lIy9XlR9VkR"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0720929998921,
+                    23.94259919999314
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "GAN6DoI5rHL"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06598310033985,
+                    23.94862419994695
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "ZFq5IKy7tns"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.06747230030646,
+                    23.950760599721946
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "wLq2SJC5Pdk"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0691659998111,
+                    23.952228000122147
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "Kbu3oNZ7sXd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07937350018693,
+                    23.933781100017825
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "PVQ2VxT0zWy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09998769987249,
+                    24.008763900333804
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "Zox0WKb1KSg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11962279955259,
+                    24.019416799845487
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "dhR4XjX1DWJ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1150318999023,
+                    24.010860899910654
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "AFN5Yhf0qje"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11178769994245,
+                    24.019630100149072
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "tOz5QEj3LhT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11253360034544,
+                    24.016891900141104
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "UdQ2mvL9YoM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11861810034509,
+                    24.005090999849813
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "mYe4seE1WtQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0974300000945,
+                    24.01494840044836
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "GYw9fVB9xmp"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1240335002459,
+                    24.00160579956804
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "AtC3peI5sNV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11404380038113,
+                    23.98994336789218
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "zQs8QML1SFS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10556710014163,
+                    24.004572799694984
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "qMu7vTL4WWZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1082297004404,
+                    23.97869700036631
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "iZq8zvt9tsX"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10582489979936,
+                    23.979957500038665
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "hMc0Bew5yZk"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1041965000685,
+                    23.982319699794346
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "Wnq6kBG3KKy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09904769969165,
+                    23.985441100026776
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "ljs0LAY9BsM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09975179960594,
+                    23.997002199691792
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "VoZ3cvV1yyg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09739739967034,
+                    24.00348560028027
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "chJ5BLg4rsr"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13860210010688,
+                    24.015859900214252
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "IYT8XAS2MAp"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13812490004415,
+                    24.021764099633515
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "AVM0otc0KIp"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13971279970599,
+                    24.03026499972998
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "CoK1TrS2ppq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1304486998477,
+                    24.029995800266022
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "uYz2ZPs9ixv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13562470021981,
+                    24.021837700149774
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "ixW7pJG8ZTd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11950650012494,
+                    24.01439640017378
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "Tgy4jiy9VTE"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11629369999434,
+                    24.01713050017247
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "ryL5Mum3fFd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13224059992382,
+                    24.02267339965772
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "cFA7cDR6xDa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21784410042494,
+                    23.86785840004518
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "Izx1zTQ6Rzg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19201950039968,
+                    23.91474040004948
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "ZOQ3Ren2iyO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20019549972261,
+                    23.911544800352317
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "LyM3loK6Epa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20559300041668,
+                    23.90231549976056
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "ZnK2pyR2kxz"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.2060697706035,
+                    23.900608071205568
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "bga6gcS7WaT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20667297647674,
+                    23.900519791954878
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "uuN4utX2rUn"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21426400008357,
+                    23.90013619962599
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "pYQ4tSJ2Doa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21773676184216,
+                    23.90356539462732
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "IKs3TJJ6tIe"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.23464789958098,
+                    23.864646000112884
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "rBM8BbN8NUl"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.23062219955494,
+                    23.873768200442157
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "iru5IXW7ctL"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21002354195298,
+                    23.87474521761777
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "TCF1WGs4EUo"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20777817402359,
+                    23.861906438531378
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "oMh3pgM3zjE"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20501010033593,
+                    23.852247299773126
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "uzC1ySn6DQg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20224320026352,
+                    23.899286500371772
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "eFG9BXe3lTV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.23246107481879,
+                    23.84213549355826
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "zxT1cbc8kDT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.23819954087617,
+                    23.838554107186326
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "rcD6qlb2Vkq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21245055944581,
+                    23.849902013567146
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "aBn5fcY4XvX"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.24115980777896,
+                    23.840272297028946
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "oQS5qKY6COQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18485099987379,
+                    23.88767590022269
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "zSE3Hrw1Qqd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19255959994564,
+                    23.885844500123653
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "uUa3cLm3tgj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22423150018363,
+                    23.88443189991233
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "eem9rzH4VUH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19839780351589,
+                    23.867365890823237
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "yqg5BBl2MTg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.22791480042775,
+                    23.89675029978656
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "mZa8kKI7qjU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.21779598939344,
+                    23.904025776468472
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-1) EPI Center",
+                "org_uid": "usl9uas1hch"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09140070857592,
+                    23.97636312655709
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-1) EPI Center",
+                "org_uid": "rSD9TTx4TJO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10070446763712,
+                    23.951936914756857
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Ga-2) EPI Center",
+                "org_uid": "ayS2tba1tmg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10795038630135,
+                    23.96553934686341
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "XGJ6Nom2SYo"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11763769991995,
+                    23.9564354000737
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-2) EPI Center",
+                "org_uid": "Zse4RmX8Wcv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.074549199486,
+                    23.969066929495227
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "ZSM2kCI6nzs"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16705059990534,
+                    23.964167199956364
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "oZa8DGH7SHS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1439513998373,
+                    23.967684899938206
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "PVi8Zed8PAQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13631797859188,
+                    23.965767319606186
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "Ark7pAg9cDH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13162320005068,
+                    23.97285950006591
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "zGI1IoS5ODA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16232609966983,
+                    23.987939600132506
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "Inz5PIi3wxj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16724199991842,
+                    23.980301700263283
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "WUd3rwb6vqC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1575304999327,
+                    23.975019999873155
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "Vbt0MaW0Tnz"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15811490008264,
+                    23.968496299764467
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "czb0Jkp2sOK"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11879709960652,
+                    23.975329899954943
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "wpd5Hho3vtv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11485610042877,
+                    23.980125399867347
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "ZjI1tiU7stM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.099234300023,
+                    23.97121740006304
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "SBk2RaT2uJb"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1164829416345,
+                    23.96855690597647
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "yQt3QSk3PJW"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11225390039726,
+                    23.9625498996582
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "nkz4IUK7jgn"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11833459986195,
+                    23.957007500196028
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "rBt2nNT1Ehe"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12609159155375,
+                    23.89630836483923
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "Mst7ywC1lKO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14925910772172,
+                    23.90031298295787
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "MKN8Loo9JCU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1701180003455,
+                    23.877354499810394
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "xkQ2svy7vlV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16482059959105,
+                    23.88245519994757
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "FaV0xnf1mde"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15049350007502,
+                    23.88854510037612
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "VUX8yJA4eus"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14905469991453,
+                    23.890191400212984
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "JMN0pNs3rGp"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14976809971807,
+                    23.891466500378726
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "oNS7sOT7qKa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1513566999518,
+                    23.891431300014517
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "gUN4KMW6dqw"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15038560031525,
+                    23.88660919995465
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "RyS9xRY7jsd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1523932999109,
+                    23.883746600325424
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "yVE6Msy2OxI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12692339969522,
+                    23.893595700181493
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "SdJ1OgQ2UlN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1575262209584,
+                    23.89723320964498
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "hZz0Yde6KIX"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17830979985746,
+                    23.89385340001445
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "OME5Mkf5KrC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16768449964002,
+                    23.889165100189246
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "kmt6ECZ0YIR"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15922919966789,
+                    23.891040100320424
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "kme5aLw7swr"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17967350033183,
+                    23.88294260012094
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "gfL3EAx7ROX"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18025819995603,
+                    23.870498000182636
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "IyO8qnV8osn"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18303890012521,
+                    23.87745519959782
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "icb5Hwh4tbK"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18501560008991,
+                    23.883516399961934
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "eOa4fwu6jSK"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18211990001345,
+                    23.884786999920152
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "ulb8tBK5uuf"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15786390019889,
+                    23.834601100260613
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "Inz2GJT8Vis"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17193739989114,
+                    23.833051300377235
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "ufv1Gqq3jpF"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17433370014021,
+                    23.862611399996183
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "DAR9OeM5ThJ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17605389996754,
+                    23.860627500059138
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "ZXx6zPq6Jli"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16076189984187,
+                    23.85295329995489
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "CRb1HBo1geH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15704819981465,
+                    23.844163300196215
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "OkL0ZKG1pbM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16285039992607,
+                    23.84171059986437
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "GTy4fIy8YPS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16233766585066,
+                    23.831663746284903
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "Zdl0boF7Fod"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1652899998337,
+                    23.833557099780364
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "lOG0acN8bcv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17164689998452,
+                    23.840846700315012
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "KIj5Lei1pyt"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1623860997388,
+                    23.84426280028805
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "WjG1oVx5pWS"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16644459983848,
+                    23.84940940002383
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "scu3ToD0oJM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15316969992176,
+                    23.849058499849946
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "NCj5nSF8BGi"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15325699981076,
+                    23.846028700064494
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "wDf3ckE3pCy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14096370001482,
+                    23.8545327999488
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "mzO8IcY8VKg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.145596199605,
+                    23.85649429957232
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "aoS4VZg2SRq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20075670006173,
+                    23.84279170007693
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "DWV4MXs4jPG"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19316269969892,
+                    23.838430400042967
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "QeR3kaN0wce"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.20772008681263,
+                    23.84217121552922
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "EyI0xVx7ZUT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19855549963665,
+                    23.851686999655385
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "PSx7OBE4LoE"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19046499975997,
+                    23.853519999648313
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "bFH0NhV8DYj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18600509985555,
+                    23.84947839960853
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "mdw6YeO0QLa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18582890018365,
+                    23.839674700227306
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "vUy3cFP0OPN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18204559982462,
+                    23.843140899632886
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "qoC9PCC1lzJ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14143410030357,
+                    23.93943429955334
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "WzW6rjV1qTi"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15120479996159,
+                    23.940561999936392
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "GQC1xvI5rRZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14054890031156,
+                    23.948324199602155
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "MNz6ATY1Gvn"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1228092999093,
+                    23.932251999829987
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "rpr3DaA6lIl"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11831209972371,
+                    23.938780799993992
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "XXD2PFq0CLg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1135077001203,
+                    23.94514170032926
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "oDm7YwH3ACN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10453999972128,
+                    23.949394999879416
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "XVl2tax5aSI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11021670034052,
+                    23.945975600293764
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "GVB7ULR8eoj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11007620015658,
+                    23.942629900149825
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "AKA3CGu1mQU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10908880030797,
+                    23.936074900036658
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "lYu4MeX6WAV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10786600021578,
+                    23.932963699914865
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "JPH1DZt6xal"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14052430025629,
+                    23.95585440026042
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "pCY0Xsu4tnB"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14819409997779,
+                    23.955706899753693
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "kvJ4cIC9OMq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11733359956605,
+                    23.951375600203846
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "PlK7rbs8THA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1158993229954,
+                    23.949470733587532
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "vXp4PRO8yyP"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12994000013094,
+                    23.948622400403508
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "Pai2NFP9TOm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12620455989259,
+                    23.949302887718147
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "mMA8eCe4heI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13749203452983,
+                    23.947781760020234
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "xfR0WSR9Cxm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15551389974672,
+                    23.957610599949305
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "zSk6faD6XNv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15438429999551,
+                    23.941364199698114
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "lUX2KNg3eWd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15278720026913,
+                    23.955115799654493
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "aHe1zgD8gjj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1802248998593,
+                    23.94260959975327
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "nDV8ZEp8xkc"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17864399962093,
+                    23.927076500380224
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "dea9XKe1Bqw"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16325269995218,
+                    23.959133000187876
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "DBV5BLR7BCk"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16550039982366,
+                    23.968365200193887
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "OWJ7nrw0qWT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15955179997565,
+                    23.913351700220858
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "FLw1eEf3iRH"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17120519976021,
+                    23.90261569975479
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "YZw0EEm0fHs"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18355140037687,
+                    23.905076500280302
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "lEM1CZT2vFm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16864669958557,
+                    23.910009100039986
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "lOg9pYk3Uoc"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1706488000022,
+                    23.919909499923506
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "FJo3CeL8KAN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17095229960898,
+                    23.921553600018683
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "pZZ4pWf2rFa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16770349961689,
+                    23.92945410012669
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "AWD1ZKz5xqr"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16398070024917,
+                    23.931170600143105
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "SeZ9wmD5gmz"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18719209973568,
+                    23.927492099580775
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "liQ1jSF7efV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18540410001924,
+                    23.91763300016288
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "IxU7WHj9wtl"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1836434999476,
+                    23.910254800218922
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "FlY7SuX4Jmm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1636704997938,
+                    23.940667299756115
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "QfQ9KdR9vFi"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16565998901734,
+                    23.94200097096808
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "Dov5FPT2zAg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17412434786041,
+                    23.937940639848705
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "fKG6Jvg1qCG"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17234436470073,
+                    23.94086867145205
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "JSu7NMb7fYP"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.19354969955907,
+                    23.930621299633344
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "aXT0Szc1yhj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18929620035942,
+                    23.929291800376348
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "Pch5wOv6YDv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17171169973523,
+                    23.94918500008771
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "poq3rsg9maC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.17632620029394,
+                    23.953310899878204
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "AAX6Qht3sYw"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.18451749978283,
+                    23.94534750028697
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "Kbu2ySm3wdU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11551810038009,
+                    23.88737599970267
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "iEf3PXB8kGF"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11719930020757,
+                    23.884091400397836
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "RRq3zcX2NEm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11974360008713,
+                    23.883175900447497
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "kEp7jAp2edN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1183380001986,
+                    23.879858900367992
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "DgG3sCi5UVB"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12432900038311,
+                    23.879792099625774
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "VuH9Yxr2lcB"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12791899956221,
+                    23.8793016003886
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "UUR3ksf0xOM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12853119955525,
+                    23.881209700067643
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "Ltg6Yta1pwY"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12564869972778,
+                    23.8741918000116
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "wdY4Rkn7MnN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.16430600032174,
+                    23.869870400198863
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "ibp8MUw8gVF"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15441509997692,
+                    23.86869370025414
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "DYe0AwB1ZGL"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15038150030603,
+                    23.869211199837025
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "VCA1ZHd7EZj"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14720860039665,
+                    23.872456300018257
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "nFu1pky2ZHZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15173949997802,
+                    23.86185299991604
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "geP9Yrz9ENi"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15604389990614,
+                    23.85893119971513
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "fDS8Lst4mFF"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14729299997202,
+                    23.862671099691568
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "gSk4clc5auy"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1413552000825,
+                    23.86137179966886
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "YZx8kMT2PdZ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13064939975004,
+                    23.877114399709853
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "yrp7ief5AcY"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1328338997647,
+                    23.869176899694196
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "Nte5fhy4poe"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1410663998945,
+                    23.868406099761728
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "BvZ5cFZ9UvR"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13763170014289,
+                    23.869463699789947
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "wFM6iyt0qJi"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1375102997606,
+                    23.862864200322633
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "lLY0YOU4ScQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13665479987918,
+                    23.874710199815922
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "UkC9JGJ7XlV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13727150007975,
+                    23.87760079983707
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "okC5gTe6KnA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13774750044684,
+                    23.879037199707057
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "fGy6iul4mqc"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09910940037861,
+                    23.907796999831703
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "t. (W-3, Kha-2) EPI Center",
+                "org_uid": "DXg4DLD6PTq"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11880700024295,
+                    23.92540299964878
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "x. (W-3, Gha-2) EPI Center",
+                "org_uid": "IWt2xan4tRY"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13716379996947,
+                    23.920530899981088
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "s. (W-3, Kha-1) EPI Center",
+                "org_uid": "RmW8vGZ2hYO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15135960026538,
+                    23.91122110017369
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "u. (W-3, Ga-1) EPI Center",
+                "org_uid": "qJA5iGB9hfJ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12667649982069,
+                    23.92223819993302
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "Dbo3kNR7iiL"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12923449997226,
+                    23.923883300074294
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "iaz5Wzf9lCF"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10942719990538,
+                    23.90186770033415
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "l. (W-2, Kha-2) EPI Center",
+                "org_uid": "mNB5lef1yIC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11231810030017,
+                    23.901117799746714
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "i. (W-2, Ka-1) EPI Center",
+                "org_uid": "voL3oRh9UgD"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11149240035405,
+                    23.894234600146717
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "GYV6DXM8Ohm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12394649983116,
+                    23.90613250041463
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "w. (W-3, Gha-1) EPI Center",
+                "org_uid": "KnW5PNs8DyY"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14224950031422,
+                    23.930489100191892
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "org_uid": "khE2LGb4EZQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.15282560042118,
+                    23.922825200023
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "org_uid": "qOM4Ahy8jhb"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1583436003769,
+                    23.93000680007384
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "ppS3weP9Jzo"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10489340001044,
+                    23.90107790042481
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "m. (W-2, Ga-1) EPI Center",
+                "org_uid": "jBe1Wss5RPV"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1069702997396,
+                    23.903597500424382
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "p. (W-2, Gha-2) EPI Center",
+                "org_uid": "Owj5UtM4mJt"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11219369977948,
+                    23.916246900274302
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "o. (W-2, Gha-1) EPI Center",
+                "org_uid": "HEP9oZZ1Dnx"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1064863997276,
+                    23.915037900278946
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "DNS9OBn3RnQ"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.08894619970744,
+                    23.912401699578822
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "a. (W-1, Ka-1) EPI Center",
+                "org_uid": "Omp5fZO6ytl"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0942192000561,
+                    23.91217500027608
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "Tlu8BYX1pJK"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09959559995701,
+                    23.929268200367176
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "JJK9Pjz0BrU"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.0988372997017,
+                    23.927775699888684
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "f. (W-1, Ga-2) EPI Center",
+                "org_uid": "pRp2DgU9IGC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09301179995464,
+                    23.926658300340364
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "zJe4gua1vYC"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09508160043555,
+                    23.919428799699403
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "Dck0qaE8jpt"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.101197699914,
+                    23.91594429998952
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ga-2) EPI Center",
+                "org_uid": "zbG5HvS8UoM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05428639909809,
+                    23.978759717287176
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "zbG5HvS8UoM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.04699929957809,
+                    23.969122899702086
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-1) EPI Center",
+                "org_uid": "zbG5HvS8UoM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.05742133952327,
+                    23.97792690550233
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "ZKT8eGD8RlM"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07425339987458,
+                    23.997149567098916
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "v. (W-3, Ga-2) EPI Center",
+                "org_uid": "fts5yYx1VMd"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07301570071405,
+                    23.917384423052738
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "org_uid": "usl9uas1hch"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09011580040391,
+                    23.96901059146569
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "Zse4RmX8Wcv"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.07966979982149,
+                    23.964517399558417
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Ga-1) EPI Center",
+                "org_uid": "ayS2tba1tmg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.09859910436523,
+                    23.967609477395513
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "h. (W-1, Gha-2) EPI Center",
+                "org_uid": "rSD9TTx4TJO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.10409520043322,
+                    23.962817000104508
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "SBk2RaT2uJb"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11534079993805,
+                    23.96284620019202
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "c. (W-1, Kha-1) EPI Center",
+                "org_uid": "Mst7ywC1lKO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13295980035457,
+                    23.89458800043593
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "g. (W-1, Gha-1) EPI Center",
+                "org_uid": "SdJ1OgQ2UlN"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.1573549001086,
+                    23.899308100288636
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "d. (W-1, Kha-2) EPI Center",
+                "org_uid": "Mst7ywC1lKO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.13731421338031,
+                    23.898775850924835
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "e. (W-1, Ga-1) EPI Center",
+                "org_uid": "Mst7ywC1lKO"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.14423844544797,
+                    23.902202275114973
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "k. (W-2, Kha-1) EPI Center",
+                "org_uid": "Pai2NFP9TOm"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12492559983662,
+                    23.942848599982938
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "n. (W-2, Ga-2) EPI Center",
+                "org_uid": "PlK7rbs8THA"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.11820739975178,
+                    23.94785270034191
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": false,
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "org_uid": "mMA8eCe4heI"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.12660600016682,
+                    23.94274919971582
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "info": {
+                "type": "epi",
+                "is_fixed_center": true,
+                "name": " ",
+                "org_uid": " "
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.2241904,
+                    23.9139923
+                ]
+            }
+        }
+    ]
+}

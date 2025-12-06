@@ -1,0 +1,69 @@
+{
+    "current_page": 1,
+    "data": [
+        {
+            "uid": "kSKR2jNO8OD",
+            "name": "Barishal Division",
+            "type": "division",
+            "parent_uid": null
+        },
+        {
+            "uid": "VlP0kOsZC3u",
+            "name": "Rajshahi Division",
+            "type": "division",
+            "parent_uid": null
+        },
+        {
+            "uid": "g5RJ0OisMH9",
+            "name": "Dhaka Division",
+            "type": "division",
+            "parent_uid": null
+        },
+        {
+            "uid": "ZFDuFWPSZvV",
+            "name": "Rangpur Division",
+            "type": "division",
+            "parent_uid": null
+        },
+        {
+            "uid": "G0Apq8AyXEe",
+            "name": "Sylhet Division",
+            "type": "division",
+            "parent_uid": null
+        },
+        {
+            "uid": "rz8pgTi6avt",
+            "name": "Mymensingh Division",
+            "type": "division",
+            "parent_uid": null
+        }
+    ],
+    "first_page_url": "http://46.250.234.81/areas?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://46.250.234.81/areas?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://46.250.234.81/areas?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+        
+    ],
+    "next_page_url": null,
+    "path": "http://46.250.234.81/areas",
+    "per_page": 100,
+    "prev_page_url": null,
+    "to": 6,
+    "total": 6
+}

@@ -1,0 +1,158 @@
+{
+    "current_page": 1,
+    "data": [
+        {
+            "uid": "QcTlB4zamGB",
+            "name": "Dhaka",
+            "type": "district",
+            "parent_uid": "g5RJ0OisMH9"
+        },
+        {
+            "uid": "QYrmONYNCy2",
+            "name": "Dinajpur",
+            "type": "district",
+            "parent_uid": "ZFDuFWPSZvV"
+        },
+        {
+            "uid": "W9KrpQU6TLm",
+            "name": "Gaibandha",
+            "type": "district",
+            "parent_uid": "ZFDuFWPSZvV"
+        },
+        {
+            "uid": "Dm5f5xHNXLC",
+            "name": "Gazipur",
+            "type": "district",
+            "parent_uid": "g5RJ0OisMH9"
+        },
+        {
+            "uid": "JaqS7PoUpef",
+            "name": "Habiganj",
+            "type": "district",
+            "parent_uid": "G0Apq8AyXEe"
+        },
+        {
+            "uid": "cvH8QAmvQMx",
+            "name": "Lalmonirhat",
+            "type": "district",
+            "parent_uid": "ZFDuFWPSZvV"
+        },
+        {
+            "uid": "yUizLVMh15J",
+            "name": "Manikganj",
+            "type": "district",
+            "parent_uid": "g5RJ0OisMH9"
+        },
+        {
+            "uid": "lPUmKj10UW0",
+            "name": "Maulvibazar",
+            "type": "district",
+            "parent_uid": "G0Apq8AyXEe"
+        },
+        {
+            "uid": "fyZy2EnOurX",
+            "name": "Munshiganj",
+            "type": "district",
+            "parent_uid": "g5RJ0OisMH9"
+        },
+        {
+            "uid": "svplE3L1nVM",
+            "name": "Narayanganj",
+            "type": "district",
+            "parent_uid": "g5RJ0OisMH9"
+        },
+        {
+            "uid": "iOGsTH3jTn2",
+            "name": "Narsingdi",
+            "type": "district",
+            "parent_uid": "g5RJ0OisMH9"
+        },
+        {
+            "uid": "nO6YhCOhfzs",
+            "name": "Nilphamari",
+            "type": "district",
+            "parent_uid": "ZFDuFWPSZvV"
+        },
+        {
+            "uid": "zVxk7ilIDvv",
+            "name": "Panchagarh",
+            "type": "district",
+            "parent_uid": "ZFDuFWPSZvV"
+        },
+        {
+            "uid": "yWcChyPavg3",
+            "name": "Rangpur",
+            "type": "district",
+            "parent_uid": "ZFDuFWPSZvV"
+        },
+        {
+            "uid": "yd7wviaF3wA",
+            "name": "Sunamganj",
+            "type": "district",
+            "parent_uid": "G0Apq8AyXEe"
+        },
+        {
+            "uid": "wpHsNmBZBIw",
+            "name": "Sylhet",
+            "type": "district",
+            "parent_uid": "G0Apq8AyXEe"
+        },
+        {
+            "uid": "Bur9WC3b50G",
+            "name": "Thakurgaon",
+            "type": "district",
+            "parent_uid": "ZFDuFWPSZvV"
+        },
+        {
+            "uid": "tJ23nFn03ns",
+            "name": "Barguna",
+            "type": "district",
+            "parent_uid": "kSKR2jNO8OD"
+        },
+        {
+            "uid": "SsBgIrBMR8w",
+            "name": "Bhola",
+            "type": "district",
+            "parent_uid": "kSKR2jNO8OD"
+        },
+        {
+            "uid": "Mw6T3cMzFCS",
+            "name": "Bogura",
+            "type": "district",
+            "parent_uid": "VlP0kOsZC3u"
+        },
+        {
+            "uid": "dXz4nlHTmUG",
+            "name": "Joypurhat",
+            "type": "district",
+            "parent_uid": "VlP0kOsZC3u"
+        }
+    ],
+    "first_page_url": "http://46.250.234.81/areas?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://46.250.234.81/areas?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://46.250.234.81/areas?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://46.250.234.81/areas",
+    "per_page": 100,
+    "prev_page_url": null,
+    "to": 21,
+    "total": 21
+}

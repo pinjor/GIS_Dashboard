@@ -1,0 +1,109 @@
+{
+    "type": "FeatureCollection",
+    "info": {
+        "type": "cc-zones",
+        "cityCorporation_name": "Khulna CC",
+        "cityCorporation_uid": "nyiKx41WXYX",
+        "total_ccZones": 4,
+        "skipped_ccZones": [],
+        "created_at": "2025-09-23 05:44:23 PM"
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            89.520148785000103,
+                            22.904549484000018
+                        ],
+                        [
+                            89.520169877000072,
+                            22.904136671000057
+                        ]
+                    ]
+                ]
+            },
+            "info": {
+                "type": "cc-zone",
+                "name": "KCC Zone 1",
+                "org_uid": "KfozIfW6Bad",
+                "slug": "khulna-cc/kcc-zone-1"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            89.548394681000019,
+                            22.869848087000026
+                        ],
+                        [
+                            89.549111674000102,
+                            22.86976010900003
+                        ]
+                    ]
+                ]
+            },
+            "info": {
+                "type": "cc-zone",
+                "name": "KCC Zone 2",
+                "org_uid": "UFNgqCX9KNp",
+                "slug": "khulna-cc/kcc-zone-2"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            89.544986193000085,
+                            22.837778781000033
+                        ],
+                        [
+                            89.545444914000115,
+                            22.837016455000018
+                        ]
+                    ]
+                ]
+            },
+            "info": {
+                "type": "cc-zone",
+                "name": "KCC Zone 3",
+                "org_uid": "SFbBt74KHhT",
+                "slug": "khulna-cc/kcc-zone-3"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            89.579365847000105,
+                            22.812432144000098
+                        ],
+                        [
+                            89.579954149000017,
+                            22.811738491
+                        ]
+                    ]
+                ]
+            },
+            "info": {
+                "type": "cc-zone",
+                "name": "KCC Zone 4",
+                "org_uid": "VV3cSbHQsld",
+                "slug": "khulna-cc/kcc-zone-4"
+            }
+        }
+    ]
+}
