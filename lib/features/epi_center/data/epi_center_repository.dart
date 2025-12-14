@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/network/dio_client_provider.dart';
+import 'package:gis_dashboard/core/network/staging_ssl_adapter.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_coords_response.dart';
 
 import '../../../core/common/constants/api_constants.dart';
@@ -93,15 +91,10 @@ class EpiCenterRepository {
         ),
       );
 
-      // Allow all SSL certs for this specific API
-      if (epiDio.httpClientAdapter is IOHttpClientAdapter) {
-        (epiDio.httpClientAdapter as IOHttpClientAdapter).createHttpClient =
-            () {
-              final client = HttpClient();
-              client.badCertificateCallback = (_, _, _) => true;
-              return client;
-            };
-      }
+      // TODO: Remove once staging SSL certificate is fixed.
+      // Configure SSL bypass for staging server only (debug mode).
+      StagingSslAdapter.configureForDio(epiDio);
+
       logg.i('Fetching EPI details from $urlPath');
       final response = await epiDio.get(urlPath);
       logg.i('Received response for EPI details...');
@@ -245,15 +238,10 @@ class EpiCenterRepository {
         ),
       );
 
-      // Allow all SSL certs for this specific API
-      if (epiDio.httpClientAdapter is IOHttpClientAdapter) {
-        (epiDio.httpClientAdapter as IOHttpClientAdapter).createHttpClient =
-            () {
-              final client = HttpClient();
-              client.badCertificateCallback = (_, _, _) => true;
-              return client;
-            };
-      }
+      // TODO: Remove once staging SSL certificate is fixed.
+      // Configure SSL bypass for staging server only (debug mode).
+      StagingSslAdapter.configureForDio(epiDio);
+
       logg.i('Fetching EPI details from $urlPath');
       final response = await epiDio.get(urlPath);
       logg.i('Received response for EPI details...');
