@@ -290,19 +290,17 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  // Top Performing section
-                  if (topPerformers.isNotEmpty)
-                    _buildDistinctPerformersRows(
-                      performer: topPerformers,
-                      isHighPerformer: true,
-                    ),
+                  // Top Performing section - always show, with empty state if no data
+                  _buildDistinctPerformersRows(
+                    performer: topPerformers,
+                    isHighPerformer: true,
+                  ),
 
-                  // Low Performing section
-                  if (lowPerformers.isNotEmpty)
-                    _buildDistinctPerformersRows(
-                      performer: lowPerformers,
-                      isHighPerformer: false,
-                    ),
+                  // Low Performing section - always show, with empty state if no data
+                  _buildDistinctPerformersRows(
+                    performer: lowPerformers,
+                    isHighPerformer: false,
+                  ),
                 ],
               ),
             ),
@@ -322,15 +320,29 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
           alignment: Alignment.centerLeft,
 
           child: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
+            padding: const EdgeInsets.only(left: 8.0, top: 8.0),
             child: Text(
               isHighPerformer
-                  ? 'High Performing (${performer.length} area)'
-                  : 'Low Performing (${performer.length} area)',
+                  ? 'High Performing (${performer.length} District)'
+                  : 'Low Performing (${performer.length} District)',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ),
+        // Show empty state if no data
+        if (performer.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            width: double.infinity,
+            child: const Text(
+              'Data not found',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
         ...performer.asMap().entries.map((entry) {
           final index = entry.key;
           final data = entry.value;
