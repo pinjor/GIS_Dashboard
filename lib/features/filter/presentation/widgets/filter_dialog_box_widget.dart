@@ -460,6 +460,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     );
     logg.i('   Current Year: $_selectedYear vs Initial: $_initialYear');
 
+    // 🔍 DEBUG: Log vaccine selection status
+    logg.i('🧪 FILTER DIALOG: Vaccine selection status:');
+    logg.i('   isEpiContext: $isEpiContext');
+    logg.i('   _selectedVaccine: "$_selectedVaccine"');
+    logg.i('   _initialVaccine: "$_initialVaccine"');
+    logg.i('   Changed: ${_selectedVaccine != _initialVaccine}');
+
     // Only apply the changed values to avoid triggering unnecessary hierarchical loading
     final Map<String, dynamic> changedValues = {};
 
@@ -468,6 +475,14 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     }
     if (!isEpiContext && _selectedVaccine != _initialVaccine) {
       changedValues['vaccine'] = _selectedVaccine;
+      logg.i(
+        '🧪 FILTER DIALOG: ✅ Vaccine change will be applied: "$_selectedVaccine"',
+      );
+    } else if (isEpiContext && _selectedVaccine != _initialVaccine) {
+      // 🔍 DEBUG: This is the critical line - vaccine is being SKIPPED in EPI context!
+      logg.w(
+        '🧪 FILTER DIALOG: ⚠️ Vaccine change SKIPPED because isEpiContext=true! Selected: "$_selectedVaccine"',
+      );
     }
     if (_selectedYear != _initialYear) {
       changedValues['year'] = _selectedYear;
@@ -1100,7 +1115,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           spacing: 4,
                           children: [
                             CustomRadioButton(
-                              label: 'Penta - 1st',
+                              label: 'Penta - 1',
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1110,7 +1125,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: 'Penta - 2nd',
+                              label: 'Penta - 2',
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1120,7 +1135,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: 'Penta - 3rd',
+                              label: 'Penta - 3',
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1139,7 +1154,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           spacing: 4,
                           children: [
                             CustomRadioButton(
-                              label: 'MR - 1st',
+                              label: 'MR - 1',
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1149,7 +1164,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: 'MR - 2nd',
+                              label: 'MR - 2',
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {

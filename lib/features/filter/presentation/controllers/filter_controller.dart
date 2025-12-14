@@ -122,7 +122,13 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Update vaccine selection
   void updateVaccine(String vaccine) {
+    logg.i(
+      '🧪 VACCINE UPDATE: Changing from "${state.selectedVaccine}" to "$vaccine"',
+    );
     state = state.copyWith(selectedVaccine: vaccine);
+    logg.i(
+      '🧪 VACCINE UPDATE: State now has selectedVaccine = "${state.selectedVaccine}"',
+    );
   }
 
   /// Update area type selection
