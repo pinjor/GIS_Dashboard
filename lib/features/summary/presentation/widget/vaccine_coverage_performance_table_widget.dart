@@ -345,7 +345,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    '${(area.coveragePercentage ?? 0).round().toStringAsFixed(2)}%',
+                    '${(area.coveragePercentage ?? 0).toStringAsFixed(2)}%',
                     style: const TextStyle(fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
@@ -353,7 +353,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    '${dropoutPercentage.round().toStringAsFixed(2)}%',
+                    '${dropoutPercentage.toStringAsFixed(2)}%',
                     style: const TextStyle(fontSize: 13),
                     textAlign: TextAlign.center,
                   ),

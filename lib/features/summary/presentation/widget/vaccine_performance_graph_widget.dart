@@ -21,6 +21,12 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
     }
   }
 
+  String _getFormattedAreaName(String area) {
+    // Bogura (Part ..) should return just: Bogura
+
+    return area.split(' (')[0];
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filterState = ref.watch(filterControllerProvider);
@@ -151,7 +157,7 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'No of children vaccinated - (${summaryState.currentAreaName})',
+                'No of children vaccinated - (${_getFormattedAreaName(summaryState.currentAreaName)})',
                 style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
