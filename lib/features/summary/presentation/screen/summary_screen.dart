@@ -11,6 +11,7 @@ import '../../../map/presentation/controllers/map_controller.dart';
 import '../controllers/summary_controller.dart';
 import '../widget/summary_card_widget.dart';
 import '../widget/vaccine_performance_graph_widget.dart';
+import '../widget/vaccine_performance_graph_widget_v2.dart';
 import '../widget/vaccine_coverage_performance_table_widget.dart';
 
 class SummaryScreen extends ConsumerStatefulWidget {
@@ -102,6 +103,8 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                   const VaccineCoveragePerformanceTableWidget(),
                   16.h,
                   const VaccinePerformanceGraphWidget(),
+                  16.h,
+                  const VaccinePerformanceGraphWidgetV2(),
                 ],
               ),
             ),

@@ -34,22 +34,29 @@ class SummaryCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(8),
         color: Color(Constants.primaryColor),
       ),
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: Stack(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(color: Colors.white)),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               4.h,
               Text(
                 _formatNumber(value),
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 20,
                   color: Colors.white,
                 ),
               ),
@@ -69,6 +76,7 @@ class SummaryCardWidget extends StatelessWidget {
             child: Image.asset(
               isFirst ? Constants.childrenIconPath : Constants.dosesIconPath,
               width: isFirst ? 45 : 35,
+              color: Colors.white,
             ),
           ),
         ],
@@ -82,17 +90,23 @@ class SummaryCardWidget extends StatelessWidget {
         Image.asset(
           isBoy ? Constants.boyIconPath : Constants.girlIconPath,
           color: Colors.white,
-          width: isBoy ? 10 : 16,
+          width: isBoy ? 12 : 18,
         ),
-        2.w,
+        4.w,
         Text(
           isBoy ? 'Boys: ' : 'Girls: ',
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+          ),
         ),
-        2.w,
         Text(
           _formatNumber(count.toString()),
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
