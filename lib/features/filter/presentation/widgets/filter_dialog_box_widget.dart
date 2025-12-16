@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/constants.dart';
+import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/filter/presentation/widgets/custom_radio_button.dart';
 import '../../domain/filter_state.dart';
@@ -1115,7 +1116,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           spacing: 4,
                           children: [
                             CustomRadioButton(
-                              label: 'Penta - 1',
+                              label: VaccineType.penta1.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1125,7 +1126,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: 'Penta - 2',
+                              label: VaccineType.penta2.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1135,7 +1136,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: 'Penta - 3',
+                              label: VaccineType.penta3.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1154,7 +1155,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           spacing: 4,
                           children: [
                             CustomRadioButton(
-                              label: 'MR - 1',
+                              label: VaccineType.mr1.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1164,7 +1165,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: 'MR - 2',
+                              label: VaccineType.mr2.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1174,7 +1175,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: 'BCG',
+                              label: VaccineType.bcg.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {

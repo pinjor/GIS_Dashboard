@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/features/summary/presentation/controllers/summary_controller.dart';
@@ -41,10 +42,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'No of children vaccinated',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                 ),
               ),
               SizedBox(height: 16),
@@ -72,10 +70,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'No of children vaccinated',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                 ),
               ),
               SizedBox(height: 16),
@@ -99,9 +94,12 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
 
     final bcgVaccine = vaccines.isNotEmpty
         ? vaccines.firstWhere(
-            (vaccine) => vaccine.vaccineName == 'BCG',
+            (vaccine) => vaccine.vaccineName == VaccineType.bcg.displayName,
             orElse: () {
               // If BCG not found, try to use first available vaccine
+              logg.w(
+                'BCG vaccine not found, returning first available vaccine.',
+              );
               return vaccines.first;
             },
           )
@@ -120,10 +118,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'No of children vaccinated',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                 ),
               ),
               SizedBox(height: 16),
@@ -159,13 +154,13 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
       for (int month = 1; month <= 11; month++) {
         final monthData = monthlyData[month.toString()];
         final coverage = monthData?.coverage?.toDouble() ?? 0.0;
-        
+
         // Calculate progressive monthly target: (totalTarget / 12) * monthNumber
         final monthlyTarget = monthlyTargetPerMonth * month;
-        
+
         coverageSpots.add(FlSpot(month - 1.0, coverage));
         targetSpots.add(FlSpot(month - 1.0, monthlyTarget));
-        
+
         allValues.add(coverage);
         allValues.add(monthlyTarget);
       }
@@ -174,10 +169,10 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
       for (int month = 1; month <= 11; month++) {
         final monthlyTarget = monthlyTargetPerMonth * month;
         final coverage = 0.0;
-        
+
         coverageSpots.add(FlSpot(month - 1.0, coverage));
         targetSpots.add(FlSpot(month - 1.0, monthlyTarget));
-        
+
         allValues.add(coverage);
         allValues.add(monthlyTarget);
       }
@@ -186,7 +181,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
     // Always use 1,400,000 as max Y value to match reference image exactly
     // This prevents points from going off screen
     const double maxY = 1400000.0;
-    
+
     // Ensure spots don't contain invalid values and clamp to maxY
     coverageSpots = coverageSpots.map((spot) {
       if (!spot.y.isFinite || spot.y.isNaN) {
@@ -196,7 +191,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
       final clampedY = spot.y > maxY ? maxY : spot.y;
       return FlSpot(spot.x, clampedY);
     }).toList();
-    
+
     targetSpots = targetSpots.map((spot) {
       if (!spot.y.isFinite || spot.y.isNaN) {
         return FlSpot(spot.x, 0.0);
@@ -207,8 +202,8 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
     }).toList();
 
     // Always show "BCG" in legend to match reference image
-    const vaccineName = 'BCG';
-    
+    final vaccineName = VaccineType.bcg.displayName;
+
     // Safety check: ensure we have valid spots
     if (coverageSpots.isEmpty || targetSpots.isEmpty) {
       return Card(
@@ -223,10 +218,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'No of children vaccinated',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                 ),
               ),
               SizedBox(height: 16),
@@ -244,17 +236,21 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
         ),
       );
     }
-    
+
     // Debug: Log data points
     logg.i('📊 CHART V2: BCG Vaccine found: ${bcgVaccine.vaccineName}');
     logg.i('📊 CHART V2: BCG Total Target: ${bcgVaccine.totalTarget}');
     logg.i('📊 CHART V2: Coverage spots count: ${coverageSpots.length}');
     logg.i('📊 CHART V2: Target spots count: ${targetSpots.length}');
     if (coverageSpots.isNotEmpty) {
-      logg.i('📊 CHART V2: Coverage spots: ${coverageSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}');
+      logg.i(
+        '📊 CHART V2: Coverage spots: ${coverageSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
+      );
     }
     if (targetSpots.isNotEmpty) {
-      logg.i('📊 CHART V2: Target spots: ${targetSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}');
+      logg.i(
+        '📊 CHART V2: Target spots: ${targetSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
+      );
     }
 
     return Card(
@@ -275,7 +271,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Legend
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -307,10 +303,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                     const SizedBox(width: 6),
                     const Text(
                       'Monthly Target',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black87,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.black87),
                     ),
                   ],
                 ),
@@ -318,11 +311,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                 // Actual Coverage legend item
                 Row(
                   children: [
-                    Container(
-                      width: 20,
-                      height: 3,
-                      color: Colors.blue,
-                    ),
+                    Container(width: 20, height: 3, color: Colors.blue),
                     const SizedBox(width: 8),
                     Container(
                       width: 8,
@@ -408,96 +397,97 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                                 interval: 200000,
                               ),
                             ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (value, _) {
-                          const months = [
-                            'Jan',
-                            'Feb',
-                            'Mar',
-                            'Apr',
-                            'May',
-                            'Jun',
-                            'Jul',
-                            'Aug',
-                            'Sep',
-                            'Oct',
-                            'Nov',
-                          ];
-                          final monthIndex = value.toInt();
-                          // Show only every other month: Jan, Mar, May, Jul, Sep, Nov (0, 2, 4, 6, 8, 10)
-                          if (monthIndex >= 0 && monthIndex < months.length) {
-                            if (monthIndex == 0 ||
-                                monthIndex == 2 ||
-                                monthIndex == 4 ||
-                                monthIndex == 6 ||
-                                monthIndex == 8 ||
-                                monthIndex == 10) {
-                              return Text(
-                                months[monthIndex],
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.black87,
-                                ),
-                              );
-                            }
-                          }
-                          return const Text('');
-                        },
-                        interval: 1,
-                      ),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  lineBarsData: [
-                    // Monthly Target line (red, dotted, square markers)
-                    LineChartBarData(
-                      spots: targetSpots,
-                      isCurved: false,
-                      barWidth: 2.5,
-                      color: Colors.red,
-                      dotData: FlDotData(
-                        show: true,
-                        getDotPainter: (spot, percent, barData, index) {
-                          return _SquareDotPainter(
-                            radius: 5,
-                            color: Colors.red,
-                            strokeWidth: 2,
-                          );
-                        },
-                      ),
-                      dashArray: [8, 4],
-                      belowBarData: BarAreaData(show: false),
-                    ),
-                    // Actual Coverage line (blue, solid, circular markers) - CURVED
-                    LineChartBarData(
-                      spots: coverageSpots,
-                      isCurved: true,
-                      curveSmoothness: 0.35,
-                      barWidth: 2.5,
-                      color: Colors.blue,
-                      dotData: FlDotData(
-                        show: true,
-                        getDotPainter: (spot, percent, barData, index) {
-                          return _CircleDotPainter(
-                            radius: 5,
-                            color: Colors.blue,
-                            strokeWidth: 2,
-                          );
-                        },
-                      ),
-                      preventCurveOverShooting: true,
-                      preventCurveOvershootingThreshold: 0.1,
-                      belowBarData: BarAreaData(show: false),
-                    ),
-                  ],
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                                getTitlesWidget: (value, _) {
+                                  const months = [
+                                    'Jan',
+                                    'Feb',
+                                    'Mar',
+                                    'Apr',
+                                    'May',
+                                    'Jun',
+                                    'Jul',
+                                    'Aug',
+                                    'Sep',
+                                    'Oct',
+                                    'Nov',
+                                  ];
+                                  final monthIndex = value.toInt();
+                                  // Show only every other month: Jan, Mar, May, Jul, Sep, Nov (0, 2, 4, 6, 8, 10)
+                                  if (monthIndex >= 0 &&
+                                      monthIndex < months.length) {
+                                    if (monthIndex == 0 ||
+                                        monthIndex == 2 ||
+                                        monthIndex == 4 ||
+                                        monthIndex == 6 ||
+                                        monthIndex == 8 ||
+                                        monthIndex == 10) {
+                                      return Text(
+                                        months[monthIndex],
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.black87,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                  return const Text('');
+                                },
+                                interval: 1,
+                              ),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ),
+                          lineBarsData: [
+                            // Monthly Target line (red, dotted, square markers)
+                            LineChartBarData(
+                              spots: targetSpots,
+                              isCurved: false,
+                              barWidth: 2.5,
+                              color: Colors.red,
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, barData, index) {
+                                  return _SquareDotPainter(
+                                    radius: 5,
+                                    color: Colors.red,
+                                    strokeWidth: 2,
+                                  );
+                                },
+                              ),
+                              dashArray: [8, 4],
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                            // Actual Coverage line (blue, solid, circular markers) - CURVED
+                            LineChartBarData(
+                              spots: coverageSpots,
+                              isCurved: true,
+                              curveSmoothness: 0.35,
+                              barWidth: 2.5,
+                              color: Colors.blue,
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, barData, index) {
+                                  return _CircleDotPainter(
+                                    radius: 5,
+                                    color: Colors.blue,
+                                    strokeWidth: 2,
+                                  );
+                                },
+                              ),
+                              preventCurveOverShooting: true,
+                              preventCurveOvershootingThreshold: 0.1,
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -506,7 +496,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // View Details button
             Center(
               child: ElevatedButton(
@@ -527,10 +517,7 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                 ),
                 child: const Text(
                   'View Details',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
@@ -589,7 +576,7 @@ class _SquareDotPainter extends FlDotPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-    
+
     final strokePaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
@@ -597,14 +584,10 @@ class _SquareDotPainter extends FlDotPainter {
 
     // Draw square
     final rect = RRect.fromRectAndRadius(
-      Rect.fromCenter(
-        center: offset,
-        width: radius * 2,
-        height: radius * 2,
-      ),
+      Rect.fromCenter(center: offset, width: radius * 2, height: radius * 2),
       Radius.circular(2),
     );
-    
+
     canvas.drawRRect(rect, paint);
     canvas.drawRRect(rect, strokePaint);
   }
@@ -650,7 +633,7 @@ class _CircleDotPainter extends FlDotPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-    
+
     final strokePaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
@@ -684,4 +667,3 @@ class _CircleDotPainter extends FlDotPainter {
   @override
   List<Object?> get props => [radius, color, strokeWidth];
 }
-
