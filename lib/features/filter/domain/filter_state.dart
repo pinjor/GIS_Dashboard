@@ -62,7 +62,7 @@ class FilterState {
   final DateTime? lastAppliedTimestamp;
 
   const FilterState({
-    this.selectedVaccine = 'Penta - 1',
+    this.selectedVaccine = 'BCG',
     this.selectedAreaType = AreaType.district,
     this.selectedDivision = 'All',
     this.selectedCityCorporation,
