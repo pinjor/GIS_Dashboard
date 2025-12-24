@@ -9,6 +9,7 @@ class FilterState {
   final String? selectedCityCorporation;
   final String? selectedDistrict;
   final String selectedYear;
+  final List<String> selectedMonths;
 
   // Extended hierarchical selections (for EPI details screen)
   final String? selectedUpazila;
@@ -68,6 +69,7 @@ class FilterState {
     this.selectedCityCorporation,
     this.selectedDistrict,
     this.selectedYear = '2025',
+    this.selectedMonths = const [],
     // Extended hierarchical selections
     this.selectedUpazila,
     this.selectedUnion,
@@ -117,6 +119,7 @@ class FilterState {
     String? selectedCityCorporation,
     String? selectedDistrict,
     String? selectedYear,
+    List<String>? selectedMonths,
     // Extended hierarchical selections
     String? selectedUpazila,
     String? selectedUnion,
@@ -188,6 +191,7 @@ class FilterState {
           ? null
           : (selectedDistrict ?? this.selectedDistrict),
       selectedYear: selectedYear ?? this.selectedYear,
+      selectedMonths: selectedMonths ?? this.selectedMonths,
       // Extended hierarchical selections
       selectedUpazila: clearUpazila
           ? null

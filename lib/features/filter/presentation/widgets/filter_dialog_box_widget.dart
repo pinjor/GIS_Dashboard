@@ -33,6 +33,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   String? _selectedUnion;
   String? _selectedWard;
   String? _selectedSubblock;
+  List<String> _selectedMonths = []; // Local state for selected months
 
   // Store initial values for reset functionality and change detection
   late AreaType _initialAreaType;
@@ -45,6 +46,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   String? _initialUnion;
   String? _initialWard;
   String? _initialSubblock;
+  List<String> _initialMonths = []; // Initial state for selected months
 
   final _formKey = GlobalKey<FormState>();
 
@@ -83,7 +85,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     // This ensures we can compare against the original state in applyFilters
     _initialAreaType = currentFilter.selectedAreaType;
     _initialVaccine = currentFilter.selectedVaccine;
+    _initialAreaType = currentFilter.selectedAreaType;
+    _initialVaccine = currentFilter.selectedVaccine;
     _initialYear = currentFilter.selectedYear;
+    _initialMonths = List.from(currentFilter.selectedMonths); // Deep copy
+    _selectedMonths = List.from(
+      currentFilter.selectedMonths,
+    ); // Initialize local selection
 
     logg.i('🎯 Filter Dialog: Capturing initial values from provider state:');
     logg.i('   Provider AreaType: ${currentFilter.selectedAreaType}');
@@ -314,40 +322,18 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         _selectedUpazila != _initialUpazila ||
         _selectedUnion != _initialUnion ||
         _selectedWard != _initialWard ||
-        _selectedSubblock != _initialSubblock;
-
-    // if (hasChanged) {
-    //   logg.i('🔄 Filter values changed detected:');
-    //   if (_selectedAreaType != _initialAreaType) {
-    //     logg.i('   AreaType: $_initialAreaType → $_selectedAreaType');
-    //   }
-    //   if (_selectedVaccine != _initialVaccine) {
-    //     logg.i('   Vaccine: $_initialVaccine → $_selectedVaccine');
-    //   }
-    //   if (_selectedDivision != _initialDivision) {
-    //     logg.i('   Division: $_initialDivision → $_selectedDivision');
-    //   }
-    //   if (_selectedDistrict != _initialDistrict) {
-    //     logg.i('   District: $_initialDistrict → $_selectedDistrict');
-    //   }
-    //   if (_selectedYear != _initialYear) {
-    //     logg.i('   Year: $_initialYear → $_selectedYear');
-    //   }
-    //   if (_selectedUpazila != _initialUpazila) {
-    //     logg.i('   Upazila: $_initialUpazila → $_selectedUpazila');
-    //   }
-    //   if (_selectedUnion != _initialUnion) {
-    //     logg.i('   Union: $_initialUnion → $_selectedUnion');
-    //   }
-    //   if (_selectedWard != _initialWard) {
-    //     logg.i('   Ward: $_initialWard → $_selectedWard');
-    //   }
-    //   if (_selectedSubblock != _initialSubblock) {
-    //     logg.i('   Subblock: $_initialSubblock → $_selectedSubblock');
-    //   }
-    // }
+        _selectedSubblock != _initialSubblock ||
+        _areMonthsChanged(); // Check for months changes
 
     return hasChanged;
+  }
+
+  bool _areMonthsChanged() {
+    if (_selectedMonths.length != _initialMonths.length) return true;
+    final currentSet = _selectedMonths.toSet();
+    final initialSet = _initialMonths.toSet();
+    return currentSet.difference(initialSet).isNotEmpty ||
+        initialSet.difference(currentSet).isNotEmpty;
   }
 
   // /// Reset all selections to initial values
@@ -460,6 +446,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       '   Current Subblock: $_selectedSubblock vs Initial: $_initialSubblock',
     );
     logg.i('   Current Year: $_selectedYear vs Initial: $_initialYear');
+    logg.i('   Current Months: $_selectedMonths vs Initial: $_initialMonths');
 
     // 🔍 DEBUG: Log vaccine selection status
     logg.i('🧪 FILTER DIALOG: Vaccine selection status:');
@@ -487,6 +474,9 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     }
     if (_selectedYear != _initialYear) {
       changedValues['year'] = _selectedYear;
+    }
+    if (_areMonthsChanged()) {
+      changedValues['months'] = _selectedMonths;
     }
 
     if (_selectedAreaType == AreaType.district) {
@@ -546,10 +536,12 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       subblock: _selectedAreaType == AreaType.district && isEpiContext
           ? _selectedSubblock
           : null,
+      months: !isEpiContext ? _selectedMonths : null, // Pass selected months
       // Initial values for comparison
       initialVaccine: _initialVaccine,
       initialAreaType: _initialAreaType,
       initialYear: _initialYear,
+      initialMonths: _initialMonths, // Pass initial months
       initialDivision: _initialDivision,
       initialDistrict: _initialDistrict,
       initialCityCorporation: _initialCityCorporation,
@@ -790,6 +782,16 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     }
                   },
                 ),
+                // Month Selection (Only in normal context)
+                if (!widget.isEpiContext) ...[
+                  16.h,
+                  const Text(
+                    'Months',
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+                  ),
+                  8.h,
+                  _buildMonthFilter(context, filterNotifier),
+                ],
                 16.h,
                 // Area-specific dropdowns
                 if (_selectedAreaType == AreaType.district) ...[
@@ -1242,6 +1244,99 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMonthFilter(
+    BuildContext context,
+    FilterControllerNotifier filterNotifier,
+  ) {
+    return InkWell(
+      onTap: () async {
+        final availableMonths = filterNotifier.monthDropdownItems;
+        final selected = await showDialog<List<String>>(
+          context: context,
+          builder: (context) {
+            final tempSelectedMonths = List<String>.from(_selectedMonths);
+            return StatefulBuilder(
+              builder: (context, setStateDialog) {
+                return AlertDialog(
+                  title: const Text('Select Months'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: availableMonths.map((month) {
+                        return CheckboxListTile(
+                          title: Text(month),
+                          value: tempSelectedMonths.contains(month),
+                          onChanged: (bool? value) {
+                            setStateDialog(() {
+                              if (value == true) {
+                                tempSelectedMonths.add(month);
+                              } else {
+                                tempSelectedMonths.remove(month);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pop(context, tempSelectedMonths),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+
+        if (selected != null) {
+          setState(() {
+            _selectedMonths = selected;
+          });
+        }
+      },
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          suffixIcon: Icon(Icons.arrow_drop_down),
+        ),
+        child: _selectedMonths.isEmpty
+            ? const Text(
+                'Select Months',
+                style: TextStyle(color: Colors.black54, fontSize: 16),
+              )
+            : Wrap(
+                spacing: 6.0,
+                runSpacing: 4.0,
+                children: _selectedMonths.map((month) {
+                  return Chip(
+                    label: Text(month, style: const TextStyle(fontSize: 12)),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).primaryColor.withOpacity(0.1),
+                    onDeleted: () {
+                      setState(() {
+                        _selectedMonths.remove(month);
+                      });
+                    },
+                    padding: EdgeInsets.zero,
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  );
+                }).toList(),
+              ),
       ),
     );
   }

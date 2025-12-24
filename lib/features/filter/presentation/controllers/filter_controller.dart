@@ -308,6 +308,27 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     state = state.copyWith(selectedSubblock: subblock);
   }
 
+  /// Update selected months
+  void updateMonths(List<String> months) {
+    state = state.copyWith(selectedMonths: months);
+  }
+
+  /// Get dropdown items for months
+  List<String> get monthDropdownItems => [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
   /// Reset specific filter fields based on area type
   /// Area type and vaccine selection are preserved
   void resetFilters() {
@@ -326,6 +347,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       state = state.copyWith(
         selectedDivision: defaultDivision,
         selectedYear: defaultYear,
+        selectedMonths: const [], // Reset months
         filteredDistricts: state.districts, // Reset to show all districts
         clearDistrict: true, // Explicitly clear district selection
         lastAppliedTimestamp: DateTime.now(), // Trigger map update
@@ -989,6 +1011,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? ward,
     String? subblock,
     String? year,
+    List<String>? months,
     // Initial values for comparison
     required String initialVaccine,
     required AreaType initialAreaType,
@@ -1000,10 +1023,26 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? initialUnion,
     String? initialWard,
     String? initialSubblock,
+    required List<String> initialMonths,
   }) {
     logg.i('🔍 FilterProvider: Comparing current vs initial values:');
 
     // Compare current values with initial values to detect changes
+    // Check if months list content changed (order matters or length matters)
+    bool areMonthsChanged = false;
+    if (months != null) {
+      if (months.length != initialMonths.length) {
+        areMonthsChanged = true;
+      } else {
+        // Simple check: check if lists contain same elements
+        final currentSet = months.toSet();
+        final initialSet = initialMonths.toSet();
+        areMonthsChanged =
+            currentSet.difference(initialSet).isNotEmpty ||
+            initialSet.difference(currentSet).isNotEmpty;
+      }
+    }
+
     final bool hasNonVaccineChanges =
         (areaType != null && areaType != initialAreaType) ||
         (division != null && division != initialDivision) ||
@@ -1014,12 +1053,14 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         (union != null && union != initialUnion) ||
         (ward != null && ward != initialWard) ||
         (subblock != null && subblock != initialSubblock) ||
-        (year != null && year != initialYear);
+        (year != null && year != initialYear) ||
+        areMonthsChanged;
 
     // Update individual filter selections
     if (vaccine != null) updateVaccine(vaccine);
     if (areaType != null) updateAreaType(areaType);
     if (year != null) updateYear(year);
+    if (months != null) updateMonths(months);
     if (division != null) updateDivision(division);
     if (cityCorporation != null) updateCityCorporation(cityCorporation);
     if (district != null) updateDistrict(district);
