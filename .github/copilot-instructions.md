@@ -2,15 +2,16 @@
 
 ## Architecture Overview
 
-This Flutter app visualizes Bangladesh vaccination data using a **hierarchical drilldown GIS system** with clean architecture. The architecture prioritizes geographic data synchronization and state management across features.
+This Flutter app visualizes Bangladesh vaccination data using a **hierarchical drilldown GIS system** with clean architecture prioritizing geographic synchronization and state management.
 
 **Core Stack**: Flutter 3.8.1+ | Riverpod state management | Freezed/json_serializable code generation | flutter_map + GeoJSON rendering
 
 **Key Patterns**:
-- **Feature-driven structure**: `lib/features/{map,filter,summary,epi_center}/` with domain-data-presentation layers
-- **Cross-provider dependencies**: Controllers inject each other via constructor parameters (MapController ← FilterController)
-- **Hierarchical navigation**: Country → Division → District → Upazila with dynamic slug-based URL paths
-- **GeoJSON decompression**: All map data fetched as `.json.gz` files, decompressed using `archive` package
+- **Feature-driven structure**: `lib/features/{map,filter,summary,epi_center,zero_dose_dashboard,micro_plan,session_plan,gis_methodology,home}/` with domain-data-presentation layers
+- **Cross-provider dependencies**: Controllers directly injected as constructor params (MapController receives FilterController)
+- **Hierarchical drilldown**: Country → Division → District → Upazila with dynamic slug-based paths
+- **GeoJSON decompression**: Map data fetched as `.json.gz`, decompressed via `archive` package
+- **Graceful degradation**: Area data (divisions/districts/city corps) load independently—partial data preferred over total failure
 
 ## Critical Development Workflows
 
@@ -120,7 +121,7 @@ Future<List<Model>> fetchData() async {
 
 ### Parallel API Loading Anti-Pattern ⚠️
 
-**AVOID** `Future.wait()` for critical flows - single failure blocks all data:
+**AVOID** `Future.wait()` for critical flows - single failure blocks all data loading:
 
 ```dart
 // ❌ BAD: Fail-fast behavior - if divisions fails, districts never load
@@ -130,15 +131,39 @@ final results = await Future.wait([
   fetchCityCorporations(),
 ]);
 
-// ✅ GOOD: Individual error handling with graceful degradation
-try { state = state.copyWith(divisions: await fetchDivisions()); } catch (e) { 
+// ✅ GOOD: Individual try-catch with graceful degradation
+// From FilterController._loadAllAreas() in lib/features/filter/presentation/controllers/filter_controller.dart
+bool hasAnySuccess = false;
+List<String> failedTypes = [];
+
+// Load divisions independently
+try {
+  divisions = await _repository.fetchAllDivisions();
+  hasAnySuccess = true;
+} catch (e) {
   logg.e('Failed to load divisions: $e');
-  state = state.copyWith(areasError: 'Failed to load divisions');
+  failedTypes.add('divisions');
 }
-try { state = state.copyWith(districts: await fetchDistricts()); } catch (e) { /* handle */ }
+
+// Load districts independently
+try {
+  districts = await _repository.fetchAllDistricts();
+  hasAnySuccess = true;
+} catch (e) {
+  logg.e('Failed to load districts: $e');
+  failedTypes.add('districts');
+}
+
+// Update state with whatever loaded successfully
+state = state.copyWith(
+  divisions: divisions,
+  districts: districts,
+  areasError: hasAnySuccess ? (failedTypes.isEmpty ? null : 'Partial load: ${failedTypes.join(", ")} failed') 
+                            : 'All data failed to load',
+);
 ```
 
-**Why**: `FilterController._loadAllAreas()` had issues where division API failures froze entire filter system. Separate try-catch allows partial data loading.
+**Why**: FilterController initially used `Future.wait()`, causing division API failures to freeze the entire filter system. Individual loading allows partial data to work while retrying failed requests.
 
 ### DataService Retry Logic
 
@@ -246,7 +271,7 @@ void clearEpiDetailsContext() {
 
 ### Logging Pattern
 
-Use the global `logg` instance for consistent logging:
+Use the global `logg` instance (imported from `lib/core/utils/utils.dart`) for consistent logging:
 
 ```dart
 import 'package:gis_dashboard/core/utils/utils.dart';
@@ -254,12 +279,70 @@ import 'package:gis_dashboard/core/utils/utils.dart';
 logg.i("✅ Successfully loaded data");
 logg.e("❌ Error occurred: $error"); 
 logg.d("🔍 Debug info: $details");
+logg.w("⚠️ Warning: $message");
 ```
 
-### Common Issues
+The logger is configured globally and integrates with the app's debugging infrastructure.
 
-1. **Filter button disabled**: Check `_isFilterButtonEnabled()` logic in `FilterDialogBoxWidget` 
-2. **EPI context stale data**: Ensure `clearEpiDetailsContext()` is called when navigating away
-3. **Division loading failures**: Look for `Future.wait()` usage and replace with individual error handling
+### Common Issues & Solutions
+
+| Issue | Root Cause | Solution |
+|-------|-----------|----------|
+| Filter button disabled | Check `_isFilterButtonEnabled()` logic in `FilterDialogBoxWidget` | Ensure all required filters have non-null values |
+| EPI context stale data | `clearEpiDetailsContext()` not called on navigation | Call in route pop handler: `ref.read(filterControllerProvider.notifier).clearEpiDetailsContext()` |
+| Division loading fails silently | Previous `Future.wait()` pattern in `_loadAllAreas()` | Already fixed with individual try-catch (preserve pattern) |
+| Map doesn't update on filter change | Listener in `MapScreen` not triggering | Check `ref.listen<FilterState>(filterControllerProvider, ...)` is properly connected |
+| ".freezed.dart files not found" | Generated files missing | Run: `dart run build_runner build --delete-conflicting-outputs` |
 
 When modifying geographic navigation, ensure URL path generation in `ApiConstants` matches backend structure. When adding new data models, follow the Freezed + json_annotation pattern and run code generation.
+
+## Critical Implementation Notes
+
+### Environment Configuration & API Paths
+
+Create `.env` file at project root:
+```
+URL_SCHEME=https
+STAGING_SERVER_HOST=api.example.com
+STAGING_SERVER_FULL_URL=https://api.example.com
+URL_COMMON_PATH=/api/v1
+```
+
+Dynamic path generation in `ApiConstants`:
+- **GeoJSON shapes**: `getGeoJsonPath(slug)` → `/shapes/{slug}/shape.json.gz`
+- **Coverage data**: `getCoveragePath(slug, year)` → `/coverage/{slug}/{year}-coverage.json`
+- **EPI centers**: `getEpiPath(slug)` → `/epi/{slug}/epi.json`
+
+All slug values are converted to lowercase automatically.
+
+### Filter State Provider Lifecycle
+
+The `filterControllerProvider` explicitly cleans up EPI context on dispose:
+
+```dart
+ref.onDispose(() {
+  controller.clearEpiDetailsContext(); // Restore original filter state
+});
+```
+
+**Critical**: This prevents stale filter state when navigating between screens.
+
+### Data Service Retry Logic
+
+`lib/core/service/data_service.dart` wraps all repository calls with 3-attempt exponential backoff:
+- Coverage data: 500ms, 1000ms, 1500ms delays
+- GeoJSON data: Same pattern (files larger, same retry strategy)
+
+**Do NOT** wrap these in additional retry logic—it's already handled transparently.
+
+### Connectivity Service Pattern
+
+All repository methods check internet before API calls:
+
+```dart
+if (!await _connectivityService.hasInternetConnection()) {
+  throw NetworkException(message: 'No internet connection', type: NetworkErrorType.noInternet);
+}
+```
+
+**Note**: `hasInternetConnection()` uses `InternetAddress.lookup('google.com')` with 5s timeout.

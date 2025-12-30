@@ -46,10 +46,28 @@ abstract class EpiCenterDetailsResponse with _$EpiCenterDetailsResponse {
 
 @freezed
 abstract class CityCorporation with _$CityCorporation {
-  const factory CityCorporation({String? uid, String? name}) = _CityCorporation;
+  const factory CityCorporation({
+    String? uid,
+    String? name,
+    @Default([]) List<CCChild> children,
+  }) = _CityCorporation;
 
   factory CityCorporation.fromJson(Map<String, dynamic> json) =>
       _$CityCorporationFromJson(json);
+}
+
+@freezed
+abstract class CCChild with _$CCChild {
+  const factory CCChild({
+    String? uid,
+    String? name,
+    @JsonKey(name: 'parent_uid') String? parentUid,
+    String? type,
+    @Default([]) List<CCChild> children,
+  }) = _CCChild;
+
+  factory CCChild.fromJson(Map<String, dynamic> json) =>
+      _$CCChildFromJson(json);
 }
 
 @freezed
