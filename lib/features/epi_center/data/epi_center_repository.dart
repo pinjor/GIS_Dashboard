@@ -62,7 +62,7 @@ class EpiCenterRepository {
       //   epiJsonString = epiData.toString();
       // }
 
-      // logg.i('Successfully received EPI data');
+      logg.i('Successfully received EPI data: $epiData');
       return EpiCenterCoordsResponse.fromJson(epiData as Map<String, dynamic>);
     } on DioException catch (e) {
       logg.e("Dio error fetching EPI data: $e");
@@ -103,7 +103,8 @@ class EpiCenterRepository {
       }
       final rawData = response.data;
       final contentType = response.headers.value('content-type') ?? '';
-
+      logg.i('Raw data: $rawData');
+      logg.i('Content type: $contentType');
       // Reject HTML responses
       if (contentType.contains('text/html') ||
           (rawData is String && rawData.trim().startsWith('<'))) {
@@ -113,7 +114,7 @@ class EpiCenterRepository {
       // Decode and parse
       logg.i('Decoding and parsing EPI details JSON...');
       final parsedJson = decodeEpiCenterDetailsNestedJson(rawData);
-
+      logg.i('Parsed JSON: $parsedJson');
       try {
         logg.i('Creating EpiCenterDetailsResponse from parsed JSON...');
         final result = EpiCenterDetailsResponse.fromJson(
@@ -261,9 +262,9 @@ class EpiCenterRepository {
       // Decode and parse
       logg.i('Decoding and parsing EPI details JSON...');
       final parsedJson = decodeEpiCenterDetailsNestedJson(rawData);
-
+      logg.i('Parsed JSON: $parsedJson');
       try {
-        logg.i('Creating EpiCenterDetailsResponse from parsed JSON...');
+        logg.i('Creating EpiCenterDetailsResponse..[] from parsed JSON...');
         final result = EpiCenterDetailsResponse.fromJson(
           parsedJson as Map<String, dynamic>,
         );

@@ -767,6 +767,22 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     logg.i("🎯 UID_REPORT: Focal Area '$areaName' (Trigger: $source)");
 
     // 1. Get UID from Filter State (The most common source of truth for IDs)
+    // 1. Get UID from Filter State or Navigation Stack
+    final uid = focalAreaUid;
+
+    if (uid != null) {
+      logUidInfo(
+        source: source,
+        layer: "Focal Area",
+        name: areaName ?? "Unknown",
+        uid: uid,
+      );
+    }
+  }
+
+  /// Get the UID of the current focal area (deepest filter or navigation level)
+  String? get focalAreaUid {
+    // 1. Get UID from Filter State (The most common source of truth for IDs)
     final filterState = _filterNotifier.state;
     String? filterUid;
 
@@ -795,25 +811,15 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
 
     if (filterUid != null) {
-      logUidInfo(
-        source: "Filter State",
-        layer: "Focal Area",
-        name: areaName ?? "Unknown",
-        uid: filterUid,
-      );
+      return filterUid;
     }
 
     // 2. Get UID from Navigation Stack (The slug used for the API request)
     if (state.navigationStack.isNotEmpty) {
-      final lastLevel = state.navigationStack.last;
-      logUidInfo(
-        source: "Navigation Stack",
-        layer: "Focal Area",
-        name: lastLevel.name ?? "Unknown",
-        uid: lastLevel.slug,
-        parentUid: lastLevel.parentSlug,
-      );
+      return state.navigationStack.last.slug;
     }
+
+    return null;
   }
 
   // ============================================================================

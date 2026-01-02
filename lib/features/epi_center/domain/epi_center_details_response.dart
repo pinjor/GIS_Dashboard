@@ -328,11 +328,11 @@ abstract class ChartData with _$ChartData {
 abstract class Dataset with _$Dataset {
   const factory Dataset({
     String? label,
-    @Default([]) List<int> data,
+    @Default([]) List<int?> data,
     String? borderColor,
     String? backgroundColor,
     int? borderWidth,
-    @Default([]) List<int> borderDash,
+    @Default([]) List<int?> borderDash,
     int? pointRadius,
     double? tension,
   }) = _Dataset;

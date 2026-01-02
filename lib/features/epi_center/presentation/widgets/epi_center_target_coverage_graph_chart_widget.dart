@@ -96,7 +96,8 @@ class _EpiCenterTargetCoverageGraphChartWidgetState
 
       // Use raw data values directly without any cumulative calculation
       for (int i = 0; i < maxLength; i++) {
-        final value = dataset.data[i].toDouble(); // Use raw value directly
+        final rawValue = dataset.data[i];
+        final value = (rawValue ?? 0).toDouble(); // Handle null values safely
         final label = _getShortMonthName(widget.chartData!.labels[i]);
         points.add(_ChartPoint(label, value)); // No cumulation
       }

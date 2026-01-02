@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gis_dashboard/core/utils/utils.dart';
+import 'package:gis_dashboard/features/epi_center/presentation/screen/epi_center_details_screen.dart';
+import 'package:gis_dashboard/features/filter/presentation/controllers/filter_controller.dart';
+import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 
 class ViewDetailsButtonWidget extends ConsumerWidget {
   const ViewDetailsButtonWidget({super.key});
@@ -9,8 +13,30 @@ class ViewDetailsButtonWidget extends ConsumerWidget {
     return Center(
       child: ElevatedButton(
         onPressed: () {
-          // TODO: Add navigation or action when needed
-          // For now, just a placeholder
+          final mapNotifier = ref.read(mapControllerProvider.notifier);
+          // final filterState = ref.read(filterControllerProvider);
+
+          final orgUid = mapNotifier.focalAreaUid;
+          // final year = filterState.selectedYear;
+
+          logg.i("🖱️ View Details Button Tapped");
+          // If orgUid is null (country level), we pass 'null' as a string to the API
+          // This matches the backend requirement: /chart/null?year=...
+          final effectiveUid = (orgUid != null && orgUid.isNotEmpty)
+              ? orgUid
+              : 'null';
+
+          logg.i("   > Effective UID for API: $effectiveUid");
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EpiCenterDetailsScreen(
+                epiUid: effectiveUid,
+                isOrgUidRequest: true,
+              ),
+            ),
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
