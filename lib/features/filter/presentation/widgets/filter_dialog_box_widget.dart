@@ -643,7 +643,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     final primaryColor = Color(Constants.primaryColor);
     final filterState = ref.watch(filterControllerProvider);
     final filterNotifier = ref.read(filterControllerProvider.notifier);
-
+    // Generate years from current year down to 2024
+    final int currentYear = DateTime.now().year;
+    final int startYear = 2024;
+    final List<String> years = List.generate(
+      currentYear - startYear + 1,
+      (index) => (currentYear - index).toString(),
+    );
     // Sync local selections with provider state when dropdown items change
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
@@ -768,7 +774,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     border: OutlineInputBorder(),
                   ),
                   initialValue: _selectedYear,
-                  items: ['2025', '2024']
+                  items: years
                       .map(
                         (year) =>
                             DropdownMenuItem(value: year, child: Text(year)),
@@ -1118,7 +1124,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           spacing: 4,
                           children: [
                             CustomRadioButton(
-                              label: VaccineType.penta1.displayName,
+                              label: VaccineType.bcg.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1138,7 +1144,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                               },
                             ),
                             CustomRadioButton(
-                              label: VaccineType.penta3.displayName,
+                              label: VaccineType.mr1.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1157,7 +1163,17 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           spacing: 4,
                           children: [
                             CustomRadioButton(
-                              label: VaccineType.mr1.displayName,
+                              label: VaccineType.penta1.displayName,
+                              primaryColor: primaryColor,
+                              selectedVaccine: _selectedVaccine,
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedVaccine = val;
+                                });
+                              },
+                            ),
+                            CustomRadioButton(
+                              label: VaccineType.penta3.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {
@@ -1168,16 +1184,6 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             ),
                             CustomRadioButton(
                               label: VaccineType.mr2.displayName,
-                              primaryColor: primaryColor,
-                              selectedVaccine: _selectedVaccine,
-                              onChanged: (val) {
-                                setState(() {
-                                  _selectedVaccine = val;
-                                });
-                              },
-                            ),
-                            CustomRadioButton(
-                              label: VaccineType.bcg.displayName,
                               primaryColor: primaryColor,
                               selectedVaccine: _selectedVaccine,
                               onChanged: (val) {

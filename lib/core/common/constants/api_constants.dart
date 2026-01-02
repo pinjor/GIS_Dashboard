@@ -2,18 +2,22 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
   static final String urlScheme = dotenv.env['URL_SCHEME'] ?? '';
-  static final String stagingServerHost = dotenv.env['STAGING_SERVER_HOST'] ?? '';
+  static final String stagingServerHost =
+      dotenv.env['STAGING_SERVER_HOST'] ?? '';
   // static final String prodHost = dotenv.env['PROD_HOST'] ?? '';
   // static final String baseUrlProd = dotenv.env['PROD_SERVER_URL'] ?? '';
-  static final String stagingServerFullUrl = dotenv.env['STAGING_SERVER_FULL_URL'] ?? '';
+  static final String stagingServerFullUrl =
+      dotenv.env['STAGING_SERVER_FULL_URL'] ?? '';
   static final String urlCommonPath = dotenv.env['URL_COMMON_PATH'] ?? '';
-  
+
   static String get districtJsonPath => '/shapes/shape.json.gz';
 
   // these two paths needs to be dynamic based on year value, like a getter function like below:::
 
   // static String districtCoveragePath(String year) => '/coverage/$year-coverage.json';
+  @Deprecated('Use getCoveragePath(year: year) instead')
   static String get districtCoveragePath25 => '/coverage/2025-coverage.json';
+  @Deprecated('Use getCoveragePath(year: year) instead')
   static String get districtCoveragePath24 => '/coverage/2024-coverage.json';
 
   static String get filterByArea => '/areas';
@@ -178,8 +182,10 @@ class ApiConstants {
   }
 
   /// Legacy getters for backward compatibility
+  @Deprecated('Use getCoveragePath(slug: slug, year: "2025") instead')
   static String getCoveragePath25({String? slug}) =>
       getCoveragePath(slug: slug, year: '2025');
+  @Deprecated('Use getCoveragePath(slug: slug, year: "2024") instead')
   static String getCoveragePath24({String? slug}) =>
       getCoveragePath(slug: slug, year: '2024');
 }

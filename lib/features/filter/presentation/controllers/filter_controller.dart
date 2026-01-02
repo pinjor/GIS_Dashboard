@@ -31,7 +31,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     required Ref ref,
   }) : _repository = repository,
        _ref = ref,
-       super(const FilterState()) {
+       super(FilterState(selectedYear: DateTime.now().year.toString())) {
     // Initialize area data when provider is created
     _loadAllAreas();
   }
@@ -337,7 +337,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     );
 
     // Define default values based on area type
-    const defaultYear = '2025';
+    final defaultYear = DateTime.now().year.toString();
 
     if (state.selectedAreaType == AreaType.district) {
       // For district area type: reset period, division, and district

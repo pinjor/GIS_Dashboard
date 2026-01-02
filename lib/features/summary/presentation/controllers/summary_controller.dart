@@ -57,7 +57,9 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
       logg.i("Loading summary data...");
 
       final coverageData = await _dataService.getVaccinationCoverage(
-        urlPath: ApiConstants.districtCoveragePath25,
+        urlPath: ApiConstants.getCoveragePath(
+          year: DateTime.now().year.toString(),
+        ),
         forceRefresh: forceRefresh,
       );
 
@@ -84,5 +86,4 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
   Future<void> refreshSummaryData() async {
     await loadSummaryData(forceRefresh: true);
   }
-
 }
