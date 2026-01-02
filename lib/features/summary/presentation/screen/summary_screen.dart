@@ -10,9 +10,9 @@ import '../../../../core/common/widgets/header_title_icon_filter_widget.dart';
 import '../../../map/presentation/controllers/map_controller.dart';
 import '../controllers/summary_controller.dart';
 import '../widget/summary_card_widget.dart';
-import '../widget/vaccine_performance_graph_widget.dart';
 import '../widget/vaccine_performance_graph_widget_v2.dart';
 import '../widget/vaccine_coverage_performance_table_widget.dart';
+import '../widget/view_details_button_widget.dart';
 
 class SummaryScreen extends ConsumerStatefulWidget {
   const SummaryScreen({super.key});
@@ -105,6 +105,9 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                   // const VaccinePerformanceGraphWidget(),
                   16.h,
                   const VaccinePerformanceGraphWidgetV2(),
+
+                  16.h,
+                  const ViewDetailsButtonWidget(),
                 ],
               ),
             ),

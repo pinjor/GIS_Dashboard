@@ -495,32 +495,6 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-
-            // View Details button
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Add navigation or action when needed
-                  // For now, just a placeholder
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  'View Details',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-              ),
-            ),
           ],
         ),
       ),
