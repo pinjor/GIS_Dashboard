@@ -83,3 +83,22 @@ String? formatDateTime(String? dateTime) {
   final DateFormat formatter = DateFormat('dd MMM yyyy, hh:mm a');
   return formatter.format(DateTime.parse(dateTime));
 }
+
+void logUidInfo({
+  required String source,
+  required String name,
+  required String? uid,
+  String? parentUid,
+  String? layer,
+}) {
+  if (uid == null || uid.isEmpty) return;
+
+  final layerTag = layer != null ? "[$layer]" : "";
+  final parentInfo = parentUid != null ? " | Parent: $parentUid" : "";
+
+  logg.i(
+    "🆔 UID_LOG $layerTag: $name\n"
+    "   └─ Source: $source\n"
+    "   └─ UID: $uid$parentInfo",
+  );
+}

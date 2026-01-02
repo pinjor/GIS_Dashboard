@@ -238,20 +238,20 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
     }
 
     // Debug: Log data points
-    logg.i('📊 CHART V2: BCG Vaccine found: ${bcgVaccine.vaccineName}');
-    logg.i('📊 CHART V2: BCG Total Target: ${bcgVaccine.totalTarget}');
-    logg.i('📊 CHART V2: Coverage spots count: ${coverageSpots.length}');
-    logg.i('📊 CHART V2: Target spots count: ${targetSpots.length}');
-    if (coverageSpots.isNotEmpty) {
-      logg.i(
-        '📊 CHART V2: Coverage spots: ${coverageSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
-      );
-    }
-    if (targetSpots.isNotEmpty) {
-      logg.i(
-        '📊 CHART V2: Target spots: ${targetSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
-      );
-    }
+    // logg.i('📊 CHART V2: BCG Vaccine found: ${bcgVaccine.vaccineName}');
+    // logg.i('📊 CHART V2: BCG Total Target: ${bcgVaccine.totalTarget}');
+    // logg.i('📊 CHART V2: Coverage spots count: ${coverageSpots.length}');
+    // logg.i('📊 CHART V2: Target spots count: ${targetSpots.length}');
+    // if (coverageSpots.isNotEmpty) {
+    //   logg.i(
+    //     '📊 CHART V2: Coverage spots: ${coverageSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
+    //   );
+    // }
+    // if (targetSpots.isNotEmpty) {
+    //   logg.i(
+    //     '📊 CHART V2: Target spots: ${targetSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
+    //   );
+    // }
 
     return Card(
       color: Color(Constants.cardColor),

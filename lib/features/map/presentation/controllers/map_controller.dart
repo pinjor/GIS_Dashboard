@@ -74,6 +74,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         isLoading: false,
         clearError: true, // Explicitly clear any previous errors
       );
+
+      _logCurrentAreaUids(source: "Initial Data (Country)");
     } catch (e) {
       logg.e("Error loading initial data: $e");
       state = state.copyWith(
@@ -186,6 +188,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         clearError: true,
         clearEpiData: epiCenterCoordsData == null, // Clear EPI data if null
       );
+
+      _logCurrentAreaUids(source: "Drilldown to $areaName");
 
       logg.i("Successfully drilled down to $areaName at level $newLevel");
     } catch (e) {
@@ -328,6 +332,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           isLoading: false,
           clearError: true,
         );
+
+        _logCurrentAreaUids(source: "Go Back to ${previousLevel.name}");
       }
 
       logg.i("Successfully navigated back");
@@ -393,6 +399,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         isLoading: false,
         clearError: true,
       );
+
+      _logCurrentAreaUids(source: "Year Change ($selectedYear)");
 
       logg.i("Successfully refreshed coverage data for year $selectedYear");
     } catch (e) {
@@ -463,6 +471,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         clearError: true,
         clearEpiData: true, // Clear EPI data for divisions
       );
+
+      _logCurrentAreaUids(source: "Division Filter ($divisionName)");
 
       // logg.i("Successfully loaded division data for $divisionName");
     } catch (e) {
@@ -554,6 +564,10 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         currentAreaName: cityCorporationName,
         isLoading: false,
         clearError: true,
+      );
+
+      _logCurrentAreaUids(
+        source: "City Corporation Filter ($cityCorporationName)",
       );
 
       logg.i(
@@ -681,6 +695,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         clearEpiData: true, // Clear EPI data for districts from filter
       );
 
+      _logCurrentAreaUids(source: "District Filter ($districtName)");
+
       // logg.i("Successfully loaded district data for $districtName");
     } catch (e) {
       logg.e("Error loading district data for $districtName: $e");
@@ -741,6 +757,63 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   void clearError() {
     logg.i("Explicitly clearing error state");
     state = state.copyWith(clearError: true);
+  }
+
+  /// Specialized logging for the CURRENT focal area's UIDs
+  void _logCurrentAreaUids({required String source}) {
+    final areaName = state.currentAreaName;
+    if (areaName == 'Bangladesh') return;
+
+    logg.i("🎯 UID_REPORT: Focal Area '$areaName' (Trigger: $source)");
+
+    // 1. Get UID from Filter State (The most common source of truth for IDs)
+    final filterState = _filterNotifier.state;
+    String? filterUid;
+
+    if (filterState.selectedSubblock != null &&
+        filterState.selectedSubblock != 'All') {
+      filterUid = _filterNotifier.getSubblockUid(filterState.selectedSubblock!);
+    } else if (filterState.selectedWard != null &&
+        filterState.selectedWard != 'All') {
+      filterUid = _filterNotifier.getWardUid(filterState.selectedWard!);
+    } else if (filterState.selectedUnion != null &&
+        filterState.selectedUnion != 'All') {
+      filterUid = _filterNotifier.getUnionUid(filterState.selectedUnion!);
+    } else if (filterState.selectedUpazila != null &&
+        filterState.selectedUpazila != 'All') {
+      filterUid = _filterNotifier.getUpazilaUid(filterState.selectedUpazila!);
+    } else if (filterState.selectedDistrict != null &&
+        filterState.selectedDistrict != 'All') {
+      filterUid = _filterNotifier.getDistrictUid(filterState.selectedDistrict!);
+    } else if (filterState.selectedDivision != 'All') {
+      filterUid = _filterNotifier.getDivisionUid(filterState.selectedDivision);
+    } else if (filterState.selectedCityCorporation != null &&
+        filterState.selectedCityCorporation != 'All') {
+      filterUid = _filterNotifier.getCityCorporationUid(
+        filterState.selectedCityCorporation!,
+      );
+    }
+
+    if (filterUid != null) {
+      logUidInfo(
+        source: "Filter State",
+        layer: "Focal Area",
+        name: areaName ?? "Unknown",
+        uid: filterUid,
+      );
+    }
+
+    // 2. Get UID from Navigation Stack (The slug used for the API request)
+    if (state.navigationStack.isNotEmpty) {
+      final lastLevel = state.navigationStack.last;
+      logUidInfo(
+        source: "Navigation Stack",
+        layer: "Focal Area",
+        name: lastLevel.name ?? "Unknown",
+        uid: lastLevel.slug,
+        parentUid: lastLevel.parentSlug,
+      );
+    }
   }
 
   // ============================================================================

@@ -121,6 +121,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     if (tappedPolygon != null) {
+      logUidInfo(
+        source: "Map Interaction (Polygon Tap)",
+        layer: "Map Interaction",
+        name: tappedPolygon.areaName,
+        uid: tappedPolygon.areaId,
+        parentUid: tappedPolygon.parentSlug,
+      );
       logg.i("Tapped on: ${tappedPolygon.areaName}");
 
       final mapState = ref.read(mapControllerProvider);
@@ -252,6 +259,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     String epiUid,
     // EpiInfo? info,
   ) {
+    logUidInfo(
+      source: "Map Interaction (EPI Marker Tap)",
+      layer: "Map Interaction",
+      name: "EPI Center Marker",
+      uid: epiUid,
+    );
     logg.i("EPI marker tapped: (UID: $epiUid)");
 
     if (epiUid.isEmpty) {

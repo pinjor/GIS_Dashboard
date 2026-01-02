@@ -1077,6 +1077,9 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     if (hasNonVaccineChanges) {
       state = state.copyWith(lastAppliedTimestamp: DateTime.now());
       logg.i('✅ FilterProvider: Timestamp updated - EPI screen will reload');
+
+      // Log the UIDs of the successfully applied filter state
+      _logFilterUids("Apply Filters (with Initial Values)");
     } else {
       logg.i('FilterProvider: No non-vaccine changes, timestamp not updated');
     }
@@ -1159,10 +1162,86 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     );
     // Only mark the timestamp when non-vaccine filters actually changed
     // This prevents map loading when only vaccine changes
-    if (hasNonVaccineChanges) {
+    if (hasNonVaccineChanges || (vaccine != null)) {
       state = state.copyWith(lastAppliedTimestamp: DateTime.now());
+      logg.i(
+        '✅ FilterProvider: Timestamp updated - triggers map/summary reload',
+      );
+
+      // Log the UIDs of the successfully applied filter state
+      _logFilterUids("Apply Filters");
     } else {
-      logg.i('FilterProvider: No non-vaccine changes, timestamp not updated');
+      logg.i('FilterProvider: No non-vaccine changes detected');
     }
+  }
+
+  /// Log UIDs for the current deep-most focal selection
+  void _logFilterUids(String source) {
+    String? focalUid;
+    String? focalName;
+    String? layerName;
+
+    // Check from deepest to shallowest to find the "active" focal selection
+    if (state.selectedSubblock != null && state.selectedSubblock != 'All') {
+      focalUid = getSubblockUid(state.selectedSubblock!);
+      focalName = state.selectedSubblock;
+      layerName = "Filter (Subblock)";
+    } else if (state.selectedWard != null && state.selectedWard != 'All') {
+      focalUid = getWardUid(state.selectedWard!);
+      focalName = state.selectedWard;
+      layerName = "Filter (Ward)";
+    } else if (state.selectedUnion != null && state.selectedUnion != 'All') {
+      focalUid = getUnionUid(state.selectedUnion!);
+      focalName = state.selectedUnion;
+      layerName = "Filter (Union)";
+    } else if (state.selectedUpazila != null &&
+        state.selectedUpazila != 'All') {
+      focalUid = getUpazilaUid(state.selectedUpazila!);
+      focalName = state.selectedUpazila;
+      layerName = "Filter (Upazila)";
+    } else if (state.selectedDistrict != null &&
+        state.selectedDistrict != 'All') {
+      focalUid = getDistrictUid(state.selectedDistrict!);
+      focalName = state.selectedDistrict;
+      layerName = "Filter (District)";
+    } else if (state.selectedDivision != 'All') {
+      focalUid = getDivisionUid(state.selectedDivision);
+      focalName = state.selectedDivision;
+      layerName = "Filter (Division)";
+    } else if (state.selectedCityCorporation != null &&
+        state.selectedCityCorporation != 'All') {
+      focalUid = getCityCorporationUid(state.selectedCityCorporation!);
+      focalName = state.selectedCityCorporation;
+      layerName = "Filter (CC)";
+    }
+
+    if (focalUid != null) {
+      logUidInfo(
+        source: source,
+        layer: layerName!,
+        name: focalName!,
+        uid: focalUid,
+      );
+    }
+  }
+
+  /// Get division UID by name
+  String? getDivisionUid(String divisionName) {
+    if (divisionName == 'All') return null;
+    final div = state.divisions.firstWhere(
+      (d) => d.name == divisionName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return div.uid;
+  }
+
+  /// Get district UID by name
+  String? getDistrictUid(String districtName) {
+    if (districtName == 'All') return null;
+    final dist = state.districts.firstWhere(
+      (d) => d.name == districtName,
+      orElse: () => const AreaResponseModel(),
+    );
+    return dist.uid;
   }
 }

@@ -139,31 +139,31 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
     final vaccines = summaryState.coverageData?.vaccines ?? [];
 
     // 🔍 DEBUG: Log all available vaccines from API
-    logg.i(
-      '📋 TABLE WIDGET: Looking for vaccine "${filterState.selectedVaccine}"',
-    );
-    logg.i(
-      '📋 TABLE WIDGET: Available vaccines from API (${vaccines.length}):',
-    );
-    for (int i = 0; i < vaccines.length; i++) {
-      logg.i('   [$i] "${vaccines[i].vaccineName}"');
-    }
+    // logg.i(
+    //   '📋 TABLE WIDGET: Looking for vaccine "${filterState.selectedVaccine}"',
+    // );
+    // logg.i(
+    //   '📋 TABLE WIDGET: Available vaccines from API (${vaccines.length}):',
+    // );
+    // for (int i = 0; i < vaccines.length; i++) {
+    //   logg.i('   [$i] "${vaccines[i].vaccineName}"');
+    // }
 
     final selectedVaccine = vaccines.isNotEmpty
         ? vaccines.firstWhere(
             (vaccine) => vaccine.vaccineName == filterState.selectedVaccine,
             orElse: () {
-              logg.w(
-                '📋 TABLE WIDGET: ⚠️ No exact match found for "${filterState.selectedVaccine}", falling back to first vaccine "${vaccines.first.vaccineName}"',
-              );
+              // logg.w(
+              //   '📋 TABLE WIDGET: ⚠️ No exact match found for "${filterState.selectedVaccine}", falling back to first vaccine "${vaccines.first.vaccineName}"',
+              // );
               return vaccines.first;
             },
           )
         : null;
 
-    logg.i(
-      '📋 TABLE WIDGET: Selected vaccine = "${selectedVaccine?.vaccineName}" (match: ${selectedVaccine?.vaccineName == filterState.selectedVaccine})',
-    );
+    // logg.i(
+    //   '📋 TABLE WIDGET: Selected vaccine = "${selectedVaccine?.vaccineName}" (match: ${selectedVaccine?.vaccineName == filterState.selectedVaccine})',
+    // );
 
     if (selectedVaccine == null) {
       return Card(
