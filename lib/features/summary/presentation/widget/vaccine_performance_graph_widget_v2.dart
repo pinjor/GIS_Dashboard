@@ -238,20 +238,18 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
     }
 
     // Debug: Log data points
-    // logg.i('📊 CHART V2: BCG Vaccine found: ${bcgVaccine.vaccineName}');
-    // logg.i('📊 CHART V2: BCG Total Target: ${bcgVaccine.totalTarget}');
-    // logg.i('📊 CHART V2: Coverage spots count: ${coverageSpots.length}');
-    // logg.i('📊 CHART V2: Target spots count: ${targetSpots.length}');
-    // if (coverageSpots.isNotEmpty) {
-    //   logg.i(
-    //     '📊 CHART V2: Coverage spots: ${coverageSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
-    //   );
-    // }
-    // if (targetSpots.isNotEmpty) {
-    //   logg.i(
-    //     '📊 CHART V2: Target spots: ${targetSpots.map((s) => '(${s.x}, ${s.y})').join(', ')}',
-    //   );
-    // }
+    logg.i('''
+📊 GRAPH DEBUG:
+Vaccine: ${bcgVaccine.vaccineName}
+Total Target: ${bcgVaccine.totalTarget}
+MonthWise Data Present: ${bcgVaccine.monthWiseTotalCoverages != null}
+MonthWise Keys: ${bcgVaccine.monthWiseTotalCoverages?.keys.toList()}
+Coverage Spots: ${coverageSpots.length}
+Target Spots: ${targetSpots.length}
+First Spot: ${coverageSpots.isNotEmpty ? '(${coverageSpots.first.x}, ${coverageSpots.first.y})' : 'N/A'}
+Last Spot: ${coverageSpots.isNotEmpty ? '(${coverageSpots.last.x}, ${coverageSpots.last.y})' : 'N/A'}
+-------------------
+''');
 
     return Card(
       color: Color(Constants.cardColor),

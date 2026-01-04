@@ -314,6 +314,16 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
     required List<Map<String, dynamic>> performer,
     bool isHighPerformer = true,
   }) {
+    if (performer.isNotEmpty) {
+      logg.i('''
+🔍 PERFORMANCE TABLE DEBUG (${isHighPerformer ? 'HIGH' : 'LOW'}):
+Count: ${performer.length}
+First Item: ${performer.first['area']?.name} -> Cov: ${performer.first['area']?.coveragePercentage}%
+Last Item: ${performer.last['area']?.name} -> Cov: ${performer.last['area']?.coveragePercentage}%
+-------------------
+''');
+    }
+
     return Column(
       children: [
         Align(
@@ -337,10 +347,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
             child: const Text(
               'Data not found',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey,
-                fontStyle: FontStyle.italic,
-              ),
+              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
             ),
           ),
         ...performer.asMap().entries.map((entry) {

@@ -9,18 +9,29 @@ import '../../../../core/utils/utils.dart';
 import '../../domain/area_coords_geo_json_response.dart';
 import 'map_state.dart';
 import '../../../summary/domain/vaccine_coverage_response.dart';
+import '../../../../core/utils/vaccine_data_calculator.dart';
 
 final mapControllerProvider =
     StateNotifierProvider<MapControllerNotifier, MapState>((ref) {
-      return MapControllerNotifier(
+      final controller = MapControllerNotifier(
         dataService: ref.read(dataServiceProvider),
         filterNotifier: ref.read(filterControllerProvider.notifier),
       );
+
+      // Listen to filter state mainly for months
+      ref.listen<FilterState>(filterControllerProvider, (previous, next) {
+        if (previous?.selectedMonths != next.selectedMonths) {
+          controller.applyMonthFilter(next.selectedMonths);
+        }
+      });
+
+      return controller;
     });
 
 class MapControllerNotifier extends StateNotifier<MapState> {
   final DataService _dataService;
   final FilterControllerNotifier _filterNotifier;
+  VaccineCoverageResponse? _unfilteredCoverageData;
 
   MapControllerNotifier({
     required DataService dataService,
@@ -64,9 +75,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       //   "Loaded Coverage data for ${coverageData.vaccines?.first.vaccineName} and ${coverageData.vaccines?.first.areas?.length} coverage areas",
       // );
 
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
-        coverageData: coverageData,
+        coverageData: filteredData,
         currentLevel: GeographicLevel
             .country, // Fixed: Country level should use country enum
         navigationStack: [], // Reset to country level
@@ -177,9 +195,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final newStack = List<DrilldownLevel>.from(state.navigationStack)
         ..add(newNavLevel);
 
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
-        coverageData: coverageData,
+        coverageData: filteredData,
         epiCenterCoordsData: epiCenterCoordsData,
         currentLevel: newLevelEnum,
         navigationStack: newStack,
@@ -322,9 +347,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           }
         }
 
+        _unfilteredCoverageData = coverageData;
+        // Apply existing month filter if any
+        final filteredData = VaccineDataCalculator.recalculateCoverageData(
+          coverageData,
+          currentFilter.selectedMonths,
+        );
+
         state = state.copyWith(
           areaCoordsGeoJsonData: areaCoordsGeoJsonData,
-          coverageData: coverageData,
+          coverageData: filteredData,
           epiCenterCoordsData: epiCenterCoordsData,
           currentLevel: previousLevel.level,
           navigationStack: newStack,
@@ -394,8 +426,15 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         forceRefresh: true, // Always refresh for year change
       );
 
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
       state = state.copyWith(
-        coverageData: coverageData,
+        coverageData: filteredData,
         isLoading: false,
         clearError: true,
       );
@@ -459,9 +498,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         parentSlug: null,
       );
 
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
-        coverageData: coverageData,
+        coverageData: filteredData,
         currentLevel: GeographicLevel.division,
         navigationStack: [
           divisionNavLevel,
@@ -551,9 +597,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         parentSlug: null,
       );
 
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
-        coverageData: coverageData,
+        coverageData: filteredData,
         epiCenterCoordsData:
             epiCenterCoordsData, // Include EPI data for city corporations
         currentLevel: GeographicLevel
@@ -684,9 +737,16 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         logg.i("Starting fresh navigation with district only");
       }
 
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
-        coverageData: coverageData,
+        coverageData: filteredData,
         currentLevel: GeographicLevel.district,
         navigationStack: newNavigationStack,
         currentAreaName: districtName,
@@ -820,6 +880,20 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
 
     return null;
+  }
+
+  /// Apply month filter to existing data
+  void applyMonthFilter(List<String> selectedMonths) {
+    if (_unfilteredCoverageData == null) return;
+
+    logg.i("Applying month filter to MAP: $selectedMonths");
+
+    final filteredData = VaccineDataCalculator.recalculateCoverageData(
+      _unfilteredCoverageData,
+      selectedMonths,
+    );
+
+    state = state.copyWith(coverageData: filteredData);
   }
 
   // ============================================================================

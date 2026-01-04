@@ -1,12 +1,18 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gis_dashboard/core/common/constants/api_constants.dart';
-import 'package:gis_dashboard/features/summary/domain/summary_state.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_state.dart';
 import 'package:gis_dashboard/features/map/utils/map_enums.dart';
+import 'package:gis_dashboard/features/filter/presentation/controllers/filter_controller.dart';
+import 'package:gis_dashboard/features/filter/domain/filter_state.dart';
+import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/core/utils/vaccine_data_calculator.dart';
 
+import '../../../../core/common/constants/api_constants.dart';
 import '../../../../core/service/data_service.dart';
 import '../../../../core/utils/utils.dart';
+import '../../domain/summary_state.dart';
 
 final summaryControllerProvider =
     StateNotifierProvider<SummaryControllerNotifier, SummaryState>((ref) {
@@ -22,7 +28,15 @@ final summaryControllerProvider =
             next.error == null &&
             (previous?.coverageData != next.coverageData ||
                 previous?.currentLevel != next.currentLevel)) {
-          controller._updateWithMapData(next);
+          final filterState = ref.read(filterControllerProvider);
+          controller.updateDataAndFilter(next, filterState.selectedMonths);
+        }
+      });
+
+      // Listen to filter state changes
+      ref.listen<FilterState>(filterControllerProvider, (previous, next) {
+        if (previous?.selectedMonths != next.selectedMonths) {
+          controller.applyMonthFilter(next.selectedMonths);
         }
       });
 
@@ -31,24 +45,46 @@ final summaryControllerProvider =
 
 class SummaryControllerNotifier extends StateNotifier<SummaryState> {
   final DataService _dataService;
+  VaccineCoverageResponse? _unfilteredCoverageData;
 
   SummaryControllerNotifier({required DataService dataService})
     : _dataService = dataService,
       super(SummaryState());
 
-  /// Update summary with data from map state (called when drill-down occurs)
-  void _updateWithMapData(MapState mapState) {
+  /// Update summary with data from map state and apply month filter
+  void updateDataAndFilter(MapState mapState, List<String> selectedMonths) {
     logg.i(
       "Updating summary with map data for ${mapState.currentAreaName} at level ${mapState.currentLevel}",
     );
 
+    _unfilteredCoverageData = mapState.coverageData;
+
+    final filteredData = VaccineDataCalculator.recalculateCoverageData(
+      _unfilteredCoverageData,
+      selectedMonths,
+    );
+
     state = state.copyWith(
-      coverageData: mapState.coverageData,
+      coverageData: filteredData,
       currentLevel: mapState.currentLevel,
       currentAreaName: mapState.currentAreaName,
       isLoading: false,
       error: null,
     );
+  }
+
+  /// Apply month filter to existing data
+  void applyMonthFilter(List<String> selectedMonths) {
+    if (_unfilteredCoverageData == null) return;
+
+    logg.i("Applying month filter: $selectedMonths");
+
+    final filteredData = VaccineDataCalculator.recalculateCoverageData(
+      _unfilteredCoverageData,
+      selectedMonths,
+    );
+
+    state = state.copyWith(coverageData: filteredData);
   }
 
   Future<void> loadSummaryData({bool forceRefresh = false}) async {
@@ -62,6 +98,19 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
         ),
         forceRefresh: forceRefresh,
       );
+
+      // 🔍 DEBUG: Save JSON to file
+      if (coverageData.vaccines != null) {
+        try {
+          final file = File('debug_output/response.json');
+          await file.create(recursive: true);
+          // Assuming the model has toJson() because it's freezed
+          await file.writeAsString(jsonEncode(coverageData.toJson()));
+          logg.i("✅ DEBUG: Saved response.json to ${file.absolute.path}");
+        } catch (e) {
+          logg.e("Failed to write debug file: $e");
+        }
+      }
 
       logg.i(
         "Loaded summary data for ${coverageData.vaccines?.first.vaccineName} and ${coverageData.vaccines?.first.areas?.length} coverage areas",

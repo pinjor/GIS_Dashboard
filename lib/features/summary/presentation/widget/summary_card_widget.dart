@@ -40,6 +40,22 @@ class SummaryCardWidget extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Stack(
         children: [
+          // 🔍 DEBUG LOG
+          Builder(
+            builder: (context) {
+              if (label.contains('Total Children')) {
+                logg.i('''
+🔍 SUMMARY CARD DEBUG:
+Label: $label
+Value: $value
+Boys: $boysCount
+Girls: $girlsCount
+-------------------
+''');
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -95,10 +111,7 @@ class SummaryCardWidget extends StatelessWidget {
         4.w,
         Text(
           isBoy ? 'Boys: ' : 'Girls: ',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: Colors.white, fontSize: 12),
         ),
         Text(
           _formatNumber(count.toString()),
