@@ -1,0 +1,100 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "info": {
+                "name": "b. (W-1, Ka-2) EPI Center",
+                "type": "epi",
+                "org_uid": "KIAmJWqYEBq",
+                "type_name": "Outreach Center",
+                "is_fixed_center": false
+            },
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.69252540042696,
+                    22.08910970015256
+                ]
+            },
+            "session_dates": "2026-01-05"
+        },
+        {
+            "info": {
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "type": "epi",
+                "org_uid": "vCU5Ns6Gi5P",
+                "type_name": "Outreach Center",
+                "is_fixed_center": false
+            },
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.82821398298898,
+                    22.26296870833926
+                ]
+            },
+            "session_dates": "2026-01-05"
+        },
+        {
+            "info": {
+                "name": "r. (W-3, Ka-2) EPI Center",
+                "type": "epi",
+                "org_uid": "SVN5WgS9eay",
+                "type_name": "Outreach Center",
+                "is_fixed_center": false
+            },
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    92.20341602013326,
+                    24.960282259818484
+                ]
+            },
+            "session_dates": "2026-01-05"
+        },
+        {
+            "info": {
+                "name": "j. (W-2, Ka-2) EPI Center",
+                "type": "epi",
+                "org_uid": "yuk3cVp4hSf",
+                "type_name": "Outreach Center",
+                "is_fixed_center": false
+            },
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    89.88172560005648,
+                    24.879764199758085
+                ]
+            },
+            "session_dates": "2026-01-05"
+        },
+        {
+            "info": {
+                "name": "q. (W-3, Ka-1) EPI Center",
+                "type": "epi",
+                "org_uid": "Doc1GTY1lOJ",
+                "type_name": "Outreach Center",
+                "is_fixed_center": false
+            },
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    90.8650206101131,
+                    25.08529993484416
+                ]
+            },
+            "session_dates": "2026-01-05"
+        }
+    ],
+    "session_count": 11,
+    "metadata": {
+        "generated_at": "2026-01-05 00:45:04",
+        "data_structure": "session_plans"
+    }
+}

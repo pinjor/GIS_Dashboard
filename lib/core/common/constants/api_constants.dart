@@ -19,8 +19,14 @@ class ApiConstants {
   static String get districtCoveragePath25 => '/coverage/2025-coverage.json';
   @Deprecated('Use getCoveragePath(year: year) instead')
   static String get districtCoveragePath24 => '/coverage/2024-coverage.json';
-
+  /// Filter paths
   static String get filterByArea => '/areas';
+
+  /// Session plans
+  static String get sessionPlans => '/session-plans'; 
+
+
+
 
   /// Dynamic path generators for drilldown functionality
 

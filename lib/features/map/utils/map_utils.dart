@@ -144,6 +144,65 @@ List<AreaPolygon> parseGeoJsonToPolygons(
   return polygonList;
 }
 
+List<AreaPolygon> parseGeoJsonToPolygonsSimple(
+  AreaCoordsGeoJsonResponse fetchAreaGeoJsonCoordsData,
+) {
+  final features = fetchAreaGeoJsonCoordsData.features;
+  final List<AreaPolygon> polygonList = [];
+
+  if (features == null || features.isEmpty) {
+    return polygonList;
+  }
+
+  for (final feature in features) {
+    final geometry = feature.geometry;
+    final info = feature.info;
+
+    if (geometry == null) continue;
+
+    final type = geometry.type;
+    List<List<LatLng>> allRings = [];
+
+    if (type == 'Polygon') {
+      allRings = _extractAllPolygonRings(geometry, info?.name);
+    } else if (type == 'MultiPolygon') {
+      allRings = _extractAllMultiPolygonRings(geometry, info?.name);
+    }
+
+    for (int ringIndex = 0; ringIndex < allRings.length; ringIndex++) {
+      final ring = allRings[ringIndex];
+      if (ring.isEmpty || ring.length < 3) continue;
+
+      final ringAreaName = allRings.length > 1
+          ? "${info?.name} (Part ${ringIndex + 1})"
+          : info?.name ?? 'Unknown Area';
+
+      // Create polygon with default neutral styling
+      final polygon = Polygon(
+        points: ring,
+        color: Colors.blueGrey.withValues(alpha: 0.1),
+        borderColor: const Color(0xFF333333),
+        borderStrokeWidth: 0.8,
+      );
+
+      final areaPolygon = AreaPolygon(
+        polygon: polygon,
+        areaId: info?.orgUid ?? info?.name ?? 'unknown',
+        areaName: ringAreaName,
+        level: 'country',
+        coveragePercentage: 0.0,
+        slug: info?.slug,
+        parentSlug: info?.parentSlug,
+        canDrillDown: false,
+        orgUid: info?.orgUid,
+      );
+
+      polygonList.add(areaPolygon);
+    }
+  }
+  return polygonList;
+}
+
 // Helper function to extract ALL polygon rings from a Polygon geometry
 // FUTURE-PROOF: Enhanced ring extraction for comprehensive polygon rendering
 List<List<LatLng>> _extractAllPolygonRings(

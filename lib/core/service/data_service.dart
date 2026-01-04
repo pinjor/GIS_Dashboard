@@ -3,6 +3,8 @@ import 'package:gis_dashboard/features/epi_center/data/epi_center_repository.dar
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_coords_response.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 import 'package:gis_dashboard/features/map/data/map_repository.dart';
+import 'package:gis_dashboard/features/session_plan/data/session_plan_repository.dart';
+import 'package:gis_dashboard/features/session_plan/domain/session_plan_coords_response.dart';
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 
 import '../../features/map/domain/area_coords_geo_json_response.dart';
@@ -16,6 +18,7 @@ final dataServiceProvider = Provider<DataService>((ref) {
     mapRepository: ref.read(mapRepositoryProvider),
     summaryRepository: ref.read(summaryRepositoryProvider),
     epiCenterRepository: ref.read(epiCenterRepositoryProvider),
+    sessionPlanRepository: ref.read(sessionPlanRepositoryProvider),
   );
 });
 
@@ -23,6 +26,7 @@ class DataService {
   final MapRepository _mapRepository;
   final SummaryRepository _summaryRepository;
   final EpiCenterRepository _epiCenterRepository;
+  final SessionPlanRepository _sessionPlanRepository;
 
   // In-memory cache
   // VaccineCoverageResponse? _cachedCoverageData;
@@ -36,9 +40,11 @@ class DataService {
     required MapRepository mapRepository,
     required SummaryRepository summaryRepository,
     required EpiCenterRepository epiCenterRepository,
+    required SessionPlanRepository sessionPlanRepository,
   }) : _mapRepository = mapRepository,
        _summaryRepository = summaryRepository,
-       _epiCenterRepository = epiCenterRepository;
+       _epiCenterRepository = epiCenterRepository,
+       _sessionPlanRepository = sessionPlanRepository;
 
   /// Get vaccination coverage data with caching and retry logic
   Future<VaccineCoverageResponse> getVaccinationCoverage({
@@ -346,6 +352,31 @@ class DataService {
       // logg.e('Error fetching EPI center details by org_uid: $e');
       rethrow;
     }
+  }
+
+  /// Get session plan coordinates
+  Future<SessionPlanCoordsResponse> getSessionPlanCoords({
+    required String urlPath,
+    bool forceRefresh = false,
+  }) async {
+    // Similar retry logic as other methods if needed
+    Exception? lastError;
+
+    for (int attempt = 1; attempt <= 2; attempt++) {
+      try {
+        final data = await _sessionPlanRepository.fetchSessionPlanCoords(
+          urlPath: urlPath,
+        );
+        return data;
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        if (attempt < 2) {
+          await Future.delayed(Duration(milliseconds: 500 * attempt));
+          continue;
+        }
+      }
+    }
+    throw lastError ?? Exception('Session plan data unavailable');
   }
 }
 

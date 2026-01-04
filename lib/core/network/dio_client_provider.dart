@@ -47,3 +47,21 @@ final dioClientProvider = Provider<Dio>((ref) {
 
   return dio;
 });
+
+// Provider for dynamic API calls (not storage/static files)
+// Base URL: staging.gisdashboard.online
+final apiClientProvider = Provider<Dio>((ref) {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: ApiConstants.stagingServerFullUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 15),
+    ),
+  );
+
+  StagingSslAdapter.configureForDio(dio);
+  dio.interceptors.add(LoggingInterceptor());
+
+  return dio;
+});
