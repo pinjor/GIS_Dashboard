@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/common/constants/constants.dart';
-import '../../../epi_center/presentation/widgets/epi_center_about_details_widget.dart';
-import '../../../epi_center/presentation/widgets/epi_center_microplan_widgets.dart';
-import '../../../epi_center/presentation/widgets/epi_yearly_session_personnel_widget.dart';
 
 class MicroPlanScreen extends StatelessWidget {
   const MicroPlanScreen({super.key});

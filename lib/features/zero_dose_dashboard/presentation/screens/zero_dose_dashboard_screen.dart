@@ -4,8 +4,6 @@ import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import '../../../../core/common/constants/constants.dart';
 import '../../../summary/presentation/controllers/summary_controller.dart';
 import '../../../summary/domain/vaccine_coverage_response.dart';
-import '../../../map/presentation/widget/map_coverage_visualizer_card_widget.dart';
-import '../../../map/utils/map_enums.dart';
 import '../widgets/zero_dose_bar_chart_widget.dart';
 
 class ZeroDoseDashboardScreen extends ConsumerWidget {
@@ -28,7 +26,7 @@ class ZeroDoseDashboardScreen extends ConsumerWidget {
     if (coverageData?.vaccines != null) {
       // Find Penta-1 vaccine
       final pentaVaccine = coverageData!.vaccines!.firstWhere(
-        (vaccine) => vaccine.vaccineName == VaccineType.penta1.displayName,
+        (vaccine) => vaccine.vaccineUid == VaccineType.penta1.uid,
         orElse: () => const Vaccine(),
       );
 

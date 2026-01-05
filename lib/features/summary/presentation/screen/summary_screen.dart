@@ -41,7 +41,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
     final vaccines = summaryState.coverageData?.vaccines ?? [];
     final selectedVaccineData = vaccines.isNotEmpty
         ? vaccines.firstWhere(
-            (vaccine) => vaccine.vaccineName == filterState.selectedVaccine,
+            (vaccine) => vaccine.vaccineUid == filterState.selectedVaccine,
             orElse: () => vaccines.first,
           )
         : null;

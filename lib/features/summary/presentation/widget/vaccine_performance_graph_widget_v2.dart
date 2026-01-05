@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
-import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/features/summary/presentation/controllers/summary_controller.dart';
 import 'package:intl/intl.dart';
 
@@ -25,7 +24,6 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filterState = ref.watch(filterControllerProvider);
     final summaryState = ref.watch(summaryControllerProvider);
 
     // Show loading or error state
@@ -94,11 +92,11 @@ class VaccinePerformanceGraphWidgetV2 extends ConsumerWidget {
 
     final bcgVaccine = vaccines.isNotEmpty
         ? vaccines.firstWhere(
-            (vaccine) => vaccine.vaccineName == VaccineType.bcg.displayName,
+            (vaccine) => vaccine.vaccineUid == VaccineType.bcg.uid,
             orElse: () {
               // If BCG not found, try to use first available vaccine
               logg.w(
-                'BCG vaccine not found, returning first available vaccine.',
+                'BCG vaccine (by UID) not found, returning first available vaccine.',
               );
               return vaccines.first;
             },

@@ -3,6 +3,7 @@ import '../../map/utils/map_enums.dart';
 
 /// Filter state for managing user selections and area data
 class FilterState {
+  /// Stores the vaccine UID (not display name)
   final String selectedVaccine;
   final AreaType selectedAreaType;
   final String selectedDivision;
@@ -62,8 +63,12 @@ class FilterState {
   // Filter application tracking
   final DateTime? lastAppliedTimestamp;
 
+  /// Use the enum name as the default UID (will be mapped to real UID at runtime)
+  static const String defaultVaccineUid = 'x3aIDdpR65a'; // BCG UID
+
   const FilterState({
-    this.selectedVaccine = 'BCG',
+    /// Default to BCG UID for robustness
+    this.selectedVaccine = defaultVaccineUid,
     this.selectedAreaType = AreaType.district,
     this.selectedDivision = 'All',
     this.selectedCityCorporation,
@@ -113,7 +118,7 @@ class FilterState {
   });
 
   FilterState copyWith({
-    String? selectedVaccine,
+    String? selectedVaccine, // should be UID
     AreaType? selectedAreaType,
     String? selectedDivision,
     String? selectedCityCorporation,

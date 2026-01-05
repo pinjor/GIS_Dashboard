@@ -151,10 +151,10 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
 
     final selectedVaccine = vaccines.isNotEmpty
         ? vaccines.firstWhere(
-            (vaccine) => vaccine.vaccineName == filterState.selectedVaccine,
+            (vaccine) => vaccine.vaccineUid == filterState.selectedVaccine,
             orElse: () {
               // logg.w(
-              //   '📋 TABLE WIDGET: ⚠️ No exact match found for "${filterState.selectedVaccine}", falling back to first vaccine "${vaccines.first.vaccineName}"',
+              //   '📋 TABLE WIDGET: ⚠️ No exact match found for UID "${filterState.selectedVaccine}", falling back to first vaccine UID "${vaccines.first.vaccineUid}"',
               // );
               return vaccines.first;
             },

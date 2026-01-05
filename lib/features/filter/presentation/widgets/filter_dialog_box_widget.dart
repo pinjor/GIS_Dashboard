@@ -1126,30 +1126,42 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             CustomRadioButton(
                               label: VaccineType.bcg.displayName,
                               primaryColor: primaryColor,
-                              selectedVaccine: _selectedVaccine,
+                              selectedVaccine:
+                                  VaccineType.fromUid(
+                                    _selectedVaccine,
+                                  )?.displayName ??
+                                  '',
                               onChanged: (val) {
                                 setState(() {
-                                  _selectedVaccine = val;
+                                  _selectedVaccine = VaccineType.bcg.uid;
                                 });
                               },
                             ),
                             CustomRadioButton(
                               label: VaccineType.penta2.displayName,
                               primaryColor: primaryColor,
-                              selectedVaccine: _selectedVaccine,
+                              selectedVaccine:
+                                  VaccineType.fromUid(
+                                    _selectedVaccine,
+                                  )?.displayName ??
+                                  '',
                               onChanged: (val) {
                                 setState(() {
-                                  _selectedVaccine = val;
+                                  _selectedVaccine = VaccineType.penta2.uid;
                                 });
                               },
                             ),
                             CustomRadioButton(
                               label: VaccineType.mr1.displayName,
                               primaryColor: primaryColor,
-                              selectedVaccine: _selectedVaccine,
+                              selectedVaccine:
+                                  VaccineType.fromUid(
+                                    _selectedVaccine,
+                                  )?.displayName ??
+                                  '',
                               onChanged: (val) {
                                 setState(() {
-                                  _selectedVaccine = val;
+                                  _selectedVaccine = VaccineType.mr1.uid;
                                 });
                               },
                             ),
@@ -1165,30 +1177,42 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             CustomRadioButton(
                               label: VaccineType.penta1.displayName,
                               primaryColor: primaryColor,
-                              selectedVaccine: _selectedVaccine,
+                              selectedVaccine:
+                                  VaccineType.fromUid(
+                                    _selectedVaccine,
+                                  )?.displayName ??
+                                  '',
                               onChanged: (val) {
                                 setState(() {
-                                  _selectedVaccine = val;
+                                  _selectedVaccine = VaccineType.penta1.uid;
                                 });
                               },
                             ),
                             CustomRadioButton(
                               label: VaccineType.penta3.displayName,
                               primaryColor: primaryColor,
-                              selectedVaccine: _selectedVaccine,
+                              selectedVaccine:
+                                  VaccineType.fromUid(
+                                    _selectedVaccine,
+                                  )?.displayName ??
+                                  '',
                               onChanged: (val) {
                                 setState(() {
-                                  _selectedVaccine = val;
+                                  _selectedVaccine = VaccineType.penta3.uid;
                                 });
                               },
                             ),
                             CustomRadioButton(
                               label: VaccineType.mr2.displayName,
                               primaryColor: primaryColor,
-                              selectedVaccine: _selectedVaccine,
+                              selectedVaccine:
+                                  VaccineType.fromUid(
+                                    _selectedVaccine,
+                                  )?.displayName ??
+                                  '',
                               onChanged: (val) {
                                 setState(() {
-                                  _selectedVaccine = val;
+                                  _selectedVaccine = VaccineType.mr2.uid;
                                 });
                               },
                             ),

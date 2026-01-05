@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/screen/epi_center_details_screen.dart';
-import 'package:gis_dashboard/features/filter/presentation/controllers/filter_controller.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 
 class ViewDetailsButtonWidget extends ConsumerWidget {

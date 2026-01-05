@@ -56,7 +56,7 @@ List<AreaPolygon> parseGeoJsonToPolygons(
   final vaccines = coverageData.vaccines ?? [];
   final selectedVaccineData = vaccines.isNotEmpty
       ? vaccines.firstWhere(
-          (vaccine) => vaccine.vaccineName == selectedVaccine,
+          (vaccine) => vaccine.vaccineUid == selectedVaccine,
           orElse: () => vaccines.first,
         )
       : null;
