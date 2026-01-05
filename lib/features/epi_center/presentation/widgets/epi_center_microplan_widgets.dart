@@ -60,8 +60,8 @@ class MicroplanTable extends ConsumerWidget {
     if (currentYear == "") {
       return const Text('No year selected in filter.');
     }
-    final yearDemographics =
-        epiData?.area?.additionalData?.demographics[currentYear];
+    // ✅ Use helper method that handles both country-level and EPI-level data
+    final yearDemographics = epiData?.getDemographicsForYear(currentYear);
     final population = yearDemographics?.population;
     final child0To15Month = yearDemographics?.child0To15Month;
     final child0To11Month = yearDemographics?.child0To11Month;
@@ -169,8 +169,10 @@ class PopulationCard extends StatelessWidget {
             if (category != "women") ...[
               const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
+                  Flexible(
+                    flex: 1,
                     child: GenderInfo(
                       gender: 'Male',
                       count: male,
@@ -178,7 +180,8 @@ class PopulationCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
+                  Flexible(
+                    flex: 1,
                     child: GenderInfo(
                       gender: 'Female',
                       count: female,
@@ -188,20 +191,21 @@ class PopulationCard extends StatelessWidget {
                 ],
               ),
             ],
-            // if (progress > 0) ...[
-            //   const SizedBox(height: 12),
-            //   LinearProgressIndicator(
-            //     value: progress > 1 ? 1 : progress,
-            //     backgroundColor: Colors.grey[300],
-            //     color: categoryColor,
-            //   ),
-            //   const SizedBox(height: 4),
-            //   Text(
-            //     '${(progress * 100).toStringAsFixed(1)}% of total population',
-            //     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            //   ),
-            // ],
           ],
+
+          // if (progress > 0) ...[
+          //   const SizedBox(height: 12),
+          //   LinearProgressIndicator(
+          //     value: progress > 1 ? 1 : progress,
+          //     backgroundColor: Colors.grey[300],
+          //     color: categoryColor,
+          //   ),
+          //   const SizedBox(height: 4),
+          //   Text(
+          //     '${(progress * 100).toStringAsFixed(1)}% of total population',
+          //     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          //   ),
+          // ],
         ),
       ),
     );
@@ -252,21 +256,26 @@ class GenderInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
         Text(
-          '$gender: $count',
+          gender,
           style: TextStyle(
             color: color,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
+          maxLines: 1,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          count,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          maxLines: 1,
         ),
       ],
     );

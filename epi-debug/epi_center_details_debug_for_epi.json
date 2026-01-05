@@ -1,0 +1,4163 @@
+{
+  "cityCorporations": [
+    {
+      "uid": "AGuxsoFsYIv",
+      "name": "Dhaka South CC",
+      "children": [
+        {
+          "uid": "Oa903WL5umn",
+          "name": "Dhaka South CC Zone-01",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "s8sgszSfN6m",
+              "name": "Ward-15",
+              "parent_uid": "Oa903WL5umn",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "m3fLcZzhrLR",
+              "name": "Ward-16",
+              "parent_uid": "Oa903WL5umn",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "LQRC0FuiQGy",
+              "name": "Ward-17",
+              "parent_uid": "Oa903WL5umn",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "5MmDjULMWRg",
+              "name": "Ward-18",
+              "parent_uid": "Oa903WL5umn",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "E4KMiisaKaW",
+              "name": "Ward-19",
+              "parent_uid": "Oa903WL5umn",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "t4YW5YPn4wX",
+              "name": "Ward-20",
+              "parent_uid": "Oa903WL5umn",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "D3Fks1ad8ww",
+              "name": "Ward-21",
+              "parent_uid": "Oa903WL5umn",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "6z0CPp3s0ZN",
+          "name": "Dhaka South CC Zone-02",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": []
+        },
+        {
+          "uid": "lzValS97C3q",
+          "name": "Dhaka South CC Zone-03",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "jDYSF3qqwdW",
+              "name": "Ward-14",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "YgaRVYZl3IQ",
+              "name": "Ward-22",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Kw5PJ9GFU6k",
+              "name": "Ward-23",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "1MUD4celWnD",
+              "name": "Ward-24",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "w4BQJ74I8ZM",
+              "name": "Ward-25",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "01BOk400JhI",
+              "name": "Ward-26",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "W4xp6w99qDY",
+              "name": "Ward-27",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "uvk816ukKxN",
+              "name": "Ward-28",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "EkSqpjdOCNu",
+              "name": "Ward-29",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "R8FAdHuQiXi",
+              "name": "Ward-55",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "OOYAtRQzuFJ",
+              "name": "Ward-56",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "UttDHkxM3ke",
+              "name": "Ward-57",
+              "parent_uid": "lzValS97C3q",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "5orhxeNEjAM",
+          "name": "Dhaka South CC Zone-04",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": []
+        },
+        {
+          "uid": "WYzBb9D1AvZ",
+          "name": "Dhaka South CC Zone-05",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "EqrTYpLeGtU",
+              "name": "ward-07",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "jnBQdnYegFt",
+              "name": "ward-39",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "eXdRncsi1Vc",
+              "name": "ward-40",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ty2FiHG8NWT",
+              "name": "ward-41",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "bi79tg1kwxg",
+              "name": "ward-44",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "mQ7q7FOuzpJ",
+              "name": "ward-45",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Dz5QrzATLRw",
+              "name": "ward-46",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Ir6J9p9d6Vo",
+              "name": "ward-47",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "eQyGxI4YFeX",
+              "name": "ward-48",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "N2RJQYJPfPy",
+              "name": "ward-49",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "KpqbsjdIjH7",
+              "name": "ward-50",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "lpVDjxOlbT9",
+              "name": "ward-51",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "bUoVKm98nr5",
+              "name": "ward-52",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "fyOXvuSu3Vv",
+              "name": "ward-53",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "YRvQHYfJUYW",
+              "name": "ward-54",
+              "parent_uid": "WYzBb9D1AvZ",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "4YYqz3P9eHQ",
+          "name": "Dhaka South CC Zone-06",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": []
+        },
+        {
+          "uid": "ZlghMgSjXOX",
+          "name": "Dhaka South CC Zone-07",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "60lWGWFjojG",
+              "name": "Ward-71",
+              "parent_uid": "ZlghMgSjXOX",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "fabcUcPsDGo",
+              "name": "Ward-72",
+              "parent_uid": "ZlghMgSjXOX",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "nUvdfEI3X3b",
+              "name": "Ward-73",
+              "parent_uid": "ZlghMgSjXOX",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "rHX15cpHzyY",
+          "name": "Dhaka South CC Zone-08",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "RiPQWTlbNDQ",
+              "name": "Ward-66",
+              "parent_uid": "rHX15cpHzyY",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "MDKyZq9TLdL",
+              "name": "Ward-67",
+              "parent_uid": "rHX15cpHzyY",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "gouADzPyIdx",
+              "name": "Ward-68",
+              "parent_uid": "rHX15cpHzyY",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "o7MG5CHMYDR",
+              "name": "Ward-69",
+              "parent_uid": "rHX15cpHzyY",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "wYWvPh4w6nZ",
+          "name": "Dhaka South CC Zone-09",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "itILVMpBJqD",
+              "name": "Ward-62",
+              "parent_uid": "wYWvPh4w6nZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "msRiiCqi6EN",
+              "name": "Ward-63",
+              "parent_uid": "wYWvPh4w6nZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "qAZKXWfKn24",
+              "name": "Ward-64",
+              "parent_uid": "wYWvPh4w6nZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "2hdgeqJXup6",
+              "name": "Ward-65",
+              "parent_uid": "wYWvPh4w6nZ",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "wRnN4YFjUiQ",
+          "name": "Dhaka South CC Zone-10",
+          "parent_uid": "AGuxsoFsYIv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "yw44D55dRDO",
+              "name": "Ward-58",
+              "parent_uid": "wRnN4YFjUiQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "mJqiWEYrS7y",
+              "name": "Ward-59",
+              "parent_uid": "wRnN4YFjUiQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "iYhNOdVBNwa",
+              "name": "Ward-60",
+              "parent_uid": "wRnN4YFjUiQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "1U5xX6S2NyF",
+              "name": "Ward-61",
+              "parent_uid": "wRnN4YFjUiQ",
+              "type": "cc-ward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "znW8Rsl2Kxv",
+      "name": "Gazipur CC",
+      "children": [
+        {
+          "uid": "mlqip6tviiU",
+          "name": "Zone no - 1",
+          "parent_uid": "znW8Rsl2Kxv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "PqaYH6weiF4",
+              "name": "Ward-43",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "bhnXGBfbl0V",
+              "name": "Ward-44",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "7nmGQPnzOCR",
+              "name": "Ward-45",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "MkrckTrr2h4",
+              "name": "Ward-46",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "1xHIJsliygB",
+              "name": "Ward-47",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "aEA8NLev6DX",
+              "name": "Ward-48",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "azExsWOf0HT",
+              "name": "Ward-49",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "xBWVnFZEL3U",
+              "name": "Ward-50",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "binHjtimHfe",
+              "name": "Ward-51",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "FVHeB4hVuY6",
+              "name": "Ward-52",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "5gZkFomdSwc",
+              "name": "Ward-53",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "A6kv9kZGPBB",
+              "name": "Ward-54",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "lKWiK0aDbcJ",
+              "name": "Ward-55",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "opomTI9ZFXL",
+              "name": "Ward-56",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "9q6DLh6S13R",
+              "name": "Ward-57",
+              "parent_uid": "mlqip6tviiU",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "XuQTlvXK83x",
+          "name": "Zone no - 4",
+          "parent_uid": "znW8Rsl2Kxv",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "UQ7up0ejmVn",
+              "name": "Ward-24",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "kmN4lBF5sHy",
+              "name": "Ward-25",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "3BhUS6Cpbuo",
+              "name": "Ward-26",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ZIlNgyDa7wF",
+              "name": "Ward-27",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "jsr5vkCD0r9",
+              "name": "Ward-28",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "KRpkhVPpyXS",
+              "name": "Ward-29",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "OAD5xXMnmQR",
+              "name": "Ward-30",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "HEwWbsJe76b",
+              "name": "Ward-31",
+              "parent_uid": "XuQTlvXK83x",
+              "type": "cc-ward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "nyiKx41WXYX",
+      "name": "Khulna CC",
+      "children": [
+        {
+          "uid": "KfozIfW6Bad",
+          "name": "KCC Zone 1",
+          "parent_uid": "nyiKx41WXYX",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "gG2dgpsId71",
+              "name": "Ward 01",
+              "parent_uid": "KfozIfW6Bad",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "vd4sH0CXVMY",
+              "name": "Ward 02",
+              "parent_uid": "KfozIfW6Bad",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "drwdOFClnJm",
+              "name": "Ward 03",
+              "parent_uid": "KfozIfW6Bad",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "nPBmpfWqxwq",
+              "name": "Ward 04",
+              "parent_uid": "KfozIfW6Bad",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "t6GqugfZ8d2",
+              "name": "Ward 05",
+              "parent_uid": "KfozIfW6Bad",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "YKz5uLiWbJB",
+              "name": "Ward 06",
+              "parent_uid": "KfozIfW6Bad",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "UFNgqCX9KNp",
+          "name": "KCC Zone 2",
+          "parent_uid": "nyiKx41WXYX",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "QnFZRbXa7xg",
+              "name": "Ward 07",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "pczXo6CVSYB",
+              "name": "Ward 08",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "QtES7Ipo1B8",
+              "name": "Ward 09",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "kxKoc0C6BR4",
+              "name": "Ward 10",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "FglHhgFttMp",
+              "name": "Ward 11",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "LOGmdOWl0x6",
+              "name": "Ward 12",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Zt3FcwN4ecY",
+              "name": "Ward 13",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "RUxK42mNUQh",
+              "name": "Ward 14",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "UvNzeUx3hwE",
+              "name": "Ward 15",
+              "parent_uid": "UFNgqCX9KNp",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "SFbBt74KHhT",
+          "name": "KCC Zone 3",
+          "parent_uid": "nyiKx41WXYX",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "iMXa6zD8Iq2",
+              "name": "Ward 16",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "GDxWeuvkFW1",
+              "name": "Ward 17",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Az0LZGyHyE2",
+              "name": "Ward 18",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "WpCYhNqhbBP",
+              "name": "Ward 19",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "BVfvDRFThKE",
+              "name": "Ward 20",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "yuoYYtwErFC",
+              "name": "Ward 21",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "eU2zKDTakE6",
+              "name": "Ward 23",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "GNsV4R4AizE",
+              "name": "Ward 24",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "aenWgmlfQLz",
+              "name": "Ward 25",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "jy2duCqk1No",
+              "name": "Ward 26",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "WyVzVLRmQGw",
+              "name": "Ward 27",
+              "parent_uid": "SFbBt74KHhT",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "VV3cSbHQsld",
+          "name": "KCC Zone 4",
+          "parent_uid": "nyiKx41WXYX",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "T4djO6IbkYe",
+              "name": "Ward 22",
+              "parent_uid": "VV3cSbHQsld",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "z2mUGcrhyA0",
+              "name": "Ward 28",
+              "parent_uid": "VV3cSbHQsld",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "etlaJo8Gqpd",
+              "name": "Ward 29",
+              "parent_uid": "VV3cSbHQsld",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "xBx7UI12TYh",
+              "name": "Ward 30",
+              "parent_uid": "VV3cSbHQsld",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ZYG8XBgtnGD",
+              "name": "Ward 31",
+              "parent_uid": "VV3cSbHQsld",
+              "type": "cc-ward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "XPeIlpEDvpn",
+      "name": "Dhaka North CC",
+      "children": [
+        {
+          "uid": "Ecg8no2EfyF",
+          "name": "Dhaka North CC Zone-01",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "JK3emlDQW3Z",
+              "name": "Ward -01",
+              "parent_uid": "Ecg8no2EfyF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "5CgZoufSpPk",
+              "name": "Ward -17",
+              "parent_uid": "Ecg8no2EfyF",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "VbH676JoTZQ",
+          "name": "Dhaka North CC Zone-02",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "AiGkUBaTDok",
+              "name": "Ward -02",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "oZJ78n1mscG",
+              "name": "Ward -03",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "uhXavEnjnBQ",
+              "name": "Ward -04",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "iWk7FUXNuFi",
+              "name": "Ward -05",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "QOV0U4nAAIO",
+              "name": "Ward -06",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "s9Zg57EPe2a",
+              "name": "Ward -07",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "UvqDTI0waC7",
+              "name": "Ward -08",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "IgcfKJgXb6X",
+              "name": "Ward -15",
+              "parent_uid": "VbH676JoTZQ",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "aGnjmBLz6M2",
+          "name": "Dhaka North CC Zone-03",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "YYMMuXIWgIP",
+              "name": "Ward -18",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "pYTnbIZ0mot",
+              "name": "Ward -19",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "OKmqsqxZ9po",
+              "name": "Ward -20",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "NL57YXqME2R",
+              "name": "Ward -21",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ZHkhqwKYOoL",
+              "name": "Ward -22",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "50CIy11c9gd",
+              "name": "Ward -23",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "slmLgXY6GH5",
+              "name": "Ward -24",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "XCQv07r9tYj",
+              "name": "Ward -25",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "5jy5Y4wJLuU",
+              "name": "Ward -35",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "MOn2RFbJhPv",
+              "name": "Ward -36",
+              "parent_uid": "aGnjmBLz6M2",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "eGLuwqKmO88",
+          "name": "Dhaka North CC Zone-04",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "ihFtGi6NDI2",
+              "name": "Ward -09",
+              "parent_uid": "eGLuwqKmO88",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "KsNj84x6lOr",
+              "name": "Ward -10",
+              "parent_uid": "eGLuwqKmO88",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "R06xtUz1gzq",
+              "name": "Ward -11",
+              "parent_uid": "eGLuwqKmO88",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "FO04bYQGvFc",
+              "name": "Ward -12",
+              "parent_uid": "eGLuwqKmO88",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "xYLyVuugKWV",
+              "name": "Ward -13",
+              "parent_uid": "eGLuwqKmO88",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "DZohsFRsvzN",
+              "name": "Ward -16",
+              "parent_uid": "eGLuwqKmO88",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "vGmrDiuzexU",
+              "name": "Ward -14",
+              "parent_uid": "eGLuwqKmO88",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "aNjVhi9jopF",
+          "name": "Dhaka North CC Zone-05",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "CccSiK6CYVy",
+              "name": "Ward -26",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Bs3t8wrnx0z",
+              "name": "Ward -27",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "HflkO7ixOLj",
+              "name": "Ward -28",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "O52gUeP5taC",
+              "name": "Ward -29",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "8uc5yEKYWxT",
+              "name": "Ward -30",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "pbU6ZSpyVg3",
+              "name": "Ward -31",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "4GHjIDrF2SG",
+              "name": "Ward -32",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "2Nk0Dk1AtP3",
+              "name": "Ward -33",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "86b0N7TPfAv",
+              "name": "Ward -34",
+              "parent_uid": "aNjVhi9jopF",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "mhhvUWFWNI6",
+          "name": "Dhaka North CC Zone-06",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "4dxoWarUdb8",
+              "name": "Ward -51",
+              "parent_uid": "mhhvUWFWNI6",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "skjFkB02ze4",
+              "name": "Ward -52",
+              "parent_uid": "mhhvUWFWNI6",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "kHfJMiUnPFk",
+              "name": "Ward -53",
+              "parent_uid": "mhhvUWFWNI6",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "BrVJq7lFwAq",
+              "name": "Ward -54",
+              "parent_uid": "mhhvUWFWNI6",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "jll2RAcrwfZ",
+          "name": "Dhaka North CC Zone-07",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "TYWZbkUiuv9",
+              "name": "Ward -47",
+              "parent_uid": "jll2RAcrwfZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "h21RWlp3mKT",
+              "name": "Ward -48",
+              "parent_uid": "jll2RAcrwfZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "0SHnFQKtM8t",
+              "name": "Ward -49",
+              "parent_uid": "jll2RAcrwfZ",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "2D7DVHwrpmt",
+              "name": "Ward -50",
+              "parent_uid": "jll2RAcrwfZ",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "56XQHdobxgL",
+          "name": "Dhaka North CC Zone-08",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": []
+        },
+        {
+          "uid": "MPxgXi9pCgO",
+          "name": "Dhaka North CC Zone-09",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "Xt8lkeDcpTi",
+              "name": "Ward -39",
+              "parent_uid": "MPxgXi9pCgO",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Hi1lTCWqdCO",
+              "name": "Ward -40",
+              "parent_uid": "MPxgXi9pCgO",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "XKQrSpNO92f",
+              "name": "Ward -43",
+              "parent_uid": "MPxgXi9pCgO",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "LldYyecVpmA",
+          "name": "Dhaka North CC Zone-10",
+          "parent_uid": "XPeIlpEDvpn",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "XYRaHNBrZBh",
+              "name": "Ward -37",
+              "parent_uid": "LldYyecVpmA",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "UpxUcFhb0B9",
+              "name": "Ward -38",
+              "parent_uid": "LldYyecVpmA",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "L3O0BnsMuYe",
+              "name": "Ward -41",
+              "parent_uid": "LldYyecVpmA",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ptvcEDlbC74",
+              "name": "Ward -42",
+              "parent_uid": "LldYyecVpmA",
+              "type": "cc-ward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "I8zluOsInxz",
+      "name": "Sylhet CC",
+      "children": [
+        {
+          "uid": "YW30a0thb3y",
+          "name": "Ward No-35",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "Wn9jwVTWB0k",
+          "name": "Ward No-01",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "QnsnGAaH1zc",
+          "name": "Ward No-02",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "ZTStkeRGihs",
+          "name": "Ward No-03",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "DFPtbmvIskH",
+          "name": "Ward No-04",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "pE2BBZ2wHMq",
+          "name": "Ward No-05",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "kg7no0RYFLI",
+          "name": "Ward No-06",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "jGKfyGeVI6e",
+          "name": "Ward No-07",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "HK3XhlwLsYj",
+          "name": "Ward No-08",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "TAWZZN9PCgc",
+          "name": "Ward No-38",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "USXviM49mn9",
+          "name": "Ward No-10",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "iBiN8LiVLDr",
+          "name": "Ward No-11",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "GvOhedwipVy",
+          "name": "Ward No-12",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "FacnpMLigQX",
+          "name": "Ward No-13",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "cjUySh4zfOJ",
+          "name": "Ward No-14",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "mkhssWQytMj",
+          "name": "Ward No-15",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "Y9BBpmJdsua",
+          "name": "Ward No-16",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "RoqLlSWGj4X",
+          "name": "Ward No-17",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "zXdqZSHLrjV",
+          "name": "Ward No-18",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "fbTs5VIBpPo",
+          "name": "Ward No-19",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "uZy2vwZTu8d",
+          "name": "Ward No-20",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "OJNH0ai3taB",
+          "name": "Ward No-21",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "YkUJHTQgoG9",
+          "name": "Ward No-22",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "c4GF9NH0lZz",
+          "name": "Ward No-23",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "k5WjNOCoWts",
+          "name": "Ward No-24",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "SDyjNSNpZNg",
+          "name": "Ward No-30",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "XusZ35z4tt8",
+          "name": "Ward No-26",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "YXoypDL5Upa",
+          "name": "Ward No-40",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "vJyOFUYQtPi",
+          "name": "Ward No-28",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "RgUGyXmzgRE",
+          "name": "Ward No-29",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "DaRQrj52DRq",
+          "name": "Ward No-25",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "iPX0SAr7Tgk",
+          "name": "Ward No-31",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "AzV9IqT4wAb",
+          "name": "Ward No-32",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "OP19cH1DT4z",
+          "name": "Ward No-33",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "p9ogYaEDu0H",
+          "name": "Ward No-34",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "nJHsn3zm02S",
+          "name": "Ward No-37",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "ZeCCTcynU5r",
+          "name": "Ward No-09",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "Z6gFrLV1mqx",
+          "name": "Ward No-39",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "oyBYtgPLdlZ",
+          "name": "Ward No-27",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "guQPNGzHtZg",
+          "name": "Ward No-41",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "1rghgObbFq0",
+          "name": "Ward No-36",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        },
+        {
+          "uid": "L5G4puGH71a",
+          "name": "Ward No-42",
+          "parent_uid": "I8zluOsInxz",
+          "type": "cc-ward",
+          "children": []
+        }
+      ]
+    },
+    {
+      "uid": "Wxc3qhC6nKd",
+      "name": "Chattogram CC",
+      "children": [
+        {
+          "uid": "nb3UUFhGDLv",
+          "name": "Chattogram CC Zone-1",
+          "parent_uid": "Wxc3qhC6nKd",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "WMvCL3VvmsD",
+              "name": "Ward 23",
+              "parent_uid": "nb3UUFhGDLv",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "W7lMOCaDt3g",
+              "name": "Ward 24",
+              "parent_uid": "nb3UUFhGDLv",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ZT0Y6XpujFK",
+              "name": "Ward 27",
+              "parent_uid": "nb3UUFhGDLv",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "MG44DMBilY3",
+              "name": "Ward 28",
+              "parent_uid": "nb3UUFhGDLv",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "uJBQLUBYoUX",
+              "name": "Ward 36",
+              "parent_uid": "nb3UUFhGDLv",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "vaZbO63pC5B",
+          "name": "Chattogram CC Zone-2",
+          "parent_uid": "Wxc3qhC6nKd",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "H2fwyA48lId",
+              "name": "Ward 26",
+              "parent_uid": "vaZbO63pC5B",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Mtf4dBSKxIx",
+              "name": "Ward 37",
+              "parent_uid": "vaZbO63pC5B",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "OYyjXGVRg1p",
+              "name": "Ward 38",
+              "parent_uid": "vaZbO63pC5B",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "008g6aiAz3Q",
+              "name": "Ward 39",
+              "parent_uid": "vaZbO63pC5B",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "QEcBXZNVATT",
+              "name": "Ward 40",
+              "parent_uid": "vaZbO63pC5B",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "sKDlOiY8MVu",
+              "name": "Ward 41",
+              "parent_uid": "vaZbO63pC5B",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "CTKGY7SMK1G",
+          "name": "Chattogram CC Zone-3",
+          "parent_uid": "Wxc3qhC6nKd",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "aJxPrAsMGua",
+              "name": "Ward 14",
+              "parent_uid": "CTKGY7SMK1G",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "OEdWk6Yh3Vx",
+              "name": "Ward 17",
+              "parent_uid": "CTKGY7SMK1G",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "P1zuzanxMtP",
+              "name": "Ward 18",
+              "parent_uid": "CTKGY7SMK1G",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "1Z5CUKwglQP",
+              "name": "Ward 20",
+              "parent_uid": "CTKGY7SMK1G",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "LsJfQFYlpQC",
+              "name": "Ward 19",
+              "parent_uid": "CTKGY7SMK1G",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "wVHKbMxZJfH",
+              "name": "Ward 35",
+              "parent_uid": "CTKGY7SMK1G",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "KVjAhXLHB10",
+          "name": "Chattogram CC Zone-4",
+          "parent_uid": "Wxc3qhC6nKd",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "xgV4XW959tC",
+              "name": "Ward 04",
+              "parent_uid": "KVjAhXLHB10",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "4qJNSo5CWVJ",
+              "name": "Ward 05",
+              "parent_uid": "KVjAhXLHB10",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "1lbHegisXSd",
+              "name": "Ward 06",
+              "parent_uid": "KVjAhXLHB10",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "CeUFPzsRNoL",
+              "name": "Ward 08",
+              "parent_uid": "KVjAhXLHB10",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Et28chKo3io",
+              "name": "Ward 15",
+              "parent_uid": "KVjAhXLHB10",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "LEHqrWwJj1j",
+              "name": "Ward 16",
+              "parent_uid": "KVjAhXLHB10",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "Rx4IUPgun36",
+          "name": "Chattogram CC Zone-5",
+          "parent_uid": "Wxc3qhC6nKd",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "2BJXgFesjso",
+              "name": "Ward 21",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "cDqEMczy4kV",
+              "name": "Ward 22",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "x3jVgYF3LX2",
+              "name": "Ward 29",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "qF6c8I9cAx2",
+              "name": "Ward 30",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "N9VkIN52OOs",
+              "name": "Ward 31",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "BLX5QblGbLX",
+              "name": "Ward 32",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "obKr6GGvceJ",
+              "name": "Ward 33",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "SwVI6XPMsPR",
+              "name": "Ward 34",
+              "parent_uid": "Rx4IUPgun36",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "83iTxwkH1fb",
+          "name": "Chattogram CC Zone-6",
+          "parent_uid": "Wxc3qhC6nKd",
+          "type": "cc-zone",
+          "children": []
+        },
+        {
+          "uid": "jMRUm4ji613",
+          "name": "Chattogram CC Zone-7",
+          "parent_uid": "Wxc3qhC6nKd",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "CSPCBZXVbcP",
+              "name": "Ward 09",
+              "parent_uid": "jMRUm4ji613",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "CPiYmfgBlym",
+              "name": "Ward 10",
+              "parent_uid": "jMRUm4ji613",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "qfpVpBaoTwB",
+              "name": "Ward 11",
+              "parent_uid": "jMRUm4ji613",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "yVQsqzitU6V",
+              "name": "Ward 12",
+              "parent_uid": "jMRUm4ji613",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "1R0oSZow5IC",
+              "name": "Ward 13",
+              "parent_uid": "jMRUm4ji613",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "zGlds7CXkex",
+              "name": "Ward 25",
+              "parent_uid": "jMRUm4ji613",
+              "type": "cc-ward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "VzxNxkhNrgy",
+      "name": "Narayanganj CC",
+      "children": [
+        {
+          "uid": "SsxiAQYFZHj",
+          "name": "NCC Zone 1",
+          "parent_uid": "VzxNxkhNrgy",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "K3f3fabrNpq",
+              "name": "Ward 01",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "UOZOZ03GdVw",
+              "name": "Ward 02",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "vca6Rx0KDuk",
+              "name": "Ward 03",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "niabcTRpgyQ",
+              "name": "Ward 04",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "yG95Mj8i1sT",
+              "name": "Ward 05",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "UJNHERt03uB",
+              "name": "Ward 06",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Ru3lPngYxhi",
+              "name": "Ward 07",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "OHUlWYXQlta",
+              "name": "Ward 08",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "fjpXfJqVxV2",
+              "name": "Ward 09",
+              "parent_uid": "SsxiAQYFZHj",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "cpYO9FDDy0Q",
+          "name": "NCC Zone 2",
+          "parent_uid": "VzxNxkhNrgy",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "FWXmjvassbX",
+              "name": "Ward 10",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "EmXKAgqqZDb",
+              "name": "Ward 11",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ddauiENh6u5",
+              "name": "Ward 12",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "wGtEaSdhy0z",
+              "name": "Ward 13",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "vHvey16x5jJ",
+              "name": "Ward 14",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "QFJomIT6WZ0",
+              "name": "Ward 15",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "qPZ20dxDGMC",
+              "name": "Ward 16",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "g2GpACf7Is5",
+              "name": "Ward 17",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "vVEWECGZuIn",
+              "name": "Ward 18",
+              "parent_uid": "cpYO9FDDy0Q",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "gKfKw3tvB0K",
+          "name": "NCC Zone 3",
+          "parent_uid": "VzxNxkhNrgy",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "cGzHkO6ua0m",
+              "name": "Ward 19",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "oLIDgnxISvn",
+              "name": "Ward 20",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Kd7NAx8sSpp",
+              "name": "Ward 21",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "cY6SxM3iWOR",
+              "name": "Ward 22",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "ehbdEGBfQDu",
+              "name": "Ward 23",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "I9DIvi6btiG",
+              "name": "Ward 24",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "WBuO2cAexiz",
+              "name": "Ward 25",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Fkw2chYIQNo",
+              "name": "Ward 26",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "J6c4HNtZKeK",
+              "name": "Ward 27",
+              "parent_uid": "gKfKw3tvB0K",
+              "type": "cc-ward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "DAO7d4HVHuk",
+      "name": "Rangpur CC",
+      "children": [
+        {
+          "uid": "x35T5FcxqEr",
+          "name": "Rangpur CC Zone 01",
+          "parent_uid": "DAO7d4HVHuk",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "tH84GKFWDSA",
+              "name": "Ward 01",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "X2ScjAYlYAD",
+              "name": "Ward 02",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "oKN3s0PqIVf",
+              "name": "Ward 03",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "xqqp40vcW4V",
+              "name": "Ward 10",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "eROXt804Z1G",
+              "name": "Ward 11",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "D7yz7W9ba1l",
+              "name": "Ward 12",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "TgBiLMKvGWx",
+              "name": "Ward 13",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "z6DCTmmK3PB",
+              "name": "Ward 14/1",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "mYZbDoDwMd2",
+              "name": "Ward 15",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Uwf4bOb6vpl",
+              "name": "Ward 31",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "isB4JcW8NOt",
+              "name": "Ward 32",
+              "parent_uid": "x35T5FcxqEr",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "PtW13Eo9vro",
+          "name": "Rangpur CC Zone 02",
+          "parent_uid": "DAO7d4HVHuk",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "AHw0laFhWne",
+              "name": "Ward 04",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "wlPXbECwJXO",
+              "name": "Ward 05",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "KtZNwEdJzb4",
+              "name": "Ward 06",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "gq8SFsgjuYl",
+              "name": "Ward 07",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Wv5cfi2Lco0",
+              "name": "Ward 08",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "YQJBqwsY19Q",
+              "name": "Ward 09",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "v8WmZExc0RI",
+              "name": "Ward 16",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "sTi9kHLOl4x",
+              "name": "Ward 17",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "k6japyyxRMf",
+              "name": "Ward 18",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "i1aKXG4FOpd",
+              "name": "Ward 19",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "RVoMl3sp33w",
+              "name": "Ward 20",
+              "parent_uid": "PtW13Eo9vro",
+              "type": "cc-ward"
+            }
+          ]
+        },
+        {
+          "uid": "RE0ah2Yfqix",
+          "name": "Rangpur CC Zone 03",
+          "parent_uid": "DAO7d4HVHuk",
+          "type": "cc-zone",
+          "children": [
+            {
+              "uid": "Nh9Ql17MHvF",
+              "name": "Ward 21",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Awd1XvLEzde",
+              "name": "Ward 22",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "kSCwVkf2Ixw",
+              "name": "Ward 23",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "qvcgBVYmIxM",
+              "name": "Ward 24",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "H7dZYlqWynx",
+              "name": "Ward 25",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Ea2JDKINpE8",
+              "name": "Ward 26",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "oeLhdVfviHj",
+              "name": "Ward 27",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "YtRkirWCjp3",
+              "name": "Ward 28",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "wOgRXH7ec8v",
+              "name": "Ward 29",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "Lo81FTdSVJA",
+              "name": "Ward 30",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            },
+            {
+              "uid": "dnv9tjH1bBk",
+              "name": "Ward 33/1",
+              "parent_uid": "RE0ah2Yfqix",
+              "type": "cc-ward"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "districts": [],
+  "divisions": [
+    {
+      "uid": "kSKR2jNO8OD",
+      "name": "Barishal Division"
+    },
+    {
+      "uid": "VlP0kOsZC3u",
+      "name": "Rajshahi Division"
+    },
+    {
+      "uid": "g5RJ0OisMH9",
+      "name": "Dhaka Division"
+    },
+    {
+      "uid": "ZFDuFWPSZvV",
+      "name": "Rangpur Division"
+    },
+    {
+      "uid": "G0Apq8AyXEe",
+      "name": "Sylhet Division"
+    },
+    {
+      "uid": "M3MmuROriS5",
+      "name": "Khulna Division"
+    },
+    {
+      "uid": "emH4Bs634AJ",
+      "name": "Chattogram Division"
+    },
+    {
+      "uid": "rz8pgTi6avt",
+      "name": "Mymensingh Division"
+    }
+  ],
+  "area": {
+    "id": 44736,
+    "type": "epi",
+    "uid": "lnuF3c6qhdh",
+    "name": "d. (W-1, Kha-2) EPI Center",
+    "etracker_name": "lnuF3c6qhdh",
+    "geo_name": null,
+    "parent_uid": "W1lZtmP0t1O0z",
+    "json_file_path": null,
+    "is_bulk_imported": true,
+    "vaccine_target": {
+      "child_0_to_11_month": {
+        "2025": {
+          "male": 32,
+          "female": 34
+        },
+        "2026": {
+          "male": 32,
+          "female": 34
+        },
+        "2024": {
+          "male": 33,
+          "female": 32
+        }
+      }
+    },
+    "vaccine_coverage": {
+      "child_0_to_11_month": {
+        "2024": {
+          "vaccine": [
+            {
+              "vaccine_uid": "x3aIDdpR65a",
+              "vaccine_name": "BCG",
+              "male": 29,
+              "female": 30
+            },
+            {
+              "vaccine_uid": "HOq1Ax6xB19",
+              "vaccine_name": "Penta - 1",
+              "male": 4,
+              "female": 9
+            },
+            {
+              "vaccine_uid": "NCu55gLH6Te",
+              "vaccine_name": "Penta - 2",
+              "male": 10,
+              "female": 7
+            },
+            {
+              "vaccine_uid": "b3FM2S2oaAd",
+              "vaccine_name": "Penta - 3",
+              "male": 4,
+              "female": 7
+            },
+            {
+              "vaccine_uid": "xyVY5CmifZP",
+              "vaccine_name": "MR - 1",
+              "male": 30,
+              "female": 35
+            },
+            {
+              "vaccine_uid": "nHwxXPJziO2",
+              "vaccine_name": "MR - 2",
+              "male": 20,
+              "female": 33
+            }
+          ],
+          "months": {
+            "1": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 3,
+                  "female": 4
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": null
+                }
+              ]
+            },
+            "2": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 5,
+                  "female": 5
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 9
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 4,
+                  "female": 9
+                }
+              ]
+            },
+            "3": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 6,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 2,
+                  "female": 2
+                }
+              ]
+            },
+            "4": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": 3
+                }
+              ]
+            },
+            "5": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 3,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 2,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 3,
+                  "female": 3
+                }
+              ]
+            },
+            "6": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 2,
+                  "female": 2
+                }
+              ]
+            },
+            "7": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 3,
+                  "female": 4
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 4,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": 7
+                }
+              ]
+            },
+            "8": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": null,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 4
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 2,
+                  "female": 1
+                }
+              ]
+            },
+            "9": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 2,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": 1
+                }
+              ]
+            },
+            "10": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 1,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 3,
+                  "female": 2
+                }
+              ]
+            },
+            "11": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 1,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 1,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 1,
+                  "female": null
+                }
+              ]
+            },
+            "12": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": null,
+                  "female": 5
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": 4,
+                  "female": 9
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": 10,
+                  "female": 7
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": 4,
+                  "female": 5
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 5,
+                  "female": 5
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 3,
+                  "female": 3
+                }
+              ]
+            }
+          }
+        },
+        "2025": {
+          "vaccine": [
+            {
+              "vaccine_uid": "x3aIDdpR65a",
+              "vaccine_name": "BCG",
+              "male": 26,
+              "female": 19
+            },
+            {
+              "vaccine_uid": "HOq1Ax6xB19",
+              "vaccine_name": "Penta - 1",
+              "male": 18,
+              "female": 13
+            },
+            {
+              "vaccine_uid": "NCu55gLH6Te",
+              "vaccine_name": "Penta - 2",
+              "male": 21,
+              "female": 12
+            },
+            {
+              "vaccine_uid": "b3FM2S2oaAd",
+              "vaccine_name": "Penta - 3",
+              "male": 22,
+              "female": 19
+            },
+            {
+              "vaccine_uid": "xyVY5CmifZP",
+              "vaccine_name": "MR - 1",
+              "male": 24,
+              "female": 22
+            },
+            {
+              "vaccine_uid": "nHwxXPJziO2",
+              "vaccine_name": "MR - 2",
+              "male": 23,
+              "female": 23
+            }
+          ],
+          "months": {
+            "1": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 5,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 4,
+                  "female": 3
+                }
+              ]
+            },
+            "2": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 7,
+                  "female": 5
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": 8,
+                  "female": 6
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": 5,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": 9,
+                  "female": 8
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": null
+                }
+              ]
+            },
+            "3": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": 2,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": 9,
+                  "female": 4
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": 4,
+                  "female": 5
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 2,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 4,
+                  "female": 6
+                }
+              ]
+            },
+            "4": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 1,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 1,
+                  "female": 5
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 3,
+                  "female": 3
+                }
+              ]
+            },
+            "5": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 3,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": 3,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": 4,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": 6,
+                  "female": 4
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 2,
+                  "female": 3
+                }
+              ]
+            },
+            "6": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 4,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 2,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 1,
+                  "female": null
+                }
+              ]
+            },
+            "7": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": 5,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": 3,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": 3,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 1,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 3,
+                  "female": 2
+                }
+              ]
+            },
+            "8": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 4
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 2,
+                  "female": null
+                }
+              ]
+            },
+            "9": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 1,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 3,
+                  "female": 2
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 1,
+                  "female": 1
+                }
+              ]
+            },
+            "10": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 3
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": null
+                }
+              ]
+            },
+            "11": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": 2,
+                  "female": 1
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": 4,
+                  "female": 4
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": 3,
+                  "female": 5
+                }
+              ]
+            },
+            "12": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": null
+                }
+              ]
+            }
+          }
+        },
+        "2026": {
+          "vaccine": [
+            {
+              "vaccine_uid": "x3aIDdpR65a",
+              "vaccine_name": "BCG",
+              "male": null,
+              "female": null
+            },
+            {
+              "vaccine_uid": "HOq1Ax6xB19",
+              "vaccine_name": "Penta - 1",
+              "male": null,
+              "female": null
+            },
+            {
+              "vaccine_uid": "NCu55gLH6Te",
+              "vaccine_name": "Penta - 2",
+              "male": null,
+              "female": null
+            },
+            {
+              "vaccine_uid": "b3FM2S2oaAd",
+              "vaccine_name": "Penta - 3",
+              "male": null,
+              "female": null
+            },
+            {
+              "vaccine_uid": "xyVY5CmifZP",
+              "vaccine_name": "MR - 1",
+              "male": null,
+              "female": null
+            },
+            {
+              "vaccine_uid": "nHwxXPJziO2",
+              "vaccine_name": "MR - 2",
+              "male": null,
+              "female": null
+            }
+          ],
+          "months": {
+            "1": {
+              "vaccine": [
+                {
+                  "vaccine_uid": "x3aIDdpR65a",
+                  "vaccine_name": "BCG",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "HOq1Ax6xB19",
+                  "vaccine_name": "Penta - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "NCu55gLH6Te",
+                  "vaccine_name": "Penta - 2",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "b3FM2S2oaAd",
+                  "vaccine_name": "Penta - 3",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "xyVY5CmifZP",
+                  "vaccine_name": "MR - 1",
+                  "male": null,
+                  "female": null
+                },
+                {
+                  "vaccine_uid": "nHwxXPJziO2",
+                  "vaccine_name": "MR - 2",
+                  "male": null,
+                  "female": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "additional_data": {
+      "demographics": {
+        "2024": {
+          "population": {
+            "female": 1198,
+            "male": 1149
+          },
+          "child_0_15_month": {
+            "female": 32,
+            "male": 33
+          },
+          "child_0_11_month": {
+            "female": 32,
+            "male": 33
+          },
+          "number_of_sessions_in_year": null,
+          "women_15_to_49": 518,
+          "ha_vaccinator_designation1": null,
+          "ha_vaccinator_name1": null,
+          "ha_vaccinator_designation2": null,
+          "ha_vaccinator_name2": null,
+          "supervisor1_designation": null,
+          "supervisor1_name": null,
+          "epi_center_name_address": null,
+          "epi_center_implementer_name": null,
+          "distance_from_cc_to_epi_center": null,
+          "mode_of_transportation_distribution": null,
+          "mode_of_transportation_uhc": null,
+          "time_to_reach_distribution_point": 60,
+          "time_to_reach_epi_center": 25,
+          "porter_name": null,
+          "porter_mobile": 1721641799,
+          "epi_center_type": null
+        },
+        "2025": {
+          "population": {
+            "female": 1146,
+            "male": 1137
+          },
+          "child_0_15_month": {
+            "female": 34,
+            "male": 32
+          },
+          "child_0_11_month": {
+            "female": 34,
+            "male": 32
+          },
+          "number_of_sessions_in_year": null,
+          "women_15_to_49": 507,
+          "ha_vaccinator_designation1": null,
+          "ha_vaccinator_name1": null,
+          "ha_vaccinator_designation2": null,
+          "ha_vaccinator_name2": null,
+          "supervisor1_designation": null,
+          "supervisor1_name": null,
+          "epi_center_name_address": null,
+          "epi_center_implementer_name": null,
+          "distance_from_cc_to_epi_center": null,
+          "mode_of_transportation_distribution": null,
+          "mode_of_transportation_uhc": null,
+          "time_to_reach_distribution_point": 60,
+          "time_to_reach_epi_center": 30,
+          "porter_name": null,
+          "porter_mobile": 1721641799,
+          "epi_center_type": null
+        },
+        "2026": {
+          "population": {
+            "female": 1184,
+            "male": 1175
+          },
+          "child_0_15_month": {
+            "female": 35,
+            "male": 32
+          },
+          "child_0_11_month": {
+            "female": 34,
+            "male": 32
+          },
+          "number_of_sessions_in_year": null,
+          "women_15_to_49": 507,
+          "ha_vaccinator_designation1": null,
+          "ha_vaccinator_name1": null,
+          "ha_vaccinator_designation2": null,
+          "ha_vaccinator_name2": null,
+          "supervisor1_designation": null,
+          "supervisor1_name": null,
+          "epi_center_name_address": null,
+          "epi_center_implementer_name": null,
+          "distance_from_cc_to_epi_center": null,
+          "mode_of_transportation_distribution": null,
+          "mode_of_transportation_uhc": null,
+          "time_to_reach_distribution_point": 60,
+          "time_to_reach_epi_center": 30,
+          "porter_name": null,
+          "porter_mobile": 1721641799,
+          "epi_center_type": null
+        }
+      }
+    },
+    "epi_uids": null,
+    "remarks": null,
+    "build_at": null,
+    "created_at": "2025-10-06T09:01:54.000000Z",
+    "updated_at": "2026-01-03T21:35:25.000000Z",
+    "status": "active",
+    "parent": {
+      "id": 44728,
+      "type": "ward",
+      "uid": "W1lZtmP0t1O0z",
+      "name": "Ward 1",
+      "etracker_name": "W1lZtmP0t1O0z",
+      "geo_name": "Ward 1",
+      "parent_uid": "lZtmP0t1O0z",
+      "json_file_path": "/var/www/html/staging/codes/storage/app/public/uploads/import/shapes/2025-10-06_17-00-52/Mymensingh_District_Ado9TkhzWZD_4561/Nandail_Upazila_ahs816hni4a_45610072/Gangail_Union_lZtmP0t1O0z_4561007200310/Ward 1_Ward_NAN_4561007200310W1/Ward 1_Ward_NAN_4561007200310W1.json",
+      "is_bulk_imported": true,
+      "vaccine_target": null,
+      "vaccine_coverage": null,
+      "additional_data": null,
+      "epi_uids": null,
+      "remarks": null,
+      "build_at": "2025-12-22 11:50:33 PM",
+      "created_at": "2025-10-06T09:01:54.000000Z",
+      "updated_at": "2025-12-22T17:50:33.000000Z",
+      "status": "active"
+    }
+  },
+  "coverageTableData": {
+    "months": {
+      "January": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 6,
+          "Penta - 1": 6,
+          "Penta - 2": 6,
+          "Penta - 3": 6,
+          "MR - 1": 6,
+          "MR - 2": 6,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "February": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "March": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "April": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "May": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "June": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "July": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "August": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "September": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "October": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "November": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      },
+      "December": {
+        "coverages": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        },
+        "dropouts": {
+          "BCG": 0,
+          "Penta - 1": 0,
+          "Penta - 2": 0,
+          "Penta - 3": 0,
+          "MR - 1": 0,
+          "MR - 2": 0,
+          "Penta - 1st": 0,
+          "Penta - 2nd": 0,
+          "Penta - 3rd": 0,
+          "MR - 1st": 0,
+          "MR - 2nd": 0
+        }
+      }
+    },
+    "totals": {
+      "coverages": {
+        "BCG": 0,
+        "Penta - 1": 0,
+        "Penta - 2": 0,
+        "Penta - 3": 0,
+        "MR - 1": 0,
+        "MR - 2": 0
+      },
+      "dropouts": {
+        "BCG": 6,
+        "Penta - 1": 6,
+        "Penta - 2": 6,
+        "Penta - 3": 6,
+        "MR - 1": 6,
+        "MR - 2": 6
+      }
+    },
+    "vaccine_names": [
+      "BCG",
+      "Penta - 1",
+      "Penta - 2",
+      "Penta - 3",
+      "MR - 1",
+      "MR - 2"
+    ],
+    "targets": {
+      "year": 6,
+      "month": 1,
+      "male": 32,
+      "female": 34
+    },
+    "coverage_percentages": {
+      "BCG": 0,
+      "Penta - 1": 0,
+      "Penta - 2": 0,
+      "Penta - 3": 0,
+      "MR - 1": 0,
+      "MR - 2": 0
+    }
+  },
+  "chartData": {
+    "labels": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "datasets": [
+      {
+        "label": "Monthly Target",
+        "data": [
+          6,
+          12,
+          18,
+          24,
+          30,
+          36,
+          42,
+          48,
+          54,
+          60,
+          66,
+          72
+        ],
+        "borderColor": "#ff0000",
+        "backgroundColor": "transparent",
+        "borderWidth": 4,
+        "borderDash": [
+          5,
+          5
+        ],
+        "pointRadius": 0
+      },
+      {
+        "label": "BCG",
+        "data": [
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "borderColor": "#1a53ffff",
+        "backgroundColor": "transparent",
+        "borderWidth": 2,
+        "pointRadius": 3,
+        "tension": 0.1,
+        "hidden": false
+      },
+      {
+        "label": "Penta - 1",
+        "data": [
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "borderColor": "#005536ff",
+        "backgroundColor": "transparent",
+        "borderWidth": 2,
+        "pointRadius": 3,
+        "tension": 0.1,
+        "hidden": false
+      },
+      {
+        "label": "Penta - 2",
+        "data": [
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "borderColor": "#cc3654ff",
+        "backgroundColor": "transparent",
+        "borderWidth": 2,
+        "pointRadius": 3,
+        "tension": 0.1,
+        "hidden": true
+      },
+      {
+        "label": "Penta - 3",
+        "data": [
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "borderColor": "#f6c23e",
+        "backgroundColor": "transparent",
+        "borderWidth": 2,
+        "pointRadius": 3,
+        "tension": 0.1,
+        "hidden": false
+      },
+      {
+        "label": "MR - 1",
+        "data": [
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "borderColor": "#005868ff",
+        "backgroundColor": "transparent",
+        "borderWidth": 2,
+        "pointRadius": 3,
+        "tension": 0.1,
+        "hidden": false
+      },
+      {
+        "label": "MR - 2",
+        "data": [
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "borderColor": "#88006bff",
+        "backgroundColor": "transparent",
+        "borderWidth": 2,
+        "pointRadius": 3,
+        "tension": 0.1,
+        "hidden": true
+      }
+    ]
+  },
+  "uid": "lnuF3c6qhdh",
+  "nameList": "d. (W-1, Kha-2) EPI Center",
+  "subblocks": [],
+  "wards": [],
+  "unions": [],
+  "upazilas": [],
+  "subblockId": "",
+  "wardId": "",
+  "unionId": "",
+  "upazilaId": "",
+  "districtId": "",
+  "divisionId": "",
+  "type": "ward",
+  "subBlockName": "",
+  "wardName": "",
+  "unionName": "",
+  "upazilaName": "",
+  "districtName": "",
+  "divisionName": "",
+  "cityCorporationName": "",
+  "ccZoneName": "",
+  "ccWardName": "",
+  "ccUid": "",
+  "selectedYear": 2026,
+  "additionalData": {
+    "demographics": {
+      "2024": {
+        "population": {
+          "female": 1198,
+          "male": 1149
+        },
+        "child_0_15_month": {
+          "female": 32,
+          "male": 33
+        },
+        "child_0_11_month": {
+          "female": 32,
+          "male": 33
+        },
+        "number_of_sessions_in_year": 0,
+        "women_15_to_49": 518,
+        "ha_vaccinator_designation1": 0,
+        "ha_vaccinator_name1": 0,
+        "ha_vaccinator_designation2": 0,
+        "ha_vaccinator_name2": 0,
+        "supervisor1_designation": 0,
+        "supervisor1_name": 0,
+        "epi_center_name_address": 0,
+        "epi_center_implementer_name": 0,
+        "distance_from_cc_to_epi_center": 0,
+        "mode_of_transportation_distribution": 0,
+        "mode_of_transportation_uhc": 0,
+        "time_to_reach_distribution_point": 60,
+        "time_to_reach_epi_center": 25,
+        "porter_name": 0,
+        "porter_mobile": 1721641799,
+        "epi_center_type": 0
+      },
+      "2025": {
+        "population": {
+          "female": 1146,
+          "male": 1137
+        },
+        "child_0_15_month": {
+          "female": 34,
+          "male": 32
+        },
+        "child_0_11_month": {
+          "female": 34,
+          "male": 32
+        },
+        "number_of_sessions_in_year": 0,
+        "women_15_to_49": 507,
+        "ha_vaccinator_designation1": 0,
+        "ha_vaccinator_name1": 0,
+        "ha_vaccinator_designation2": 0,
+        "ha_vaccinator_name2": 0,
+        "supervisor1_designation": 0,
+        "supervisor1_name": 0,
+        "epi_center_name_address": 0,
+        "epi_center_implementer_name": 0,
+        "distance_from_cc_to_epi_center": 0,
+        "mode_of_transportation_distribution": 0,
+        "mode_of_transportation_uhc": 0,
+        "time_to_reach_distribution_point": 60,
+        "time_to_reach_epi_center": 30,
+        "porter_name": 0,
+        "porter_mobile": 1721641799,
+        "epi_center_type": 0
+      },
+      "2026": {
+        "population": {
+          "female": 1184,
+          "male": 1175
+        },
+        "child_0_15_month": {
+          "female": 35,
+          "male": 32
+        },
+        "child_0_11_month": {
+          "female": 34,
+          "male": 32
+        },
+        "number_of_sessions_in_year": 0,
+        "women_15_to_49": 507,
+        "ha_vaccinator_designation1": 0,
+        "ha_vaccinator_name1": 0,
+        "ha_vaccinator_designation2": 0,
+        "ha_vaccinator_name2": 0,
+        "supervisor1_designation": 0,
+        "supervisor1_name": 0,
+        "epi_center_name_address": 0,
+        "epi_center_implementer_name": 0,
+        "distance_from_cc_to_epi_center": 0,
+        "mode_of_transportation_distribution": 0,
+        "mode_of_transportation_uhc": 0,
+        "time_to_reach_distribution_point": 60,
+        "time_to_reach_epi_center": 30,
+        "porter_name": 0,
+        "porter_mobile": 1721641799,
+        "epi_center_type": 0
+      }
+    }
+  },
+  "cc": null
+}

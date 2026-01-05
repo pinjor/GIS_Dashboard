@@ -262,7 +262,7 @@ class EpiCenterRepository {
       // Decode and parse
       logg.i('Decoding and parsing EPI details JSON...');
       final parsedJson = decodeEpiCenterDetailsNestedJson(rawData);
-      logg.i('Parsed JSON: $parsedJson');
+      logg.i('Parsed JSON');
       try {
         logg.i('Creating EpiCenterDetailsResponse..[] from parsed JSON...');
         final result = EpiCenterDetailsResponse.fromJson(

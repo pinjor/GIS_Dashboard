@@ -11,8 +11,10 @@ class EpiCenterAboutDetailsWidget extends StatelessWidget {
   final String selectedYear;
   @override
   Widget build(BuildContext context) {
-    final demographicsData =
-        epiCenterDetailsData?.area?.additionalData?.demographics[selectedYear];
+    // ✅ Use helper method that handles both country-level and EPI-level data
+    final demographicsData = epiCenterDetailsData?.getDemographicsForYear(
+      selectedYear,
+    );
     final details = [
       {
         'label': 'Name and Address of EPI Center',

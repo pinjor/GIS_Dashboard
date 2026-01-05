@@ -7,6 +7,8 @@ part 'epi_center_details_response.g.dart';
 
 @freezed
 abstract class EpiCenterDetailsResponse with _$EpiCenterDetailsResponse {
+  const EpiCenterDetailsResponse._(); // Add private constructor for custom getters
+
   const factory EpiCenterDetailsResponse({
     @Default([]) List<CityCorporation> cityCorporations,
     @Default([]) List<District> districts,
@@ -38,10 +40,34 @@ abstract class EpiCenterDetailsResponse with _$EpiCenterDetailsResponse {
     String? ccWardName,
     String? ccUid,
     int? selectedYear,
+    // ✅ NEW: Root-level additionalData for country-level responses
+    AdditionalData? additionalData,
   }) = _EpiCenterDetailsResponse;
 
   factory EpiCenterDetailsResponse.fromJson(Map<String, dynamic> json) =>
       _$EpiCenterDetailsResponseFromJson(json);
+
+  /// Helper method to get demographics data from either location:
+  /// 1. First tries: area.additionalData.demographics (EPI center level)
+  /// 2. Falls back to: additionalData.demographics (country level)
+  Map<String, YearDemographics> getDemographics() {
+    // Try area first (EPI center level)
+    if (area?.additionalData?.demographics != null) {
+      return area!.additionalData!.demographics;
+    }
+    // Fallback to root level (country level)
+    if (additionalData?.demographics != null) {
+      return additionalData!.demographics;
+    }
+    // Return empty map if neither exists
+    return {};
+  }
+
+  /// Get demographics for a specific year
+  YearDemographics? getDemographicsForYear(String year) {
+    final demographics = getDemographics();
+    return demographics[year];
+  }
 }
 
 @freezed
@@ -197,28 +223,38 @@ abstract class YearDemographics with _$YearDemographics {
     @JsonKey(name: 'number_of_sessions_in_year') int? numberOfSessionsInYear,
     @JsonKey(name: 'women_15_to_49') int? women15To49,
     @JsonKey(name: 'ha_vaccinator_designation1')
-    String? haVaccinatorDesignation1,
-    @JsonKey(name: 'ha_vaccinator_name1') String? haVaccinatorName1,
+    dynamic
+    haVaccinatorDesignation1, // ✅ Changed to dynamic (can be String or int)
+    @JsonKey(name: 'ha_vaccinator_name1')
+    dynamic haVaccinatorName1, // ✅ Changed to dynamic
     @JsonKey(name: 'ha_vaccinator_designation2')
-    String? haVaccinatorDesignation2,
-    @JsonKey(name: 'ha_vaccinator_name2') String? haVaccinatorName2,
-    @JsonKey(name: 'supervisor1_designation') String? supervisor1Designation,
-    @JsonKey(name: 'supervisor1_name') String? supervisor1Name,
-    @JsonKey(name: 'epi_center_name_address') String? epiCenterNameAddress,
+    dynamic haVaccinatorDesignation2, // ✅ Changed to dynamic
+    @JsonKey(name: 'ha_vaccinator_name2')
+    dynamic haVaccinatorName2, // ✅ Changed to dynamic
+    @JsonKey(name: 'supervisor1_designation')
+    dynamic supervisor1Designation, // ✅ Changed to dynamic
+    @JsonKey(name: 'supervisor1_name')
+    dynamic supervisor1Name, // ✅ Changed to dynamic
+    @JsonKey(name: 'epi_center_name_address')
+    dynamic epiCenterNameAddress, // ✅ Changed to dynamic
     @JsonKey(name: 'epi_center_implementer_name')
-    String? epiCenterImplementerName,
+    dynamic epiCenterImplementerName, // ✅ Changed to dynamic
     @JsonKey(name: 'distance_from_cc_to_epi_center')
     dynamic distanceFromCcToEpiCenter,
     @JsonKey(name: 'mode_of_transportation_distribution')
-    String? modeOfTransportationDistribution,
+    dynamic modeOfTransportationDistribution, // ✅ Changed to dynamic
     @JsonKey(name: 'mode_of_transportation_uhc')
-    String? modeOfTransportationUhc,
+    dynamic modeOfTransportationUhc, // ✅ Changed to dynamic
     @JsonKey(name: 'time_to_reach_distribution_point')
-    int? timeToReachDistributionPoint,
-    @JsonKey(name: 'time_to_reach_epi_center') int? timeToReachEpiCenter,
-    @JsonKey(name: 'porter_name') String? porterName,
-    @JsonKey(name: 'porter_mobile') int? porterMobile,
-    @JsonKey(name: 'epi_center_type') String? epiCenterType,
+    dynamic
+    timeToReachDistributionPoint, // ✅ Changed to dynamic (can be double or int)
+    @JsonKey(name: 'time_to_reach_epi_center')
+    dynamic timeToReachEpiCenter, // ✅ Changed to dynamic
+    @JsonKey(name: 'porter_name') dynamic porterName, // ✅ Changed to dynamic
+    @JsonKey(name: 'porter_mobile')
+    dynamic porterMobile, // ✅ Changed to dynamic (can be very large number)
+    @JsonKey(name: 'epi_center_type')
+    dynamic epiCenterType, // ✅ Changed to dynamic
   }) = _YearDemographics;
 
   factory YearDemographics.fromJson(Map<String, dynamic> json) =>

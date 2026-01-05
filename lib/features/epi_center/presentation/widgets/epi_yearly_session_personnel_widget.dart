@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 
-
 class EpiYearlySessionPersonnelWidget extends StatelessWidget {
   const EpiYearlySessionPersonnelWidget({
     super.key,
@@ -13,8 +12,10 @@ class EpiYearlySessionPersonnelWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final demographicsData =
-        epiCenterDetailsData?.area?.additionalData?.demographics[selectedYear];
+    // ✅ Use helper method that handles both country-level and EPI-level data
+    final demographicsData = epiCenterDetailsData?.getDemographicsForYear(
+      selectedYear,
+    );
 
     final personnel = [
       {

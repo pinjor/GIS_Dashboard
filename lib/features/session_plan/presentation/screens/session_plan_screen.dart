@@ -9,6 +9,7 @@ import 'package:gis_dashboard/features/map/presentation/widget/map_tile_layer.da
 import 'package:gis_dashboard/features/map/utils/map_utils.dart';
 import 'package:gis_dashboard/features/session_plan/domain/session_plan_coords_response.dart';
 import 'package:gis_dashboard/features/session_plan/presentation/controllers/session_plan_controller.dart';
+import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 
 class SessionPlanScreen extends ConsumerStatefulWidget {
@@ -80,10 +81,9 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
                     height: 14,
                     child: Container(
                       decoration: BoxDecoration(
-                        color:
-                            isFixedCenter
-                                ? Colors.blueAccent
-                                : Colors.deepPurple,
+                        color: isFixedCenter
+                            ? Colors.blueAccent
+                            : Colors.deepPurple,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 0.5),
                         boxShadow: [
@@ -95,18 +95,13 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
                         ],
                       ),
                       child: Center(
-                        child:
-                            !isFixedCenter
-                                ? FaIcon(
-                                  FontAwesomeIcons.syringe,
-                                  size: 10,
-                                  color: Colors.white,
-                                )
-                                : Icon(
-                                  Icons.home,
-                                  color: Colors.white,
-                                  size: 10,
-                                ),
+                        child: !isFixedCenter
+                            ? FaIcon(
+                                FontAwesomeIcons.syringe,
+                                size: 10,
+                                color: Colors.white,
+                              )
+                            : Icon(Icons.home, color: Colors.white, size: 10),
                       ),
                     ),
                   ),
@@ -139,10 +134,14 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Session Plans'),
+        backgroundColor: Color(Constants.primaryColor),
+        title: const Text(
+          'Session Plans',
+          style: TextStyle(color: Colors.white),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _onBack,
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Stack(
