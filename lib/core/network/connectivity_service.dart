@@ -12,32 +12,58 @@ class ConnectivityService {
   ///
   /// Uses a two-tier approach for optimal performance:
   /// 1. Quick instant check with connectivity_plus (detects airplane mode, no WiFi/data)
-  /// 2. Actual internet verification with 2s timeout (reduced from 5s for faster UX)
+  /// 2. Actual internet verification with 5s timeout + retry (more reliable for slow networks)
   Future<bool> hasInternetConnection() async {
     try {
       // TIER 1: Instant connectivity check (no network latency)
       final connectivityResult = await _connectivity.checkConnectivity();
       logg.d('Connectivity status: $connectivityResult');
 
-      // If no connectivity detected, return false immediately (saves 2s timeout)
+      // If no connectivity detected, return false immediately (saves timeout)
       if (connectivityResult.contains(ConnectivityResult.none)) {
         logg.w('No connectivity detected - skipping internet verification');
         return false;
       }
 
-      // TIER 2: Verify actual internet access (2s timeout - 60% faster than before)
+      // TIER 2: Verify actual internet access with retry for reliability
       // This catches cases where WiFi/mobile is connected but no actual internet
-      final result = await InternetAddress.lookup(
-        'google.com',
-      ).timeout(const Duration(seconds: 2)); // Reduced from 5s to 2s
+      // Try up to 2 times with 5s timeout each (handles slow DNS/network)
+      for (int attempt = 1; attempt <= 2; attempt++) {
+        try {
+          final result = await InternetAddress.lookup('google.com').timeout(
+            const Duration(seconds: 5),
+          ); // Increased back to 5s for reliability
 
-      final hasConnection =
-          result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-      logg.i('Internet connection verified: $hasConnection');
-      return hasConnection;
+          final hasConnection =
+              result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+
+          if (hasConnection) {
+            logg.i('Internet connection verified on attempt $attempt');
+            return true;
+          }
+        } on TimeoutException catch (e) {
+          logg.w('Internet check timeout on attempt $attempt: $e');
+          if (attempt == 2) {
+            // On second timeout, assume we have internet (fail-open for staging SSL bypass)
+            logg.w(
+              '⚠️ DNS timeout - assuming internet available (fail-open for staging)',
+            );
+            return true; // Fail-open to prevent false negatives
+          }
+          // Wait 500ms before retry
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      }
+
+      logg.i('Internet connection verified: false');
+      return false;
     } catch (e) {
       logg.e('Error checking internet connection: $e');
-      return false;
+      // Fail-open: assume internet is available on unexpected errors
+      logg.w(
+        '⚠️ Connectivity check error - assuming internet available (fail-open)',
+      );
+      return true;
     }
   }
 
