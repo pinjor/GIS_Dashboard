@@ -31,9 +31,9 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
     });
   }
 
-  void _onBack() {
-    Navigator.pop(context);
-  }
+  // void _onBack() {
+  //   Navigator.pop(context);
+  // }
 
   Future<void> _launchMapsUrl(double lat, double lng) async {
     final googleMapsUrl = Uri.parse(

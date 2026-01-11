@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 import 'package:gis_dashboard/features/map/presentation/controllers/map_state.dart';
@@ -99,18 +97,18 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
         forceRefresh: forceRefresh,
       );
 
-      // 🔍 DEBUG: Save JSON to file
-      if (coverageData.vaccines != null) {
-        try {
-          final file = File('debug_output/response.json');
-          await file.create(recursive: true);
-          // Assuming the model has toJson() because it's freezed
-          await file.writeAsString(jsonEncode(coverageData.toJson()));
-          logg.i("✅ DEBUG: Saved response.json to ${file.absolute.path}");
-        } catch (e) {
-          logg.e("Failed to write debug file: $e");
-        }
-      }
+      // // 🔍 DEBUG: Save JSON to file
+      // if (coverageData.vaccines != null) {
+      //   try {
+      //     final file = File('debug_output/response.json');
+      //     await file.create(recursive: true);
+      //     // Assuming the model has toJson() because it's freezed
+      //     await file.writeAsString(jsonEncode(coverageData.toJson()));
+      //     logg.i("✅ DEBUG: Saved response.json to ${file.absolute.path}");
+      //   } catch (e) {
+      //     logg.e("Failed to write debug file: $e");
+      //   }
+      // }
 
       logg.i(
         "Loaded summary data for ${coverageData.vaccines?.first.vaccineName} and ${coverageData.vaccines?.first.areas?.length} coverage areas",
