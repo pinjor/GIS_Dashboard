@@ -107,6 +107,68 @@ class MapControllerNotifier extends StateNotifier<MapState> {
   //   await loadInitialData(forceRefresh: true);
   // }
 
+  /// Load all city corporations view (when CC area type selected but no specific CC chosen)
+  Future<void> loadAllCityCorporationsData({bool forceRefresh = false}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      logg.i("Loading All City Corporations map data...");
+
+      // Get current filter state for year selection
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Use the specific All CCs endpoints
+      final geoJsonPath = ApiConstants.allCityCorporationsGeoJson;
+      final coveragePath = ApiConstants.getAllCityCorporationsCoveragePath(
+        selectedYear,
+      );
+
+      logg.i("Loading All CCs GeoJSON from: $geoJsonPath");
+      logg.i(
+        "Loading All CCs coverage for year $selectedYear from: $coveragePath",
+      );
+
+      final results = await Future.wait([
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: forceRefresh,
+        ),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: forceRefresh,
+        ),
+      ]);
+
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
+      final coverageData = results[1] as VaccineCoverageResponse;
+
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
+      state = state.copyWith(
+        areaCoordsGeoJsonData: areaCoordsGeoJsonData,
+        coverageData: filteredData,
+        currentLevel: GeographicLevel.country, // Treat as country-level view
+        navigationStack: [], // Reset navigation stack
+        currentAreaName: 'All City Corporations',
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("✅ Successfully loaded All City Corporations view");
+    } catch (e) {
+      logg.e("Error loading All City Corporations data: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load All City Corporations data: $e',
+      );
+    }
+  }
+
   /// Drill down to a specific area based on the slug
   Future<void> drillDownToArea({
     required String areaName,

@@ -18,12 +18,12 @@ class ApiConstants {
   static String getZoneChildDataPath(String type) =>
       childData.replaceFirst('TYPE', type);
 
-  // All City Corporations view
-  static const String allCityCorporationsGeoJson =
-      '/storage/build-json/shapes/city-corporations/shape.json.gz';
+  // All City Corporations view - using full URLs to bypass urlCommonPath
+  static String get allCityCorporationsGeoJson =>
+      '$stagingServerFullUrl/storage/build-json/shapes/city-corporations/shape.json.gz';
 
   static String getAllCityCorporationsCoveragePath(String year) =>
-      '/storage/build-json/coverage/city-corporations/$year-coverage.json';
+      '$stagingServerFullUrl/storage/build-json/coverage/city-corporations/$year-coverage.json';
 
   // these two paths needs to be dynamic based on year value, like a getter function like below:::
 

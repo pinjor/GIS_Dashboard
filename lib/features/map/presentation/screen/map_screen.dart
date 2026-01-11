@@ -592,12 +592,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         final bool cityCorporationFilterApplied =
             current.selectedAreaType == AreaType.cityCorporation &&
             current.selectedCityCorporation != null;
+        final bool allCityCorporationsView =
+            current.selectedAreaType == AreaType.cityCorporation &&
+            current.selectedCityCorporation == null;
         final bool shouldResetToCountry =
-            (current.selectedAreaType == AreaType.district &&
-                current.selectedDivision == 'All' &&
-                current.selectedDistrict == null) ||
-            (current.selectedAreaType == AreaType.cityCorporation &&
-                current.selectedCityCorporation == null);
+            current.selectedAreaType == AreaType.district &&
+            current.selectedDivision == 'All' &&
+            current.selectedDistrict == null;
 
         if (districtFilterApplied) {
           logg.i("District filter applied: ${current.selectedDistrict}");
@@ -628,6 +629,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   .loadCityCorporationData(
                     cityCorporationName: current.selectedCityCorporation!,
                   );
+            }
+          });
+        } else if (allCityCorporationsView) {
+          logg.i("All City Corporations view requested");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadAllCityCorporationsData();
             }
           });
         } else if (shouldResetToCountry) {
