@@ -409,12 +409,26 @@ class _EpiCenterDetailsScreenState
     EpiCenterDetailsResponse? epiCenterData,
     String selectedYear,
   ) {
+    int? calcTarget;
+
+    // 1. Try Area-specific target
     final vaccineTarget =
         epiCenterData?.area?.vaccineTarget?.child0To11Month[selectedYear];
-    final targetValue = vaccineTarget != null
-        ? ((vaccineTarget.male?.toInt() ?? 0) +
-              (vaccineTarget.female?.toInt() ?? 0))
-        : 'N/A';
+
+    if (vaccineTarget != null) {
+      calcTarget =
+          (vaccineTarget.male?.toInt() ?? 0) +
+          (vaccineTarget.female?.toInt() ?? 0);
+    } else {
+      // 2. Fallback to Demographics (Country/Area level)
+      final demographics = epiCenterData?.getDemographicsForYear(selectedYear);
+      final childData = demographics?.child0To11Month;
+      if (childData != null) {
+        calcTarget = (childData.male ?? 0) + (childData.female ?? 0);
+      }
+    }
+
+    final targetValue = calcTarget != null ? calcTarget.toString() : 'N/A';
 
     return Card(
       elevation: 0,

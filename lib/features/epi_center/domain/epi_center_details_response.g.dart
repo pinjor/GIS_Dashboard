@@ -483,16 +483,8 @@ Map<String, dynamic> _$CoverageTableDataToJson(_CoverageTableData instance) =>
 
 _MonthTableData _$MonthTableDataFromJson(Map<String, dynamic> json) =>
     _MonthTableData(
-      coverages:
-          (json['coverages'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          const {},
-      dropouts:
-          (json['dropouts'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          const {},
+      coverages: json['coverages'] as Map<String, dynamic>? ?? const {},
+      dropouts: json['dropouts'] as Map<String, dynamic>? ?? const {},
     );
 
 Map<String, dynamic> _$MonthTableDataToJson(_MonthTableData instance) =>
@@ -503,16 +495,8 @@ Map<String, dynamic> _$MonthTableDataToJson(_MonthTableData instance) =>
 
 _TotalTableData _$TotalTableDataFromJson(Map<String, dynamic> json) =>
     _TotalTableData(
-      coverages:
-          (json['coverages'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          const {},
-      dropouts:
-          (json['dropouts'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          const {},
+      coverages: json['coverages'] as Map<String, dynamic>? ?? const {},
+      dropouts: json['dropouts'] as Map<String, dynamic>? ?? const {},
     );
 
 Map<String, dynamic> _$TotalTableDataToJson(_TotalTableData instance) =>

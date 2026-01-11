@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EpiCenterDetailsResponse {
 
- List<CityCorporation> get cityCorporations; List<District> get districts; List<Division> get divisions; Area? get area; CoverageTableData? get coverageTableData; ChartData? get chartData; String? get uid; String? get nameList; List<Subblock> get subblocks; List<Ward> get wards; List<Union> get unions; List<Upazila> get upazilas; String? get subblockId; String? get wardId; String? get unionId; String? get upazilaId; String? get districtId; String? get divisionId; String? get type; String? get subBlockName; String? get wardName; String? get unionName; String? get upazilaName; String? get districtName; String? get divisionName; String? get cityCorporationName; String? get ccZoneName; String? get ccWardName; String? get ccUid; int? get selectedYear;// ✅ NEW: Root-level additionalData for country-level responses
+ List<CityCorporation> get cityCorporations; List<District> get districts; List<Division> get divisions; Area? get area; CoverageTableData? get coverageTableData; ChartData? get chartData; String? get uid; String? get nameList; List<Subblock> get subblocks; List<Ward> get wards; List<Union> get unions; List<Upazila> get upazilas; String? get subblockId; String? get wardId; String? get unionId; String? get upazilaId; String? get districtId; String? get divisionId; String? get type; String? get subBlockName; String? get wardName; String? get unionName; String? get upazilaName; String? get districtName; String? get divisionName; String? get cityCorporationName; String? get ccZoneName; String? get ccWardName; String? get ccUid; int? get selectedYear;//   NEW: Root-level additionalData for country-level responses
  AdditionalData? get additionalData;
 /// Create a copy of EpiCenterDetailsResponse
 /// with the given fields replaced by the non-null parameter values.
@@ -363,7 +363,7 @@ class _EpiCenterDetailsResponse extends EpiCenterDetailsResponse {
 @override final  String? ccWardName;
 @override final  String? ccUid;
 @override final  int? selectedYear;
-// ✅ NEW: Root-level additionalData for country-level responses
+//   NEW: Root-level additionalData for country-level responses
 @override final  AdditionalData? additionalData;
 
 /// Create a copy of EpiCenterDetailsResponse
@@ -3901,20 +3901,20 @@ as Map<String, YearDemographics>,
 /// @nodoc
 mixin _$YearDemographics {
 
- Population? get population;@JsonKey(name: 'child_0_15_month') ChildData? get child0To15Month;@JsonKey(name: 'child_0_11_month') ChildData? get child0To11Month;@JsonKey(name: 'number_of_sessions_in_year') int? get numberOfSessionsInYear;@JsonKey(name: 'women_15_to_49') int? get women15To49;@JsonKey(name: 'ha_vaccinator_designation1') dynamic get haVaccinatorDesignation1;// ✅ Changed to dynamic (can be String or int)
-@JsonKey(name: 'ha_vaccinator_name1') dynamic get haVaccinatorName1;// ✅ Changed to dynamic
-@JsonKey(name: 'ha_vaccinator_designation2') dynamic get haVaccinatorDesignation2;// ✅ Changed to dynamic
-@JsonKey(name: 'ha_vaccinator_name2') dynamic get haVaccinatorName2;// ✅ Changed to dynamic
-@JsonKey(name: 'supervisor1_designation') dynamic get supervisor1Designation;// ✅ Changed to dynamic
-@JsonKey(name: 'supervisor1_name') dynamic get supervisor1Name;// ✅ Changed to dynamic
-@JsonKey(name: 'epi_center_name_address') dynamic get epiCenterNameAddress;// ✅ Changed to dynamic
-@JsonKey(name: 'epi_center_implementer_name') dynamic get epiCenterImplementerName;// ✅ Changed to dynamic
-@JsonKey(name: 'distance_from_cc_to_epi_center') dynamic get distanceFromCcToEpiCenter;@JsonKey(name: 'mode_of_transportation_distribution') dynamic get modeOfTransportationDistribution;// ✅ Changed to dynamic
-@JsonKey(name: 'mode_of_transportation_uhc') dynamic get modeOfTransportationUhc;// ✅ Changed to dynamic
-@JsonKey(name: 'time_to_reach_distribution_point') dynamic get timeToReachDistributionPoint;// ✅ Changed to dynamic (can be double or int)
-@JsonKey(name: 'time_to_reach_epi_center') dynamic get timeToReachEpiCenter;// ✅ Changed to dynamic
-@JsonKey(name: 'porter_name') dynamic get porterName;// ✅ Changed to dynamic
-@JsonKey(name: 'porter_mobile') dynamic get porterMobile;// ✅ Changed to dynamic (can be very large number)
+ Population? get population;@JsonKey(name: 'child_0_15_month') ChildData? get child0To15Month;@JsonKey(name: 'child_0_11_month') ChildData? get child0To11Month;@JsonKey(name: 'number_of_sessions_in_year') int? get numberOfSessionsInYear;@JsonKey(name: 'women_15_to_49') int? get women15To49;@JsonKey(name: 'ha_vaccinator_designation1') dynamic get haVaccinatorDesignation1;//   Changed to dynamic (can be String or int)
+@JsonKey(name: 'ha_vaccinator_name1') dynamic get haVaccinatorName1;//   Changed to dynamic
+@JsonKey(name: 'ha_vaccinator_designation2') dynamic get haVaccinatorDesignation2;//   Changed to dynamic
+@JsonKey(name: 'ha_vaccinator_name2') dynamic get haVaccinatorName2;//   Changed to dynamic
+@JsonKey(name: 'supervisor1_designation') dynamic get supervisor1Designation;//   Changed to dynamic
+@JsonKey(name: 'supervisor1_name') dynamic get supervisor1Name;//   Changed to dynamic
+@JsonKey(name: 'epi_center_name_address') dynamic get epiCenterNameAddress;//   Changed to dynamic
+@JsonKey(name: 'epi_center_implementer_name') dynamic get epiCenterImplementerName;//   Changed to dynamic
+@JsonKey(name: 'distance_from_cc_to_epi_center') dynamic get distanceFromCcToEpiCenter;@JsonKey(name: 'mode_of_transportation_distribution') dynamic get modeOfTransportationDistribution;//   Changed to dynamic
+@JsonKey(name: 'mode_of_transportation_uhc') dynamic get modeOfTransportationUhc;//   Changed to dynamic
+@JsonKey(name: 'time_to_reach_distribution_point') dynamic get timeToReachDistributionPoint;//   Changed to dynamic (can be double or int)
+@JsonKey(name: 'time_to_reach_epi_center') dynamic get timeToReachEpiCenter;//   Changed to dynamic
+@JsonKey(name: 'porter_name') dynamic get porterName;//   Changed to dynamic
+@JsonKey(name: 'porter_mobile') dynamic get porterMobile;//   Changed to dynamic (can be very large number)
 @JsonKey(name: 'epi_center_type') dynamic get epiCenterType;
 /// Create a copy of YearDemographics
 /// with the given fields replaced by the non-null parameter values.
@@ -4174,34 +4174,34 @@ class _YearDemographics implements YearDemographics {
 @override@JsonKey(name: 'number_of_sessions_in_year') final  int? numberOfSessionsInYear;
 @override@JsonKey(name: 'women_15_to_49') final  int? women15To49;
 @override@JsonKey(name: 'ha_vaccinator_designation1') final  dynamic haVaccinatorDesignation1;
-// ✅ Changed to dynamic (can be String or int)
+//   Changed to dynamic (can be String or int)
 @override@JsonKey(name: 'ha_vaccinator_name1') final  dynamic haVaccinatorName1;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'ha_vaccinator_designation2') final  dynamic haVaccinatorDesignation2;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'ha_vaccinator_name2') final  dynamic haVaccinatorName2;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'supervisor1_designation') final  dynamic supervisor1Designation;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'supervisor1_name') final  dynamic supervisor1Name;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'epi_center_name_address') final  dynamic epiCenterNameAddress;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'epi_center_implementer_name') final  dynamic epiCenterImplementerName;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'distance_from_cc_to_epi_center') final  dynamic distanceFromCcToEpiCenter;
 @override@JsonKey(name: 'mode_of_transportation_distribution') final  dynamic modeOfTransportationDistribution;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'mode_of_transportation_uhc') final  dynamic modeOfTransportationUhc;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'time_to_reach_distribution_point') final  dynamic timeToReachDistributionPoint;
-// ✅ Changed to dynamic (can be double or int)
+//   Changed to dynamic (can be double or int)
 @override@JsonKey(name: 'time_to_reach_epi_center') final  dynamic timeToReachEpiCenter;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'porter_name') final  dynamic porterName;
-// ✅ Changed to dynamic
+//   Changed to dynamic
 @override@JsonKey(name: 'porter_mobile') final  dynamic porterMobile;
-// ✅ Changed to dynamic (can be very large number)
+//   Changed to dynamic (can be very large number)
 @override@JsonKey(name: 'epi_center_type') final  dynamic epiCenterType;
 
 /// Create a copy of YearDemographics
@@ -5583,7 +5583,7 @@ $TargetsCopyWith<$Res>? get targets {
 /// @nodoc
 mixin _$MonthTableData {
 
- Map<String, int> get coverages; Map<String, int> get dropouts;
+ Map<String, dynamic> get coverages; Map<String, dynamic> get dropouts;
 /// Create a copy of MonthTableData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5616,7 +5616,7 @@ abstract mixin class $MonthTableDataCopyWith<$Res>  {
   factory $MonthTableDataCopyWith(MonthTableData value, $Res Function(MonthTableData) _then) = _$MonthTableDataCopyWithImpl;
 @useResult
 $Res call({
- Map<String, int> coverages, Map<String, int> dropouts
+ Map<String, dynamic> coverages, Map<String, dynamic> dropouts
 });
 
 
@@ -5636,8 +5636,8 @@ class _$MonthTableDataCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? coverages = null,Object? dropouts = null,}) {
   return _then(_self.copyWith(
 coverages: null == coverages ? _self.coverages : coverages // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,dropouts: null == dropouts ? _self.dropouts : dropouts // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,
+as Map<String, dynamic>,dropouts: null == dropouts ? _self.dropouts : dropouts // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 
@@ -5722,7 +5722,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, int> coverages,  Map<String, int> dropouts)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, dynamic> coverages,  Map<String, dynamic> dropouts)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MonthTableData() when $default != null:
 return $default(_that.coverages,_that.dropouts);case _:
@@ -5743,7 +5743,7 @@ return $default(_that.coverages,_that.dropouts);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, int> coverages,  Map<String, int> dropouts)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, dynamic> coverages,  Map<String, dynamic> dropouts)  $default,) {final _that = this;
 switch (_that) {
 case _MonthTableData():
 return $default(_that.coverages,_that.dropouts);case _:
@@ -5763,7 +5763,7 @@ return $default(_that.coverages,_that.dropouts);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, int> coverages,  Map<String, int> dropouts)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, dynamic> coverages,  Map<String, dynamic> dropouts)?  $default,) {final _that = this;
 switch (_that) {
 case _MonthTableData() when $default != null:
 return $default(_that.coverages,_that.dropouts);case _:
@@ -5778,18 +5778,18 @@ return $default(_that.coverages,_that.dropouts);case _:
 @JsonSerializable()
 
 class _MonthTableData implements MonthTableData {
-  const _MonthTableData({final  Map<String, int> coverages = const {}, final  Map<String, int> dropouts = const {}}): _coverages = coverages,_dropouts = dropouts;
+  const _MonthTableData({final  Map<String, dynamic> coverages = const {}, final  Map<String, dynamic> dropouts = const {}}): _coverages = coverages,_dropouts = dropouts;
   factory _MonthTableData.fromJson(Map<String, dynamic> json) => _$MonthTableDataFromJson(json);
 
- final  Map<String, int> _coverages;
-@override@JsonKey() Map<String, int> get coverages {
+ final  Map<String, dynamic> _coverages;
+@override@JsonKey() Map<String, dynamic> get coverages {
   if (_coverages is EqualUnmodifiableMapView) return _coverages;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_coverages);
 }
 
- final  Map<String, int> _dropouts;
-@override@JsonKey() Map<String, int> get dropouts {
+ final  Map<String, dynamic> _dropouts;
+@override@JsonKey() Map<String, dynamic> get dropouts {
   if (_dropouts is EqualUnmodifiableMapView) return _dropouts;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_dropouts);
@@ -5829,7 +5829,7 @@ abstract mixin class _$MonthTableDataCopyWith<$Res> implements $MonthTableDataCo
   factory _$MonthTableDataCopyWith(_MonthTableData value, $Res Function(_MonthTableData) _then) = __$MonthTableDataCopyWithImpl;
 @override @useResult
 $Res call({
- Map<String, int> coverages, Map<String, int> dropouts
+ Map<String, dynamic> coverages, Map<String, dynamic> dropouts
 });
 
 
@@ -5849,8 +5849,8 @@ class __$MonthTableDataCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? coverages = null,Object? dropouts = null,}) {
   return _then(_MonthTableData(
 coverages: null == coverages ? _self._coverages : coverages // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,dropouts: null == dropouts ? _self._dropouts : dropouts // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,
+as Map<String, dynamic>,dropouts: null == dropouts ? _self._dropouts : dropouts // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 
@@ -5861,7 +5861,7 @@ as Map<String, int>,
 /// @nodoc
 mixin _$TotalTableData {
 
- Map<String, int> get coverages; Map<String, int> get dropouts;
+ Map<String, dynamic> get coverages; Map<String, dynamic> get dropouts;
 /// Create a copy of TotalTableData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5894,7 +5894,7 @@ abstract mixin class $TotalTableDataCopyWith<$Res>  {
   factory $TotalTableDataCopyWith(TotalTableData value, $Res Function(TotalTableData) _then) = _$TotalTableDataCopyWithImpl;
 @useResult
 $Res call({
- Map<String, int> coverages, Map<String, int> dropouts
+ Map<String, dynamic> coverages, Map<String, dynamic> dropouts
 });
 
 
@@ -5914,8 +5914,8 @@ class _$TotalTableDataCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? coverages = null,Object? dropouts = null,}) {
   return _then(_self.copyWith(
 coverages: null == coverages ? _self.coverages : coverages // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,dropouts: null == dropouts ? _self.dropouts : dropouts // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,
+as Map<String, dynamic>,dropouts: null == dropouts ? _self.dropouts : dropouts // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 
@@ -6000,7 +6000,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, int> coverages,  Map<String, int> dropouts)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, dynamic> coverages,  Map<String, dynamic> dropouts)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TotalTableData() when $default != null:
 return $default(_that.coverages,_that.dropouts);case _:
@@ -6021,7 +6021,7 @@ return $default(_that.coverages,_that.dropouts);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, int> coverages,  Map<String, int> dropouts)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, dynamic> coverages,  Map<String, dynamic> dropouts)  $default,) {final _that = this;
 switch (_that) {
 case _TotalTableData():
 return $default(_that.coverages,_that.dropouts);case _:
@@ -6041,7 +6041,7 @@ return $default(_that.coverages,_that.dropouts);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, int> coverages,  Map<String, int> dropouts)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, dynamic> coverages,  Map<String, dynamic> dropouts)?  $default,) {final _that = this;
 switch (_that) {
 case _TotalTableData() when $default != null:
 return $default(_that.coverages,_that.dropouts);case _:
@@ -6056,18 +6056,18 @@ return $default(_that.coverages,_that.dropouts);case _:
 @JsonSerializable()
 
 class _TotalTableData implements TotalTableData {
-  const _TotalTableData({final  Map<String, int> coverages = const {}, final  Map<String, int> dropouts = const {}}): _coverages = coverages,_dropouts = dropouts;
+  const _TotalTableData({final  Map<String, dynamic> coverages = const {}, final  Map<String, dynamic> dropouts = const {}}): _coverages = coverages,_dropouts = dropouts;
   factory _TotalTableData.fromJson(Map<String, dynamic> json) => _$TotalTableDataFromJson(json);
 
- final  Map<String, int> _coverages;
-@override@JsonKey() Map<String, int> get coverages {
+ final  Map<String, dynamic> _coverages;
+@override@JsonKey() Map<String, dynamic> get coverages {
   if (_coverages is EqualUnmodifiableMapView) return _coverages;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_coverages);
 }
 
- final  Map<String, int> _dropouts;
-@override@JsonKey() Map<String, int> get dropouts {
+ final  Map<String, dynamic> _dropouts;
+@override@JsonKey() Map<String, dynamic> get dropouts {
   if (_dropouts is EqualUnmodifiableMapView) return _dropouts;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_dropouts);
@@ -6107,7 +6107,7 @@ abstract mixin class _$TotalTableDataCopyWith<$Res> implements $TotalTableDataCo
   factory _$TotalTableDataCopyWith(_TotalTableData value, $Res Function(_TotalTableData) _then) = __$TotalTableDataCopyWithImpl;
 @override @useResult
 $Res call({
- Map<String, int> coverages, Map<String, int> dropouts
+ Map<String, dynamic> coverages, Map<String, dynamic> dropouts
 });
 
 
@@ -6127,8 +6127,8 @@ class __$TotalTableDataCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? coverages = null,Object? dropouts = null,}) {
   return _then(_TotalTableData(
 coverages: null == coverages ? _self._coverages : coverages // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,dropouts: null == dropouts ? _self._dropouts : dropouts // ignore: cast_nullable_to_non_nullable
-as Map<String, int>,
+as Map<String, dynamic>,dropouts: null == dropouts ? _self._dropouts : dropouts // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 

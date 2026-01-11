@@ -175,10 +175,15 @@ class MonthlyCard extends ConsumerWidget {
             {};
 
         for (final vaccineName in vaccineNames) {
-          vaccines[vaccineName] = math.max(
-            0,
-            monthlyTarget - (coverageData[vaccineName] ?? 0),
-          );
+          final rawValue = coverageData[vaccineName];
+          int value = 0;
+          if (rawValue is num) {
+            value = rawValue.toInt();
+          } else if (rawValue is String) {
+            value = int.tryParse(rawValue) ?? 0;
+          }
+
+          vaccines[vaccineName] = math.max(0, monthlyTarget - value);
         }
       }
     } else {
@@ -188,7 +193,14 @@ class MonthlyCard extends ConsumerWidget {
           {};
 
       for (final vaccineName in vaccineNames) {
-        vaccines[vaccineName] = coverageData[vaccineName] ?? 0;
+        final rawValue = coverageData[vaccineName];
+        int value = 0;
+        if (rawValue is num) {
+          value = rawValue.toInt();
+        } else if (rawValue is String) {
+          value = int.tryParse(rawValue) ?? 0;
+        }
+        vaccines[vaccineName] = value;
       }
     }
 
@@ -377,10 +389,16 @@ class SummaryCard extends ConsumerWidget {
               {};
 
           for (final vaccineName in vaccineNames) {
-            final dropout = math.max(
-              0,
-              monthlyTarget - (coverageData[vaccineName] ?? 0),
-            );
+            final rawValue = coverageData[vaccineName];
+            int value = 0;
+            if (rawValue is num) {
+              value = rawValue.toInt();
+            } else if (rawValue is String) {
+              value = int.tryParse(rawValue) ?? 0;
+            }
+
+            final dropout = math.max(0, monthlyTarget - value);
+
             accumulatedVaccines[vaccineName] =
                 (accumulatedVaccines[vaccineName] ?? 0) + dropout;
           }
@@ -392,9 +410,15 @@ class SummaryCard extends ConsumerWidget {
             {};
 
         for (final vaccineName in vaccineNames) {
+          final rawValue = coverageData[vaccineName];
+          int value = 0;
+          if (rawValue is num) {
+            value = rawValue.toInt();
+          } else if (rawValue is String) {
+            value = int.tryParse(rawValue) ?? 0;
+          }
           accumulatedVaccines[vaccineName] =
-              (accumulatedVaccines[vaccineName] ?? 0) +
-              (coverageData[vaccineName] ?? 0);
+              (accumulatedVaccines[vaccineName] ?? 0) + value;
         }
       }
     }
