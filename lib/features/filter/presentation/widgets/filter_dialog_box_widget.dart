@@ -698,10 +698,6 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
             _selectedSubblock = null;
           }
         }
-
-        // ✅ REMOVED: Automatic CC sync was interfering with user dropdown selections
-        // Provider sync should only happen after successful API calls, not continuously
-        // The sync logic is now handled in the _applyFilters method after API success
       });
     });
 
@@ -890,12 +886,20 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     onChanged: (value) {
                       setState(() {
                         _selectedDistrict = value;
+                        // Clear child selections when district changes
+                        _selectedUpazila = null;
+                        _selectedUnion = null;
+                        _selectedWard = null;
                       });
+                      // Trigger upazila loading
+                      filterNotifier.updateDistrict(value);
                     },
                   ),
 
-                  // Extended hierarchical fields (only for EPI details context)
-                  if (widget.isEpiContext) ...[
+                  // Extended hierarchical fields (for District area type in non-EPI context, or EPI context)
+                  if ((_selectedAreaType == AreaType.district &&
+                          !widget.isEpiContext) ||
+                      widget.isEpiContext) ...[
                     16.h,
                     // Upazila Dropdown
                     const Text(
@@ -1028,48 +1032,51 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                         filterNotifier.updateWard(value);
                       },
                     ),
-                    16.h,
-                    // Subblock Dropdown
-                    const Text(
-                      'Sub Block',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 16,
-                      ),
-                    ),
-                    8.h,
-                    DropdownButtonFormField<String?>(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      initialValue:
-                          filterNotifier.subblockDropdownItems.contains(
-                            _selectedSubblock,
-                          )
-                          ? _selectedSubblock
-                          : null,
-                      hint: const Text('All'),
-                      items: [
-                        const DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text('All'),
+
+                    // Subblock Dropdown (EPI context only - not shown in main filter)
+                    if (widget.isEpiContext) ...[
+                      16.h,
+                      const Text(
+                        'Subblock',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
                         ),
-                        ...filterNotifier.subblockDropdownItems
-                            .where((item) => item != 'All')
-                            .map(
-                              (subblock) => DropdownMenuItem<String?>(
-                                value: subblock,
-                                child: Text(subblock),
+                      ),
+                      8.h,
+                      DropdownButtonFormField<String?>(
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        initialValue:
+                            filterNotifier.subblockDropdownItems.contains(
+                          _selectedSubblock,
+                        )
+                            ? _selectedSubblock
+                            : null,
+                        hint: const Text('All'),
+                        items: [
+                          const DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text('All'),
+                          ),
+                          ...filterNotifier.subblockDropdownItems
+                              .where((item) => item != 'All')
+                              .map(
+                                (subblock) => DropdownMenuItem<String?>(
+                                  value: subblock,
+                                  child: Text(subblock),
+                                ),
                               ),
-                            ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedSubblock = value;
-                        });
-                        filterNotifier.updateSubblock(value);
-                      },
-                    ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedSubblock = value;
+                          });
+                          filterNotifier.updateSubblock(value);
+                        },
+                      ),
+                    ],
                   ],
                 ] else if (_selectedAreaType == AreaType.cityCorporation) ...[
                   // City Corporation Dropdown

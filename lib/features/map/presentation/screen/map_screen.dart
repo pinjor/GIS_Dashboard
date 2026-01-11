@@ -585,10 +585,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         final bool divisionFilterApplied =
             current.selectedAreaType == AreaType.district &&
             current.selectedDivision != 'All' &&
-            current.selectedDistrict == null;
+            current.selectedDistrict == null &&
+            current.selectedUpazila == null;
+
+        // Detect deepest hierarchical selection for District area type
+        final bool wardFilterApplied =
+            current.selectedAreaType == AreaType.district &&
+            current.selectedWard != null;
+        final bool unionFilterApplied =
+            current.selectedAreaType == AreaType.district &&
+            current.selectedUnion != null &&
+            current.selectedWard == null;
+        final bool upazilaFilterApplied =
+            current.selectedAreaType == AreaType.district &&
+            current.selectedUpazila != null &&
+            current.selectedUnion == null;
         final bool districtFilterApplied =
             current.selectedAreaType == AreaType.district &&
-            current.selectedDistrict != null;
+            current.selectedDistrict != null &&
+            current.selectedUpazila == null;
+
         final bool cityCorporationFilterApplied =
             current.selectedAreaType == AreaType.cityCorporation &&
             current.selectedCityCorporation != null;
@@ -600,7 +616,35 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             current.selectedDivision == 'All' &&
             current.selectedDistrict == null;
 
-        if (districtFilterApplied) {
+        // Load data based on deepest selection (hierarchical priority)
+        if (wardFilterApplied) {
+          logg.i("Ward filter applied: ${current.selectedWard}");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadWardData(wardName: current.selectedWard!);
+            }
+          });
+        } else if (unionFilterApplied) {
+          logg.i("Union filter applied: ${current.selectedUnion}");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadUnionData(unionName: current.selectedUnion!);
+            }
+          });
+        } else if (upazilaFilterApplied) {
+          logg.i("Upazila filter applied: ${current.selectedUpazila}");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadUpazilaData(upazilaName: current.selectedUpazila!);
+            }
+          });
+        } else if (districtFilterApplied) {
           logg.i("District filter applied: ${current.selectedDistrict}");
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {

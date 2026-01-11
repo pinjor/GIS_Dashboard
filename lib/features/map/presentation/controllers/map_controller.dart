@@ -829,6 +829,237 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
+  /// Load upazila data by name (for hierarchical filter)
+  Future<void> loadUpazilaData({required String upazilaName}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Build concatenated path: district_uid/upazila_uid
+      final districtUid = _filterNotifier.getDistrictUid(
+        currentFilter.selectedDistrict!,
+      );
+      final upazilaUid = _filterNotifier.getUpazilaUid(upazilaName);
+
+      if (districtUid == null || upazilaUid == null) {
+        throw Exception('Could not find UIDs for hierarchical path');
+      }
+
+      final concatenatedSlug = '$districtUid/$upazilaUid';
+      logg.i(
+        "Loading upazila data for: $upazilaName (Path: $concatenatedSlug)",
+      );
+
+      // Construct API paths using concatenated slug
+      final geoJsonPath = ApiConstants.getGeoJsonPath(slug: concatenatedSlug);
+      final coveragePath = ApiConstants.getCoveragePath(
+        slug: concatenatedSlug,
+        year: selectedYear,
+      );
+
+      final results = await Future.wait([
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: true,
+        ),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: true,
+        ),
+      ]);
+
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
+      final coverageData = results[1] as VaccineCoverageResponse;
+
+      _unfilteredCoverageData = coverageData;
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
+      state = state.copyWith(
+        areaCoordsGeoJsonData: areaCoordsGeoJsonData,
+        coverageData: filteredData,
+        currentLevel: GeographicLevel.upazila,
+        navigationStack: [], // Reset navigation for filter-based loading
+        currentAreaName: upazilaName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("✅ Successfully loaded upazila data for $upazilaName");
+    } catch (e) {
+      logg.e("Error loading upazila data: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load upazila data: $e',
+      );
+    }
+  }
+
+  /// Load union data by name (for hierarchical filter)
+  Future<void> loadUnionData({required String unionName}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Build concatenated path: district_uid/upazila_uid/union_uid
+      final districtUid = _filterNotifier.getDistrictUid(
+        currentFilter.selectedDistrict!,
+      );
+      final upazilaUid = _filterNotifier.getUpazilaUid(
+        currentFilter.selectedUpazila!,
+      );
+      final unionUid = _filterNotifier.getUnionUid(unionName);
+
+      if (districtUid == null || upazilaUid == null || unionUid == null) {
+        throw Exception('Could not find UIDs for hierarchical path');
+      }
+
+      final concatenatedSlug = '$districtUid/$upazilaUid/$unionUid';
+      logg.i("Loading union data for: $unionName (Path: $concatenatedSlug)");
+
+      // Construct API paths using concatenated slug
+      final geoJsonPath = ApiConstants.getGeoJsonPath(slug: concatenatedSlug);
+      final coveragePath = ApiConstants.getCoveragePath(
+        slug: concatenatedSlug,
+        year: selectedYear,
+      );
+
+      final results = await Future.wait([
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: true,
+        ),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: true,
+        ),
+      ]);
+
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
+      final coverageData = results[1] as VaccineCoverageResponse;
+
+      _unfilteredCoverageData = coverageData;
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
+      state = state.copyWith(
+        areaCoordsGeoJsonData: areaCoordsGeoJsonData,
+        coverageData: filteredData,
+        currentLevel: GeographicLevel.union,
+        navigationStack: [], // Reset navigation for filter-based loading
+        currentAreaName: unionName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("✅ Successfully loaded union data for $unionName");
+    } catch (e) {
+      logg.e("Error loading union data: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load union data: $e',
+      );
+    }
+  }
+
+  /// Load ward data by name (for hierarchical filter)
+  Future<void> loadWardData({required String wardName}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Build concatenated path: district_uid/upazila_uid/union_uid/ward_uid
+      final districtUid = _filterNotifier.getDistrictUid(
+        currentFilter.selectedDistrict!,
+      );
+      final upazilaUid = _filterNotifier.getUpazilaUid(
+        currentFilter.selectedUpazila!,
+      );
+      final unionUid = _filterNotifier.getUnionUid(
+        currentFilter.selectedUnion!,
+      );
+      final wardUid = _filterNotifier.getWardUid(wardName);
+
+      if (districtUid == null ||
+          upazilaUid == null ||
+          unionUid == null ||
+          wardUid == null) {
+        throw Exception('Could not find UIDs for hierarchical path');
+      }
+
+      final concatenatedSlug = '$districtUid/$upazilaUid/$unionUid/$wardUid';
+      logg.i("Loading ward data for: $wardName (Path: $concatenatedSlug)");
+
+      // Construct API paths using concatenated slug
+      final geoJsonPath = ApiConstants.getGeoJsonPath(slug: concatenatedSlug);
+      final coveragePath = ApiConstants.getCoveragePath(
+        slug: concatenatedSlug,
+        year: selectedYear,
+      );
+
+      final results = await Future.wait([
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: true,
+        ),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: true,
+        ),
+      ]);
+
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
+      final coverageData = results[1] as VaccineCoverageResponse;
+
+      // Fetch EPI data for ward level (uses only ward UID, not concatenated path)
+      EpiCenterCoordsResponse? epiCenterCoordsData;
+      try {
+        final epiPath = ApiConstants.getEpiPath(slug: wardUid);
+        logg.i("Fetching EPI data from: $epiPath");
+        epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
+          urlPath: epiPath,
+          forceRefresh: true,
+        );
+        logg.i("Successfully fetched EPI data for $wardName");
+      } catch (e) {
+        logg.w("EPI data not available for $wardName - continuing without EPI data: $e");
+        epiCenterCoordsData = null;
+      }
+
+      _unfilteredCoverageData = coverageData;
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
+      state = state.copyWith(
+        areaCoordsGeoJsonData: areaCoordsGeoJsonData,
+        coverageData: filteredData,
+        epiCenterCoordsData: epiCenterCoordsData,
+        currentLevel: GeographicLevel.ward,
+        navigationStack: [], // Reset navigation for filter-based loading
+        currentAreaName: wardName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("✅ Successfully loaded ward data for $wardName");
+    } catch (e) {
+      logg.e("Error loading ward data: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load ward data: $e',
+      );
+    }
+  }
+
   /// Extract district slug from country-level GeoJSON data
   /// This loads fresh country data to ensure we have all districts available
   Future<String?> _getDistrictSlugFromCountryData(String districtName) async {

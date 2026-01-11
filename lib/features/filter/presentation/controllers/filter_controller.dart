@@ -243,7 +243,51 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Update district selection
   void updateDistrict(String? district) {
-    state = state.copyWith(selectedDistrict: district);
+    // Only clear child data if the selection actually changed
+    if (state.selectedDistrict != district) {
+      print(
+        'FilterProvider: District changed from ${state.selectedDistrict} to $district - clearing child data',
+      );
+      state = state.copyWith(
+        selectedDistrict: district,
+        clearUpazila: true,
+        clearUnion: true,
+        clearWard: true,
+        clearSubblock: true,
+        upazilas: const [],
+        unions: const [],
+        wards: const [],
+        subblocks: const [],
+      );
+
+      // Load new data only if changed and valid
+      if (district != null && district != 'All') {
+        final districtUid = getDistrictUid(district);
+        if (districtUid != null) {
+          _loadUpazilasByDistrict(districtUid);
+        }
+      }
+    } else {
+      // Same value - just update the selection without clearing children
+      print(
+        'FilterProvider: District unchanged ($district) - preserving child data',
+      );
+      state = state.copyWith(selectedDistrict: district);
+    }
+  }
+
+  /// Load upazilas by district UID
+  Future<void> _loadUpazilasByDistrict(String districtUid) async {
+    try {
+      print('FilterProvider: Loading upazilas for district UID: $districtUid');
+      final upazilas = await _repository.fetchAreasByParentUid(districtUid);
+      state = state.copyWith(upazilas: upazilas);
+      print(
+        'FilterProvider: Loaded ${upazilas.length} upazilas for district: $districtUid',
+      );
+    } catch (e) {
+      print('FilterProvider: Error loading upazilas: $e');
+    }
   }
 
   /// Update year selection
