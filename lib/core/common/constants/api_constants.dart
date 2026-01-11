@@ -12,6 +12,19 @@ class ApiConstants {
 
   static String get districtJsonPath => '/shapes/shape.json.gz';
 
+  // Child Data (for generic child fetching, e.g. Zones)
+  static const String childData = '/get/TYPE/child-data';
+
+  static String getZoneChildDataPath(String type) =>
+      childData.replaceFirst('TYPE', type);
+
+  // All City Corporations view
+  static const String allCityCorporationsGeoJson =
+      '/storage/build-json/shapes/city-corporations/shape.json.gz';
+
+  static String getAllCityCorporationsCoveragePath(String year) =>
+      '/storage/build-json/coverage/city-corporations/$year-coverage.json';
+
   // these two paths needs to be dynamic based on year value, like a getter function like below:::
 
   // static String districtCoveragePath(String year) => '/coverage/$year-coverage.json';
@@ -19,14 +32,12 @@ class ApiConstants {
   static String get districtCoveragePath25 => '/coverage/2025-coverage.json';
   @Deprecated('Use getCoveragePath(year: year) instead')
   static String get districtCoveragePath24 => '/coverage/2024-coverage.json';
+
   /// Filter paths
   static String get filterByArea => '/areas';
 
   /// Session plans
-  static String get sessionPlans => '/session-plans'; 
-
-
-
+  static String get sessionPlans => '/session-plans';
 
   /// Dynamic path generators for drilldown functionality
 

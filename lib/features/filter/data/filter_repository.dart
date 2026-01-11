@@ -183,4 +183,38 @@ class FilterRepository {
       return Future.error('Failed to fetch areas: $e');
     }
   }
+
+  /// Fetch zones for a city corporation
+  Future<List<AreaResponseModel>> fetchZones(String ccUid) async {
+    try {
+      // Check internet connectivity first
+      final hasInternet = await _connectivityService.hasInternetConnection();
+      if (!hasInternet) {
+        return Future.error(
+          'No internet connection. Please check your connection and try again.',
+        );
+      }
+
+      final uri = Uri(
+        scheme: ApiConstants.urlScheme,
+        host: ApiConstants.stagingServerHost,
+        path: ApiConstants.getZoneChildDataPath('city-corporation'),
+        queryParameters: {'parent_id': ccUid},
+      ).toString();
+
+      print('FilterRepository: Fetching zones from: $uri');
+      final response = await _client.get(uri);
+
+      // Handle the response which wraps data in 'data' field
+      if (response.data != null && response.data['data'] != null) {
+        return (response.data['data'] as List)
+            .map((item) => AreaResponseModel.fromJson(item))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      print('FilterRepository: Error fetching zones: $e');
+      return Future.error('Failed to fetch zones: $e');
+    }
+  }
 }

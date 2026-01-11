@@ -201,7 +201,44 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Update city corporation selection
   void updateCityCorporation(String? cityCorporation) {
-    state = state.copyWith(selectedCityCorporation: cityCorporation);
+    // Only clear child data if the selection actually changed
+    if (state.selectedCityCorporation != cityCorporation) {
+      print(
+        'FilterProvider: City Corporation changed from ${state.selectedCityCorporation} to $cityCorporation - clearing zones',
+      );
+      state = state.copyWith(
+        selectedCityCorporation: cityCorporation,
+        clearZone: true,
+        zones: const [],
+      );
+
+      // Load zones only if changed and valid
+      if (cityCorporation != null && cityCorporation.isNotEmpty) {
+        final ccUid = getCityCorporationUid(cityCorporation);
+        if (ccUid != null) {
+          _loadZones(ccUid);
+        }
+      }
+    } else {
+      state = state.copyWith(selectedCityCorporation: cityCorporation);
+    }
+  }
+
+  /// Update zone selection
+  void updateZone(String? zone) {
+    state = state.copyWith(selectedZone: zone);
+  }
+
+  /// Load zones for a city corporation
+  Future<void> _loadZones(String ccUid) async {
+    try {
+      print('FilterProvider: Loading zones for CC UID: $ccUid');
+      final zones = await _repository.fetchZones(ccUid);
+      state = state.copyWith(zones: zones);
+      print('FilterProvider: Loaded ${zones.length} zones for CC: $ccUid');
+    } catch (e) {
+      print('FilterProvider: Error loading zones: $e');
+    }
   }
 
   /// Update district selection
@@ -360,6 +397,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         selectedYear: defaultYear,
         clearCityCorporation:
             true, // Explicitly clear city corporation selection
+        clearZone: true, // Explicitly clear zone
         lastAppliedTimestamp: DateTime.now(), // Trigger map update
       );
     }
@@ -393,6 +431,15 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   List<String> get districtDropdownItems {
     return state.filteredDistricts
         .map((district) => district.name ?? '')
+        .where((name) => name.isNotEmpty)
+        .toList();
+  }
+
+  /// Get dropdown items for zones
+  List<String> get zoneDropdownItems {
+    if (state.zones.isEmpty) return [];
+    return state.zones
+        .map((zone) => zone.name ?? '')
         .where((name) => name.isNotEmpty)
         .toList();
   }
@@ -1005,6 +1052,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     AreaType? areaType,
     String? division,
     String? cityCorporation,
+    String? zone,
     String? district,
     String? upazila,
     String? union,
@@ -1019,6 +1067,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     required String initialDivision,
     String? initialDistrict,
     String? initialCityCorporation,
+    String? initialZone,
     String? initialUpazila,
     String? initialUnion,
     String? initialWard,
@@ -1048,6 +1097,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         (division != null && division != initialDivision) ||
         (cityCorporation != null &&
             cityCorporation != initialCityCorporation) ||
+        (zone != null && zone != initialZone) ||
         (district != null && district != initialDistrict) ||
         (upazila != null && upazila != initialUpazila) ||
         (union != null && union != initialUnion) ||
@@ -1063,6 +1113,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     if (months != null) updateMonths(months);
     if (division != null) updateDivision(division);
     if (cityCorporation != null) updateCityCorporation(cityCorporation);
+    if (zone != null) updateZone(zone);
     if (district != null) updateDistrict(district);
     if (upazila != null) updateUpazila(upazila);
     if (union != null) updateUnion(union);

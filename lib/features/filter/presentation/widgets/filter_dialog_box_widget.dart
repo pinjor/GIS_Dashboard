@@ -26,6 +26,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   late String _selectedDivision;
   String? _selectedCityCorporation;
   String? _selectedDistrict;
+  String? _selectedZone;
   late String _selectedYear;
 
   // Extended hierarchical selections (for EPI details screen)
@@ -41,6 +42,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   late String _initialDivision;
   String? _initialCityCorporation;
   String? _initialDistrict;
+  String? _initialZone;
   late String _initialYear;
   String? _initialUpazila;
   String? _initialUnion;
@@ -258,6 +260,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _initialDivision = 'All';
     _initialDistrict = null;
     _initialCityCorporation = _selectedCityCorporation;
+    _initialZone = null;
     _initialUpazila = null;
     _initialUnion = null;
     _initialWard = null;
@@ -317,6 +320,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         _selectedVaccine != _initialVaccine ||
         _selectedDivision != _initialDivision ||
         _selectedCityCorporation != _initialCityCorporation ||
+        _selectedZone != _initialZone ||
         _selectedDistrict != _initialDistrict ||
         _selectedYear != _initialYear ||
         _selectedUpazila != _initialUpazila ||
@@ -505,6 +509,9 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       if (_selectedCityCorporation != _initialCityCorporation) {
         changedValues['cityCorporation'] = _selectedCityCorporation;
       }
+      if (_selectedZone != _initialZone) {
+        changedValues['zone'] = _selectedZone;
+      }
     }
 
     // ✅ Apply all current selections (not just changed values) but pass initial values for comparison
@@ -523,6 +530,9 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
           : null,
       cityCorporation: _selectedAreaType == AreaType.cityCorporation
           ? _selectedCityCorporation
+          : null,
+      zone: _selectedAreaType == AreaType.cityCorporation
+          ? _selectedZone
           : null,
       upazila: _selectedAreaType == AreaType.district && isEpiContext
           ? _selectedUpazila
@@ -545,6 +555,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       initialDivision: _initialDivision,
       initialDistrict: _initialDistrict,
       initialCityCorporation: _initialCityCorporation,
+      initialZone: _initialZone,
       initialUpazila: _initialUpazila,
       initialUnion: _initialUnion,
       initialWard: _initialWard,
@@ -1102,9 +1113,57 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       onChanged: (value) {
                         setState(() {
                           _selectedCityCorporation = value;
+                          _selectedZone = null; // Clear zone when CC changes
+                        });
+                        // Trigger zone loading
+                        if (value != null) {
+                          filterNotifier.updateCityCorporation(value);
+                        }
+                      },
+                    ),
+
+                  // Zone Dropdown (only show if CC is selected and not in EPI context)
+                  if (_selectedCityCorporation != null &&
+                      !widget.isEpiContext) ...[
+                    16.h,
+                    const Text(
+                      'Zone',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
+                    ),
+                    8.h,
+                    DropdownButtonFormField<String?>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      value:
+                          filterNotifier.zoneDropdownItems.contains(
+                            _selectedZone,
+                          )
+                          ? _selectedZone
+                          : null,
+                      hint: const Text('All'),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All'),
+                        ),
+                        ...filterNotifier.zoneDropdownItems.map(
+                          (zone) => DropdownMenuItem<String?>(
+                            value: zone,
+                            child: Text(zone),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedZone = value;
                         });
                       },
                     ),
+                  ],
                 ],
                 16.h,
                 // Vaccine Selection (hidden in EPI details context)

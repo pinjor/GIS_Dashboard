@@ -9,6 +9,7 @@ class FilterState {
   final String selectedDivision;
   final String? selectedCityCorporation;
   final String? selectedDistrict;
+  final String? selectedZone;
   final String selectedYear;
   final List<String> selectedMonths;
 
@@ -22,6 +23,7 @@ class FilterState {
   final List<AreaResponseModel> divisions;
   final List<AreaResponseModel> districts;
   final List<AreaResponseModel> cityCorporations;
+  final List<AreaResponseModel> zones;
   final List<AreaResponseModel>
   filteredDistricts; // Districts filtered by selected division
 
@@ -44,6 +46,8 @@ class FilterState {
   final String? originalCcUid;
   final String? originalDivision;
   final String? originalDistrict;
+  final String? originalCityCorporation;
+  final String? originalZone;
   final String? originalUpazila;
   final String? originalUnion;
   final String? originalWard;
@@ -73,6 +77,7 @@ class FilterState {
     this.selectedDivision = 'All',
     this.selectedCityCorporation,
     this.selectedDistrict,
+    this.selectedZone,
     this.selectedYear = '2025',
     this.selectedMonths = const [],
     // Extended hierarchical selections
@@ -84,6 +89,7 @@ class FilterState {
     this.divisions = const [],
     this.districts = const [],
     this.cityCorporations = const [],
+    this.zones = const [],
     this.filteredDistricts = const [],
     // Extended hierarchical area data
     this.upazilas = const [],
@@ -100,6 +106,8 @@ class FilterState {
     this.originalCcUid,
     this.originalDivision,
     this.originalDistrict,
+    this.originalCityCorporation,
+    this.originalZone,
     this.originalUpazila,
     this.originalUnion,
     this.originalWard,
@@ -123,6 +131,7 @@ class FilterState {
     String? selectedDivision,
     String? selectedCityCorporation,
     String? selectedDistrict,
+    String? selectedZone,
     String? selectedYear,
     List<String>? selectedMonths,
     // Extended hierarchical selections
@@ -134,6 +143,7 @@ class FilterState {
     List<AreaResponseModel>? divisions,
     List<AreaResponseModel>? districts,
     List<AreaResponseModel>? cityCorporations,
+    List<AreaResponseModel>? zones,
     List<AreaResponseModel>? filteredDistricts,
     // Extended hierarchical area data
     List<AreaResponseModel>? upazilas,
@@ -150,6 +160,8 @@ class FilterState {
     String? originalCcUid,
     String? originalDivision,
     String? originalDistrict,
+    String? originalCityCorporation,
+    String? originalZone,
     String? originalUpazila,
     String? originalUnion,
     String? originalWard,
@@ -168,6 +180,7 @@ class FilterState {
     // Explicit flags for nullable fields to allow setting to null
     bool clearCityCorporation = false,
     bool clearDistrict = false,
+    bool clearZone = false,
     bool clearUpazila = false,
     bool clearUnion = false,
     bool clearWard = false,
@@ -178,6 +191,8 @@ class FilterState {
     bool clearOriginalCcUid = false,
     bool clearOriginalDivision = false,
     bool clearOriginalDistrict = false,
+    bool clearOriginalCityCorporation = false,
+    bool clearOriginalZone = false,
     bool clearOriginalUpazila = false,
     bool clearOriginalUnion = false,
     bool clearOriginalWard = false,
@@ -195,6 +210,7 @@ class FilterState {
       selectedDistrict: clearDistrict
           ? null
           : (selectedDistrict ?? this.selectedDistrict),
+      selectedZone: clearZone ? null : (selectedZone ?? this.selectedZone),
       selectedYear: selectedYear ?? this.selectedYear,
       selectedMonths: selectedMonths ?? this.selectedMonths,
       // Extended hierarchical selections
@@ -210,6 +226,7 @@ class FilterState {
       divisions: divisions ?? this.divisions,
       districts: districts ?? this.districts,
       cityCorporations: cityCorporations ?? this.cityCorporations,
+      zones: zones ?? this.zones,
       filteredDistricts: filteredDistricts ?? this.filteredDistricts,
       // Extended hierarchical area data
       upazilas: upazilas ?? this.upazilas,
@@ -236,6 +253,12 @@ class FilterState {
       originalDistrict: clearOriginalDistrict
           ? null
           : (originalDistrict ?? this.originalDistrict),
+      originalCityCorporation: clearOriginalCityCorporation
+          ? null
+          : (originalCityCorporation ?? this.originalCityCorporation),
+      originalZone: clearOriginalZone
+          ? null
+          : (originalZone ?? this.originalZone),
       originalUpazila: clearOriginalUpazila
           ? null
           : (originalUpazila ?? this.originalUpazila),
