@@ -48,8 +48,8 @@ app.*.map.json
 # /lib/core/jsons/
 
 # freezed, generated files
-*.g.dart
-*.freezed.dart
+# *.g.dart
+# *.freezed.dart
 # /assets/tmp/
 # PLAN_A_IMPLEMENTATION.md
 # CC_EPI_FILTER_IMPLEMENTATION.md

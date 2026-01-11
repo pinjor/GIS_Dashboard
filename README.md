@@ -26,7 +26,7 @@ A Flutter application for geographic information system visualization for vaccin
    flutter pub get
    ```
 
-3. **Generate required files**
+3. **Generate required files(NOW OPTIONAL, AS IT IS ALREADY IN THE REPO CURRENTLY)**
 
    ```bash
    dart run build_runner build --delete-conflicting-outputs
