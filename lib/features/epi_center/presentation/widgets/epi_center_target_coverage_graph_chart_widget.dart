@@ -120,7 +120,7 @@ class _EpiCenterTargetCoverageGraphChartWidgetState
             yValueMapper: (point, _) => point.value,
             color: color,
             width: borderWidth,
-            dashArray: isDashed ? <double>[4, 2] : null,
+            dashArray: isDashed ? <double>[3, 2] : <double>[3, 2],
             markerSettings: MarkerSettings(
               isVisible: pointRadius > 0,
               width: pointRadius,
@@ -138,7 +138,7 @@ class _EpiCenterTargetCoverageGraphChartWidgetState
             yValueMapper: (point, _) => point.value,
             color: color,
             width: borderWidth,
-            dashArray: isDashed ? <double>[4, 2] : null,
+            dashArray: isDashed ? <double>[3, 2] : <double>[3, 2],
             markerSettings: MarkerSettings(
               isVisible: pointRadius > 0,
               width: pointRadius,
