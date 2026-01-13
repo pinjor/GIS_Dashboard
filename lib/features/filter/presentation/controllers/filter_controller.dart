@@ -431,6 +431,16 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         selectedMonths: const [], // Reset months
         filteredDistricts: state.districts, // Reset to show all districts
         clearDistrict: true, // Explicitly clear district selection
+        // ✅ FIX: Clear all hierarchical selections (upazila, union, ward, subblock)
+        clearUpazila: true,
+        clearUnion: true,
+        clearWard: true,
+        clearSubblock: true,
+        // Clear hierarchical data lists
+        upazilas: const [],
+        unions: const [],
+        wards: const [],
+        subblocks: const [],
         lastAppliedTimestamp: DateTime.now(), // Trigger map update
       );
     } else if (state.selectedAreaType == AreaType.cityCorporation) {

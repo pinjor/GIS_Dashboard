@@ -872,6 +872,72 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
 
+      // Get district name and slug for navigation stack
+      final districtName = currentFilter.selectedDistrict!;
+      final districtSlug = await _getDistrictSlugFromCountryData(districtName);
+
+      // Create navigation level for upazila
+      final upazilaNavLevel = DrilldownLevel(
+        level: GeographicLevel.upazila,
+        slug: concatenatedSlug,
+        name: upazilaName,
+        parentSlug: districtSlug,
+      );
+
+      // Create navigation level for district
+      final districtNavLevel = DrilldownLevel(
+        level: GeographicLevel.district,
+        slug: districtSlug ?? districtUid,
+        name: districtName,
+        parentSlug: null,
+      );
+
+      // Build navigation stack properly preserving division hierarchy
+      List<DrilldownLevel> newNavigationStack;
+
+      // Check if there's a division context from filter that should be preserved
+      final selectedDivision = currentFilter.selectedDivision;
+      final hasValidDivisionContext =
+          selectedDivision != 'All' && selectedDivision.isNotEmpty;
+
+      // Check if current navigation stack already has a division level
+      final currentHasDivisionLevel =
+          state.navigationStack.isNotEmpty &&
+          state.navigationStack.any(
+            (level) => level.level == GeographicLevel.division,
+          );
+
+      if (hasValidDivisionContext && !currentHasDivisionLevel) {
+        // We have a division filter but no division in navigation stack
+        // This means user went directly from country -> division -> district -> upazila via filters
+        // We should preserve the division level in navigation
+        final divisionSlug = ApiConstants.divisionNameToSlug(selectedDivision);
+        final divisionNavLevel = DrilldownLevel(
+          level: GeographicLevel.division,
+          slug: 'divisions/$divisionSlug',
+          name: selectedDivision,
+          parentSlug: null,
+        );
+
+        newNavigationStack = [divisionNavLevel, districtNavLevel, upazilaNavLevel];
+        logg.i(
+          "Preserved division '$selectedDivision' in upazila navigation hierarchy",
+        );
+      } else if (currentHasDivisionLevel) {
+        // Current navigation already has division, build upon it
+        final existingStack = List<DrilldownLevel>.from(state.navigationStack);
+        // Remove any existing district/lower levels and add new district and upazila
+        existingStack.removeWhere(
+          (level) => level.level.index >= GeographicLevel.district.index,
+        );
+        newNavigationStack = [...existingStack, districtNavLevel, upazilaNavLevel];
+        logg.i("Built upon existing division navigation hierarchy for upazila");
+      } else {
+        // No division context, start fresh with district and upazila
+        newNavigationStack = [districtNavLevel, upazilaNavLevel];
+        logg.i("Starting fresh navigation with district and upazila");
+      }
+
       _unfilteredCoverageData = coverageData;
       final filteredData = VaccineDataCalculator.recalculateCoverageData(
         coverageData,
@@ -882,7 +948,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: filteredData,
         currentLevel: GeographicLevel.upazila,
-        navigationStack: [], // Reset navigation for filter-based loading
+        navigationStack: newNavigationStack,
         currentAreaName: upazilaName,
         isLoading: false,
         clearError: true,

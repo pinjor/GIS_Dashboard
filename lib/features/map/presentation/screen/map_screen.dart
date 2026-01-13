@@ -611,10 +611,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         final bool allCityCorporationsView =
             current.selectedAreaType == AreaType.cityCorporation &&
             current.selectedCityCorporation == null;
+        // ✅ FIX: Check that all hierarchical selections are cleared for country reset
         final bool shouldResetToCountry =
             current.selectedAreaType == AreaType.district &&
             current.selectedDivision == 'All' &&
-            current.selectedDistrict == null;
+            current.selectedDistrict == null &&
+            current.selectedUpazila == null &&
+            current.selectedUnion == null &&
+            current.selectedWard == null &&
+            current.selectedSubblock == null;
 
         // Load data based on deepest selection (hierarchical priority)
         if (wardFilterApplied) {
@@ -637,11 +642,47 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           });
         } else if (upazilaFilterApplied) {
           logg.i("Upazila filter applied: ${current.selectedUpazila}");
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
             if (mounted) {
-              ref
-                  .read(mapControllerProvider.notifier)
-                  .loadUpazilaData(upazilaName: current.selectedUpazila!);
+              // ✅ FIX: Wait for upazilas to be loaded before calling loadUpazilaData
+              // This prevents race condition where loadUpazilaData is called before
+              // upazilas list is populated in filter controller
+              final upazilaName = current.selectedUpazila!;
+              
+              // Check if upazilas are already loaded
+              var currentFilterState = ref.read(filterControllerProvider);
+              if (currentFilterState.upazilas.isEmpty) {
+                logg.i("Upazilas not loaded yet, waiting for them to load...");
+                
+                // Wait for upazilas to load (max 3 seconds, check every 100ms)
+                int retries = 0;
+                const maxRetries = 30; // 30 * 100ms = 3 seconds
+                
+                while (retries < maxRetries && mounted) {
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  currentFilterState = ref.read(filterControllerProvider);
+                  
+                  if (currentFilterState.upazilas.isNotEmpty) {
+                    logg.i("Upazilas loaded (${currentFilterState.upazilas.length} items), proceeding with loadUpazilaData");
+                    break;
+                  }
+                  
+                  retries++;
+                }
+                
+                if (currentFilterState.upazilas.isEmpty) {
+                  logg.w("Upazilas still not loaded after waiting, attempting to load anyway");
+                }
+              } else {
+                logg.i("Upazilas already loaded (${currentFilterState.upazilas.length} items), proceeding immediately");
+              }
+              
+              // Now call loadUpazilaData with the upazila name
+              if (mounted) {
+                ref
+                    .read(mapControllerProvider.notifier)
+                    .loadUpazilaData(upazilaName: upazilaName);
+              }
             }
           });
         } else if (districtFilterApplied) {

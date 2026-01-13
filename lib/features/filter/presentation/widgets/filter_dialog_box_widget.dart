@@ -148,74 +148,60 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _initialDistrict = _selectedDistrict;
     _initialCityCorporation = null;
 
-    // Initialize extended hierarchical selections (for EPI details screen)
-    if (widget.isEpiContext) {
-      // For EPI context, properly validate hierarchical selections
-      final availableUpazilas = filterNotifier.upazilaDropdownItems;
-      if (currentFilter.selectedUpazila != null &&
-          availableUpazilas.contains(currentFilter.selectedUpazila)) {
-        _selectedUpazila = currentFilter.selectedUpazila;
-      } else {
-        _selectedUpazila = null;
-      }
-
-      final availableUnions = filterNotifier.unionDropdownItems;
-      if (currentFilter.selectedUnion != null &&
-          availableUnions.contains(currentFilter.selectedUnion)) {
-        _selectedUnion = currentFilter.selectedUnion;
-      } else {
-        _selectedUnion = null;
-      }
-
-      final availableWards = filterNotifier.wardDropdownItems;
-      if (currentFilter.selectedWard != null &&
-          availableWards.contains(currentFilter.selectedWard)) {
-        _selectedWard = currentFilter.selectedWard;
-      } else {
-        _selectedWard = null;
-      }
-
-      final availableSubblocks = filterNotifier.subblockDropdownItems;
-      if (currentFilter.selectedSubblock != null &&
-          availableSubblocks.contains(currentFilter.selectedSubblock)) {
-        _selectedSubblock = currentFilter.selectedSubblock;
-      } else {
-        _selectedSubblock = null;
-      }
-
-      // Store initial hierarchical values - NEVER update these during dialog lifetime
-      _initialUpazila = _selectedUpazila;
-      _initialUnion = _selectedUnion;
-      _initialWard = _selectedWard;
-      _initialSubblock = _selectedSubblock;
-
-      logg.i('🔧 EPI Filter Dialog: Initial hierarchical values stored');
-      logg.i('   Initial Upazila: $_initialUpazila');
-      logg.i('   Initial Union: $_initialUnion');
-      logg.i('   Initial Ward: $_initialWard');
-      logg.i('   Initial Subblock: $_initialSubblock');
-
-      // Debug log all initial values for comparison
-      logg.i('🔍 All Initial Values Captured:');
-      logg.i('   _initialAreaType: $_initialAreaType');
-      logg.i('   _initialVaccine: $_initialVaccine');
-      logg.i('   _initialYear: $_initialYear');
-      logg.i('   _initialDivision: $_initialDivision');
-      logg.i('   _initialDistrict: $_initialDistrict');
-      logg.i('   _initialCityCorporation: $_initialCityCorporation');
+    // Initialize extended hierarchical selections (for both EPI context and main screen filtering)
+    // ✅ FIX: Allow hierarchical selections in non-EPI context for upazila-level filtering
+    final availableUpazilas = filterNotifier.upazilaDropdownItems;
+    if (currentFilter.selectedUpazila != null &&
+        availableUpazilas.contains(currentFilter.selectedUpazila)) {
+      _selectedUpazila = currentFilter.selectedUpazila;
     } else {
-      // For normal context, clear hierarchical selections
       _selectedUpazila = null;
-      _selectedUnion = null;
-      _selectedWard = null;
-      _selectedSubblock = null;
-
-      // Store initial hierarchical values as null for normal context
-      _initialUpazila = null;
-      _initialUnion = null;
-      _initialWard = null;
-      _initialSubblock = null;
     }
+
+    final availableUnions = filterNotifier.unionDropdownItems;
+    if (currentFilter.selectedUnion != null &&
+        availableUnions.contains(currentFilter.selectedUnion)) {
+      _selectedUnion = currentFilter.selectedUnion;
+    } else {
+      _selectedUnion = null;
+    }
+
+    final availableWards = filterNotifier.wardDropdownItems;
+    if (currentFilter.selectedWard != null &&
+        availableWards.contains(currentFilter.selectedWard)) {
+      _selectedWard = currentFilter.selectedWard;
+    } else {
+      _selectedWard = null;
+    }
+
+    final availableSubblocks = filterNotifier.subblockDropdownItems;
+    if (currentFilter.selectedSubblock != null &&
+        availableSubblocks.contains(currentFilter.selectedSubblock)) {
+      _selectedSubblock = currentFilter.selectedSubblock;
+    } else {
+      _selectedSubblock = null;
+    }
+
+    // Store initial hierarchical values - NEVER update these during dialog lifetime
+    _initialUpazila = _selectedUpazila;
+    _initialUnion = _selectedUnion;
+    _initialWard = _selectedWard;
+    _initialSubblock = _selectedSubblock;
+
+    logg.i('🔧 Filter Dialog: Initial hierarchical values stored');
+    logg.i('   Initial Upazila: $_initialUpazila');
+    logg.i('   Initial Union: $_initialUnion');
+    logg.i('   Initial Ward: $_initialWard');
+    logg.i('   Initial Subblock: $_initialSubblock');
+
+    // Debug log all initial values for comparison
+    logg.i('🔍 All Initial Values Captured:');
+    logg.i('   _initialAreaType: $_initialAreaType');
+    logg.i('   _initialVaccine: $_initialVaccine');
+    logg.i('   _initialYear: $_initialYear');
+    logg.i('   _initialDivision: $_initialDivision');
+    logg.i('   _initialDistrict: $_initialDistrict');
+    logg.i('   _initialCityCorporation: $_initialCityCorporation');
 
     // Clear city corporation selection for district area type any way
     _selectedCityCorporation = null;
@@ -534,16 +520,17 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       zone: _selectedAreaType == AreaType.cityCorporation
           ? _selectedZone
           : null,
-      upazila: _selectedAreaType == AreaType.district && isEpiContext
+      // ✅ FIX: Allow hierarchical filtering in non-EPI context (for upazila-level map/summary filtering)
+      upazila: _selectedAreaType == AreaType.district
           ? _selectedUpazila
           : null,
-      union: _selectedAreaType == AreaType.district && isEpiContext
+      union: _selectedAreaType == AreaType.district
           ? _selectedUnion
           : null,
-      ward: _selectedAreaType == AreaType.district && isEpiContext
+      ward: _selectedAreaType == AreaType.district
           ? _selectedWard
           : null,
-      subblock: _selectedAreaType == AreaType.district && isEpiContext
+      subblock: _selectedAreaType == AreaType.district
           ? _selectedSubblock
           : null,
       months: !isEpiContext ? _selectedMonths : null, // Pass selected months
@@ -670,33 +657,31 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
           _selectedDistrict = null;
         }
 
-        // Validate hierarchical selections (for EPI context)
-        if (widget.isEpiContext) {
-          // Validate upazila selection
-          if (_selectedUpazila != null &&
-              !filterNotifier.upazilaDropdownItems.contains(_selectedUpazila)) {
-            _selectedUpazila = null;
-          }
+        // ✅ FIX: Validate hierarchical selections for both EPI context and main screen filtering
+        // Validate upazila selection
+        if (_selectedUpazila != null &&
+            !filterNotifier.upazilaDropdownItems.contains(_selectedUpazila)) {
+          _selectedUpazila = null;
+        }
 
-          // Validate union selection
-          if (_selectedUnion != null &&
-              !filterNotifier.unionDropdownItems.contains(_selectedUnion)) {
-            _selectedUnion = null;
-          }
+        // Validate union selection
+        if (_selectedUnion != null &&
+            !filterNotifier.unionDropdownItems.contains(_selectedUnion)) {
+          _selectedUnion = null;
+        }
 
-          // Validate ward selection
-          if (_selectedWard != null &&
-              !filterNotifier.wardDropdownItems.contains(_selectedWard)) {
-            _selectedWard = null;
-          }
+        // Validate ward selection
+        if (_selectedWard != null &&
+            !filterNotifier.wardDropdownItems.contains(_selectedWard)) {
+          _selectedWard = null;
+        }
 
-          // Validate subblock selection
-          if (_selectedSubblock != null &&
-              !filterNotifier.subblockDropdownItems.contains(
-                _selectedSubblock,
-              )) {
-            _selectedSubblock = null;
-          }
+        // Validate subblock selection
+        if (_selectedSubblock != null &&
+            !filterNotifier.subblockDropdownItems.contains(
+              _selectedSubblock,
+            )) {
+          _selectedSubblock = null;
         }
       });
     });
