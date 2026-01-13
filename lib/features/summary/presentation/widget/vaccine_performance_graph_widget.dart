@@ -9,8 +9,19 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/common/constants/constants.dart';
 
-class VaccinePerformanceGraphWidget extends ConsumerWidget {
+class VaccinePerformanceGraphWidget extends ConsumerStatefulWidget {
   const VaccinePerformanceGraphWidget({super.key});
+
+  @override
+  ConsumerState<VaccinePerformanceGraphWidget> createState() =>
+      _VaccinePerformanceGraphWidgetState();
+}
+
+class _VaccinePerformanceGraphWidgetState
+    extends ConsumerState<VaccinePerformanceGraphWidget> {
+  // Track visibility of each series
+  bool _isMonthlyTargetVisible = true;
+  bool _isVaccineVisible = true;
 
   String _getFormattedAreaName(String area) {
     // Bogura (Part ..) should return just: Bogura
@@ -23,8 +34,59 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
     return formatter.format(value.toInt());
   }
 
+  // Calculate dynamic maxY based on data values
+  double _calculateMaxY(List<double> allValues) {
+    if (allValues.isEmpty) {
+      return 100000.0; // Default fallback
+    }
+
+    // Find maximum value
+    final maxValue = allValues.reduce((a, b) => a > b ? a : b);
+
+    // If all values are zero or very small, use minimum scale
+    if (maxValue <= 0) {
+      return 10000.0;
+    }
+
+    // Add 15% padding above max value
+    final paddedMax = maxValue * 1.15;
+
+    // Round to nice number based on magnitude
+    if (paddedMax < 10000) {
+      // For values < 10K, round to nearest 1K
+      return (paddedMax / 1000).ceil() * 1000.0;
+    } else if (paddedMax < 100000) {
+      // For values < 100K, round to nearest 10K
+      return (paddedMax / 10000).ceil() * 10000.0;
+    } else if (paddedMax < 500000) {
+      // For values < 500K, round to nearest 50K
+      return (paddedMax / 50000).ceil() * 50000.0;
+    } else if (paddedMax < 1000000) {
+      // For values < 1M, round to nearest 100K
+      return (paddedMax / 100000).ceil() * 100000.0;
+    } else {
+      // For values >= 1M, round to nearest 200K
+      return (paddedMax / 200000).ceil() * 200000.0;
+    }
+  }
+
+  // Calculate dynamic interval based on maxY
+  double _calculateInterval(double maxY) {
+    if (maxY < 10000) {
+      return 1000.0; // 1K intervals for small values
+    } else if (maxY < 100000) {
+      return 10000.0; // 10K intervals
+    } else if (maxY < 500000) {
+      return 50000.0; // 50K intervals
+    } else if (maxY < 1000000) {
+      return 100000.0; // 100K intervals
+    } else {
+      return 200000.0; // 200K intervals for large values
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final summaryState = ref.watch(summaryControllerProvider);
     final filterState = ref.watch(filterControllerProvider);
 
@@ -89,23 +151,23 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
       );
     }
 
-    // Find BCG vaccine specifically from the coverage data
+    // Find selected vaccine from the coverage data based on filter
     final vaccines = summaryState.coverageData?.vaccines ?? [];
 
-    final bcgVaccine = vaccines.isNotEmpty
+    final selectedVaccine = vaccines.isNotEmpty
         ? vaccines.firstWhere(
-            (vaccine) => vaccine.vaccineUid == VaccineType.bcg.uid,
+            (vaccine) => vaccine.vaccineUid == filterState.selectedVaccine,
             orElse: () {
-              // If BCG not found, try to use first available vaccine
+              // If selected vaccine not found, try to use first available vaccine
               logg.w(
-                'BCG vaccine (by UID) not found, returning first available vaccine.',
+                'Selected vaccine (by UID) not found, returning first available vaccine.',
               );
               return vaccines.first;
             },
           )
         : null;
 
-    if (bcgVaccine == null) {
+    if (selectedVaccine == null) {
       return Card(
         color: Color(Constants.cardColor),
         elevation: 1,
@@ -126,7 +188,7 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
                 height: 200,
                 child: Center(
                   child: Text(
-                    'BCG vaccine data not available',
+                    'Vaccine data not available',
                     style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ),
@@ -137,8 +199,8 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
       );
     }
 
-    // Get total target for calculating monthly targets - use BCG's target
-    final totalTarget = bcgVaccine.totalTarget ?? 0;
+    // Get total target for calculating monthly targets - use selected vaccine's target
+    final totalTarget = selectedVaccine.totalTarget ?? 0;
     final monthlyTargetPerMonth = totalTarget > 0 ? (totalTarget / 12) : 0.0;
 
     // Extract monthly coverage data and calculate monthly targets
@@ -147,9 +209,9 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
     List<double> allValues = [];
 
     // Show only 11 months (Jan to Nov) as per the reference image
-    // Use BCG's monthly coverage data
-    if (bcgVaccine.monthWiseTotalCoverages != null) {
-      final monthlyData = bcgVaccine.monthWiseTotalCoverages!;
+    // Use selected vaccine's monthly coverage data
+    if (selectedVaccine.monthWiseTotalCoverages != null) {
+      final monthlyData = selectedVaccine.monthWiseTotalCoverages!;
 
       for (int month = 1; month <= 11; month++) {
         final monthData = monthlyData[month.toString()];
@@ -178,32 +240,33 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
       }
     }
 
-    // Always use 1,400,000 as max Y value to match reference image exactly
-    // This prevents points from going off screen
-    const double maxY = 1400000.0;
+    // Calculate dynamic maxY based on actual data values
+    final maxY = _calculateMaxY(allValues);
+    final horizontalInterval = _calculateInterval(maxY);
 
-    // Ensure spots don't contain invalid values and clamp to maxY
+    // Ensure spots don't contain invalid values (remove clamping to show all data)
     coverageSpots = coverageSpots.map((spot) {
       if (!spot.y.isFinite || spot.y.isNaN) {
         return FlSpot(spot.x, 0.0);
       }
-      // Clamp values to maxY to prevent overflow
-      final clampedY = spot.y > maxY ? maxY : spot.y;
-      return FlSpot(spot.x, clampedY);
+      // No clamping - show actual values
+      return FlSpot(spot.x, spot.y);
     }).toList();
 
     targetSpots = targetSpots.map((spot) {
       if (!spot.y.isFinite || spot.y.isNaN) {
         return FlSpot(spot.x, 0.0);
       }
-      // Clamp values to maxY to prevent overflow
-      final clampedY = spot.y > maxY ? maxY : spot.y;
-      return FlSpot(spot.x, clampedY);
+      // No clamping - show actual values
+      return FlSpot(spot.x, spot.y);
     }).toList();
 
     // Get dynamic vaccine name from filter selection
-    final selectedVaccineType = VaccineType.fromUid(filterState.selectedVaccine);
-    final vaccineName = selectedVaccineType?.displayName ?? VaccineType.bcg.displayName;
+    final selectedVaccineType = VaccineType.fromUid(
+      filterState.selectedVaccine,
+    );
+    final vaccineName =
+        selectedVaccineType?.displayName ?? VaccineType.bcg.displayName;
 
     // Safety check: ensure we have valid spots
     if (coverageSpots.isEmpty || targetSpots.isEmpty) {
@@ -241,10 +304,10 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
     // Debug: Log data points
     logg.i('''
 📊 GRAPH DEBUG:
-Vaccine: ${bcgVaccine.vaccineName}
-Total Target: ${bcgVaccine.totalTarget}
-MonthWise Data Present: ${bcgVaccine.monthWiseTotalCoverages != null}
-MonthWise Keys: ${bcgVaccine.monthWiseTotalCoverages?.keys.toList()}
+Vaccine: ${selectedVaccine.vaccineName}
+Total Target: ${selectedVaccine.totalTarget}
+MonthWise Data Present: ${selectedVaccine.monthWiseTotalCoverages != null}
+MonthWise Keys: ${selectedVaccine.monthWiseTotalCoverages?.keys.toList()}
 Coverage Spots: ${coverageSpots.length}
 Target Spots: ${targetSpots.length}
 First Spot: ${coverageSpots.isNotEmpty ? '(${coverageSpots.first.x}, ${coverageSpots.first.y})' : 'N/A'}
@@ -271,64 +334,128 @@ Last Spot: ${coverageSpots.isNotEmpty ? '(${coverageSpots.last.x}, ${coverageSpo
             ),
             const SizedBox(height: 16),
 
-            // Legend
+            // Interactive Legend with clickable items
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Monthly Target legend item
-                Row(
-                  children: [
-                    Container(
-                      width: 20,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(1),
-                      ),
-                      child: CustomPaint(
-                        painter: _DashedLinePainter(Colors.red),
-                      ),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isMonthlyTargetVisible = !_isMonthlyTargetVisible;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(1),
+                    decoration: BoxDecoration(
+                      color: _isMonthlyTargetVisible
+                          ? Colors.transparent
+                          : Colors.grey.shade200,
+                      border: Border.all(
+                        color: _isMonthlyTargetVisible
+                            ? Colors.grey.shade300
+                            : Colors.grey.shade400,
+                        width: 1,
                       ),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'Monthly Target',
-                      style: TextStyle(fontSize: 12, color: Colors.black87),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Rectangular color indicator (24x12) with dashed pattern
+                        Container(
+                          width: 24,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: _isMonthlyTargetVisible
+                                ? Colors.red
+                                : Colors.grey.shade400,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: CustomPaint(
+                            painter: _LegendRectanglePainter(
+                              _isMonthlyTargetVisible
+                                  ? Colors.red
+                                  : Colors.grey.shade400,
+                              true,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Monthly Target',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: _isMonthlyTargetVisible
+                                    ? null
+                                    : Colors.grey.shade600,
+                                decoration: _isMonthlyTargetVisible
+                                    ? null
+                                    : TextDecoration.lineThrough,
+                              ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-                const SizedBox(width: 24),
+                const SizedBox(width: 16),
                 // Actual Coverage legend item
-                Row(
-                  children: [
-                    Container(width: 20, height: 3, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.blue,
-                        shape: BoxShape.circle,
-                      ),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isVaccineVisible = !_isVaccineVisible;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      vaccineName,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black87,
+                    decoration: BoxDecoration(
+                      color: _isVaccineVisible
+                          ? Colors.transparent
+                          : Colors.grey.shade200,
+                      border: Border.all(
+                        color: _isVaccineVisible
+                            ? Colors.grey.shade300
+                            : Colors.grey.shade400,
+                        width: 1,
                       ),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Rectangular color indicator (24x12) with solid color
+                        Container(
+                          width: 24,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: _isVaccineVisible
+                                ? Colors.blue
+                                : Colors.grey.shade400,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          vaccineName,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: _isVaccineVisible
+                                    ? null
+                                    : Colors.grey.shade600,
+                                decoration: _isVaccineVisible
+                                    ? null
+                                    : TextDecoration.lineThrough,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -360,133 +487,149 @@ Last Spot: ${coverageSpots.isNotEmpty ? '(${coverageSpots.last.x}, ${coverageSpo
                 Expanded(
                   child: SizedBox(
                     height: 300,
-                    child: ClipRect(
-                      child: LineChart(
-                        LineChartData(
-                          clipData: FlClipData.all(),
-                          borderData: FlBorderData(show: true),
-                          gridData: FlGridData(
-                            show: true,
-                            drawVerticalLine: false,
-                            horizontalInterval: 200000,
-                          ),
-                          maxY: maxY,
-                          minY: 0,
-                          titlesData: FlTitlesData(
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 80,
-                                getTitlesWidget: (value, _) {
-                                  // Don't show label for maxY to prevent overlap
-                                  if (value >= maxY) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: Text(
-                                      _formatYAxisLabel(value),
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                interval: 200000,
-                              ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ClipRect(
+                        child: LineChart(
+                          LineChartData(
+                            clipData: FlClipData.all(),
+                            borderData: FlBorderData(show: true),
+                            gridData: FlGridData(
+                              show: true,
+                              drawVerticalLine: false,
+                              horizontalInterval: horizontalInterval,
                             ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 40,
-                                getTitlesWidget: (value, _) {
-                                  const months = [
-                                    'Jan',
-                                    'Feb',
-                                    'Mar',
-                                    'Apr',
-                                    'May',
-                                    'Jun',
-                                    'Jul',
-                                    'Aug',
-                                    'Sep',
-                                    'Oct',
-                                    'Nov',
-                                  ];
-                                  final monthIndex = value.toInt();
-                                  // Show only every other month: Jan, Mar, May, Jul, Sep, Nov (0, 2, 4, 6, 8, 10)
-                                  if (monthIndex >= 0 &&
-                                      monthIndex < months.length) {
-                                    if (monthIndex == 0 ||
-                                        monthIndex == 2 ||
-                                        monthIndex == 4 ||
-                                        monthIndex == 6 ||
-                                        monthIndex == 8 ||
-                                        monthIndex == 10) {
-                                      return Text(
-                                        months[monthIndex],
+                            maxY: maxY,
+                            minY: 0,
+                            titlesData: FlTitlesData(
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 80,
+                                  getTitlesWidget: (value, _) {
+                                    // Don't show label for maxY to prevent overlap
+                                    if (value >= maxY) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 8.0,
+                                      ),
+                                      child: Text(
+                                        _formatYAxisLabel(value),
                                         style: const TextStyle(
                                           fontSize: 10,
                                           color: Colors.black87,
                                         ),
-                                      );
+                                      ),
+                                    );
+                                  },
+                                  interval: horizontalInterval,
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 60,
+                                  getTitlesWidget: (value, _) {
+                                    const months = [
+                                      'Jan',
+                                      'Feb',
+                                      'Mar',
+                                      'Apr',
+                                      'May',
+                                      'Jun',
+                                      'Jul',
+                                      'Aug',
+                                      'Sep',
+                                      'Oct',
+                                      'Nov',
+                                    ];
+                                    final monthIndex = value.toInt();
+                                    // Show only every other month: Jan, Mar, May, Jul, Sep, Nov (0, 2, 4, 6, 8, 10)
+                                    if (monthIndex >= 0 &&
+                                        monthIndex < months.length) {
+                                      if (monthIndex == 0 ||
+                                          monthIndex == 2 ||
+                                          monthIndex == 4 ||
+                                          monthIndex == 6 ||
+                                          monthIndex == 8 ||
+                                          monthIndex == 10) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            top: 4.0,
+                                            right: monthIndex == 10 ? 4.0 : 0.0,
+                                          ),
+                                          child: Text(
+                                            months[monthIndex],
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.black87,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        );
+                                      }
                                     }
-                                  }
-                                  return const Text('');
-                                },
-                                interval: 1,
+                                    return const SizedBox.shrink();
+                                  },
+                                  interval: 1,
+                                ),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
                               ),
                             ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
+                            lineBarsData: [
+                              // Monthly Target line (red, dotted, square markers) - conditionally visible
+                              if (_isMonthlyTargetVisible)
+                                LineChartBarData(
+                                  spots: targetSpots,
+                                  isCurved: false,
+                                  barWidth: 2.5,
+                                  color: Colors.red,
+                                  dotData: FlDotData(
+                                    show: true,
+                                    getDotPainter:
+                                        (spot, percent, barData, index) {
+                                          return _SquareDotPainter(
+                                            radius: 5,
+                                            color: Colors.red,
+                                            strokeWidth: 2,
+                                          );
+                                        },
+                                  ),
+                                  dashArray: [8, 4],
+                                  belowBarData: BarAreaData(show: false),
+                                ),
+                              // Actual Coverage line (blue, solid, circular markers) - CURVED - conditionally visible
+                              if (_isVaccineVisible)
+                                LineChartBarData(
+                                  spots: coverageSpots,
+                                  isCurved: true,
+                                  curveSmoothness: 0.35,
+                                  barWidth: 2.5,
+                                  color: Colors.blue,
+                                  dotData: FlDotData(
+                                    show: true,
+                                    getDotPainter:
+                                        (spot, percent, barData, index) {
+                                          return _CircleDotPainter(
+                                            radius: 5,
+                                            color: Colors.blue,
+                                            strokeWidth: 2,
+                                          );
+                                        },
+                                  ),
+                                  preventCurveOverShooting: true,
+                                  preventCurveOvershootingThreshold: 0.1,
+                                  belowBarData: BarAreaData(show: false),
+                                ),
+                            ],
                           ),
-                          lineBarsData: [
-                            // Monthly Target line (red, dotted, square markers)
-                            LineChartBarData(
-                              spots: targetSpots,
-                              isCurved: false,
-                              barWidth: 2.5,
-                              color: Colors.red,
-                              dotData: FlDotData(
-                                show: true,
-                                getDotPainter: (spot, percent, barData, index) {
-                                  return _SquareDotPainter(
-                                    radius: 5,
-                                    color: Colors.red,
-                                    strokeWidth: 2,
-                                  );
-                                },
-                              ),
-                              dashArray: [8, 4],
-                              belowBarData: BarAreaData(show: false),
-                            ),
-                            // Actual Coverage line (blue, solid, circular markers) - CURVED
-                            LineChartBarData(
-                              spots: coverageSpots,
-                              isCurved: true,
-                              curveSmoothness: 0.35,
-                              barWidth: 2.5,
-                              color: Colors.blue,
-                              dotData: FlDotData(
-                                show: true,
-                                getDotPainter: (spot, percent, barData, index) {
-                                  return _CircleDotPainter(
-                                    radius: 5,
-                                    color: Colors.blue,
-                                    strokeWidth: 2,
-                                  );
-                                },
-                              ),
-                              preventCurveOverShooting: true,
-                              preventCurveOvershootingThreshold: 0.1,
-                              belowBarData: BarAreaData(show: false),
-                            ),
-                          ],
                         ),
                       ),
                     ),
@@ -501,19 +644,22 @@ Last Spot: ${coverageSpots.isNotEmpty ? '(${coverageSpots.last.x}, ${coverageSpo
   }
 }
 
-// Custom painter for dashed line in legend
-class _DashedLinePainter extends CustomPainter {
+// Custom painter for dashed rectangle in legend (for Monthly Target)
+class _LegendRectanglePainter extends CustomPainter {
   final Color color;
+  final bool dashed;
 
-  _DashedLinePainter(this.color);
+  _LegendRectanglePainter(this.color, this.dashed);
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (!dashed) return; // Only paint for dashed patterns
+
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+      ..strokeWidth = 1.5;
 
+    // Draw dashed pattern across the rectangle
     const dashWidth = 3.0;
     const dashSpace = 2.0;
     double startX = 0;
