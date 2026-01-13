@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/summary/presentation/controllers/summary_controller.dart';
+import 'package:gis_dashboard/features/filter/presentation/controllers/filter_controller.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/common/constants/constants.dart';
@@ -25,6 +26,7 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryState = ref.watch(summaryControllerProvider);
+    final filterState = ref.watch(filterControllerProvider);
 
     // Show loading or error state
     if (summaryState.isLoading) {
@@ -199,8 +201,9 @@ class VaccinePerformanceGraphWidget extends ConsumerWidget {
       return FlSpot(spot.x, clampedY);
     }).toList();
 
-    // Always show "BCG" in legend to match reference image
-    final vaccineName = VaccineType.bcg.displayName;
+    // Get dynamic vaccine name from filter selection
+    final selectedVaccineType = VaccineType.fromUid(filterState.selectedVaccine);
+    final vaccineName = selectedVaccineType?.displayName ?? VaccineType.bcg.displayName;
 
     // Safety check: ensure we have valid spots
     if (coverageSpots.isEmpty || targetSpots.isEmpty) {
