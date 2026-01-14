@@ -588,12 +588,37 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             current.selectedDistrict == null &&
             current.selectedUpazila == null;
 
+        // ✅ FIX: Log warnings when union/ward is selected but parent levels are missing
+        if (current.selectedUnion != null &&
+            (current.selectedDistrict == null || current.selectedUpazila == null)) {
+          logg.w(
+            "⚠️ Union filter selected but parent levels missing: "
+            "district=${current.selectedDistrict}, upazila=${current.selectedUpazila}",
+          );
+        }
+        if (current.selectedWard != null &&
+            (current.selectedDistrict == null ||
+                current.selectedUpazila == null ||
+                current.selectedUnion == null)) {
+          logg.w(
+            "⚠️ Ward filter selected but parent levels missing: "
+            "district=${current.selectedDistrict}, upazila=${current.selectedUpazila}, union=${current.selectedUnion}",
+          );
+        }
+
         // Detect deepest hierarchical selection for District area type
+        // ✅ FIX: Validate parent levels are set for ward filter
         final bool wardFilterApplied =
             current.selectedAreaType == AreaType.district &&
+            current.selectedDistrict != null &&
+            current.selectedUpazila != null &&
+            current.selectedUnion != null &&
             current.selectedWard != null;
+        // ✅ FIX: Validate parent levels are set for union filter
         final bool unionFilterApplied =
             current.selectedAreaType == AreaType.district &&
+            current.selectedDistrict != null &&
+            current.selectedUpazila != null &&
             current.selectedUnion != null &&
             current.selectedWard == null;
         final bool upazilaFilterApplied =
@@ -624,20 +649,302 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Load data based on deepest selection (hierarchical priority)
         if (wardFilterApplied) {
           logg.i("Ward filter applied: ${current.selectedWard}");
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
             if (mounted) {
-              ref
-                  .read(mapControllerProvider.notifier)
-                  .loadWardData(wardName: current.selectedWard!);
+              // ✅ FIX: Wait for wards to be loaded before calling loadWardData
+              // This prevents race condition where loadWardData is called before
+              // wards list is populated in filter controller
+              final wardName = current.selectedWard!;
+              
+              // Check if wards are already loaded
+              var currentFilterState = ref.read(filterControllerProvider);
+              if (currentFilterState.wards.isEmpty) {
+                logg.i("Wards not loaded yet, attempting to load them...");
+                
+                // ✅ FIX: Proactively load wards if they're empty
+                // This happens when ward filter is applied but wards weren't loaded yet
+                final selectedUnion = currentFilterState.selectedUnion;
+                if (selectedUnion != null && selectedUnion != 'All') {
+                  final filterNotifier = ref.read(filterControllerProvider.notifier);
+                  
+                  // ✅ FIX: Wait for unions to be loaded before getting union UID
+                  if (currentFilterState.unions.isEmpty) {
+                    logg.i("Unions not loaded yet, attempting to load them...");
+                    
+                    // Try to load unions if upazila is selected
+                    final selectedUpazila = currentFilterState.selectedUpazila;
+                    if (selectedUpazila != null && selectedUpazila != 'All') {
+                      final upazilaUid = filterNotifier.getUpazilaUid(selectedUpazila);
+                      if (upazilaUid != null) {
+                        logg.i("Loading unions for upazila: $selectedUpazila (UID: $upazilaUid)");
+                        await filterNotifier.loadUnionsByUpazila(upazilaUid);
+                        // Refresh state after loading
+                        currentFilterState = ref.read(filterControllerProvider);
+                      } else {
+                        logg.w("Could not get upazila UID for $selectedUpazila to load unions");
+                      }
+                    }
+                    
+                    // Wait for unions to load (max 3 seconds, check every 100ms)
+                    int unionRetries = 0;
+                    const maxUnionRetries = 30; // 30 * 100ms = 3 seconds
+                    
+                    while (unionRetries < maxUnionRetries && mounted && currentFilterState.unions.isEmpty) {
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      currentFilterState = ref.read(filterControllerProvider);
+                      
+                      if (currentFilterState.unions.isNotEmpty) {
+                        logg.i("Unions loaded (${currentFilterState.unions.length} items), proceeding with ward loading");
+                        break;
+                      }
+                      
+                      unionRetries++;
+                    }
+                    
+                    if (currentFilterState.unions.isEmpty) {
+                      logg.w("Unions still not loaded after waiting, attempting to load wards anyway");
+                    }
+                  }
+                  
+                  // Now try to get union UID
+                  final unionUid = filterNotifier.getUnionUid(selectedUnion);
+                  if (unionUid != null) {
+                    logg.i("Loading wards for union: $selectedUnion (UID: $unionUid)");
+                    await filterNotifier.loadWardsByUnion(unionUid);
+                    // Refresh state after loading
+                    currentFilterState = ref.read(filterControllerProvider);
+                  } else {
+                    logg.w(
+                      "Could not get union UID for $selectedUnion to load wards. "
+                      "Available unions: ${currentFilterState.unions.map((u) => u.name).toList()}",
+                    );
+                  }
+                }
+                
+                // Wait for wards to load (max 5 seconds, check every 100ms)
+                int retries = 0;
+                const maxRetries = 50; // 50 * 100ms = 5 seconds (increased timeout)
+                
+                while (retries < maxRetries && mounted && currentFilterState.wards.isEmpty) {
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  currentFilterState = ref.read(filterControllerProvider);
+                  
+                  if (currentFilterState.wards.isNotEmpty) {
+                    logg.i("Wards loaded (${currentFilterState.wards.length} items), proceeding with loadWardData");
+                    break;
+                  }
+                  
+                  retries++;
+                  
+                  // Log progress every second
+                  if (retries % 10 == 0) {
+                    logg.i("Still waiting for wards to load... (${retries * 100}ms elapsed, union: $selectedUnion)");
+                  }
+                }
+                
+                if (currentFilterState.wards.isEmpty) {
+                  logg.e(
+                    "Wards still not loaded after waiting ${retries * 100}ms. "
+                    "Union: $selectedUnion, Available unions: ${currentFilterState.unions.map((u) => u.name).toList()}",
+                  );
+                  
+                  // Try one more time to load wards if union UID is available
+                  if (selectedUnion != null && selectedUnion != 'All' && mounted) {
+                    final filterNotifier = ref.read(filterControllerProvider.notifier);
+                    final unionUid = filterNotifier.getUnionUid(selectedUnion);
+                    if (unionUid != null) {
+                      logg.i("Retrying ward loading with union UID: $unionUid");
+                      await filterNotifier.loadWardsByUnion(unionUid);
+                      currentFilterState = ref.read(filterControllerProvider);
+                      
+                      // Wait a bit more after retry
+                      if (currentFilterState.wards.isEmpty) {
+                        await Future.delayed(const Duration(milliseconds: 500));
+                        currentFilterState = ref.read(filterControllerProvider);
+                      }
+                    } else {
+                      logg.w("Could not get union UID for retry: $selectedUnion");
+                    }
+                  }
+                }
+              } else {
+                logg.i("Wards already loaded (${currentFilterState.wards.length} items), proceeding immediately");
+              }
+              
+              // ✅ FIX: Only try to load ward data if wards are loaded
+              if (mounted) {
+                // Final check - refresh state one more time
+                currentFilterState = ref.read(filterControllerProvider);
+                
+                if (currentFilterState.wards.isEmpty) {
+                  logg.e(
+                    "Cannot load ward data: Wards list is still empty after all retries. "
+                    "Ward: $wardName, Union: ${currentFilterState.selectedUnion}, "
+                    "Available unions: ${currentFilterState.unions.map((u) => u.name).toList()}",
+                  );
+                  return; // Don't proceed if wards aren't loaded
+                }
+                
+                // Check if ward exists with fuzzy matching (handles name variations)
+                final wardExists = currentFilterState.wards.any(
+                  (ward) {
+                    final normalizedWardName = ward.name?.trim() ?? '';
+                    final normalizedSearchName = wardName.trim();
+                    // Exact match
+                    if (normalizedWardName == normalizedSearchName) return true;
+                    // Case-insensitive match
+                    if (normalizedWardName.toLowerCase() == normalizedSearchName.toLowerCase()) return true;
+                    // Partial match (for names with "(Part ...)" suffix)
+                    final wardBaseName = normalizedWardName.split(' (')[0].trim();
+                    final searchBaseName = normalizedSearchName.split(' (')[0].trim();
+                    if (wardBaseName.toLowerCase() == searchBaseName.toLowerCase()) return true;
+                    return false;
+                  },
+                );
+                
+                if (!wardExists && currentFilterState.wards.isNotEmpty) {
+                  logg.w(
+                    "⚠️ Ward '$wardName' not found in wards list. "
+                    "Available wards: ${currentFilterState.wards.map((w) => w.name).toList()}. "
+                    "Attempting to load anyway (getWardUid will handle fuzzy matching).",
+                  );
+                } else if (wardExists) {
+                  logg.i(
+                    "✅ Ward '$wardName' found in wards list (${currentFilterState.wards.length} total wards), proceeding with loadWardData",
+                  );
+                }
+                
+                // Try to load - getWardUid will handle fuzzy matching
+                ref
+                    .read(mapControllerProvider.notifier)
+                    .loadWardData(wardName: wardName);
+              }
             }
           });
         } else if (unionFilterApplied) {
           logg.i("Union filter applied: ${current.selectedUnion}");
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
             if (mounted) {
-              ref
-                  .read(mapControllerProvider.notifier)
-                  .loadUnionData(unionName: current.selectedUnion!);
+              // ✅ FIX: Wait for unions to be loaded before calling loadUnionData
+              // This prevents race condition where loadUnionData is called before
+              // unions list is populated in filter controller
+              final unionName = current.selectedUnion!;
+              
+              // Check if unions are already loaded
+              var currentFilterState = ref.read(filterControllerProvider);
+              if (currentFilterState.unions.isEmpty) {
+                logg.i("Unions not loaded yet, attempting to load them...");
+                
+                // ✅ FIX: Proactively load unions if they're empty
+                // This happens when union filter is applied but unions weren't loaded yet
+                final selectedUpazila = currentFilterState.selectedUpazila;
+                if (selectedUpazila != null && selectedUpazila != 'All') {
+                  final filterNotifier = ref.read(filterControllerProvider.notifier);
+                  
+                  // ✅ FIX: Wait for upazilas to be loaded before getting upazila UID
+                  if (currentFilterState.upazilas.isEmpty) {
+                    logg.i("Upazilas not loaded yet, waiting for them to load...");
+                    
+                    // Wait for upazilas to load (max 3 seconds, check every 100ms)
+                    int upazilaRetries = 0;
+                    const maxUpazilaRetries = 30; // 30 * 100ms = 3 seconds
+                    
+                    while (upazilaRetries < maxUpazilaRetries && mounted && currentFilterState.upazilas.isEmpty) {
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      currentFilterState = ref.read(filterControllerProvider);
+                      
+                      if (currentFilterState.upazilas.isNotEmpty) {
+                        logg.i("Upazilas loaded (${currentFilterState.upazilas.length} items), proceeding with union loading");
+                        break;
+                      }
+                      
+                      upazilaRetries++;
+                    }
+                    
+                    if (currentFilterState.upazilas.isEmpty) {
+                      logg.w("Upazilas still not loaded after waiting, attempting to load unions anyway");
+                    }
+                  }
+                  
+                  // Now try to get upazila UID
+                  final upazilaUid = filterNotifier.getUpazilaUid(selectedUpazila);
+                  if (upazilaUid != null) {
+                    logg.i("Loading unions for upazila: $selectedUpazila (UID: $upazilaUid)");
+                    await filterNotifier.loadUnionsByUpazila(upazilaUid);
+                    // Refresh state after loading
+                    currentFilterState = ref.read(filterControllerProvider);
+                  } else {
+                    logg.w(
+                      "Could not get upazila UID for $selectedUpazila to load unions. "
+                      "Available upazilas: ${currentFilterState.upazilas.map((u) => u.name).toList()}",
+                    );
+                  }
+                }
+                
+                // Wait for unions to load (max 3 seconds, check every 100ms)
+                int retries = 0;
+                const maxRetries = 30; // 30 * 100ms = 3 seconds
+                
+                while (retries < maxRetries && mounted && currentFilterState.unions.isEmpty) {
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  currentFilterState = ref.read(filterControllerProvider);
+                  
+                  if (currentFilterState.unions.isNotEmpty) {
+                    logg.i("Unions loaded (${currentFilterState.unions.length} items), proceeding with loadUnionData");
+                    break;
+                  }
+                  
+                  retries++;
+                }
+                
+                if (currentFilterState.unions.isEmpty) {
+                  logg.w("Unions still not loaded after waiting, attempting to load anyway");
+                }
+              } else {
+                logg.i("Unions already loaded (${currentFilterState.unions.length} items), proceeding immediately");
+              }
+              
+              // ✅ FIX: Try to load union data even if exact match fails (getUnionUid handles fuzzy matching)
+              if (mounted) {
+                // Check if union exists with fuzzy matching (handles name variations)
+                final unionExists = currentFilterState.unions.any(
+                  (union) {
+                    final normalizedUnionName = union.name?.trim() ?? '';
+                    final normalizedSearchName = unionName.trim();
+                    // Exact match
+                    if (normalizedUnionName == normalizedSearchName) return true;
+                    // Case-insensitive match
+                    if (normalizedUnionName.toLowerCase() == normalizedSearchName.toLowerCase()) return true;
+                    // Partial match (for names with "(Part ...)" suffix)
+                    final unionBaseName = normalizedUnionName.split(' (')[0].trim();
+                    final searchBaseName = normalizedSearchName.split(' (')[0].trim();
+                    if (unionBaseName.toLowerCase() == searchBaseName.toLowerCase()) return true;
+                    return false;
+                  },
+                );
+                
+                if (!unionExists && currentFilterState.unions.isNotEmpty) {
+                  logg.w(
+                    "⚠️ Union '$unionName' not found in unions list. "
+                    "Available unions: ${currentFilterState.unions.map((u) => u.name).toList()}. "
+                    "Attempting to load anyway (getUnionUid will handle fuzzy matching).",
+                  );
+                } else if (!unionExists) {
+                  logg.w(
+                    "⚠️ Union '$unionName' not found - unions list is empty. "
+                    "Attempting to load anyway.",
+                  );
+                } else {
+                  logg.i(
+                    "✅ Union '$unionName' found in unions list, proceeding with loadUnionData",
+                  );
+                }
+                
+                // Always try to load - getUnionUid will handle fuzzy matching
+                ref
+                    .read(mapControllerProvider.notifier)
+                    .loadUnionData(unionName: unionName);
+              }
             }
           });
         } else if (upazilaFilterApplied) {

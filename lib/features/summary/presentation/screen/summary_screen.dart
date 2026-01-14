@@ -39,18 +39,99 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
 
     // Find the selected vaccine data
     final vaccines = summaryState.coverageData?.vaccines ?? [];
+    
+    // 🔍 DEBUG: Log vaccine data structure
+    if (vaccines.isNotEmpty) {
+      logg.i(
+        'Summary Screen: Found ${vaccines.length} vaccines. '
+        'Selected vaccine UID: ${filterState.selectedVaccine}',
+      );
+      for (var vaccine in vaccines) {
+        logg.i(
+          'Vaccine: ${vaccine.vaccineName} (UID: ${vaccine.vaccineUid}), '
+          'totalTarget: ${vaccine.totalTarget}, '
+          'totalTargetMale: ${vaccine.totalTargetMale}, '
+          'totalTargetFemale: ${vaccine.totalTargetFemale}, '
+          'totalCoverage: ${vaccine.totalCoverage}, '
+          'totalCoverageMale: ${vaccine.totalCoverageMale}, '
+          'totalCoverageFemale: ${vaccine.totalCoverageFemale}',
+        );
+      }
+    }
+    
     final selectedVaccineData = vaccines.isNotEmpty
         ? vaccines.firstWhere(
             (vaccine) => vaccine.vaccineUid == filterState.selectedVaccine,
             orElse: () => vaccines.first,
           )
         : null;
-    final selectedVaccineTotalTarget =
-        (selectedVaccineData?.totalTargetMale ?? 0) +
-        (selectedVaccineData?.totalTargetFemale ?? 0);
-    final selectedVaccineTotalCoverage =
-        (selectedVaccineData?.totalCoverageMale ?? 0) +
-        (selectedVaccineData?.totalCoverageFemale ?? 0);
+    
+    // Calculate totals - use top-level fields if available, otherwise sum from areas
+    int selectedVaccineTotalTarget;
+    int selectedVaccineTotalCoverage;
+    int targetMale;
+    int targetFemale;
+    int coverageMale;
+    int coverageFemale;
+    
+    if (selectedVaccineData != null) {
+      // Try top-level fields first
+      targetMale = selectedVaccineData.totalTargetMale ?? 0;
+      targetFemale = selectedVaccineData.totalTargetFemale ?? 0;
+      coverageMale = selectedVaccineData.totalCoverageMale ?? 0;
+      coverageFemale = selectedVaccineData.totalCoverageFemale ?? 0;
+      
+      // If top-level fields are 0 or null, try to sum from areas array
+      if ((targetMale == 0 && targetFemale == 0) && 
+          selectedVaccineData.areas != null && 
+          selectedVaccineData.areas!.isNotEmpty) {
+        logg.i(
+          'Summary Screen: Top-level target fields are 0, calculating from areas array (${selectedVaccineData.areas!.length} areas)',
+        );
+        targetMale = selectedVaccineData.areas!
+            .map((area) => area.targetMale ?? 0)
+            .fold(0, (sum, value) => sum + value);
+        targetFemale = selectedVaccineData.areas!
+            .map((area) => area.targetFemale ?? 0)
+            .fold(0, (sum, value) => sum + value);
+      }
+      
+      if ((coverageMale == 0 && coverageFemale == 0) && 
+          selectedVaccineData.areas != null && 
+          selectedVaccineData.areas!.isNotEmpty) {
+        logg.i(
+          'Summary Screen: Top-level coverage fields are 0, calculating from areas array (${selectedVaccineData.areas!.length} areas)',
+        );
+        coverageMale = selectedVaccineData.areas!
+            .map((area) => area.coverageMale ?? 0)
+            .fold(0, (sum, value) => sum + value);
+        coverageFemale = selectedVaccineData.areas!
+            .map((area) => area.coverageFemale ?? 0)
+            .fold(0, (sum, value) => sum + value);
+      }
+      
+      selectedVaccineTotalTarget = targetMale + targetFemale;
+      selectedVaccineTotalCoverage = coverageMale + coverageFemale;
+    } else {
+      selectedVaccineTotalTarget = 0;
+      selectedVaccineTotalCoverage = 0;
+      targetMale = 0;
+      targetFemale = 0;
+      coverageMale = 0;
+      coverageFemale = 0;
+    }
+    
+    // 🔍 DEBUG: Log calculated values
+    logg.i(
+      'Summary Screen: Selected vaccine data - '
+      'totalTarget: $selectedVaccineTotalTarget, '
+      'totalCoverage: $selectedVaccineTotalCoverage, '
+      'targetMale: $targetMale, '
+      'targetFemale: $targetFemale, '
+      'coverageMale: $coverageMale, '
+      'coverageFemale: $coverageFemale, '
+      'areas count: ${selectedVaccineData?.areas?.length ?? 0}',
+    );
     return Scaffold(
       backgroundColor: Color(Constants.scaffoldBackgroundColor),
       body: summaryState.isLoading
@@ -85,16 +166,15 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                       SummaryCardWidget(
                         label: 'Total Children (0-11 m)',
                         value: selectedVaccineTotalTarget.toString(),
-                        boysCount: selectedVaccineData?.totalTargetMale ?? 0,
-                        girlsCount: selectedVaccineData?.totalTargetFemale ?? 0,
+                        boysCount: targetMale,
+                        girlsCount: targetFemale,
                       ),
                       10.h,
                       SummaryCardWidget(
                         label: 'Vaccinated Children',
                         value: selectedVaccineTotalCoverage.toString(),
-                        boysCount: selectedVaccineData?.totalCoverageMale ?? 0,
-                        girlsCount:
-                            selectedVaccineData?.totalCoverageFemale ?? 0,
+                        boysCount: coverageMale,
+                        girlsCount: coverageFemale,
                         isFirst: false,
                       ),
                     ],

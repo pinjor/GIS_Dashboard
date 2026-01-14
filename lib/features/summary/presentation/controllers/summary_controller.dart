@@ -21,13 +21,32 @@ final summaryControllerProvider =
       // Listen to map state changes to auto-update summary
       ref.listen<MapState>(mapControllerProvider, (previous, next) {
         // Update summary when map data changes and is not loading
+        logg.i(
+          'Summary: Map state changed - isLoading: ${next.isLoading}, '
+          'hasCoverageData: ${next.coverageData != null}, '
+          'error: ${next.error}, '
+          'level: ${next.currentLevel}, '
+          'areaName: ${next.currentAreaName}, '
+          'coverageChanged: ${previous?.coverageData != next.coverageData}, '
+          'levelChanged: ${previous?.currentLevel != next.currentLevel}',
+        );
+        
         if (!next.isLoading &&
             next.coverageData != null &&
             next.error == null &&
             (previous?.coverageData != next.coverageData ||
                 previous?.currentLevel != next.currentLevel)) {
+          logg.i('Summary: Updating summary with map data');
           final filterState = ref.read(filterControllerProvider);
           controller.updateDataAndFilter(next, filterState.selectedMonths);
+        } else {
+          logg.w(
+            'Summary: Skipping update - isLoading: ${next.isLoading}, '
+            'hasCoverageData: ${next.coverageData != null}, '
+            'error: ${next.error}, '
+            'coverageChanged: ${previous?.coverageData != next.coverageData}, '
+            'levelChanged: ${previous?.currentLevel != next.currentLevel}',
+          );
         }
       });
 
@@ -62,6 +81,13 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
       selectedMonths,
     );
 
+    logg.i(
+      'Summary: Updated with coverage data - '
+      'vaccines count: ${filteredData?.vaccines?.length ?? 0}, '
+      'area name: ${mapState.currentAreaName}, '
+      'level: ${mapState.currentLevel}',
+    );
+
     state = state.copyWith(
       coverageData: filteredData,
       currentLevel: mapState.currentLevel,
@@ -69,6 +95,8 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
       isLoading: false,
       error: null,
     );
+    
+    logg.i('Summary: State updated successfully');
   }
 
   /// Apply month filter to existing data

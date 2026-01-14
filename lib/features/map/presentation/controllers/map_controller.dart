@@ -980,8 +980,19 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       );
       final unionUid = _filterNotifier.getUnionUid(unionName);
 
+      // ✅ FIX: Add detailed logging for union UID lookup
+      logg.i("Union UID lookup for '$unionName':");
+      logg.i("  Unions list size: ${currentFilter.unions.length}");
+      logg.i("  Union UID result: $unionUid");
+      if (unionUid == null && currentFilter.unions.isNotEmpty) {
+        logg.w("  Available union names: ${currentFilter.unions.map((u) => u.name).toList()}");
+      }
+
       if (districtUid == null || upazilaUid == null || unionUid == null) {
-        throw Exception('Could not find UIDs for hierarchical path');
+        final errorMsg = 'Could not find UIDs for hierarchical path: '
+            'district=$districtUid, upazila=$upazilaUid, union=$unionUid';
+        logg.e(errorMsg);
+        throw Exception(errorMsg);
       }
 
       final concatenatedSlug = '$districtUid/$upazilaUid/$unionUid';
@@ -1008,6 +1019,84 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
 
+      // Get district name and slug for navigation stack
+      final districtName = currentFilter.selectedDistrict!;
+      final districtSlug = await _getDistrictSlugFromCountryData(districtName);
+
+      // Get upazila name and build upazila slug
+      final upazilaName = currentFilter.selectedUpazila!;
+      final upazilaSlug = '$districtUid/$upazilaUid';
+
+      // Create navigation level for union
+      final unionNavLevel = DrilldownLevel(
+        level: GeographicLevel.union,
+        slug: concatenatedSlug,
+        name: unionName,
+        parentSlug: upazilaSlug,
+      );
+
+      // Create navigation level for upazila
+      final upazilaNavLevel = DrilldownLevel(
+        level: GeographicLevel.upazila,
+        slug: upazilaSlug,
+        name: upazilaName,
+        parentSlug: districtSlug ?? districtUid,
+      );
+
+      // Create navigation level for district
+      final districtNavLevel = DrilldownLevel(
+        level: GeographicLevel.district,
+        slug: districtSlug ?? districtUid,
+        name: districtName,
+        parentSlug: null,
+      );
+
+      // Build navigation stack properly preserving division hierarchy
+      List<DrilldownLevel> newNavigationStack;
+
+      // Check if there's a division context from filter that should be preserved
+      final selectedDivision = currentFilter.selectedDivision;
+      final hasValidDivisionContext =
+          selectedDivision != 'All' && selectedDivision.isNotEmpty;
+
+      // Check if current navigation stack already has a division level
+      final currentHasDivisionLevel =
+          state.navigationStack.isNotEmpty &&
+          state.navigationStack.any(
+            (level) => level.level == GeographicLevel.division,
+          );
+
+      if (hasValidDivisionContext && !currentHasDivisionLevel) {
+        // We have a division filter but no division in navigation stack
+        // This means user went directly from country -> division -> district -> upazila -> union via filters
+        // We should preserve the division level in navigation
+        final divisionSlug = ApiConstants.divisionNameToSlug(selectedDivision);
+        final divisionNavLevel = DrilldownLevel(
+          level: GeographicLevel.division,
+          slug: 'divisions/$divisionSlug',
+          name: selectedDivision,
+          parentSlug: null,
+        );
+
+        newNavigationStack = [divisionNavLevel, districtNavLevel, upazilaNavLevel, unionNavLevel];
+        logg.i(
+          "Preserved division '$selectedDivision' in union navigation hierarchy",
+        );
+      } else if (currentHasDivisionLevel) {
+        // Current navigation already has division, build upon it
+        final existingStack = List<DrilldownLevel>.from(state.navigationStack);
+        // Remove any existing district/lower levels and add new district, upazila, and union
+        existingStack.removeWhere(
+          (level) => level.level.index >= GeographicLevel.district.index,
+        );
+        newNavigationStack = [...existingStack, districtNavLevel, upazilaNavLevel, unionNavLevel];
+        logg.i("Built upon existing division navigation hierarchy for union");
+      } else {
+        // No division context, start fresh with district, upazila, and union
+        newNavigationStack = [districtNavLevel, upazilaNavLevel, unionNavLevel];
+        logg.i("Starting fresh navigation with district, upazila, and union");
+      }
+
       _unfilteredCoverageData = coverageData;
       final filteredData = VaccineDataCalculator.recalculateCoverageData(
         coverageData,
@@ -1018,7 +1107,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: filteredData,
         currentLevel: GeographicLevel.union,
-        navigationStack: [], // Reset navigation for filter-based loading
+        navigationStack: newNavigationStack,
         currentAreaName: unionName,
         isLoading: false,
         clearError: true,
@@ -1084,16 +1173,111 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
       final coverageData = results[1] as VaccineCoverageResponse;
 
-      // Fetch EPI data for ward level (uses only ward UID, not concatenated path)
+      // Get district name and slug for navigation stack
+      final districtName = currentFilter.selectedDistrict!;
+      final districtSlug = await _getDistrictSlugFromCountryData(districtName);
+
+      // Get upazila name and build upazila slug
+      final upazilaName = currentFilter.selectedUpazila!;
+      final upazilaSlug = '$districtUid/$upazilaUid';
+
+      // Get union name and build union slug
+      final unionName = currentFilter.selectedUnion!;
+      final unionSlug = '$districtUid/$upazilaUid/$unionUid';
+
+      // Create navigation level for ward
+      final wardNavLevel = DrilldownLevel(
+        level: GeographicLevel.ward,
+        slug: concatenatedSlug,
+        name: wardName,
+        parentSlug: unionSlug,
+      );
+
+      // Create navigation level for union
+      final unionNavLevel = DrilldownLevel(
+        level: GeographicLevel.union,
+        slug: unionSlug,
+        name: unionName,
+        parentSlug: upazilaSlug,
+      );
+
+      // Create navigation level for upazila
+      final upazilaNavLevel = DrilldownLevel(
+        level: GeographicLevel.upazila,
+        slug: upazilaSlug,
+        name: upazilaName,
+        parentSlug: districtSlug ?? districtUid,
+      );
+
+      // Create navigation level for district
+      final districtNavLevel = DrilldownLevel(
+        level: GeographicLevel.district,
+        slug: districtSlug ?? districtUid,
+        name: districtName,
+        parentSlug: null,
+      );
+
+      // Build navigation stack properly preserving division hierarchy
+      List<DrilldownLevel> newNavigationStack;
+
+      // Check if there's a division context from filter that should be preserved
+      final selectedDivision = currentFilter.selectedDivision;
+      final hasValidDivisionContext =
+          selectedDivision != 'All' && selectedDivision.isNotEmpty;
+
+      // Check if current navigation stack already has a division level
+      final currentHasDivisionLevel =
+          state.navigationStack.isNotEmpty &&
+          state.navigationStack.any(
+            (level) => level.level == GeographicLevel.division,
+          );
+
+      if (hasValidDivisionContext && !currentHasDivisionLevel) {
+        // We have a division filter but no division in navigation stack
+        // This means user went directly from country -> division -> district -> upazila -> union -> ward via filters
+        // We should preserve the division level in navigation
+        final divisionSlug = ApiConstants.divisionNameToSlug(selectedDivision);
+        final divisionNavLevel = DrilldownLevel(
+          level: GeographicLevel.division,
+          slug: 'divisions/$divisionSlug',
+          name: selectedDivision,
+          parentSlug: null,
+        );
+
+        newNavigationStack = [divisionNavLevel, districtNavLevel, upazilaNavLevel, unionNavLevel, wardNavLevel];
+        logg.i(
+          "Preserved division '$selectedDivision' in ward navigation hierarchy",
+        );
+      } else if (currentHasDivisionLevel) {
+        // Current navigation already has division, build upon it
+        final existingStack = List<DrilldownLevel>.from(state.navigationStack);
+        // Remove any existing district/lower levels and add new district, upazila, union, and ward
+        existingStack.removeWhere(
+          (level) => level.level.index >= GeographicLevel.district.index,
+        );
+        newNavigationStack = [...existingStack, districtNavLevel, upazilaNavLevel, unionNavLevel, wardNavLevel];
+        logg.i("Built upon existing division navigation hierarchy for ward");
+      } else {
+        // No division context, start fresh with district, upazila, union, and ward
+        newNavigationStack = [districtNavLevel, upazilaNavLevel, unionNavLevel, wardNavLevel];
+        logg.i("Starting fresh navigation with district, upazila, union, and ward");
+      }
+
+      // Fetch EPI data for ward level (uses concatenated path like GeoJSON and coverage)
       EpiCenterCoordsResponse? epiCenterCoordsData;
       try {
-        final epiPath = ApiConstants.getEpiPath(slug: wardUid);
-        logg.i("Fetching EPI data from: $epiPath");
+        // ✅ FIX: Use concatenated slug for EPI path (same as GeoJSON and coverage)
+        // This matches the pattern: district/upazila/union/ward
+        final epiPath = ApiConstants.getEpiPath(slug: concatenatedSlug);
+        logg.i("Fetching EPI data from: $epiPath (using concatenated slug: $concatenatedSlug)");
         epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
           urlPath: epiPath,
           forceRefresh: true,
         );
-        logg.i("Successfully fetched EPI data for $wardName");
+        logg.i(
+          "Successfully fetched EPI data for $wardName "
+          "(${epiCenterCoordsData.features?.length ?? 0} EPI centers)",
+        );
       } catch (e) {
         logg.w("EPI data not available for $wardName - continuing without EPI data: $e");
         epiCenterCoordsData = null;
@@ -1110,7 +1294,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         coverageData: filteredData,
         epiCenterCoordsData: epiCenterCoordsData,
         currentLevel: GeographicLevel.ward,
-        navigationStack: [], // Reset navigation for filter-based loading
+        navigationStack: newNavigationStack,
         currentAreaName: wardName,
         isLoading: false,
         clearError: true,

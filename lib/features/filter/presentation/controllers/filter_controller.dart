@@ -329,7 +329,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Update union selection and load wards
-  void updateUnion(String? union) {
+  Future<void> updateUnion(String? union) async {
     // Only clear child data if the selection actually changed
     if (state.selectedUnion != union) {
       print(
@@ -345,9 +345,89 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
       // Load new data only if changed and valid
       if (union != null && union != 'All') {
+        // ✅ FIX: Wait for unions to be loaded if they're not loaded yet
+        // Also proactively load unions if upazila is selected
+        if (state.unions.isEmpty) {
+          logg.i('Unions list is empty, attempting to load them...');
+          
+          // ✅ FIX: First wait for upazilas to be loaded if they're not loaded yet
+          if (state.upazilas.isEmpty) {
+            logg.i('Upazilas not loaded yet, waiting for them...');
+            int upazilaRetries = 0;
+            const maxUpazilaRetries = 30;
+            
+            while (upazilaRetries < maxUpazilaRetries && state.upazilas.isEmpty) {
+              await Future.delayed(const Duration(milliseconds: 100));
+              upazilaRetries++;
+            }
+            
+            if (state.upazilas.isEmpty) {
+              logg.w('Upazilas still not loaded after waiting');
+            } else {
+              logg.i('Upazilas loaded (${state.upazilas.length} items)');
+            }
+          }
+          
+          // Try to load unions if upazila is selected
+          final selectedUpazila = state.selectedUpazila;
+          if (selectedUpazila != null && selectedUpazila != 'All') {
+            logg.i(
+              'Attempting to get upazila UID for: "$selectedUpazila". '
+              'Available upazilas (${state.upazilas.length}): ${state.upazilas.map((u) => u.name).toList()}',
+            );
+            
+            final upazilaUid = _getUpazilaUid(selectedUpazila);
+            if (upazilaUid != null) {
+              logg.i('Loading unions for upazila: $selectedUpazila (UID: $upazilaUid)');
+              try {
+                await _loadUnionsByUpazila(upazilaUid);
+                logg.i('Union loading completed. Current unions count: ${state.unions.length}');
+              } catch (e) {
+                logg.e('Error loading unions: $e');
+              }
+            } else {
+              logg.w(
+                'Could not get upazila UID for "$selectedUpazila" to load unions. '
+                'Available upazilas: ${state.upazilas.map((u) => u.name).toList()}',
+              );
+            }
+          } else {
+            logg.w('Cannot load unions: upazila is not selected (selectedUpazila: $selectedUpazila)');
+          }
+          
+          // Wait for unions to load (max 5 seconds, check every 100ms)
+          // Note: state is reactive in StateNotifier, so checking state.unions will get updated value
+          int retries = 0;
+          const maxRetries = 50; // 50 * 100ms = 5 seconds (increased timeout)
+          
+          while (retries < maxRetries && state.unions.isEmpty) {
+            await Future.delayed(const Duration(milliseconds: 100));
+            retries++;
+            
+            // Log progress every second
+            if (retries % 10 == 0) {
+              logg.i('Still waiting for unions to load... (${retries * 100}ms elapsed)');
+            }
+          }
+          
+          if (state.unions.isEmpty) {
+            logg.w(
+              'Unions still not loaded after waiting ${retries * 100}ms. '
+              'Upazila: $selectedUpazila, Available upazilas: ${state.upazilas.map((u) => u.name).toList()}',
+            );
+          } else {
+            logg.i('Unions loaded (${state.unions.length} items), proceeding with ward loading');
+          }
+        }
+        
         final unionUid = _getUnionUid(union);
         if (unionUid != null) {
           _loadWardsByUnion(unionUid);
+        } else {
+          logg.w(
+            'Could not get union UID for "$union". '
+            'Available unions: ${state.unions.map((u) => u.name).toList()}',
+          );
         }
       }
     } else {
@@ -513,7 +593,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Get district slug by district name from GeoJSON data
 
-  /// Load unions by upazila UID
+  /// Load unions by upazila UID (private method)
   Future<void> _loadUnionsByUpazila(String upazilaUid) async {
     try {
       final unions = await _repository.fetchAreasByParentUid(upazilaUid);
@@ -526,17 +606,30 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     }
   }
 
-  /// Load wards by union UID
+  /// Load unions by upazila UID (public method for dialog initialization)
+  Future<void> loadUnionsByUpazila(String upazilaUid) async {
+    await _loadUnionsByUpazila(upazilaUid);
+  }
+
+  /// Load wards by union UID (private method)
   Future<void> _loadWardsByUnion(String unionUid) async {
     try {
+      logg.i('Loading wards for union UID: $unionUid');
       final wards = await _repository.fetchAreasByParentUid(unionUid);
       state = state.copyWith(wards: wards);
-      print(
-        'FilterProvider: Loaded ${wards.length} wards for union: $unionUid',
+      logg.i(
+        'FilterProvider: Loaded ${wards.length} wards for union: $unionUid. '
+        'Ward names: ${wards.map((w) => w.name).toList()}',
       );
     } catch (e) {
-      print('FilterProvider: Error loading wards: $e');
+      logg.e('FilterProvider: Error loading wards for union $unionUid: $e');
+      // Don't rethrow - let the caller handle empty wards list
     }
+  }
+
+  /// Load wards by union UID (public method for dialog initialization)
+  Future<void> loadWardsByUnion(String unionUid) async {
+    await _loadWardsByUnion(unionUid);
   }
 
   /// Load subblocks by ward UID
@@ -554,28 +647,115 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Get upazila UID by name
   String? _getUpazilaUid(String upazilaName) {
-    final upazila = state.upazilas.firstWhere(
-      (upazila) => upazila.name == upazilaName,
+    if (state.upazilas.isEmpty) {
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = upazilaName.trim();
+    
+    // Try exact match first
+    var upazila = state.upazilas.firstWhere(
+      (upazila) => upazila.name?.trim() == normalizedSearchName,
       orElse: () => const AreaResponseModel(),
     );
+    
+    // If not found, try case-insensitive match
+    if (upazila.uid == null) {
+      upazila = state.upazilas.firstWhere(
+        (upazila) => upazila.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (upazila.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      upazila = state.upazilas.firstWhere(
+        (upazila) {
+          final upazilaBaseName = upazila.name?.split(' (')[0].trim() ?? '';
+          return upazilaBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
     return upazila.uid;
   }
 
   /// Get union UID by name
   String? _getUnionUid(String unionName) {
-    final union = state.unions.firstWhere(
-      (union) => union.name == unionName,
+    if (state.unions.isEmpty) {
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = unionName.trim();
+    
+    // Try exact match first
+    var union = state.unions.firstWhere(
+      (union) => union.name?.trim() == normalizedSearchName,
       orElse: () => const AreaResponseModel(),
     );
+    
+    // If not found, try case-insensitive match
+    if (union.uid == null) {
+      union = state.unions.firstWhere(
+        (union) => union.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (union.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      union = state.unions.firstWhere(
+        (union) {
+          final unionBaseName = union.name?.split(' (')[0].trim() ?? '';
+          return unionBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
     return union.uid;
   }
 
   /// Get ward UID by name
   String? _getWardUid(String wardName) {
-    final ward = state.wards.firstWhere(
-      (ward) => ward.name == wardName,
+    if (state.wards.isEmpty) {
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = wardName.trim();
+    
+    // Try exact match first
+    var ward = state.wards.firstWhere(
+      (ward) => ward.name?.trim() == normalizedSearchName,
       orElse: () => const AreaResponseModel(),
     );
+    
+    // If not found, try case-insensitive match
+    if (ward.uid == null) {
+      ward = state.wards.firstWhere(
+        (ward) => ward.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (ward.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      ward = state.wards.firstWhere(
+        (ward) {
+          final wardBaseName = ward.name?.split(' (')[0].trim() ?? '';
+          return wardBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
     return ward.uid;
   }
 
@@ -630,28 +810,139 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
 
   /// Get upazila UID by name (for EPI data fetching)
   String? getUpazilaUid(String upazilaName) {
-    final upazila = state.upazilas.firstWhere(
-      (upazila) => upazila.name == upazilaName,
+    if (state.upazilas.isEmpty) {
+      logg.w('getUpazilaUid: Upazilas list is empty for upazila: $upazilaName');
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = upazilaName.trim();
+    
+    // Try exact match first
+    var upazila = state.upazilas.firstWhere(
+      (upazila) => upazila.name?.trim() == normalizedSearchName,
       orElse: () => const AreaResponseModel(),
     );
+    
+    // If not found, try case-insensitive match
+    if (upazila.uid == null) {
+      upazila = state.upazilas.firstWhere(
+        (upazila) => upazila.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (upazila.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      upazila = state.upazilas.firstWhere(
+        (upazila) {
+          final upazilaBaseName = upazila.name?.split(' (')[0].trim() ?? '';
+          return upazilaBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    if (upazila.uid == null) {
+      logg.w(
+        'getUpazilaUid: Upazila not found: "$upazilaName". '
+        'Available upazilas: ${state.upazilas.map((u) => u.name).toList()}',
+      );
+    }
+    
     return upazila.uid;
   }
 
   /// Get union UID by name (for EPI data fetching)
   String? getUnionUid(String unionName) {
-    final union = state.unions.firstWhere(
-      (union) => union.name == unionName,
+    if (state.unions.isEmpty) {
+      logg.w('getUnionUid: Unions list is empty for union: $unionName');
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = unionName.trim();
+    
+    // Try exact match first
+    var union = state.unions.firstWhere(
+      (union) => union.name?.trim() == normalizedSearchName,
       orElse: () => const AreaResponseModel(),
     );
+    
+    // If not found, try case-insensitive match
+    if (union.uid == null) {
+      union = state.unions.firstWhere(
+        (union) => union.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (union.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      union = state.unions.firstWhere(
+        (union) {
+          final unionBaseName = union.name?.split(' (')[0].trim() ?? '';
+          return unionBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    if (union.uid == null) {
+      logg.w(
+        'getUnionUid: Union not found: "$unionName". '
+        'Available unions: ${state.unions.map((u) => u.name).toList()}',
+      );
+    }
+    
     return union.uid;
   }
 
   /// Get ward UID by name (for EPI data fetching)
   String? getWardUid(String wardName) {
-    final ward = state.wards.firstWhere(
-      (ward) => ward.name == wardName,
+    if (state.wards.isEmpty) {
+      logg.w('getWardUid: Wards list is empty for ward: $wardName');
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = wardName.trim();
+    
+    // Try exact match first
+    var ward = state.wards.firstWhere(
+      (ward) => ward.name?.trim() == normalizedSearchName,
       orElse: () => const AreaResponseModel(),
     );
+    
+    // If not found, try case-insensitive match
+    if (ward.uid == null) {
+      ward = state.wards.firstWhere(
+        (ward) => ward.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (ward.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      ward = state.wards.firstWhere(
+        (ward) {
+          final wardBaseName = ward.name?.split(' (')[0].trim() ?? '';
+          return wardBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    if (ward.uid == null) {
+      logg.w(
+        'getWardUid: Ward not found: "$wardName". '
+        'Available wards: ${state.wards.map((w) => w.name).toList()}',
+      );
+    }
+    
     return ward.uid;
   }
 

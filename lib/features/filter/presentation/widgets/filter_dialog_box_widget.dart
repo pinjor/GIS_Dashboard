@@ -73,7 +73,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   }
 
   /// Initialize filter state properly for both normal and EPI contexts
-  void _initializeFilterState() {
+  Future<void> _initializeFilterState() async {
     final currentFilter = ref.read(filterControllerProvider);
     final filterNotifier = ref.read(filterControllerProvider.notifier);
 
@@ -113,17 +113,17 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       logg.i('🎯 EPI+CC Context: Showing CC filter view directly');
       _initializeCityCorporationAreaType(currentFilter, filterNotifier);
     } else if (_selectedAreaType == AreaType.district) {
-      _initializeDistrictAreaType(currentFilter, filterNotifier);
+      await _initializeDistrictAreaType(currentFilter, filterNotifier);
     } else if (_selectedAreaType == AreaType.cityCorporation) {
       _initializeCityCorporationAreaType(currentFilter, filterNotifier);
     }
   }
 
   /// Initialize district area type selections
-  void _initializeDistrictAreaType(
+  Future<void> _initializeDistrictAreaType(
     FilterState currentFilter,
     FilterControllerNotifier filterNotifier,
-  ) {
+  ) async {
     // Validate and set division - ensure it exists in dropdown items
     final availableDivisions = filterNotifier.divisionDropdownItems;
     if (availableDivisions.contains(currentFilter.selectedDivision)) {
@@ -158,18 +158,42 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       _selectedUpazila = null;
     }
 
+    // ✅ FIX: Preserve union selection even if unions list isn't loaded yet
+    // This prevents the union value from being lost when the filter dialog opens
     final availableUnions = filterNotifier.unionDropdownItems;
-    if (currentFilter.selectedUnion != null &&
-        availableUnions.contains(currentFilter.selectedUnion)) {
-      _selectedUnion = currentFilter.selectedUnion;
+    if (currentFilter.selectedUnion != null) {
+      if (availableUnions.contains(currentFilter.selectedUnion)) {
+        _selectedUnion = currentFilter.selectedUnion;
+      } else if (availableUnions.isEmpty) {
+        // If unions list is empty, preserve the selected union value
+        // It will be validated later when unions are loaded
+        _selectedUnion = currentFilter.selectedUnion;
+        logg.i('Preserving union selection "${currentFilter.selectedUnion}" even though unions list is empty');
+      } else {
+        // Unions list is loaded but doesn't contain the selected union
+        _selectedUnion = null;
+        logg.w('Union "${currentFilter.selectedUnion}" not found in available unions: $availableUnions');
+      }
     } else {
       _selectedUnion = null;
     }
 
+    // ✅ FIX: Preserve ward selection even if wards list isn't loaded yet
+    // This prevents the ward value from being lost when the filter dialog opens
     final availableWards = filterNotifier.wardDropdownItems;
-    if (currentFilter.selectedWard != null &&
-        availableWards.contains(currentFilter.selectedWard)) {
-      _selectedWard = currentFilter.selectedWard;
+    if (currentFilter.selectedWard != null) {
+      if (availableWards.contains(currentFilter.selectedWard)) {
+        _selectedWard = currentFilter.selectedWard;
+      } else if (availableWards.isEmpty) {
+        // If wards list is empty, preserve the selected ward value
+        // It will be validated later when wards are loaded
+        _selectedWard = currentFilter.selectedWard;
+        logg.i('Preserving ward selection "${currentFilter.selectedWard}" even though wards list is empty');
+      } else {
+        // Wards list is loaded but doesn't contain the selected ward
+        _selectedWard = null;
+        logg.w('Ward "${currentFilter.selectedWard}" not found in available wards: $availableWards');
+      }
     } else {
       _selectedWard = null;
     }
@@ -187,6 +211,64 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _initialUnion = _selectedUnion;
     _initialWard = _selectedWard;
     _initialSubblock = _selectedSubblock;
+
+
+    // ✅ FIX: Reload unions if upazila is selected but unions list is empty
+    // This must happen BEFORE trying to reload wards
+    if (_selectedUpazila != null &&
+        _selectedUpazila != 'All' &&
+        currentFilter.unions.isEmpty) {
+      logg.i(
+        "🔄 Upazila selected but unions list empty, reloading unions for: $_selectedUpazila",
+      );
+      final upazilaUid = filterNotifier.getUpazilaUid(_selectedUpazila!);
+      if (upazilaUid != null) {
+        await filterNotifier.loadUnionsByUpazila(upazilaUid);
+        // Refresh currentFilter after loading unions
+        final updatedFilter = ref.read(filterControllerProvider);
+        // Update _selectedUnion if it was preserved
+        if (_selectedUnion != null && updatedFilter.unions.isNotEmpty) {
+          final unionExists = updatedFilter.unions.any((u) => u.name == _selectedUnion);
+          if (!unionExists) {
+            logg.w('Preserved union "$_selectedUnion" not found in loaded unions');
+            _selectedUnion = null;
+          }
+        }
+      } else {
+        logg.w(
+          "⚠️ Could not get upazila UID for $_selectedUpazila to reload unions",
+        );
+      }
+    }
+
+    // ✅ FIX: Reload wards if union is selected but wards list is empty
+    if (_selectedUnion != null &&
+        _selectedUnion != 'All' &&
+        currentFilter.wards.isEmpty) {
+      logg.i(
+        "🔄 Union selected but wards list empty, reloading wards for: $_selectedUnion",
+      );
+      // Get fresh filter state in case unions were just loaded
+      final freshFilterState = ref.read(filterControllerProvider);
+      final unionUid = filterNotifier.getUnionUid(_selectedUnion!);
+      if (unionUid != null) {
+        await filterNotifier.loadWardsByUnion(unionUid);
+        // Refresh and update _selectedWard if it was preserved
+        final updatedFilter = ref.read(filterControllerProvider);
+        if (_selectedWard != null && updatedFilter.wards.isNotEmpty) {
+          final wardExists = updatedFilter.wards.any((w) => w.name == _selectedWard);
+          if (!wardExists) {
+            logg.w('Preserved ward "$_selectedWard" not found in loaded wards');
+            _selectedWard = null;
+          }
+        }
+      } else {
+        logg.w(
+          "⚠️ Could not get union UID for $_selectedUnion to reload wards. "
+          "Available unions: ${freshFilterState.unions.map((u) => u.name).toList()}",
+        );
+      }
+    }
 
     logg.i('🔧 Filter Dialog: Initial hierarchical values stored');
     logg.i('   Initial Upazila: $_initialUpazila');
@@ -670,9 +752,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
           _selectedUnion = null;
         }
 
-        // Validate ward selection
+        // ✅ FIX: Only clear ward selection if wards are loaded and ward doesn't exist
+        // Don't clear if wards list is empty (they might be loading)
+        final availableWards = filterNotifier.wardDropdownItems;
         if (_selectedWard != null &&
-            !filterNotifier.wardDropdownItems.contains(_selectedWard)) {
+            availableWards.isNotEmpty &&
+            !availableWards.contains(_selectedWard)) {
+          logg.w('Clearing invalid ward selection "$_selectedWard" - not in available wards: $availableWards');
           _selectedWard = null;
         }
 
@@ -940,38 +1026,76 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       ),
                     ),
                     8.h,
-                    DropdownButtonFormField<String?>(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      initialValue:
-                          filterNotifier.unionDropdownItems.contains(
-                            _selectedUnion,
-                          )
-                          ? _selectedUnion
-                          : null,
-                      hint: const Text('All'),
-                      items: [
-                        const DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text('All'),
-                        ),
-                        ...filterNotifier.unionDropdownItems
-                            .where((item) => item != 'All')
-                            .map(
-                              (union) => DropdownMenuItem<String?>(
-                                value: union,
-                                child: Text(union),
-                              ),
+                    // ✅ FIX: Make union dropdown reactive to state changes
+                    Builder(
+                      builder: (context) {
+                        // Watch filter state to reactively update when unions are loaded
+                        ref.watch(filterControllerProvider);
+                        final unionDropdownItems = filterNotifier.unionDropdownItems;
+                        
+                        return DropdownButtonFormField<String?>(
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          value: unionDropdownItems.contains(_selectedUnion)
+                              ? _selectedUnion
+                              : null,
+                          hint: const Text('All'),
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('All'),
                             ),
-                      ],
-                      onChanged: (value) {
+                            ...unionDropdownItems
+                                .where((item) => item != 'All')
+                                .map(
+                                  (union) => DropdownMenuItem<String?>(
+                                    value: union,
+                                    child: Text(
+                                      union,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ),
+                          ],
+                      onChanged: (value) async {
                         setState(() {
                           _selectedUnion = value;
                           _selectedWard = null;
                           _selectedSubblock = null;
                         });
-                        filterNotifier.updateUnion(value);
+                        // ✅ FIX: Wait for wards to be loaded after union is selected
+                        await filterNotifier.updateUnion(value);
+                        
+                        // If union is selected and wards aren't loaded, try to load them
+                        if (value != null && value != 'All') {
+                          final currentFilterState = ref.read(filterControllerProvider);
+                          if (currentFilterState.wards.isEmpty) {
+                            logg.i('Union selected but wards not loaded, waiting for them...');
+                            // Wait for wards to load (max 3 seconds)
+                            int retries = 0;
+                            const maxRetries = 30;
+                            
+                            while (retries < maxRetries) {
+                              await Future.delayed(const Duration(milliseconds: 100));
+                              final updatedState = ref.read(filterControllerProvider);
+                              if (updatedState.wards.isNotEmpty) {
+                                logg.i('Wards loaded (${updatedState.wards.length} items)');
+                                // Trigger rebuild to update dropdown
+                                if (mounted) setState(() {});
+                                break;
+                              }
+                              retries++;
+                            }
+                          } else {
+                            // Wards already loaded, trigger rebuild to update dropdown
+                            if (mounted) setState(() {});
+                          }
+                        }
+                      },
+                        );
                       },
                     ),
                     16.h,
@@ -984,37 +1108,43 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       ),
                     ),
                     8.h,
-                    DropdownButtonFormField<String?>(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      initialValue:
-                          filterNotifier.wardDropdownItems.contains(
-                            _selectedWard,
-                          )
-                          ? _selectedWard
-                          : null,
-                      hint: const Text('All'),
-                      items: [
-                        const DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text('All'),
-                        ),
-                        ...filterNotifier.wardDropdownItems
-                            .where((item) => item != 'All')
-                            .map(
-                              (ward) => DropdownMenuItem<String?>(
-                                value: ward,
-                                child: Text(ward),
-                              ),
+                    // ✅ FIX: Make ward dropdown reactive to state changes
+                    Builder(
+                      builder: (context) {
+                        // Watch filter state to reactively update when wards are loaded
+                        ref.watch(filterControllerProvider);
+                        final wardDropdownItems = filterNotifier.wardDropdownItems;
+                        
+                        return DropdownButtonFormField<String?>(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          value: wardDropdownItems.contains(_selectedWard)
+                              ? _selectedWard
+                              : null,
+                          hint: const Text('All'),
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('All'),
                             ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedWard = value;
-                          _selectedSubblock = null;
-                        });
-                        filterNotifier.updateWard(value);
+                            ...wardDropdownItems
+                                .where((item) => item != 'All')
+                                .map(
+                                  (ward) => DropdownMenuItem<String?>(
+                                    value: ward,
+                                    child: Text(ward),
+                                  ),
+                                ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedWard = value;
+                              _selectedSubblock = null;
+                            });
+                            filterNotifier.updateWard(value);
+                          },
+                        );
                       },
                     ),
 
