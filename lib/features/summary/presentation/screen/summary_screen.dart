@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
+import 'package:gis_dashboard/core/utils/target_calculator.dart';
 
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
@@ -66,7 +67,13 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
           )
         : null;
     
-    // Calculate totals - use top-level fields if available, otherwise sum from areas
+    // ✅ Use TargetCalculator utility for consistent calculation across all sections
+    final targetData = TargetCalculator.getTargetData(
+      summaryState.coverageData,
+      filterState.selectedVaccine,
+    );
+    
+    // Calculate coverage (still need to handle this separately as it's not in TargetCalculator)
     int selectedVaccineTotalTarget;
     int selectedVaccineTotalCoverage;
     int targetMale;
@@ -74,28 +81,30 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
     int coverageMale;
     int coverageFemale;
     
+    if (targetData != null) {
+      // Use target data from utility
+      targetMale = targetData.male;
+      targetFemale = targetData.female;
+      selectedVaccineTotalTarget = targetData.total;
+      
+      logg.i(
+        'Summary Screen: Using TargetCalculator - '
+        'total: $selectedVaccineTotalTarget, male: $targetMale, female: $targetFemale',
+      );
+    } else {
+      // Fallback if TargetCalculator returns null
+      targetMale = 0;
+      targetFemale = 0;
+      selectedVaccineTotalTarget = 0;
+      logg.w('Summary Screen: TargetCalculator returned null, using fallback values');
+    }
+    
+    // Calculate coverage separately (coverage calculation logic)
     if (selectedVaccineData != null) {
-      // Try top-level fields first
-      targetMale = selectedVaccineData.totalTargetMale ?? 0;
-      targetFemale = selectedVaccineData.totalTargetFemale ?? 0;
       coverageMale = selectedVaccineData.totalCoverageMale ?? 0;
       coverageFemale = selectedVaccineData.totalCoverageFemale ?? 0;
       
-      // If top-level fields are 0 or null, try to sum from areas array
-      if ((targetMale == 0 && targetFemale == 0) && 
-          selectedVaccineData.areas != null && 
-          selectedVaccineData.areas!.isNotEmpty) {
-        logg.i(
-          'Summary Screen: Top-level target fields are 0, calculating from areas array (${selectedVaccineData.areas!.length} areas)',
-        );
-        targetMale = selectedVaccineData.areas!
-            .map((area) => area.targetMale ?? 0)
-            .fold(0, (sum, value) => sum + value);
-        targetFemale = selectedVaccineData.areas!
-            .map((area) => area.targetFemale ?? 0)
-            .fold(0, (sum, value) => sum + value);
-      }
-      
+      // If top-level coverage fields are 0, try to sum from areas array
       if ((coverageMale == 0 && coverageFemale == 0) && 
           selectedVaccineData.areas != null && 
           selectedVaccineData.areas!.isNotEmpty) {
@@ -110,13 +119,9 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
             .fold(0, (sum, value) => sum + value);
       }
       
-      selectedVaccineTotalTarget = targetMale + targetFemale;
       selectedVaccineTotalCoverage = coverageMale + coverageFemale;
     } else {
-      selectedVaccineTotalTarget = 0;
       selectedVaccineTotalCoverage = 0;
-      targetMale = 0;
-      targetFemale = 0;
       coverageMale = 0;
       coverageFemale = 0;
     }

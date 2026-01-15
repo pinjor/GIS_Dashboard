@@ -19,6 +19,7 @@ import '../../utils/map_utils.dart';
 import '../../utils/map_enums.dart';
 import '../controllers/map_controller.dart';
 import '../../../epi_center/presentation/screen/epi_center_details_screen.dart';
+import '../../../summary/presentation/controllers/summary_controller.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -295,6 +296,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     logg.i("   CC UID: $ccUid");
     logg.i("   Current Level: ${currentState.currentLevel}");
 
+    // ✅ Get coverage data and selected vaccine for consistent target calculation
+    final summaryState = ref.read(summaryControllerProvider);
+    final coverageData = summaryState.coverageData;
+    final selectedVaccineUid = filterState.selectedVaccine;
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -302,6 +308,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           epiUid: epiUid,
           ccUid: ccUid,
           currentLevel: null, // TODO: Review if this level conversion is needed
+          coverageData: coverageData, // ✅ Pass coverage data
+          selectedVaccineUid: selectedVaccineUid, // ✅ Pass selected vaccine
         ),
       ),
     );
@@ -380,6 +388,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       "Navigating to EPI details for CC ward: ${wardPolygon.areaName} (org_uid: ${wardPolygon.orgUid})",
     );
 
+    // ✅ Get coverage data and selected vaccine for consistent target calculation
+    final summaryState = ref.read(summaryControllerProvider);
+    final filterState = ref.read(filterControllerProvider);
+    final coverageData = summaryState.coverageData;
+    final selectedVaccineUid = filterState.selectedVaccine;
+
     // Navigate to EPI center details screen using org_uid
     Navigator.push(
       context,
@@ -390,6 +404,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           currentLevel:
               GeographicLevel.zone.index, // Ward within city corporation
           isOrgUidRequest: true, // Flag to use org_uid-based API call
+          coverageData: coverageData, // ✅ Pass coverage data
+          selectedVaccineUid: selectedVaccineUid, // ✅ Pass selected vaccine
         ),
       ),
     );

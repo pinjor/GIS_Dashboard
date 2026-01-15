@@ -7,6 +7,8 @@ import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_center_about_details_widget.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_yearly_session_personnel_widget.dart';
+import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/core/utils/target_calculator.dart';
 
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/utils/utils.dart';
@@ -23,6 +25,8 @@ class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
   final int? currentLevel;
   final String? ccUid;
   final bool isOrgUidRequest; // Flag to indicate org_uid-based request
+  final VaccineCoverageResponse? coverageData; // ✅ Coverage data for consistent target calculation
+  final String? selectedVaccineUid; // ✅ Selected vaccine UID
 
   const EpiCenterDetailsScreen({
     super.key,
@@ -30,6 +34,8 @@ class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
     this.currentLevel,
     this.ccUid,
     this.isOrgUidRequest = false, // Default to false for backward compatibility
+    this.coverageData, // ✅ Optional coverage data
+    this.selectedVaccineUid, // ✅ Optional selected vaccine UID
   });
 
   @override
@@ -375,7 +381,7 @@ class _EpiCenterDetailsScreenState
 
           // City corporation info (if available)
           // EpiCenterCityCorporationInfo(epiData: epiCenterData),
-          _buildTargetCard(epiCenterData, selectedYear),
+          _buildTargetCard(epiCenterData, selectedYear, widget.coverageData, widget.selectedVaccineUid),
           const SizedBox(height: 16),
 
           // Coverage tables
@@ -389,7 +395,11 @@ class _EpiCenterDetailsScreenState
           ), // datasets field is responsible for the graph
           const SizedBox(height: 24),
           // Microplan section
-          EpiCenterMicroplanSection(epiCenterDetailsData: epiCenterData),
+          EpiCenterMicroplanSection(
+            epiCenterDetailsData: epiCenterData,
+            coverageData: widget.coverageData, // ✅ Pass coverage data
+            selectedVaccineUid: widget.selectedVaccineUid, // ✅ Pass selected vaccine
+          ),
           const SizedBox(height: 24),
           EpiCenterAboutDetailsWidget(
             epiCenterDetailsData: epiCenterData,
@@ -408,23 +418,46 @@ class _EpiCenterDetailsScreenState
   Widget _buildTargetCard(
     EpiCenterDetailsResponse? epiCenterData,
     String selectedYear,
+    VaccineCoverageResponse? coverageData, // ✅ Coverage data for consistent calculation
+    String? selectedVaccineUid, // ✅ Selected vaccine UID
   ) {
     int? calcTarget;
 
-    // 1. Try Area-specific target
-    final vaccineTarget =
-        epiCenterData?.area?.vaccineTarget?.child0To11Month[selectedYear];
+    // ✅ PRIORITY 1: Use coverage data (same source as Summary card) for consistency
+    if (coverageData != null) {
+      final targetData = TargetCalculator.getTargetData(
+        coverageData,
+        selectedVaccineUid,
+      );
+      if (targetData != null && targetData.total > 0) {
+        calcTarget = targetData.total;
+        logg.i(
+          'EPI Target Card: Using coverage data - total: ${targetData.total}, '
+          'male: ${targetData.male}, female: ${targetData.female}',
+        );
+      }
+    }
 
-    if (vaccineTarget != null) {
-      calcTarget =
-          (vaccineTarget.male?.toInt() ?? 0) +
-          (vaccineTarget.female?.toInt() ?? 0);
-    } else {
-      // 2. Fallback to Demographics (Country/Area level)
+    // ✅ FALLBACK 2: Try Area-specific target from EPI details
+    if (calcTarget == null || calcTarget == 0) {
+      final vaccineTarget =
+          epiCenterData?.area?.vaccineTarget?.child0To11Month[selectedYear];
+
+      if (vaccineTarget != null) {
+        calcTarget =
+            (vaccineTarget.male?.toInt() ?? 0) +
+            (vaccineTarget.female?.toInt() ?? 0);
+        logg.i('EPI Target Card: Using EPI area vaccine target: $calcTarget');
+      }
+    }
+
+    // ✅ FALLBACK 3: Use Demographics (Country/Area level)
+    if (calcTarget == null || calcTarget == 0) {
       final demographics = epiCenterData?.getDemographicsForYear(selectedYear);
       final childData = demographics?.child0To11Month;
       if (childData != null) {
         calcTarget = (childData.male ?? 0) + (childData.female ?? 0);
+        logg.i('EPI Target Card: Using demographics data: $calcTarget');
       }
     }
 

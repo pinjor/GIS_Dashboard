@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
+import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
+import 'package:gis_dashboard/core/utils/target_calculator.dart';
+import 'package:gis_dashboard/core/utils/utils.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
 
 /// Collection of microplan and population related widgets for EPI Center Details
 class EpiCenterMicroplanSection extends ConsumerWidget {
   final EpiCenterDetailsResponse? epiCenterDetailsData;
+  final VaccineCoverageResponse? coverageData; // ✅ Coverage data for consistent calculation
+  final String? selectedVaccineUid; // ✅ Selected vaccine UID
 
   const EpiCenterMicroplanSection({
     super.key,
     required this.epiCenterDetailsData,
+    this.coverageData, // ✅ Optional coverage data
+    this.selectedVaccineUid, // ✅ Optional selected vaccine UID
   });
 
   @override
@@ -32,7 +39,11 @@ class EpiCenterMicroplanSection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            MicroplanTable(epiData: epiCenterDetailsData),
+            MicroplanTable(
+              epiData: epiCenterDetailsData,
+              coverageData: coverageData, // ✅ Pass coverage data
+              selectedVaccineUid: selectedVaccineUid, // ✅ Pass selected vaccine
+            ),
           ],
         ),
       ),
@@ -42,8 +53,15 @@ class EpiCenterMicroplanSection extends ConsumerWidget {
 
 class MicroplanTable extends ConsumerWidget {
   final EpiCenterDetailsResponse? epiData;
+  final VaccineCoverageResponse? coverageData; // ✅ Coverage data for consistent calculation
+  final String? selectedVaccineUid; // ✅ Selected vaccine UID
 
-  const MicroplanTable({super.key, required this.epiData});
+  const MicroplanTable({
+    super.key,
+    required this.epiData,
+    this.coverageData, // ✅ Optional coverage data
+    this.selectedVaccineUid, // ✅ Optional selected vaccine UID
+  });
 
   String formatCount(dynamic value) {
     if (value is int || value is double) {
@@ -64,8 +82,39 @@ class MicroplanTable extends ConsumerWidget {
     final yearDemographics = epiData?.getDemographicsForYear(currentYear);
     final population = yearDemographics?.population;
     final child0To15Month = yearDemographics?.child0To15Month;
-    final child0To11Month = yearDemographics?.child0To11Month;
     final women15To49 = yearDemographics?.women15To49;
+    
+    // ✅ PRIORITY: Use coverage data for "Child (0-11)" to match Summary card
+    String child0To11Male = '-';
+    String child0To11Female = '-';
+    
+    if (coverageData != null) {
+      final targetData = TargetCalculator.getTargetData(
+        coverageData,
+        selectedVaccineUid,
+      );
+      if (targetData != null && targetData.total > 0) {
+        child0To11Male = formatCount(targetData.male);
+        child0To11Female = formatCount(targetData.female);
+        logg.i(
+          'Microplan Table: Using coverage data for Child (0-11) - '
+          'total: ${targetData.total}, male: ${targetData.male}, female: ${targetData.female}',
+        );
+      } else {
+        // Fallback to demographics if coverage data is not available
+        final child0To11Month = yearDemographics?.child0To11Month;
+        child0To11Male = formatCount(child0To11Month?.male);
+        child0To11Female = formatCount(child0To11Month?.female);
+        logg.i('Microplan Table: Using demographics fallback for Child (0-11)');
+      }
+    } else {
+      // Fallback to demographics if coverage data is not provided
+      final child0To11Month = yearDemographics?.child0To11Month;
+      child0To11Male = formatCount(child0To11Month?.male);
+      child0To11Female = formatCount(child0To11Month?.female);
+      logg.i('Microplan Table: Coverage data not available, using demographics for Child (0-11)');
+    }
+    
     return Column(
       children: [
         PopulationCard(
@@ -78,8 +127,8 @@ class MicroplanTable extends ConsumerWidget {
         PopulationCard(
           category: "0-11",
           title: "Child (0-11)",
-          male: formatCount(child0To11Month?.male),
-          female: formatCount(child0To11Month?.female),
+          male: child0To11Male, // ✅ Use coverage data
+          female: child0To11Female, // ✅ Use coverage data
         ),
         PopulationCard(
           category: "0-15",
