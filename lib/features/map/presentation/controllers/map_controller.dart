@@ -1498,6 +1498,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     final filterState = _filterNotifier.state;
     String? filterUid;
 
+    // ✅ Check from deepest to shallowest level
     if (filterState.selectedSubblock != null &&
         filterState.selectedSubblock != 'All') {
       filterUid = _filterNotifier.getSubblockUid(filterState.selectedSubblock!);
@@ -1515,7 +1516,24 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       filterUid = _filterNotifier.getDistrictUid(filterState.selectedDistrict!);
     } else if (filterState.selectedDivision != 'All') {
       filterUid = _filterNotifier.getDivisionUid(filterState.selectedDivision);
-    } else if (filterState.selectedCityCorporation != null &&
+    } 
+    // ✅ FIX: Check for zone selection (for city corporation hierarchy)
+    else if (filterState.selectedZone != null &&
+        filterState.selectedZone != 'All' &&
+        filterState.selectedCityCorporation != null) {
+      // For zones, we need to return the concatenated slug (ccUid/zoneUid)
+      // This matches the pattern used in loadZoneData
+      final ccUid = _filterNotifier.getCityCorporationUid(
+        filterState.selectedCityCorporation!,
+      );
+      final zoneUid = _filterNotifier.getZoneUid(filterState.selectedZone!);
+      if (ccUid != null && zoneUid != null) {
+        filterUid = '$ccUid/$zoneUid';
+        logg.i('focalAreaUid: Using concatenated zone path: $filterUid');
+      }
+    } 
+    // ✅ Check for city corporation (only if no zone is selected)
+    else if (filterState.selectedCityCorporation != null &&
         filterState.selectedCityCorporation != 'All') {
       filterUid = _filterNotifier.getCityCorporationUid(
         filterState.selectedCityCorporation!,
@@ -1527,12 +1545,18 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
 
     // 2. Get UID from Navigation Stack (The slug used for the API request)
+    // This is especially important for zones since they use concatenated slugs
     if (state.navigationStack.isNotEmpty) {
-      return state.navigationStack.last.slug;
+      final slug = state.navigationStack.last.slug;
+      logg.i('focalAreaUid: Using navigation stack slug: $slug');
+      return slug;
     }
 
     return null;
   }
+
+  /// Get unfiltered coverage data (for summary controller to apply its own month filtering)
+  VaccineCoverageResponse? get unfilteredCoverageData => _unfilteredCoverageData;
 
   /// Apply month filter to existing data
   void applyMonthFilter(List<String> selectedMonths) {

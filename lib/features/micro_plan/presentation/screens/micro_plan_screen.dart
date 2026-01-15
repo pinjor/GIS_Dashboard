@@ -39,16 +39,20 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
     logg.i("🔄 Loading Micro Plan data");
     logg.i("   > Org UID: $orgUid");
     logg.i("   > Year: $year");
+    logg.i("   > Area Type: ${filterState.selectedAreaType}");
+    logg.i("   > City Corporation: ${filterState.selectedCityCorporation}");
+    logg.i("   > Zone: ${filterState.selectedZone}");
 
-    // If orgUid is null (country level), we pass 'null' as a string to the API
-    // final effectiveUid = (orgUid != null && orgUid.isNotEmpty)
-    //     ? orgUid
-    //     : 'null';
+    // ✅ FIX: Use the actual orgUid from focalAreaUid instead of hardcoded 'null'
+    // focalAreaUid now properly handles zones and city corporations
+    final effectiveUid = (orgUid != null && orgUid.isNotEmpty)
+        ? orgUid
+        : 'null';
 
-    // logg.i("   > Effective UID for API: $effectiveUid");
+    logg.i("   > Effective UID for API: $effectiveUid");
 
-    // Fetch data using the same approach as view details button
-    await epiController.fetchEpiCenterDataByOrgUid(orgUid: 'null', year: year);
+    // Fetch data using the focal area UID (which now includes zone support)
+    await epiController.fetchEpiCenterDataByOrgUid(orgUid: effectiveUid, year: year);
   }
 
   @override

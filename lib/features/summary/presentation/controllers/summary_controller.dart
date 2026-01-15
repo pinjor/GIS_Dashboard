@@ -16,6 +16,7 @@ final summaryControllerProvider =
     StateNotifierProvider<SummaryControllerNotifier, SummaryState>((ref) {
       final controller = SummaryControllerNotifier(
         dataService: ref.read(dataServiceProvider),
+        ref: ref, // ✅ Pass ref to access mapControllerProvider
       );
 
       // Listen to map state changes to auto-update summary
@@ -62,11 +63,15 @@ final summaryControllerProvider =
 
 class SummaryControllerNotifier extends StateNotifier<SummaryState> {
   final DataService _dataService;
+  final Ref _ref; // ✅ Store ref to access other providers
   VaccineCoverageResponse? _unfilteredCoverageData;
 
-  SummaryControllerNotifier({required DataService dataService})
-    : _dataService = dataService,
-      super(SummaryState());
+  SummaryControllerNotifier({
+    required DataService dataService,
+    required Ref ref,
+  })  : _dataService = dataService,
+        _ref = ref,
+        super(SummaryState());
 
   /// Update summary with data from map state and apply month filter
   void updateDataAndFilter(MapState mapState, List<String> selectedMonths) {
@@ -74,12 +79,33 @@ class SummaryControllerNotifier extends StateNotifier<SummaryState> {
       "Updating summary with map data for ${mapState.currentAreaName} at level ${mapState.currentLevel}",
     );
 
-    _unfilteredCoverageData = mapState.coverageData;
+    // ✅ FIX: Get unfiltered data from map controller instead of already-filtered mapState.coverageData
+    // This prevents double-filtering and ensures correct month scaling
+    final mapNotifier = _ref.read(mapControllerProvider.notifier);
+    _unfilteredCoverageData = mapNotifier.unfilteredCoverageData ?? mapState.coverageData;
+    
+    logg.i(
+      'Summary: Using unfiltered data from map - '
+      'hasUnfilteredData: ${mapNotifier.unfilteredCoverageData != null}, '
+      'selectedMonths: $selectedMonths (${selectedMonths.length} months)',
+    );
 
     final filteredData = VaccineDataCalculator.recalculateCoverageData(
       _unfilteredCoverageData,
       selectedMonths,
     );
+
+    // 🔍 DEBUG: Log target values to verify scaling
+    if (filteredData?.vaccines?.isNotEmpty == true) {
+      final firstVaccine = filteredData!.vaccines!.first;
+      logg.i(
+        'Summary: Month-filtered data - '
+        'totalTarget: ${firstVaccine.totalTarget}, '
+        'totalTargetMale: ${firstVaccine.totalTargetMale}, '
+        'totalTargetFemale: ${firstVaccine.totalTargetFemale}, '
+        'monthFactor: ${selectedMonths.length / 12.0}',
+      );
+    }
 
     logg.i(
       'Summary: Updated with coverage data - '
