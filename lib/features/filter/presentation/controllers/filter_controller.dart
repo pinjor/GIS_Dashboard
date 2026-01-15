@@ -229,7 +229,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     state = state.copyWith(selectedZone: zone);
   }
 
-  /// Load zones for a city corporation
+  /// Load zones for a city corporation (private method)
   Future<void> _loadZones(String ccUid) async {
     try {
       print('FilterProvider: Loading zones for CC UID: $ccUid');
@@ -239,6 +239,11 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     } catch (e) {
       print('FilterProvider: Error loading zones: $e');
     }
+  }
+
+  /// Load zones for a city corporation (public method for external use)
+  Future<void> loadZonesByCityCorporation(String ccUid) async {
+    await _loadZones(ccUid);
   }
 
   /// Update district selection
@@ -946,6 +951,52 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     return ward.uid;
   }
 
+  /// Get zone UID by name (for zone data fetching)
+  String? getZoneUid(String zoneName) {
+    if (state.zones.isEmpty) {
+      logg.w('getZoneUid: Zones list is empty for zone: $zoneName');
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = zoneName.trim();
+    
+    // Try exact match first
+    var zone = state.zones.firstWhere(
+      (zone) => zone.name?.trim() == normalizedSearchName,
+      orElse: () => const AreaResponseModel(),
+    );
+    
+    // If not found, try case-insensitive match
+    if (zone.uid == null) {
+      zone = state.zones.firstWhere(
+        (zone) => zone.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (zone.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      zone = state.zones.firstWhere(
+        (zone) {
+          final zoneBaseName = zone.name?.split(' (')[0].trim() ?? '';
+          return zoneBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    if (zone.uid == null) {
+      logg.w(
+        'getZoneUid: Zone not found: "$zoneName". '
+        'Available zones: ${state.zones.map((z) => z.name).toList()}',
+      );
+    }
+    
+    return zone.uid;
+  }
+
   /// Initialize filter with EPI data context
   Future<void> initializeFromEpiData({
     required dynamic epiData,
@@ -1600,6 +1651,10 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       focalUid = getDistrictUid(state.selectedDistrict!);
       focalName = state.selectedDistrict;
       layerName = "Filter (District)";
+    } else if (state.selectedZone != null && state.selectedZone != 'All') {
+      focalUid = getZoneUid(state.selectedZone!);
+      focalName = state.selectedZone;
+      layerName = "Filter (Zone)";
     } else if (state.selectedDivision != 'All') {
       focalUid = getDivisionUid(state.selectedDivision);
       focalName = state.selectedDivision;

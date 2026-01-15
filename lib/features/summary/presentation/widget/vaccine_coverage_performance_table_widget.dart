@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
+import 'package:gis_dashboard/core/utils/filter_level_helper.dart';
 import 'package:gis_dashboard/features/summary/presentation/controllers/summary_controller.dart';
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 
@@ -293,12 +294,14 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
                   // Top Performing section - always show, with empty state if no data
                   _buildDistinctPerformersRows(
                     performer: topPerformers,
+                    filterState: filterState,
                     isHighPerformer: true,
                   ),
 
                   // Low Performing section - always show, with empty state if no data
                   _buildDistinctPerformersRows(
                     performer: lowPerformers,
+                    filterState: filterState,
                     isHighPerformer: false,
                   ),
                 ],
@@ -312,6 +315,7 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
 
   Widget _buildDistinctPerformersRows({
     required List<Map<String, dynamic>> performer,
+    required FilterState filterState,
     bool isHighPerformer = true,
   }) {
     if (performer.isNotEmpty) {
@@ -324,6 +328,13 @@ Last Item: ${performer.last['area']?.name} -> Cov: ${performer.last['area']?.cov
 ''');
     }
 
+    // ✅ Get dynamic child level label based on current filter state
+    final childLevelLabel = FilterLevelHelper.getChildLevelLabel(filterState);
+    final count = performer.length;
+    final labelText = count == 1 
+        ? FilterLevelHelper.getChildLevelLabelSingular(filterState)
+        : childLevelLabel;
+
     return Column(
       children: [
         Align(
@@ -333,8 +344,8 @@ Last Item: ${performer.last['area']?.name} -> Cov: ${performer.last['area']?.cov
             padding: const EdgeInsets.only(left: 8.0, top: 8.0),
             child: Text(
               isHighPerformer
-                  ? 'High Performing (${performer.length} District)'
-                  : 'Low Performing (${performer.length} District)',
+                  ? 'High Performing ($count $labelText)'
+                  : 'Low Performing ($count $labelText)',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),

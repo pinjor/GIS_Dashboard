@@ -1310,6 +1310,115 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
+  /// Load zone-specific data when user selects zone filter
+  Future<void> loadZoneData({required String zoneName}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Build concatenated path: cc_uid/zone_uid
+      final ccUid = _filterNotifier.getCityCorporationUid(
+        currentFilter.selectedCityCorporation!,
+      );
+      final zoneUid = _filterNotifier.getZoneUid(zoneName);
+
+      if (ccUid == null || zoneUid == null) {
+        throw Exception('Could not find UIDs for zone path: CC=$ccUid, Zone=$zoneUid');
+      }
+
+      final concatenatedSlug = '$ccUid/$zoneUid';
+      logg.i("Loading zone data for: $zoneName (Path: $concatenatedSlug)");
+
+      // Construct API paths using concatenated slug
+      final geoJsonPath = ApiConstants.getGeoJsonPath(slug: concatenatedSlug);
+      final coveragePath = ApiConstants.getCoveragePath(
+        slug: concatenatedSlug,
+        year: selectedYear,
+      );
+
+      final results = await Future.wait([
+        _dataService.fetchAreaGeoJsonCoordsData(
+          urlPath: geoJsonPath,
+          forceRefresh: true,
+        ),
+        _dataService.getVaccinationCoverage(
+          urlPath: coveragePath,
+          forceRefresh: true,
+        ),
+      ]);
+
+      final areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
+      final coverageData = results[1] as VaccineCoverageResponse;
+
+      // Get city corporation name and slug for navigation stack
+      final ccName = currentFilter.selectedCityCorporation!;
+      final ccSlug = ccUid.toLowerCase();
+
+      // Create navigation level for zone
+      final zoneNavLevel = DrilldownLevel(
+        level: GeographicLevel.zone,
+        slug: concatenatedSlug,
+        name: zoneName,
+        parentSlug: ccSlug,
+      );
+
+      // Create navigation level for city corporation
+      final ccNavLevel = DrilldownLevel(
+        level: GeographicLevel.cityCorporation,
+        slug: ccSlug,
+        name: ccName,
+        parentSlug: null,
+      );
+
+      // Build navigation stack
+      final newNavigationStack = [ccNavLevel, zoneNavLevel];
+
+      // Fetch EPI data for zone level
+      EpiCenterCoordsResponse? epiCenterCoordsData;
+      try {
+        final epiPath = ApiConstants.getEpiPath(slug: concatenatedSlug);
+        logg.i("Fetching EPI data from: $epiPath (using concatenated slug: $concatenatedSlug)");
+        epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
+          urlPath: epiPath,
+          forceRefresh: true,
+        );
+        logg.i(
+          "Successfully fetched EPI data for $zoneName "
+          "(${epiCenterCoordsData.features?.length ?? 0} EPI centers)",
+        );
+      } catch (e) {
+        logg.w("EPI data not available for $zoneName - continuing without EPI data: $e");
+        epiCenterCoordsData = null;
+      }
+
+      _unfilteredCoverageData = coverageData;
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
+      state = state.copyWith(
+        areaCoordsGeoJsonData: areaCoordsGeoJsonData,
+        coverageData: filteredData,
+        epiCenterCoordsData: epiCenterCoordsData,
+        currentLevel: GeographicLevel.zone,
+        navigationStack: newNavigationStack,
+        currentAreaName: zoneName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i("✅ Successfully loaded zone data for $zoneName");
+    } catch (e) {
+      logg.e("Error loading zone data: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load zone data: $e',
+      );
+    }
+  }
+
   /// Extract district slug from country-level GeoJSON data
   /// This loads fresh country data to ensure we have all districts available
   Future<String?> _getDistrictSlugFromCountryData(String districtName) async {

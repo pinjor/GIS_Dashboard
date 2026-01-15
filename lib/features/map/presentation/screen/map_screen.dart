@@ -646,9 +646,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             current.selectedDistrict != null &&
             current.selectedUpazila == null;
 
+        final bool zoneFilterApplied =
+            current.selectedAreaType == AreaType.cityCorporation &&
+            current.selectedCityCorporation != null &&
+            current.selectedZone != null &&
+            current.selectedZone != 'All';
         final bool cityCorporationFilterApplied =
             current.selectedAreaType == AreaType.cityCorporation &&
-            current.selectedCityCorporation != null;
+            current.selectedCityCorporation != null &&
+            (current.selectedZone == null || current.selectedZone == 'All');
         final bool allCityCorporationsView =
             current.selectedAreaType == AreaType.cityCorporation &&
             current.selectedCityCorporation == null;
@@ -1024,6 +1030,66 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ref
                   .read(mapControllerProvider.notifier)
                   .loadDivisionData(divisionName: current.selectedDivision);
+            }
+          });
+        } else if (zoneFilterApplied) {
+          logg.i("Zone filter applied: ${current.selectedZone} in ${current.selectedCityCorporation}");
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (mounted) {
+              final currentFilterState = ref.read(filterControllerProvider);
+              
+              // ✅ Proactively load zones if not loaded
+              if (currentFilterState.zones.isEmpty) {
+                logg.i("Zones not loaded, loading zones for CC: ${current.selectedCityCorporation}");
+                final ccUid = ref.read(filterControllerProvider.notifier).getCityCorporationUid(
+                  current.selectedCityCorporation!,
+                );
+                if (ccUid != null) {
+                  await ref.read(filterControllerProvider.notifier).loadZonesByCityCorporation(ccUid);
+                }
+              }
+              
+              // Wait for zones to load (with retry)
+              int retries = 0;
+              while (retries < 30 && mounted) {
+                final checkState = ref.read(filterControllerProvider);
+                if (checkState.zones.isNotEmpty) {
+                  break;
+                }
+                await Future.delayed(const Duration(milliseconds: 100));
+                retries++;
+              }
+              
+              final finalState = ref.read(filterControllerProvider);
+              if (finalState.zones.isEmpty) {
+                logg.w("Zones not loaded after waiting ${retries * 100}ms");
+                return;
+              }
+              
+              // Verify zone exists in the list
+              final zoneName = current.selectedZone!;
+              final zoneExists = finalState.zones.any(
+                (zone) => zone.name?.trim() == zoneName.trim() ||
+                    zone.name?.trim().toLowerCase() == zoneName.trim().toLowerCase(),
+              );
+              
+              if (!zoneExists) {
+                logg.w(
+                  "Zone '$zoneName' not found in zones list (${finalState.zones.length} total zones). "
+                  "Available zones: ${finalState.zones.map((z) => z.name).toList()}",
+                );
+                return;
+              }
+              
+              logg.i(
+                "✅ Zone '$zoneName' found in zones list (${finalState.zones.length} total zones), proceeding with loadZoneData",
+              );
+              
+              if (mounted) {
+                ref
+                    .read(mapControllerProvider.notifier)
+                    .loadZoneData(zoneName: zoneName);
+              }
             }
           });
         } else if (cityCorporationFilterApplied) {
