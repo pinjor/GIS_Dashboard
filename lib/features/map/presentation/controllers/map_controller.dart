@@ -1310,6 +1310,240 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     }
   }
 
+  /// Load subblock-specific data when user selects subblock filter
+  Future<void> loadSubblockData({required String subblockName}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final currentFilter = _filterNotifier.state;
+      final selectedYear = currentFilter.selectedYear;
+
+      // Build concatenated path: district_uid/upazila_uid/union_uid/ward_uid/subblock_uid
+      final districtUid = _filterNotifier.getDistrictUid(
+        currentFilter.selectedDistrict!,
+      );
+      final upazilaUid = _filterNotifier.getUpazilaUid(
+        currentFilter.selectedUpazila!,
+      );
+      final unionUid = _filterNotifier.getUnionUid(
+        currentFilter.selectedUnion!,
+      );
+      final wardUid = _filterNotifier.getWardUid(
+        currentFilter.selectedWard!,
+      );
+      final subblockUid = _filterNotifier.getSubblockUid(subblockName);
+
+      if (districtUid == null ||
+          upazilaUid == null ||
+          unionUid == null ||
+          wardUid == null ||
+          subblockUid == null) {
+        throw Exception('Could not find UIDs for hierarchical path');
+      }
+
+      final concatenatedSlug = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
+      logg.i("Loading subblock data for: $subblockName (Path: $concatenatedSlug)");
+
+      // Construct API paths using concatenated slug
+      final geoJsonPath = ApiConstants.getGeoJsonPath(slug: concatenatedSlug);
+      final coveragePath = ApiConstants.getCoveragePath(
+        slug: concatenatedSlug,
+        year: selectedYear,
+      );
+
+      // ✅ FIX: EPI path should also use concatenated slug
+      final epiPath = ApiConstants.getEpiPath(slug: concatenatedSlug);
+      logg.i("Fetching subblock EPI data from: $epiPath");
+
+      // ✅ FIX: Try to fetch subblock data, but fallback to ward level if 404
+      // Subblock level may not have GeoJSON/coverage files, so use ward level as fallback
+      AreaCoordsGeoJsonResponse? areaCoordsGeoJsonData;
+      VaccineCoverageResponse? coverageData;
+      
+      // Build ward-level paths for fallback
+      final wardSlugForFallback = '$districtUid/$upazilaUid/$unionUid/$wardUid';
+      final wardGeoJsonPath = ApiConstants.getGeoJsonPath(slug: wardSlugForFallback);
+      final wardCoveragePath = ApiConstants.getCoveragePath(
+        slug: wardSlugForFallback,
+        year: selectedYear,
+      );
+      
+      try {
+        // Try to fetch subblock-level GeoJSON and coverage
+        logg.i("Attempting to fetch subblock-level GeoJSON and coverage...");
+        final results = await Future.wait([
+          _dataService.fetchAreaGeoJsonCoordsData(
+            urlPath: geoJsonPath,
+            forceRefresh: true,
+          ),
+          _dataService.getVaccinationCoverage(
+            urlPath: coveragePath,
+            forceRefresh: true,
+          ),
+        ]);
+        
+        areaCoordsGeoJsonData = results[0] as AreaCoordsGeoJsonResponse;
+        coverageData = results[1] as VaccineCoverageResponse;
+        logg.i("✅ Successfully fetched subblock-level GeoJSON and coverage");
+      } catch (e) {
+        // If subblock data fails (likely 404), fallback to ward level
+        logg.w(
+          "Subblock-level GeoJSON/coverage not available (404), falling back to ward level: $e",
+        );
+        logg.i("Fetching ward-level GeoJSON and coverage as fallback...");
+        
+        try {
+          final fallbackResults = await Future.wait([
+            _dataService.fetchAreaGeoJsonCoordsData(
+              urlPath: wardGeoJsonPath,
+              forceRefresh: true,
+            ),
+            _dataService.getVaccinationCoverage(
+              urlPath: wardCoveragePath,
+              forceRefresh: true,
+            ),
+          ]);
+          
+          areaCoordsGeoJsonData = fallbackResults[0] as AreaCoordsGeoJsonResponse;
+          coverageData = fallbackResults[1] as VaccineCoverageResponse;
+          logg.i("✅ Successfully fetched ward-level GeoJSON and coverage as fallback");
+        } catch (fallbackError) {
+          logg.e("Failed to fetch ward-level fallback data: $fallbackError");
+          rethrow; // Re-throw if fallback also fails
+        }
+      }
+      
+      // Fetch EPI data separately (this works at subblock level)
+      EpiCenterCoordsResponse? epiCenterCoordsData;
+      try {
+        epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
+          urlPath: epiPath,
+          forceRefresh: true,
+        );
+        logg.i(
+          "✅ Successfully fetched subblock EPI data (${epiCenterCoordsData.features?.length ?? 0} EPI centers)",
+        );
+      } catch (e) {
+        logg.w("EPI data not available for subblock - continuing without EPI data: $e");
+        epiCenterCoordsData = null;
+      }
+
+      _unfilteredCoverageData = coverageData;
+      // Apply existing month filter if any
+      final filteredData = VaccineDataCalculator.recalculateCoverageData(
+        coverageData,
+        currentFilter.selectedMonths,
+      );
+
+      // Get district name and slug for navigation stack
+      final districtName = currentFilter.selectedDistrict!;
+      final districtSlug = await _getDistrictSlugFromCountryData(districtName);
+
+      // Get upazila name and build upazila slug
+      final upazilaName = currentFilter.selectedUpazila!;
+      final upazilaSlug = '$districtUid/$upazilaUid';
+
+      // Get union name and build union slug
+      final unionName = currentFilter.selectedUnion!;
+      final unionSlug = '$districtUid/$upazilaUid/$unionUid';
+
+      // Get ward name and build ward slug
+      final wardName = currentFilter.selectedWard!;
+      final wardSlug = '$districtUid/$upazilaUid/$unionUid/$wardUid';
+
+      // Create navigation level for subblock
+      final subblockNavLevel = DrilldownLevel(
+        level: GeographicLevel.subblock,
+        slug: concatenatedSlug,
+        name: subblockName,
+        parentSlug: wardSlug,
+      );
+
+      // Create navigation level for ward
+      final wardNavLevel = DrilldownLevel(
+        level: GeographicLevel.ward,
+        slug: wardSlug,
+        name: wardName,
+        parentSlug: unionSlug,
+      );
+
+      // Create navigation level for union
+      final unionNavLevel = DrilldownLevel(
+        level: GeographicLevel.union,
+        slug: unionSlug,
+        name: unionName,
+        parentSlug: upazilaSlug,
+      );
+
+      // Create navigation level for upazila
+      final upazilaNavLevel = DrilldownLevel(
+        level: GeographicLevel.upazila,
+        slug: upazilaSlug,
+        name: upazilaName,
+        parentSlug: districtSlug ?? districtUid,
+      );
+
+      // Create navigation level for district
+      final districtNavLevel = DrilldownLevel(
+        level: GeographicLevel.district,
+        slug: districtSlug ?? districtUid,
+        name: districtName,
+        parentSlug: null,
+      );
+
+      // Build navigation stack properly preserving division hierarchy
+      List<DrilldownLevel> newNavigationStack;
+
+      // Check if there's a division context from filter that should be preserved
+      final selectedDivision = currentFilter.selectedDivision;
+      final hasValidDivisionContext =
+          selectedDivision != 'All' && selectedDivision.isNotEmpty;
+
+      if (hasValidDivisionContext) {
+        // Build full hierarchy: Division > District > Upazila > Union > Ward > Subblock
+        newNavigationStack = [
+          districtNavLevel,
+          upazilaNavLevel,
+          unionNavLevel,
+          wardNavLevel,
+          subblockNavLevel,
+        ];
+      } else {
+        // No division context, just build: District > Upazila > Union > Ward > Subblock
+        newNavigationStack = [
+          districtNavLevel,
+          upazilaNavLevel,
+          unionNavLevel,
+          wardNavLevel,
+          subblockNavLevel,
+        ];
+      }
+
+      state = state.copyWith(
+        areaCoordsGeoJsonData: areaCoordsGeoJsonData,
+        coverageData: filteredData,
+        epiCenterCoordsData: epiCenterCoordsData,
+        currentLevel: GeographicLevel.subblock,
+        navigationStack: newNavigationStack,
+        currentAreaName: subblockName,
+        isLoading: false,
+        clearError: true,
+      );
+
+      logg.i(
+        "✅ Subblock data loaded successfully: $subblockName. "
+        "EPI centers: ${epiCenterCoordsData?.features?.length ?? 0}",
+      );
+
+      _logCurrentAreaUids(source: "Subblock Data Loaded");
+    } catch (e) {
+      logg.e("Error loading subblock data: $e");
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load subblock data: $e',
+      );
+    }
+  }
+
   /// Load zone-specific data when user selects zone filter
   Future<void> loadZoneData({required String zoneName}) async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -1501,7 +1735,33 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     // ✅ Check from deepest to shallowest level
     if (filterState.selectedSubblock != null &&
         filterState.selectedSubblock != 'All') {
-      filterUid = _filterNotifier.getSubblockUid(filterState.selectedSubblock!);
+      // ✅ FIX: For subblock, use concatenated slug path (like zone)
+      // This ensures EPI center details can fetch data correctly
+      final districtUid = _filterNotifier.getDistrictUid(
+        filterState.selectedDistrict!,
+      );
+      final upazilaUid = _filterNotifier.getUpazilaUid(
+        filterState.selectedUpazila!,
+      );
+      final unionUid = _filterNotifier.getUnionUid(
+        filterState.selectedUnion!,
+      );
+      final wardUid = _filterNotifier.getWardUid(
+        filterState.selectedWard!,
+      );
+      final subblockUid = _filterNotifier.getSubblockUid(filterState.selectedSubblock!);
+      
+      if (districtUid != null &&
+          upazilaUid != null &&
+          unionUid != null &&
+          wardUid != null &&
+          subblockUid != null) {
+        filterUid = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
+        logg.i('focalAreaUid: Using concatenated subblock path: $filterUid');
+      } else {
+        logg.w('focalAreaUid: Could not build concatenated subblock path - using subblock UID only');
+        filterUid = subblockUid;
+      }
     } else if (filterState.selectedWard != null &&
         filterState.selectedWard != 'All') {
       filterUid = _filterNotifier.getWardUid(filterState.selectedWard!);

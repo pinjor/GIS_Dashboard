@@ -579,12 +579,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         logg.i("✅ Map: Filter applied - triggering map data load");
 
         // Check if only vaccine changed (no geographic filter changes)
+        // ✅ FIX: Include hierarchical filters (upazila, union, ward, subblock) in change detection
         final bool onlyVaccineChanged =
             previous.selectedAreaType == current.selectedAreaType &&
             previous.selectedDivision == current.selectedDivision &&
             previous.selectedDistrict == current.selectedDistrict &&
             previous.selectedCityCorporation ==
                 current.selectedCityCorporation &&
+            previous.selectedUpazila == current.selectedUpazila &&
+            previous.selectedUnion == current.selectedUnion &&
+            previous.selectedWard == current.selectedWard &&
+            previous.selectedSubblock == current.selectedSubblock &&
+            previous.selectedZone == current.selectedZone &&
             previous.selectedYear == current.selectedYear &&
             previous.selectedVaccine != current.selectedVaccine;
 
@@ -623,28 +629,42 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         }
 
         // Detect deepest hierarchical selection for District area type
+        // ✅ FIX: Validate parent levels are set for subblock filter
+        final bool subblockFilterApplied =
+            current.selectedAreaType == AreaType.district &&
+            current.selectedDistrict != null &&
+            current.selectedUpazila != null &&
+            current.selectedUnion != null &&
+            current.selectedWard != null &&
+            current.selectedSubblock != null &&
+            current.selectedSubblock != 'All';
         // ✅ FIX: Validate parent levels are set for ward filter
         final bool wardFilterApplied =
             current.selectedAreaType == AreaType.district &&
             current.selectedDistrict != null &&
             current.selectedUpazila != null &&
             current.selectedUnion != null &&
-            current.selectedWard != null;
+            current.selectedWard != null &&
+            current.selectedWard != 'All' &&
+            (current.selectedSubblock == null || current.selectedSubblock == 'All');
         // ✅ FIX: Validate parent levels are set for union filter
         final bool unionFilterApplied =
             current.selectedAreaType == AreaType.district &&
             current.selectedDistrict != null &&
             current.selectedUpazila != null &&
             current.selectedUnion != null &&
-            current.selectedWard == null;
+            current.selectedUnion != 'All' &&
+            (current.selectedWard == null || current.selectedWard == 'All');
         final bool upazilaFilterApplied =
             current.selectedAreaType == AreaType.district &&
             current.selectedUpazila != null &&
-            current.selectedUnion == null;
+            current.selectedUpazila != 'All' &&
+            (current.selectedUnion == null || current.selectedUnion == 'All');
         final bool districtFilterApplied =
             current.selectedAreaType == AreaType.district &&
             current.selectedDistrict != null &&
-            current.selectedUpazila == null;
+            current.selectedDistrict != 'All' &&
+            (current.selectedUpazila == null || current.selectedUpazila == 'All');
 
         final bool zoneFilterApplied =
             current.selectedAreaType == AreaType.cityCorporation &&
@@ -669,7 +689,176 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             current.selectedSubblock == null;
 
         // Load data based on deepest selection (hierarchical priority)
-        if (wardFilterApplied) {
+        // ✅ FIX: Check from deepest to shallowest (subblock -> ward -> union -> upazila -> district)
+        // This ensures when all filters are applied at once, the deepest level is selected
+        logg.i(
+          '🔍 Filter Detection: '
+          'subblock=${subblockFilterApplied} (${current.selectedSubblock}), '
+          'ward=${wardFilterApplied} (${current.selectedWard}), '
+          'union=${unionFilterApplied} (${current.selectedUnion}), '
+          'upazila=${upazilaFilterApplied} (${current.selectedUpazila}), '
+          'district=${districtFilterApplied} (${current.selectedDistrict})',
+        );
+        if (subblockFilterApplied) {
+          logg.i("Subblock filter applied: ${current.selectedSubblock}");
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (mounted) {
+              // ✅ FIX: Wait for subblocks to be loaded before calling loadSubblockData
+              // This prevents race condition where loadSubblockData is called before
+              // subblocks list is populated in filter controller
+              final subblockName = current.selectedSubblock!;
+              
+              // Check if subblocks are already loaded
+              var currentFilterState = ref.read(filterControllerProvider);
+              
+              // ✅ FIX: First ensure wards are loaded (subblocks depend on wards)
+              if (currentFilterState.wards.isEmpty) {
+                logg.i("Wards not loaded yet, loading them first before subblocks...");
+                
+                // Proactively load wards if union is selected
+                final selectedUnion = currentFilterState.selectedUnion;
+                if (selectedUnion != null && selectedUnion != 'All') {
+                  final filterNotifier = ref.read(filterControllerProvider.notifier);
+                  
+                  // Wait for unions to load if needed
+                  if (currentFilterState.unions.isEmpty) {
+                    logg.i("Unions not loaded yet, loading them first...");
+                    final selectedUpazila = currentFilterState.selectedUpazila;
+                    if (selectedUpazila != null && selectedUpazila != 'All') {
+                      final upazilaUid = filterNotifier.getUpazilaUid(selectedUpazila);
+                      if (upazilaUid != null) {
+                        await filterNotifier.loadUnionsByUpazila(upazilaUid);
+                        currentFilterState = ref.read(filterControllerProvider);
+                      }
+                    }
+                    
+                    // Wait for unions to load
+                    int unionRetries = 0;
+                    while (unionRetries < 30 && mounted && currentFilterState.unions.isEmpty) {
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      currentFilterState = ref.read(filterControllerProvider);
+                      unionRetries++;
+                    }
+                  }
+                  
+                  // Now load wards
+                  final unionUid = filterNotifier.getUnionUid(selectedUnion);
+                  if (unionUid != null) {
+                    logg.i("Loading wards for union: $selectedUnion (UID: $unionUid)");
+                    await filterNotifier.loadWardsByUnion(unionUid);
+                    currentFilterState = ref.read(filterControllerProvider);
+                  }
+                }
+                
+                // Wait for wards to load (max 5 seconds)
+                int wardRetries = 0;
+                const maxWardRetries = 50;
+                
+                while (wardRetries < maxWardRetries && mounted && currentFilterState.wards.isEmpty) {
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  currentFilterState = ref.read(filterControllerProvider);
+                  if (currentFilterState.wards.isNotEmpty) {
+                    logg.i("Wards loaded (${currentFilterState.wards.length} items), proceeding with subblock loading");
+                    break;
+                  }
+                  wardRetries++;
+                }
+                
+                if (currentFilterState.wards.isEmpty) {
+                  logg.e(
+                    "Cannot load subblock data: Wards list is still empty after waiting. "
+                    "Union: ${currentFilterState.selectedUnion}, "
+                    "Available unions: ${currentFilterState.unions.map((u) => u.name).toList()}",
+                  );
+                  return; // Don't proceed if wards aren't loaded
+                }
+              }
+              
+              // Now that wards are loaded, load subblocks
+              if (currentFilterState.subblocks.isEmpty) {
+                logg.i("Subblocks not loaded yet, attempting to load them...");
+                
+                // Proactively load subblocks if ward is selected
+                if (currentFilterState.selectedWard != null && 
+                    currentFilterState.selectedWard != 'All') {
+                  final wardName = currentFilterState.selectedWard!;
+                  final filterNotifier = ref.read(filterControllerProvider.notifier);
+                  final wardUid = filterNotifier.getWardUid(wardName);
+                  
+                  if (wardUid != null) {
+                    // Load subblocks directly using the public method
+                    logg.i("Triggering subblock load for ward: $wardName (UID: $wardUid)");
+                    await filterNotifier.loadSubblocksByWard(wardUid);
+                    // Refresh filter state after loading
+                    currentFilterState = ref.read(filterControllerProvider);
+                  } else {
+                    logg.w(
+                      "Could not get ward UID for $wardName to load subblocks. "
+                      "Available wards: ${currentFilterState.wards.map((w) => w.name).toList()}",
+                    );
+                  }
+                }
+                
+                // Wait for subblocks to load (max 5 seconds)
+                int retries = 0;
+                const maxRetries = 50;
+                
+                while (retries < maxRetries && mounted) {
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  currentFilterState = ref.read(filterControllerProvider);
+                  if (currentFilterState.subblocks.isNotEmpty) {
+                    logg.i("Subblocks loaded (${currentFilterState.subblocks.length} items), proceeding with loadSubblockData");
+                    break;
+                  }
+                  retries++;
+                }
+                
+                if (currentFilterState.subblocks.isEmpty) {
+                  logg.e(
+                    "Cannot load subblock data: Subblocks list is still empty after all retries. "
+                    "Subblock: $subblockName, Ward: ${currentFilterState.selectedWard}, "
+                    "Available wards: ${currentFilterState.wards.map((w) => w.name).toList()}",
+                  );
+                  return; // Don't proceed if subblocks aren't loaded
+                }
+              }
+              
+              // Check if subblock exists with fuzzy matching (handles name variations)
+              final subblockExists = currentFilterState.subblocks.any(
+                (subblock) {
+                  final normalizedSubblockName = subblock.name?.trim() ?? '';
+                  final normalizedSearchName = subblockName.trim();
+                  // Exact match
+                  if (normalizedSubblockName == normalizedSearchName) return true;
+                  // Case-insensitive match
+                  if (normalizedSubblockName.toLowerCase() == normalizedSearchName.toLowerCase()) return true;
+                  // Partial match (for names with "(Part ...)" suffix)
+                  final subblockBaseName = normalizedSubblockName.split(' (')[0].trim();
+                  final searchBaseName = normalizedSearchName.split(' (')[0].trim();
+                  if (subblockBaseName.toLowerCase() == searchBaseName.toLowerCase()) return true;
+                  return false;
+                },
+              );
+              
+              if (!subblockExists && currentFilterState.subblocks.isNotEmpty) {
+                logg.w(
+                  "⚠️ Subblock '$subblockName' not found in subblocks list. "
+                  "Available subblocks: ${currentFilterState.subblocks.map((s) => s.name).toList()}. "
+                  "Attempting to load anyway (getSubblockUid will handle fuzzy matching).",
+                );
+              } else if (subblockExists) {
+                logg.i(
+                  "✅ Subblock '$subblockName' found in subblocks list (${currentFilterState.subblocks.length} total subblocks), proceeding with loadSubblockData",
+                );
+              }
+              
+              // Try to load - getSubblockUid will handle fuzzy matching
+              ref
+                  .read(mapControllerProvider.notifier)
+                  .loadSubblockData(subblockName: subblockName);
+            }
+          });
+        } else if (wardFilterApplied) {
           logg.i("Ward filter applied: ${current.selectedWard}");
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             if (mounted) {

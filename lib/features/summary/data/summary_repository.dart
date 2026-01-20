@@ -52,7 +52,12 @@ class SummaryRepository {
 
       return VaccineCoverageResponse.fromJson(vaccineCoverageData);
     } on DioException catch (e) {
-      logg.e("Dio error fetching vaccination coverage: $e");
+      // ✅ Reduce log noise for expected 404 errors (fallback scenarios)
+      if (e.response?.statusCode == 404) {
+        logg.w("Vaccination coverage not found (404) for $urlPath - this may be expected for some area levels");
+      } else {
+        logg.e("Dio error fetching vaccination coverage: $e");
+      }
       throw NetworkErrorHandler.handleDioError(e);
     } catch (e) {
       logg.e("Error fetching vaccination coverage: $e");

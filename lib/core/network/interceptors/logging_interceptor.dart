@@ -22,13 +22,21 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    logg.e('ERROR: ${err.requestOptions.method} ${err.requestOptions.uri}');
-    logg.e('Error type: ${err.type}');
-    logg.e('Error message: ${err.message}');
+    // ✅ Reduce log noise for expected 404 errors (fallback scenarios)
+    if (err.response?.statusCode == 404) {
+      logg.w('⚠️ Not found (404): ${err.requestOptions.method} ${err.requestOptions.uri}');
+      logg.d('Error type: ${err.type}, message: ${err.message}');
+    } else {
+      logg.e('ERROR: ${err.requestOptions.method} ${err.requestOptions.uri}');
+      logg.e('Error type: ${err.type}');
+      logg.e('Error message: ${err.message}');
+    }
 
     // Convert to user-friendly error
     final networkError = NetworkErrorHandler.handleDioError(err);
-    logg.e('User-friendly error: ${networkError.message}');
+    if (err.response?.statusCode != 404) {
+      logg.e('User-friendly error: ${networkError.message}');
+    }
 
     super.onError(err, handler);
   }

@@ -11,8 +11,13 @@ import '../../../epi_center/presentation/controllers/epi_center_controller.dart'
 
 class FilterDialogBoxWidget extends ConsumerStatefulWidget {
   final bool isEpiContext;
+  final bool isMicroplanContext;
 
-  const FilterDialogBoxWidget({super.key, this.isEpiContext = false});
+  const FilterDialogBoxWidget({
+    super.key,
+    this.isEpiContext = false,
+    this.isMicroplanContext = false,
+  });
 
   @override
   ConsumerState<FilterDialogBoxWidget> createState() =>
@@ -198,10 +203,22 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       _selectedWard = null;
     }
 
+    // ✅ FIX: Preserve subblock selection even if subblocks list isn't loaded yet
+    // This prevents the subblock value from being lost when the filter dialog opens
     final availableSubblocks = filterNotifier.subblockDropdownItems;
-    if (currentFilter.selectedSubblock != null &&
-        availableSubblocks.contains(currentFilter.selectedSubblock)) {
-      _selectedSubblock = currentFilter.selectedSubblock;
+    if (currentFilter.selectedSubblock != null) {
+      if (availableSubblocks.contains(currentFilter.selectedSubblock)) {
+        _selectedSubblock = currentFilter.selectedSubblock;
+      } else if (availableSubblocks.isEmpty) {
+        // If subblocks list is empty, preserve the selected subblock value
+        // It will be validated later when subblocks are loaded
+        _selectedSubblock = currentFilter.selectedSubblock;
+        logg.i('Preserving subblock selection "${currentFilter.selectedSubblock}" even though subblocks list is empty');
+      } else {
+        // Subblocks list is loaded but doesn't contain the selected subblock
+        _selectedSubblock = null;
+        logg.w('Subblock "${currentFilter.selectedSubblock}" not found in available subblocks: $availableSubblocks');
+      }
     } else {
       _selectedSubblock = null;
     }
@@ -266,6 +283,36 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         logg.w(
           "⚠️ Could not get union UID for $_selectedUnion to reload wards. "
           "Available unions: ${freshFilterState.unions.map((u) => u.name).toList()}",
+        );
+      }
+    }
+
+    // ✅ FIX: Reload subblocks if ward is selected but subblocks list is empty
+    if (_selectedWard != null &&
+        _selectedWard != 'All' &&
+        currentFilter.subblocks.isEmpty) {
+      logg.i(
+        "🔄 Ward selected but subblocks list empty, reloading subblocks for: $_selectedWard",
+      );
+      // Get fresh filter state in case wards were just loaded
+      final freshFilterState = ref.read(filterControllerProvider);
+      final wardUid = filterNotifier.getWardUid(_selectedWard!);
+      if (wardUid != null) {
+        // Load subblocks directly using the public method
+        await filterNotifier.loadSubblocksByWard(wardUid);
+        // Refresh and update _selectedSubblock if it was preserved
+        final updatedFilter = ref.read(filterControllerProvider);
+        if (_selectedSubblock != null && updatedFilter.subblocks.isNotEmpty) {
+          final subblockExists = updatedFilter.subblocks.any((s) => s.name == _selectedSubblock);
+          if (!subblockExists) {
+            logg.w('Preserved subblock "$_selectedSubblock" not found in loaded subblocks');
+            _selectedSubblock = null;
+          }
+        }
+      } else {
+        logg.w(
+          "⚠️ Could not get ward UID for $_selectedWard to reload subblocks. "
+          "Available wards: ${freshFilterState.wards.map((w) => w.name).toList()}",
         );
       }
     }
@@ -383,9 +430,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
 
   /// Check if any values have changed from initial values
   bool _hasValuesChanged() {
+    // For microplan context, don't check vaccine and months changes
     final hasChanged =
         _selectedAreaType != _initialAreaType ||
-        _selectedVaccine != _initialVaccine ||
+        (!widget.isMicroplanContext && _selectedVaccine != _initialVaccine) ||
         _selectedDivision != _initialDivision ||
         _selectedCityCorporation != _initialCityCorporation ||
         _selectedZone != _initialZone ||
@@ -395,7 +443,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         _selectedUnion != _initialUnion ||
         _selectedWard != _initialWard ||
         _selectedSubblock != _initialSubblock ||
-        _areMonthsChanged(); // Check for months changes
+        (!widget.isMicroplanContext && _areMonthsChanged()); // Check for months changes only if not microplan context
 
     return hasChanged;
   }
@@ -489,8 +537,11 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       return;
     }
 
-    // Check if any values have changed from initial values
-    if (!_hasValuesChanged()) {
+    // For microplan context, always apply filters (even if no changes detected)
+    // This ensures data reload happens when filter button is clicked
+    final shouldApplyFilters = widget.isMicroplanContext || _hasValuesChanged();
+    
+    if (!shouldApplyFilters) {
       logg.i('🔄 No filter changes detected - closing dialog');
       Navigator.of(context).pop();
       return;
@@ -533,21 +584,22 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     if (_selectedAreaType != _initialAreaType) {
       changedValues['areaType'] = _selectedAreaType;
     }
-    if (!isEpiContext && _selectedVaccine != _initialVaccine) {
+    if (!isEpiContext && !widget.isMicroplanContext && _selectedVaccine != _initialVaccine) {
       changedValues['vaccine'] = _selectedVaccine;
       logg.i(
         '🧪 FILTER DIALOG: ✅ Vaccine change will be applied: "$_selectedVaccine"',
       );
-    } else if (isEpiContext && _selectedVaccine != _initialVaccine) {
-      // 🔍 DEBUG: This is the critical line - vaccine is being SKIPPED in EPI context!
+    } else if ((isEpiContext || widget.isMicroplanContext) && _selectedVaccine != _initialVaccine) {
+      // 🔍 DEBUG: This is the critical line - vaccine is being SKIPPED in EPI/microplan context!
       logg.w(
-        '🧪 FILTER DIALOG: ⚠️ Vaccine change SKIPPED because isEpiContext=true! Selected: "$_selectedVaccine"',
+        '🧪 FILTER DIALOG: ⚠️ Vaccine change SKIPPED because isEpiContext=$isEpiContext or isMicroplanContext=${widget.isMicroplanContext}! Selected: "$_selectedVaccine"',
       );
     }
     if (_selectedYear != _initialYear) {
       changedValues['year'] = _selectedYear;
     }
-    if (_areMonthsChanged()) {
+    // Only apply months filter if not in microplan context
+    if (!widget.isMicroplanContext && _areMonthsChanged()) {
       changedValues['months'] = _selectedMonths;
     }
 
@@ -559,19 +611,19 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
         changedValues['district'] = _selectedDistrict;
       }
 
-      if (isEpiContext) {
-        if (_selectedUpazila != _initialUpazila) {
-          changedValues['upazila'] = _selectedUpazila;
-        }
-        if (_selectedUnion != _initialUnion) {
-          changedValues['union'] = _selectedUnion;
-        }
-        if (_selectedWard != _initialWard) {
-          changedValues['ward'] = _selectedWard;
-        }
-        if (_selectedSubblock != _initialSubblock) {
-          changedValues['subblock'] = _selectedSubblock;
-        }
+      // ✅ FIX: Apply hierarchical filters for both EPI context and main filter
+      // Ward and subblock should be available in main filter too
+      if (_selectedUpazila != _initialUpazila) {
+        changedValues['upazila'] = _selectedUpazila;
+      }
+      if (_selectedUnion != _initialUnion) {
+        changedValues['union'] = _selectedUnion;
+      }
+      if (_selectedWard != _initialWard) {
+        changedValues['ward'] = _selectedWard;
+      }
+      if (_selectedSubblock != _initialSubblock) {
+        changedValues['subblock'] = _selectedSubblock;
       }
     } else if (_selectedAreaType == AreaType.cityCorporation) {
       if (_selectedCityCorporation != _initialCityCorporation) {
@@ -585,9 +637,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     // ✅ Apply all current selections (not just changed values) but pass initial values for comparison
     // The key insight: we pass the current _selectedXXX values but the controller will use
     // our stored _initialXXX values to determine what actually changed
+    logg.i('🔧 Microplan Filter: Applying filters with forceTimestampUpdate=${widget.isMicroplanContext}');
     filterNotifier.applyFiltersWithInitialValues(
       // Current selections
-      vaccine: !isEpiContext ? _selectedVaccine : null,
+      vaccine: (!isEpiContext && !widget.isMicroplanContext) ? _selectedVaccine : null,
       areaType: _selectedAreaType,
       year: _selectedYear,
       division: _selectedAreaType == AreaType.district
@@ -615,7 +668,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       subblock: _selectedAreaType == AreaType.district
           ? _selectedSubblock
           : null,
-      months: !isEpiContext ? _selectedMonths : null, // Pass selected months
+      months: (!isEpiContext && !widget.isMicroplanContext) ? _selectedMonths : null, // Pass selected months
       // Initial values for comparison
       initialVaccine: _initialVaccine,
       initialAreaType: _initialAreaType,
@@ -629,7 +682,12 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       initialUnion: _initialUnion,
       initialWard: _initialWard,
       initialSubblock: _initialSubblock,
+      forceTimestampUpdate: widget.isMicroplanContext, // ✅ Force timestamp update for microplan context
     );
+    
+    if (widget.isMicroplanContext) {
+      logg.i('✅ Microplan Filter: Filters applied with forced timestamp update');
+    }
 
     Navigator.of(context).pop();
   }
@@ -673,6 +731,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
   /// Check if filter button should be enabled
   bool _isFilterButtonEnabled(FilterState filterState) {
     final isEpiContext = widget.isEpiContext;
+    final isMicroplanContext = widget.isMicroplanContext;
 
     // Check if EPI is from City Corporation
     // ✅ FIX: Check if EPI is from City Corporation using filter state (more reliable)
@@ -683,6 +742,11 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     if (isEpiContext && isEpiFromCC) {
       // Enable for any CC selection (same CC = refresh data, different CC = switch CC)
       return _selectedCityCorporation != null;
+    }
+
+    // For microplan context, always enable filter button (allows data refresh)
+    if (isMicroplanContext) {
+      return true;
     }
 
     // For non-EPI context, always enable (basic filtering always allowed)
@@ -866,8 +930,8 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                     }
                   },
                 ),
-                // Month Selection (Only in normal context)
-                if (!widget.isEpiContext) ...[
+                // Month Selection (Only in normal context, not in microplan context)
+                if (!widget.isEpiContext && !widget.isMicroplanContext) ...[
                   16.h,
                   const Text(
                     'Months',
@@ -1148,8 +1212,8 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       },
                     ),
 
-                    // Subblock Dropdown (EPI context only - not shown in main filter)
-                    if (widget.isEpiContext) ...[
+                    // ✅ Subblock Dropdown (shown when ward is selected, not just EPI context)
+                    if (_selectedWard != null && _selectedWard != 'All') ...[
                       16.h,
                       const Text(
                         'Subblock',
@@ -1159,36 +1223,42 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                         ),
                       ),
                       8.h,
-                      DropdownButtonFormField<String?>(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        initialValue:
-                            filterNotifier.subblockDropdownItems.contains(
-                          _selectedSubblock,
-                        )
-                            ? _selectedSubblock
-                            : null,
-                        hint: const Text('All'),
-                        items: [
-                          const DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text('All'),
-                          ),
-                          ...filterNotifier.subblockDropdownItems
-                              .where((item) => item != 'All')
-                              .map(
-                                (subblock) => DropdownMenuItem<String?>(
-                                  value: subblock,
-                                  child: Text(subblock),
-                                ),
+                      // ✅ FIX: Make subblock dropdown reactive to state changes
+                      Builder(
+                        builder: (context) {
+                          // Watch filter state to reactively update when subblocks are loaded
+                          ref.watch(filterControllerProvider);
+                          final subblockDropdownItems = filterNotifier.subblockDropdownItems;
+                          
+                          return DropdownButtonFormField<String?>(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            value: subblockDropdownItems.contains(_selectedSubblock)
+                                ? _selectedSubblock
+                                : null,
+                            hint: const Text('All'),
+                            items: [
+                              const DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text('All'),
                               ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedSubblock = value;
-                          });
-                          filterNotifier.updateSubblock(value);
+                              ...subblockDropdownItems
+                                  .where((item) => item != 'All')
+                                  .map(
+                                    (subblock) => DropdownMenuItem<String?>(
+                                      value: subblock,
+                                      child: Text(subblock),
+                                    ),
+                                  ),
+                            ],
+                            onChanged: (value) async {
+                              setState(() {
+                                _selectedSubblock = value;
+                              });
+                              filterNotifier.updateSubblock(value);
+                            },
+                          );
                         },
                       ),
                     ],
@@ -1288,8 +1358,8 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                   ],
                 ],
                 16.h,
-                // Vaccine Selection (hidden in EPI details context)
-                if (!widget.isEpiContext) ...[
+                // Vaccine Selection (hidden in EPI details context and microplan context)
+                if (!widget.isEpiContext && !widget.isMicroplanContext) ...[
                   const Text(
                     'Select Vaccine',
                     style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),

@@ -637,16 +637,21 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     await _loadWardsByUnion(unionUid);
   }
 
-  /// Load subblocks by ward UID
+  /// Load subblocks by ward UID (public method for external use)
+  Future<void> loadSubblocksByWard(String wardUid) async {
+    await _loadSubblocksByWard(wardUid);
+  }
+
+  /// Load subblocks by ward UID (internal method)
   Future<void> _loadSubblocksByWard(String wardUid) async {
     try {
       final subblocks = await _repository.fetchAreasByParentUid(wardUid);
       state = state.copyWith(subblocks: subblocks);
-      print(
+      logg.i(
         'FilterProvider: Loaded ${subblocks.length} subblocks for ward: $wardUid',
       );
     } catch (e) {
-      print('FilterProvider: Error loading subblocks: $e');
+      logg.e('FilterProvider: Error loading subblocks: $e');
     }
   }
 
@@ -805,11 +810,58 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
   }
 
   /// Get subblock UID by name (for EPI data fetching)
+  /// Enhanced with fuzzy matching like other UID getters
   String? getSubblockUid(String subblockName) {
-    final subblock = state.subblocks.firstWhere(
-      (subblock) => subblock.name == subblockName,
+    if (state.subblocks.isEmpty) {
+      logg.w('getSubblockUid: Subblocks list is empty for subblock: $subblockName');
+      return null;
+    }
+    
+    return _getSubblockUid(subblockName);
+  }
+
+  /// Internal method for subblock UID lookup with fuzzy matching
+  String? _getSubblockUid(String subblockName) {
+    if (state.subblocks.isEmpty) {
+      return null;
+    }
+    
+    // Normalize the search name (trim whitespace)
+    final normalizedSearchName = subblockName.trim();
+    
+    // Try exact match first
+    var subblock = state.subblocks.firstWhere(
+      (subblock) => subblock.name?.trim() == normalizedSearchName,
       orElse: () => const AreaResponseModel(),
     );
+    
+    // If not found, try case-insensitive match
+    if (subblock.uid == null) {
+      subblock = state.subblocks.firstWhere(
+        (subblock) => subblock.name?.trim().toLowerCase() == normalizedSearchName.toLowerCase(),
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    // If still not found, try partial match (for names with "(Part ...)" suffix)
+    if (subblock.uid == null) {
+      final baseName = normalizedSearchName.split(' (')[0].trim();
+      subblock = state.subblocks.firstWhere(
+        (subblock) {
+          final subblockBaseName = subblock.name?.split(' (')[0].trim() ?? '';
+          return subblockBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+    
+    if (subblock.uid == null) {
+      logg.w(
+        'getSubblockUid: Could not find subblock "$subblockName". '
+        'Available subblocks: ${state.subblocks.map((s) => s.name).toList()}',
+      );
+    }
+    
     return subblock.uid;
   }
 
@@ -1469,6 +1521,7 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? initialWard,
     String? initialSubblock,
     required List<String> initialMonths,
+    bool forceTimestampUpdate = false, // Force timestamp update (e.g., for microplan context)
   }) {
     logg.i('🔍 FilterProvider: Comparing current vs initial values:');
 
@@ -1520,8 +1573,8 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
       'FilterProvider: Non-vaccine changes detected: $hasNonVaccineChanges',
     );
 
-    // Only mark the timestamp when non-vaccine filters actually changed
-    if (hasNonVaccineChanges) {
+    // Only mark the timestamp when non-vaccine filters actually changed, or if forced
+    if (hasNonVaccineChanges || forceTimestampUpdate) {
       state = state.copyWith(lastAppliedTimestamp: DateTime.now());
       logg.i('✅ FilterProvider: Timestamp updated - EPI screen will reload');
 

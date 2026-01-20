@@ -34,6 +34,20 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
       return performanceData; // No highest performers to add
     }
 
+    // ✅ Create a set of identifiers for highest areas to check for duplicates
+    // Use UID if available, otherwise use name (normalized for comparison)
+    final highestAreaIdentifiers = highestAreas.map((area) {
+      if (area.uid != null && area.uid!.isNotEmpty) {
+        return area.uid!.trim().toLowerCase();
+      }
+      return (area.name ?? '').trim().toLowerCase();
+    }).toSet();
+
+    logg.i(
+      'Performance Table: Found ${highestAreas.length} highest performers. '
+      'Identifiers: ${highestAreaIdentifiers.toList()}',
+    );
+
     // Add highest performers with upward indicator
     for (Area area in highestAreas) {
       performanceData.add({
@@ -52,6 +66,33 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
       return performanceData; // No lowest performers to add
     }
 
+    // ✅ FIX: Filter out areas that are already in the highest list
+    // This prevents the same area from appearing in both high and low performing sections
+    final originalLowestCount = lowestAreas.length;
+    lowestAreas = lowestAreas.where((area) {
+      final areaIdentifier = (area.uid != null && area.uid!.isNotEmpty)
+          ? area.uid!.trim().toLowerCase()
+          : (area.name ?? '').trim().toLowerCase();
+      
+      final isDuplicate = highestAreaIdentifiers.contains(areaIdentifier);
+      
+      if (isDuplicate) {
+        logg.w(
+          'Performance Table: Filtering duplicate area "${area.name}" (UID: ${area.uid}) '
+          'from lowest list - already in highest list',
+        );
+      }
+      
+      return !isDuplicate;
+    }).toList();
+
+    if (originalLowestCount != lowestAreas.length) {
+      logg.i(
+        'Performance Table: Filtered ${originalLowestCount - lowestAreas.length} duplicate area(s) '
+        'from lowest performers. Remaining: ${lowestAreas.length}',
+      );
+    }
+
     // Add lowest performers with downward indicator
     for (Area area in lowestAreas) {
       performanceData.add({
@@ -61,6 +102,12 @@ class VaccineCoveragePerformanceTableWidget extends ConsumerWidget {
         'iconColor': Colors.red,
       });
     }
+
+    logg.i(
+      'Performance Table: Final performance data - '
+      'Highest: ${highestAreas.length}, Lowest: ${lowestAreas.length}, '
+      'Total: ${performanceData.length}',
+    );
 
     return performanceData;
   }

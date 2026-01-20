@@ -62,7 +62,12 @@ class MapRepository {
         jsonDecode(areaCoordsGeoJsonData) as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      logg.e("Dio error fetching GeoJSON: $e");
+      // ✅ Reduce log noise for expected 404 errors (fallback scenarios)
+      if (e.response?.statusCode == 404) {
+        logg.w("GeoJSON not found (404) for $urlPath - this may be expected for some area levels");
+      } else {
+        logg.e("Dio error fetching GeoJSON: $e");
+      }
       throw NetworkErrorHandler.handleDioError(e);
     } catch (e) {
       logg.e("Error fetching GeoJSON: $e");

@@ -28,6 +28,36 @@ class EpiCenterRepository {
   }) : _client = dioClient,
        _connectivityService = connectivityService;
 
+  /// Estimate response size in bytes to prevent memory exhaustion
+  int _estimateResponseSize(dynamic data) {
+    if (data is String) {
+      return data.length * 2; // UTF-16 encoding
+    } else if (data is Map) {
+      int size = 0;
+      data.forEach((key, value) {
+        size += _estimateResponseSize(key);
+        size += _estimateResponseSize(value);
+      });
+      return size;
+    } else if (data is List) {
+      int size = 0;
+      for (var item in data) {
+        size += _estimateResponseSize(item);
+      }
+      return size;
+    } else if (data is int) {
+      return 8; // 64-bit integer
+    } else if (data is double) {
+      return 8; // 64-bit double
+    } else if (data is bool) {
+      return 1;
+    } else if (data == null) {
+      return 0;
+    }
+    // Fallback: estimate based on toString
+    return data.toString().length * 2;
+  }
+
   /// Fetch EPI center coordinates data from the API
   Future<EpiCenterCoordsResponse> fetchEpiCenterCoordsData({
     required String urlPath,
@@ -231,10 +261,17 @@ class EpiCenterRepository {
 
       logg.i("Fetching EPI details by org_uid from $urlPath");
 
+      // ✅ Optimize timeout - use reasonable timeout to prevent ANR
+      // Division-level requests may timeout, but we don't want to wait too long
+      final isLikelyDivisionLevel = orgUid.length < 20;
+      final receiveTimeout = isLikelyDivisionLevel 
+          ? const Duration(seconds: 30) // Reduced from 45s to prevent ANR
+          : const Duration(seconds: 20);
+      
       final epiDio = Dio(
         BaseOptions(
           connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 20),
+          receiveTimeout: receiveTimeout,
           sendTimeout: const Duration(seconds: 15),
         ),
       );
@@ -259,8 +296,35 @@ class EpiCenterRepository {
         throw Exception('EPI_CENTER_NO_DATA');
       }
 
+      // ✅ Check response size to prevent memory exhaustion
+      // Division-level data can be 90MB+ which causes heap exhaustion
+      // District-level data can be 100MB+ but is still manageable
+      final responseSize = _estimateResponseSize(rawData);
+      
+      // ✅ Level-specific size limits:
+      // - Division level: 50MB (too large, causes heap exhaustion)
+      // - District level: 150MB (large but manageable)
+      // - Lower levels: 150MB (should be much smaller)
+      // Note: isLikelyDivisionLevel is already defined above
+      final maxSizeBytes = isLikelyDivisionLevel 
+          ? 50 * 1024 * 1024  // 50MB for division level
+          : 150 * 1024 * 1024; // 150MB for district and lower levels
+      
+      if (responseSize > maxSizeBytes) {
+        final sizeMB = (responseSize / 1024 / 1024).toStringAsFixed(1);
+        logg.w('⚠️ Response too large (${sizeMB}MB) - exceeds ${(maxSizeBytes / 1024 / 1024).toStringAsFixed(0)}MB limit');
+        
+        if (isLikelyDivisionLevel) {
+          throw Exception('EPI_DATA_TOO_LARGE: Division-level data is too large to load. Please select a district or lower level.');
+        } else {
+          throw Exception('EPI_DATA_TOO_LARGE: Response size (${sizeMB}MB) exceeds memory limits. The data may be too large for this area level.');
+        }
+      }
+      
+      logg.i('✅ Response size check passed: ${(responseSize / 1024 / 1024).toStringAsFixed(1)}MB (limit: ${(maxSizeBytes / 1024 / 1024).toStringAsFixed(0)}MB)');
+
       // Decode and parse
-      logg.i('Decoding and parsing EPI details JSON...');
+      logg.i('Decoding and parsing EPI details JSON... (estimated size: ${(responseSize / 1024 / 1024).toStringAsFixed(1)}MB)');
       final parsedJson = decodeEpiCenterDetailsNestedJson(rawData);
       logg.i('Parsed JSON');
       try {
@@ -326,7 +390,8 @@ class EpiCenterRepository {
       throw NetworkErrorHandler.handleDioError(e);
     } catch (e) {
       if (e.toString().contains('EPI_CENTER_NO_DATA') ||
-          e.toString().contains('SSL_CERTIFICATE_ERROR')) {
+          e.toString().contains('SSL_CERTIFICATE_ERROR') ||
+          e.toString().contains('EPI_DATA_TOO_LARGE')) {
         rethrow;
       }
       throw NetworkErrorHandler.handleGenericError(e);

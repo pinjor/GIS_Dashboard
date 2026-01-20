@@ -88,32 +88,63 @@ class MicroplanTable extends ConsumerWidget {
     String child0To11Male = '-';
     String child0To11Female = '-';
     
+    logg.i('🔍 [0-11m DEBUG] EpiCenterMicroplanSection: Calculating Child (0-11) values');
+    logg.i('   > Coverage data: ${coverageData != null ? "present" : "null"}');
+    logg.i('   > Selected vaccine UID: $selectedVaccineUid');
+    logg.i('   > Year demographics: ${yearDemographics != null ? "present" : "null"}');
+    logg.i('   > Filter state: Ward=${filterState.selectedWard}, Subblock=${filterState.selectedSubblock}');
+    
+    // ✅ FIX: Get area UID/name for ward/subblock level filtering
+    String? areaUid;
+    String? areaName;
+    final filterController = ref.read(filterControllerProvider.notifier);
+    
+    if (filterState.selectedSubblock != null && filterState.selectedSubblock != 'All') {
+      // For subblock level, use subblock UID
+      areaUid = filterController.getSubblockUid(filterState.selectedSubblock!);
+      areaName = filterState.selectedSubblock;
+      logg.i('   > Filtering by subblock: $areaName (UID: $areaUid)');
+    } else if (filterState.selectedWard != null && filterState.selectedWard != 'All') {
+      // For ward level, use ward UID
+      areaUid = filterController.getWardUid(filterState.selectedWard!);
+      areaName = filterState.selectedWard;
+      logg.i('   > Filtering by ward: $areaName (UID: $areaUid)');
+    }
+    
     if (coverageData != null) {
       final targetData = TargetCalculator.getTargetData(
         coverageData,
         selectedVaccineUid,
+        areaUid: areaUid,
+        areaName: areaName,
       );
       if (targetData != null && targetData.total > 0) {
         child0To11Male = formatCount(targetData.male);
         child0To11Female = formatCount(targetData.female);
         logg.i(
-          'Microplan Table: Using coverage data for Child (0-11) - '
-          'total: ${targetData.total}, male: ${targetData.male}, female: ${targetData.female}',
+          'Microplan Table: ✅ Using coverage data for Child (0-11) - '
+          'total: ${targetData.total}, male: ${targetData.male} (displayed: $child0To11Male), female: ${targetData.female} (displayed: $child0To11Female)',
         );
       } else {
         // Fallback to demographics if coverage data is not available
         final child0To11Month = yearDemographics?.child0To11Month;
         child0To11Male = formatCount(child0To11Month?.male);
         child0To11Female = formatCount(child0To11Month?.female);
-        logg.i('Microplan Table: Using demographics fallback for Child (0-11)');
+        logg.w('Microplan Table: ⚠️ TargetCalculator returned null/zero, using demographics fallback for Child (0-11)');
+        logg.w('   > Demographics - male: ${child0To11Month?.male}, female: ${child0To11Month?.female}');
+        logg.w('   > Displayed - male: $child0To11Male, female: $child0To11Female');
       }
     } else {
       // Fallback to demographics if coverage data is not provided
       final child0To11Month = yearDemographics?.child0To11Month;
       child0To11Male = formatCount(child0To11Month?.male);
       child0To11Female = formatCount(child0To11Month?.female);
-      logg.i('Microplan Table: Coverage data not available, using demographics for Child (0-11)');
+      logg.w('Microplan Table: ⚠️ Coverage data not available, using demographics for Child (0-11)');
+      logg.w('   > Demographics - male: ${child0To11Month?.male}, female: ${child0To11Month?.female}');
+      logg.w('   > Displayed - male: $child0To11Male, female: $child0To11Female');
     }
+    
+    logg.i('🔍 [0-11m DEBUG] Final Child (0-11) values: male=$child0To11Male, female=$child0To11Female');
     
     return Column(
       children: [

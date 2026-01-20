@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,8 +8,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:gis_dashboard/features/map/domain/area_polygon.dart';
 import 'package:gis_dashboard/features/map/presentation/widget/map_tile_layer.dart';
 import 'package:gis_dashboard/features/map/utils/map_utils.dart';
+import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 import 'package:gis_dashboard/features/session_plan/domain/session_plan_coords_response.dart';
 import 'package:gis_dashboard/features/session_plan/presentation/controllers/session_plan_controller.dart';
+import 'package:gis_dashboard/features/filter/filter.dart';
+import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
+import 'package:gis_dashboard/core/utils/utils.dart';
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 
@@ -22,13 +27,105 @@ class SessionPlanScreen extends ConsumerStatefulWidget {
 class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
   final MapController _mapController = MapController();
   final double _initialZoom = 6.6;
+  Timer? _autoZoomTimer;
+  DateTime? _lastAutoZoom;
 
   @override
   void initState() {
     super.initState();
+    // ✅ OPTIMIZATION: Check if filters are already applied and load accordingly
     Future.delayed(Duration.zero, () {
-      ref.read(sessionPlanControllerProvider.notifier).loadInitialData();
+      final filterState = ref.read(filterControllerProvider);
+      
+      // Check if any filters are applied (not just default country view)
+      final hasFiltersApplied = (filterState.selectedDistrict != null &&
+              filterState.selectedDistrict != 'All') ||
+          (filterState.selectedCityCorporation != null &&
+              filterState.selectedCityCorporation != 'All') ||
+          (filterState.selectedUpazila != null &&
+              filterState.selectedUpazila != 'All') ||
+          (filterState.selectedUnion != null &&
+              filterState.selectedUnion != 'All') ||
+          (filterState.selectedWard != null &&
+              filterState.selectedWard != 'All') ||
+          (filterState.selectedSubblock != null &&
+              filterState.selectedSubblock != 'All') ||
+          (filterState.selectedZone != null &&
+              filterState.selectedZone != 'All');
+      
+      if (hasFiltersApplied) {
+        // Filters are already applied - load with current filter state
+        logg.i("Session Plan: Filters detected on init - loading with filter state");
+        ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+      } else {
+        // No filters applied - load country level data
+        logg.i("Session Plan: No filters detected on init - loading country level data");
+        ref.read(sessionPlanControllerProvider.notifier).loadInitialData();
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _autoZoomTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Auto-zoom to fit all polygons with padding
+  void _autoZoomToPolygons(List<AreaPolygon> areaPolygons) {
+    if (areaPolygons.isEmpty) return;
+
+    // Get current map state to determine geographic level
+    // This ensures we use the same level that map controller determined
+    final mapState = ref.read(mapControllerProvider);
+    GeographicLevel currentLevel = mapState.currentLevel;
+    
+    // If map state doesn't have a valid level, determine from filter state
+    if (currentLevel == GeographicLevel.country) {
+      final filterState = ref.read(filterControllerProvider);
+      
+      // Check from deepest to shallowest level (same logic as map controller)
+      if (filterState.selectedSubblock != null &&
+          filterState.selectedSubblock != 'All') {
+        currentLevel = GeographicLevel.subblock;
+      } else if (filterState.selectedWard != null &&
+          filterState.selectedWard != 'All') {
+        currentLevel = GeographicLevel.ward;
+      } else if (filterState.selectedUnion != null &&
+          filterState.selectedUnion != 'All') {
+        currentLevel = GeographicLevel.union;
+      } else if (filterState.selectedUpazila != null &&
+          filterState.selectedUpazila != 'All') {
+        currentLevel = GeographicLevel.upazila;
+      } else if (filterState.selectedZone != null &&
+          filterState.selectedZone != 'All') {
+        currentLevel = GeographicLevel.zone;
+      } else if (filterState.selectedCityCorporation != null &&
+          filterState.selectedCityCorporation != 'All') {
+        currentLevel = GeographicLevel.cityCorporation;
+      } else if (filterState.selectedDistrict != null &&
+          filterState.selectedDistrict != 'All') {
+        currentLevel = GeographicLevel.district;
+      }
+    }
+
+    logg.i("Session Plan: Auto-zooming to level: ${currentLevel.value}");
+    autoZoomToPolygons(areaPolygons, currentLevel, _mapController);
+  }
+
+  /// Show filter dialog
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Color(Constants.cardColor),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+        child: const FilterDialogBoxWidget(isEpiContext: false),
+      ),
+    );
   }
 
   // void _onBack() {
@@ -119,6 +216,64 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
   Widget build(BuildContext context) {
     final sessionPlanState = ref.watch(sessionPlanControllerProvider);
 
+    // ✅ Listen to filter state changes and reload session plan data
+    ref.listen<FilterState>(filterControllerProvider, (previous, current) {
+      if (previous != null &&
+          current.lastAppliedTimestamp != null &&
+          previous.lastAppliedTimestamp != current.lastAppliedTimestamp) {
+        logg.i("Session Plan: Filter applied - reloading session plan data");
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+          }
+        });
+      }
+    });
+
+    // ✅ Listen to session plan state changes to trigger auto-zoom after data loads
+    ref.listen<SessionPlanState>(sessionPlanControllerProvider, (previous, current) {
+      // Check if we just finished loading after a filter application
+      if (previous?.isLoading == true &&
+          current.isLoading == false &&
+          current.error == null &&
+          current.areaCoordsGeoJsonData != null) {
+        // Throttle auto-zoom to prevent rapid calls
+        final now = DateTime.now();
+        if (_lastAutoZoom != null &&
+            now.difference(_lastAutoZoom!).inMilliseconds < 800) {
+          logg.i("Session Plan: Auto-zoom throttled - too recent");
+          return;
+        }
+        _lastAutoZoom = now;
+
+        // Cancel any existing timer
+        _autoZoomTimer?.cancel();
+
+        // Schedule auto-zoom after tiles load
+        _autoZoomTimer = Timer(const Duration(milliseconds: 1500), () {
+          try {
+            if (mounted && current.areaCoordsGeoJsonData != null) {
+              // Parse fresh polygons for auto-zoom
+              final freshPolygons = parseGeoJsonToPolygonsSimple(
+                current.areaCoordsGeoJsonData!,
+              );
+
+              if (freshPolygons.isNotEmpty) {
+                logg.i(
+                  "Session Plan: Auto-zooming to ${freshPolygons.length} polygons",
+                );
+                _autoZoomToPolygons(freshPolygons);
+              } else {
+                logg.w("Session Plan: No polygons available for auto-zoom");
+              }
+            }
+          } catch (e) {
+            logg.w("Session Plan: Auto-zoom failed: $e");
+          }
+        });
+      }
+    });
+
     // Parse polygons
     List<AreaPolygon> areaPolygons = [];
     if (sessionPlanState.areaCoordsGeoJsonData != null) {
@@ -143,6 +298,14 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          // ✅ Add filter button to AppBar
+          IconButton(
+            icon: const Icon(Icons.filter_list, color: Colors.white),
+            onPressed: _showFilterDialog,
+            tooltip: 'Filter',
+          ),
+        ],
       ),
       body: Stack(
         children: [

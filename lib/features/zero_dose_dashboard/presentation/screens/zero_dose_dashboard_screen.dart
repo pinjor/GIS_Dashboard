@@ -2,12 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import '../../../../core/common/constants/constants.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../summary/presentation/controllers/summary_controller.dart';
 import '../../../summary/domain/vaccine_coverage_response.dart';
+import '../../../filter/filter.dart';
 import '../widgets/zero_dose_bar_chart_widget.dart';
 
-class ZeroDoseDashboardScreen extends ConsumerWidget {
+class ZeroDoseDashboardScreen extends ConsumerStatefulWidget {
   const ZeroDoseDashboardScreen({super.key});
+
+  @override
+  ConsumerState<ZeroDoseDashboardScreen> createState() =>
+      _ZeroDoseDashboardScreenState();
+}
+
+class _ZeroDoseDashboardScreenState
+    extends ConsumerState<ZeroDoseDashboardScreen> {
+
+  /// Show filter dialog
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Color(Constants.cardColor),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+        child: const FilterDialogBoxWidget(isEpiContext: false),
+      ),
+    );
+  }
 
   String _getLocationName(String locationName) {
     if (locationName.isEmpty) return 'Bangladesh';
@@ -15,7 +40,7 @@ class ZeroDoseDashboardScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final summaryState = ref.watch(summaryControllerProvider);
     final coverageData = summaryState.coverageData;
     final locationName = _getLocationName(summaryState.currentAreaName);
@@ -48,6 +73,15 @@ class ZeroDoseDashboardScreen extends ConsumerWidget {
       }
     }
 
+    // ✅ Listen to filter state changes - data will automatically update via summary controller
+    ref.listen<FilterState>(filterControllerProvider, (previous, current) {
+      if (previous != null &&
+          current.lastAppliedTimestamp != null &&
+          previous.lastAppliedTimestamp != current.lastAppliedTimestamp) {
+        logg.i("Zero Dose Dashboard: Filter applied - data will update via summary controller");
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(Constants.primaryColor),
@@ -59,6 +93,14 @@ class ZeroDoseDashboardScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          // ✅ Add filter button to AppBar
+          IconButton(
+            icon: const Icon(Icons.filter_list, color: Colors.white),
+            onPressed: _showFilterDialog,
+            tooltip: 'Filter',
+          ),
+        ],
       ),
       body: summaryState.isLoading
           ? const Center(child: CircularProgressIndicator())

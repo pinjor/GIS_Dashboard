@@ -4,6 +4,9 @@ import 'package:gis_dashboard/core/service/data_service.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/features/map/domain/area_coords_geo_json_response.dart';
 import 'package:gis_dashboard/features/session_plan/domain/session_plan_coords_response.dart';
+import 'package:gis_dashboard/features/filter/presentation/controllers/filter_controller.dart';
+import 'package:gis_dashboard/features/filter/domain/filter_state.dart';
+import 'package:gis_dashboard/features/map/presentation/controllers/map_controller.dart';
 
 // State class for Session Plan
 class SessionPlanState {
@@ -39,23 +42,56 @@ class SessionPlanState {
 
 final sessionPlanControllerProvider =
     StateNotifierProvider<SessionPlanController, SessionPlanState>((ref) {
-      return SessionPlanController(dataService: ref.read(dataServiceProvider));
+      return SessionPlanController(
+        dataService: ref.read(dataServiceProvider),
+        ref: ref,
+      );
     });
 
 class SessionPlanController extends StateNotifier<SessionPlanState> {
   final DataService _dataService;
+  final Ref _ref;
 
-  SessionPlanController({required DataService dataService})
-    : _dataService = dataService,
-      super(SessionPlanState());
+  SessionPlanController({
+    required DataService dataService,
+    required Ref ref,
+  })  : _dataService = dataService,
+        _ref = ref,
+        super(SessionPlanState());
 
   Future<void> loadInitialData({String? startDate, String? endDate}) async {
+    // Load with no area filter (country level)
+    await loadDataWithFilter(
+      areaUid: null,
+      geoJsonPath: ApiConstants.districtJsonPath,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  /// Load session plan data based on current filter state
+  Future<void> loadDataWithFilter({
+    String? areaUid,
+    String? geoJsonPath,
+    String? startDate,
+    String? endDate,
+  }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      logg.i("Loading initial session plan data...");
+      logg.i("Loading session plan data with filter...");
+
+      // Get filter state to determine area UID if not provided
+      final filterState = _ref.read(filterControllerProvider);
+      final mapNotifier = _ref.read(mapControllerProvider.notifier);
+      
+      // Use provided areaUid or get from map controller's focalAreaUid
+      final effectiveAreaUid = areaUid ?? mapNotifier.focalAreaUid;
+      final areaParam = effectiveAreaUid ?? 'undefined';
+      
+      logg.i("Session Plan: Using area UID: $areaParam");
 
       // Construct URL based on parameters
-      String sessionPlanUrl = '${ApiConstants.sessionPlans}?area=undefined';
+      String sessionPlanUrl = '${ApiConstants.sessionPlans}?area=$areaParam';
       if (startDate != null && startDate.isNotEmpty) {
         sessionPlanUrl += '&start_date=$startDate';
       } else {
@@ -70,9 +106,20 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
 
       logg.i("Fetching session plans from: $sessionPlanUrl");
 
+      // Determine GeoJSON path based on filter level
+      String effectiveGeoJsonPath;
+      if (geoJsonPath != null) {
+        effectiveGeoJsonPath = geoJsonPath;
+      } else {
+        // Determine GeoJSON path based on filter state
+        effectiveGeoJsonPath = _getGeoJsonPathForFilter(filterState, mapNotifier);
+      }
+
+      logg.i("Fetching GeoJSON from: $effectiveGeoJsonPath");
+
       final results = await Future.wait([
         _dataService.fetchAreaGeoJsonCoordsData(
-          urlPath: ApiConstants.districtJsonPath,
+          urlPath: effectiveGeoJsonPath,
           forceRefresh: false,
         ),
         _dataService.getSessionPlanCoords(
@@ -103,8 +150,27 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
     }
   }
 
+  /// Get GeoJSON path based on current filter state
+  /// This follows the same logic as map controller for determining the appropriate GeoJSON path
+  String _getGeoJsonPathForFilter(
+    FilterState filterState,
+    MapControllerNotifier mapNotifier,
+  ) {
+    // Get the focal area UID to determine the filter level
+    final focalAreaUid = mapNotifier.focalAreaUid;
+    
+    if (focalAreaUid == null) {
+      // Country level - use district GeoJSON
+      return ApiConstants.districtJsonPath;
+    }
+
+    // Use the focalAreaUid to construct the GeoJSON path
+    // This matches the pattern used in map controller
+    return ApiConstants.getGeoJsonPath(slug: focalAreaUid);
+  }
+
   // Reload with specific dates
   Future<void> updateDateFilter(String startDate, String endDate) async {
-    await loadInitialData(startDate: startDate, endDate: endDate);
+    await loadDataWithFilter(startDate: startDate, endDate: endDate);
   }
 }

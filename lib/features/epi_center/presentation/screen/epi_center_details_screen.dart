@@ -110,9 +110,34 @@ class _EpiCenterDetailsScreenState
       // Bottom-up hierarchical selection (most specific first)
       if (filterState.selectedSubblock != null &&
           filterState.selectedSubblock != 'All') {
-        targetUid = filterController.getSubblockUid(selectedSubblock!);
+        // ✅ FIX: For subblock, use concatenated slug path (like zone)
+        // This ensures EPI center details can fetch data correctly
+        final districtUid = filterController.getDistrictUid(
+          filterState.selectedDistrict!,
+        );
+        final upazilaUid = filterController.getUpazilaUid(
+          filterState.selectedUpazila!,
+        );
+        final unionUid = filterController.getUnionUid(
+          filterState.selectedUnion!,
+        );
+        final wardUid = filterController.getWardUid(
+          filterState.selectedWard!,
+        );
+        final subblockUid = filterController.getSubblockUid(selectedSubblock!);
+        
+        if (districtUid != null &&
+            upazilaUid != null &&
+            unionUid != null &&
+            wardUid != null &&
+            subblockUid != null) {
+          targetUid = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
+          logg.i('🎯 Target level: SUBBLOCK ($targetName, Concatenated UID: $targetUid)');
+        } else {
+          logg.w('🎯 Target level: SUBBLOCK ($targetName) - Could not build concatenated path, using subblock UID only');
+          targetUid = subblockUid;
+        }
         targetName = filterState.selectedSubblock;
-        logg.i('🎯 Target level: SUBBLOCK ($targetName, UID: $targetUid)');
       } else if (filterState.selectedWard != null &&
           filterState.selectedWard != 'All') {
         targetUid = filterController.getWardUid(filterState.selectedWard!);
