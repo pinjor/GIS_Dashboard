@@ -693,11 +693,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // This ensures when all filters are applied at once, the deepest level is selected
         logg.i(
           '🔍 Filter Detection: '
-          'subblock=${subblockFilterApplied} (${current.selectedSubblock}), '
-          'ward=${wardFilterApplied} (${current.selectedWard}), '
-          'union=${unionFilterApplied} (${current.selectedUnion}), '
-          'upazila=${upazilaFilterApplied} (${current.selectedUpazila}), '
-          'district=${districtFilterApplied} (${current.selectedDistrict})',
+          'subblock=$subblockFilterApplied (${current.selectedSubblock}), '
+          'ward=$wardFilterApplied (${current.selectedWard}), '
+          'union=$unionFilterApplied (${current.selectedUnion}), '
+          'upazila=$upazilaFilterApplied (${current.selectedUpazila}), '
+          'district=$districtFilterApplied (${current.selectedDistrict})',
         );
         if (subblockFilterApplied) {
           logg.i("Subblock filter applied: ${current.selectedSubblock}");

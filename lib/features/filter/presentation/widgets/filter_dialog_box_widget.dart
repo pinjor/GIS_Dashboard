@@ -1102,7 +1102,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
-                          value: unionDropdownItems.contains(_selectedUnion)
+                          initialValue: unionDropdownItems.contains(_selectedUnion)
                               ? _selectedUnion
                               : null,
                           hint: const Text('All'),
@@ -1183,7 +1183,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
-                          value: wardDropdownItems.contains(_selectedWard)
+                          initialValue: wardDropdownItems.contains(_selectedWard)
                               ? _selectedWard
                               : null,
                           hint: const Text('All'),
@@ -1234,7 +1234,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                             ),
-                            value: subblockDropdownItems.contains(_selectedSubblock)
+                            initialValue: subblockDropdownItems.contains(_selectedSubblock)
                                 ? _selectedSubblock
                                 : null,
                             hint: const Text('All'),
@@ -1330,7 +1330,7 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
-                      value:
+                      initialValue:
                           filterNotifier.zoneDropdownItems.contains(
                             _selectedZone,
                           )

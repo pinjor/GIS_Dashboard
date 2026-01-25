@@ -75,6 +75,25 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       //   "Loaded Coverage data for ${coverageData.vaccines?.first.vaccineName} and ${coverageData.vaccines?.first.areas?.length} coverage areas",
       // );
 
+      // ✅ FIX: Load EPI center data at country level
+      EpiCenterCoordsResponse? epiCenterCoordsData;
+      try {
+        final epiPath = ApiConstants.getEpiPath(slug: null); // Country level: /epi/epi.json
+        logg.i("Loading country-level EPI data from: $epiPath");
+        epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
+          urlPath: epiPath,
+          forceRefresh: forceRefresh,
+        );
+        logg.i(
+          "✅ Successfully loaded country-level EPI data (${epiCenterCoordsData.features?.length ?? 0} EPI centers)",
+        );
+      } catch (e) {
+        logg.w(
+          "EPI data not available at country level - continuing without EPI data: $e",
+        );
+        epiCenterCoordsData = null; // Continue with null EPI data
+      }
+
       _unfilteredCoverageData = coverageData;
       // Apply existing month filter if any
       final filteredData = VaccineDataCalculator.recalculateCoverageData(
@@ -85,6 +104,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: filteredData,
+        epiCenterCoordsData: epiCenterCoordsData, // ✅ Include EPI data at country level
         currentLevel: GeographicLevel
             .country, // Fixed: Country level should use country enum
         navigationStack: [], // Reset to country level
@@ -836,6 +856,12 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final currentFilter = _filterNotifier.state;
       final selectedYear = currentFilter.selectedYear;
 
+      // ✅ FIX: Validate that district is selected before loading upazila
+      if (currentFilter.selectedDistrict == null || 
+          currentFilter.selectedDistrict == 'All') {
+        throw Exception('District must be selected before loading upazila data');
+      }
+
       // Build concatenated path: district_uid/upazila_uid
       final districtUid = _filterNotifier.getDistrictUid(
         currentFilter.selectedDistrict!,
@@ -843,7 +869,8 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       final upazilaUid = _filterNotifier.getUpazilaUid(upazilaName);
 
       if (districtUid == null || upazilaUid == null) {
-        throw Exception('Could not find UIDs for hierarchical path');
+        logg.e('Could not find UIDs for hierarchical path - districtUid: $districtUid, upazilaUid: $upazilaUid');
+        throw Exception('Could not find UIDs for hierarchical path. District: ${currentFilter.selectedDistrict}, Upazila: $upazilaName');
       }
 
       final concatenatedSlug = '$districtUid/$upazilaUid';
@@ -1732,39 +1759,87 @@ class MapControllerNotifier extends StateNotifier<MapState> {
     final filterState = _filterNotifier.state;
     String? filterUid;
 
+    // ✅ FIX: Check area type first to handle city corporation vs district hierarchy correctly
+    final isCityCorporation = filterState.selectedAreaType == AreaType.cityCorporation;
+    
+    logg.i('focalAreaUid: Area type: ${filterState.selectedAreaType}, isCityCorporation: $isCityCorporation');
+
     // ✅ Check from deepest to shallowest level
     if (filterState.selectedSubblock != null &&
         filterState.selectedSubblock != 'All') {
-      // ✅ FIX: For subblock, use concatenated slug path (like zone)
-      // This ensures EPI center details can fetch data correctly
-      final districtUid = _filterNotifier.getDistrictUid(
-        filterState.selectedDistrict!,
-      );
-      final upazilaUid = _filterNotifier.getUpazilaUid(
-        filterState.selectedUpazila!,
-      );
-      final unionUid = _filterNotifier.getUnionUid(
-        filterState.selectedUnion!,
-      );
-      final wardUid = _filterNotifier.getWardUid(
-        filterState.selectedWard!,
-      );
-      final subblockUid = _filterNotifier.getSubblockUid(filterState.selectedSubblock!);
-      
-      if (districtUid != null &&
-          upazilaUid != null &&
-          unionUid != null &&
-          wardUid != null &&
-          subblockUid != null) {
-        filterUid = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
-        logg.i('focalAreaUid: Using concatenated subblock path: $filterUid');
+      // ✅ FIX: Handle subblock based on area type
+      if (isCityCorporation) {
+        // City corporation hierarchy: ccUid/zoneUid/wardUid/subblockUid (4 segments)
+        final ccUid = _filterNotifier.getCityCorporationUid(
+          filterState.selectedCityCorporation!,
+        );
+        final zoneUid = _filterNotifier.getZoneUid(
+          filterState.selectedZone!,
+        );
+        final wardUid = _filterNotifier.getWardUid(
+          filterState.selectedWard!,
+        );
+        final subblockUid = _filterNotifier.getSubblockUid(filterState.selectedSubblock!);
+        
+        if (ccUid != null && zoneUid != null && wardUid != null && subblockUid != null) {
+          filterUid = '$ccUid/$zoneUid/$wardUid/$subblockUid';
+          logg.i('focalAreaUid: Using city corporation subblock path (4 segments): $filterUid');
+        } else {
+          logg.w('focalAreaUid: Could not build city corporation subblock path - missing UIDs');
+          logg.w('   ccUid: $ccUid, zoneUid: $zoneUid, wardUid: $wardUid, subblockUid: $subblockUid');
+          filterUid = subblockUid; // Fallback to subblock UID only
+        }
       } else {
-        logg.w('focalAreaUid: Could not build concatenated subblock path - using subblock UID only');
-        filterUid = subblockUid;
+        // District hierarchy: district/upazila/union/ward/subblock (5 segments)
+        final districtUid = _filterNotifier.getDistrictUid(
+          filterState.selectedDistrict!,
+        );
+        final upazilaUid = _filterNotifier.getUpazilaUid(
+          filterState.selectedUpazila!,
+        );
+        final unionUid = _filterNotifier.getUnionUid(
+          filterState.selectedUnion!,
+        );
+        final wardUid = _filterNotifier.getWardUid(
+          filterState.selectedWard!,
+        );
+        final subblockUid = _filterNotifier.getSubblockUid(filterState.selectedSubblock!);
+        
+        if (districtUid != null &&
+            upazilaUid != null &&
+            unionUid != null &&
+            wardUid != null &&
+            subblockUid != null) {
+          filterUid = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
+          logg.i('focalAreaUid: Using district subblock path (5 segments): $filterUid');
+        } else {
+          logg.w('focalAreaUid: Could not build district subblock path - using subblock UID only');
+          filterUid = subblockUid;
+        }
       }
     } else if (filterState.selectedWard != null &&
         filterState.selectedWard != 'All') {
-      filterUid = _filterNotifier.getWardUid(filterState.selectedWard!);
+      // ✅ FIX: Handle ward based on area type
+      if (isCityCorporation && filterState.selectedZone != null) {
+        // City corporation ward: build ccUid/zoneUid/wardUid if zone is available
+        final ccUid = _filterNotifier.getCityCorporationUid(
+          filterState.selectedCityCorporation!,
+        );
+        final zoneUid = _filterNotifier.getZoneUid(filterState.selectedZone!);
+        final wardUid = _filterNotifier.getWardUid(filterState.selectedWard!);
+        
+        if (ccUid != null && zoneUid != null && wardUid != null) {
+          filterUid = '$ccUid/$zoneUid/$wardUid';
+          logg.i('focalAreaUid: Using city corporation ward path: $filterUid');
+        } else {
+          filterUid = wardUid; // Fallback to ward UID only
+          logg.w('focalAreaUid: Could not build city corporation ward path - using ward UID only');
+        }
+      } else {
+        // District ward or city corporation ward without zone
+        filterUid = _filterNotifier.getWardUid(filterState.selectedWard!);
+        logg.i('focalAreaUid: Using ward UID: $filterUid');
+      }
     } else if (filterState.selectedUnion != null &&
         filterState.selectedUnion != 'All') {
       filterUid = _filterNotifier.getUnionUid(filterState.selectedUnion!);
@@ -1798,6 +1873,7 @@ class MapControllerNotifier extends StateNotifier<MapState> {
       filterUid = _filterNotifier.getCityCorporationUid(
         filterState.selectedCityCorporation!,
       );
+      logg.i('focalAreaUid: Using city corporation UID: $filterUid');
     }
 
     if (filterUid != null) {
