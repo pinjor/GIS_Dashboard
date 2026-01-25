@@ -133,6 +133,19 @@ class _SessionPlanFilterDialogState
         ref.read(sessionPlanControllerProvider.notifier);
     final currentFilter = ref.read(filterControllerProvider);
 
+    // ✅ VALIDATION: Validate date range
+    if (_fromDate != null && _toDate != null) {
+      if (_toDate!.isBefore(_fromDate!)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('End date must be after or equal to start date'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
     // ✅ VALIDATION: Ensure hierarchy is maintained
     // District filter hierarchy: division → district → upazila → union → ward
     if (_selectedAreaType == AreaType.district) {
@@ -247,11 +260,15 @@ class _SessionPlanFilterDialogState
 
     // Close dialog first
     Navigator.of(context).pop();
+    
+    // ✅ FIX: Set loading state IMMEDIATELY after closing dialog
+    // This ensures the loading overlay appears right away
+    // We trigger loadDataWithFilter which sets isLoading: true
 
-    // ✅ FIX: Wait for filter state to fully update and upazilas to load if needed
+    // ✅ OPTIMIZATION 5: Reduced delay - filter state updates faster
     // The filter state listener in session_plan_screen will trigger a reload,
     // but we need to ensure the filter state is updated first
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 50)); // Reduced from 200ms
     
     // Wait for upazilas to load if upazila is selected
     if (_selectedUpazila != null && _selectedUpazila != 'Select Upazila') {
@@ -333,13 +350,44 @@ class _SessionPlanFilterDialogState
 
   int _getTotalSessions() {
     final sessionPlanState = ref.watch(sessionPlanControllerProvider);
-    final count = sessionPlanState.sessionPlanCoordsData?.sessionCount ??
-        sessionPlanState.sessionPlanCoordsData?.features?.length ??
-        0;
+    final data = sessionPlanState.sessionPlanCoordsData;
+    
+    // ✅ FIX: Always prioritize sessionCount from API (this is the total count, not limited by features)
+    // sessionCount is the actual total from the API (e.g., 39,727)
+    // features.length is limited (e.g., 10,000 max from API pagination or marker limit)
+    // Only use features.length as fallback if sessionCount is truly null/0
+    int count = 0;
+    
+    // ✅ DEBUG: Log all relevant data to understand what's happening
+    logg.i('Session Plan Filter: _getTotalSessions called');
+    logg.i('  - data is null: ${data == null}');
+    logg.i('  - sessionCount: ${data?.sessionCount}');
+    logg.i('  - features length: ${data?.features?.length}');
+    logg.i('  - isLoading: ${sessionPlanState.isLoading}');
+    logg.i('  - error: ${sessionPlanState.error}');
+    
+    if (data != null) {
+      if (data.sessionCount != null && data.sessionCount! > 0) {
+        // ✅ Use sessionCount from API - this is the correct total (e.g., 39,727)
+        count = data.sessionCount!;
+        logg.i('Session Plan Filter: ✅ Using sessionCount from API: $count');
+      } else if (data.features != null && data.features!.isNotEmpty) {
+        // Fallback to features.length only if sessionCount is null/0
+        count = data.features!.length;
+        logg.w('Session Plan Filter: ⚠️ sessionCount is null/0 (${data.sessionCount}), using features.length as fallback: $count');
+      } else {
+        logg.w('Session Plan Filter: ⚠️ Both sessionCount and features are null/empty');
+      }
+    } else {
+      logg.w('Session Plan Filter: ⚠️ sessionPlanCoordsData is null');
+    }
+    
     // Debug logging to help troubleshoot session count issues
     if (count == 0 && !sessionPlanState.isLoading && sessionPlanState.error == null) {
-      logg.w('Session Plan: Total sessions is 0 - sessionCount: ${sessionPlanState.sessionPlanCoordsData?.sessionCount}, features length: ${sessionPlanState.sessionPlanCoordsData?.features?.length}');
+      logg.w('Session Plan Filter: Total sessions is 0 - sessionCount: ${data?.sessionCount}, features length: ${data?.features?.length}');
     }
+    
+    logg.i('Session Plan Filter: Returning total sessions count: $count');
     return count;
   }
 
@@ -347,7 +395,6 @@ class _SessionPlanFilterDialogState
   Widget build(BuildContext context) {
     final filterState = ref.watch(filterControllerProvider);
     final filterNotifier = ref.read(filterControllerProvider.notifier);
-    final totalSessions = _getTotalSessions();
 
     return Dialog(
       backgroundColor: Color(Constants.cardColor),
@@ -440,22 +487,38 @@ class _SessionPlanFilterDialogState
             const SizedBox(height: 20),
 
             // Total Session Display Button
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: BoxDecoration(
-                color: Color(Constants.primaryColor),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Text(
-                'Total Session: $totalSessions',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            Builder(
+              builder: (context) {
+                // ✅ Use Builder to ensure reactive updates when session plan state changes
+                final sessionPlanState = ref.watch(sessionPlanControllerProvider);
+                final currentTotalSessions = _getTotalSessions();
+                
+                // ✅ Format number with commas to match web version (e.g., 39,727)
+                final formattedCount = currentTotalSessions.toString().replaceAllMapped(
+                  RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                  (Match m) => '${m[1]},',
+                );
+                
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Color(Constants.primaryColor),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text(
+                    sessionPlanState.isLoading
+                        ? 'Loading sessions...'
+                        : 'Total Session: $formattedCount',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
 

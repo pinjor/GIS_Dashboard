@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EpiCenterCoordsResponse {
 
-@JsonKey(name: 'type') String? get type;@JsonKey(name: 'features') List<EpiFeature>? get features;
+@JsonKey(name: 'type') String? get type;@JsonKey(name: 'features') List<EpiFeature>? get features;@JsonKey(name: 'epi_center_count') int? get epiCenterCount;@JsonKey(name: 'total_count') int? get totalCount;
 /// Create a copy of EpiCenterCoordsResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $EpiCenterCoordsResponseCopyWith<EpiCenterCoordsResponse> get copyWith => _$EpiC
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EpiCenterCoordsResponse&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.features, features));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EpiCenterCoordsResponse&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.features, features)&&(identical(other.epiCenterCount, epiCenterCount) || other.epiCenterCount == epiCenterCount)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,const DeepCollectionEquality().hash(features));
+int get hashCode => Object.hash(runtimeType,type,const DeepCollectionEquality().hash(features),epiCenterCount,totalCount);
 
 @override
 String toString() {
-  return 'EpiCenterCoordsResponse(type: $type, features: $features)';
+  return 'EpiCenterCoordsResponse(type: $type, features: $features, epiCenterCount: $epiCenterCount, totalCount: $totalCount)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $EpiCenterCoordsResponseCopyWith<$Res>  {
   factory $EpiCenterCoordsResponseCopyWith(EpiCenterCoordsResponse value, $Res Function(EpiCenterCoordsResponse) _then) = _$EpiCenterCoordsResponseCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'type') String? type,@JsonKey(name: 'features') List<EpiFeature>? features
+@JsonKey(name: 'type') String? type,@JsonKey(name: 'features') List<EpiFeature>? features,@JsonKey(name: 'epi_center_count') int? epiCenterCount,@JsonKey(name: 'total_count') int? totalCount
 });
 
 
@@ -65,11 +65,13 @@ class _$EpiCenterCoordsResponseCopyWithImpl<$Res>
 
 /// Create a copy of EpiCenterCoordsResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = freezed,Object? features = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = freezed,Object? features = freezed,Object? epiCenterCount = freezed,Object? totalCount = freezed,}) {
   return _then(_self.copyWith(
 type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String?,features: freezed == features ? _self.features : features // ignore: cast_nullable_to_non_nullable
-as List<EpiFeature>?,
+as List<EpiFeature>?,epiCenterCount: freezed == epiCenterCount ? _self.epiCenterCount : epiCenterCount // ignore: cast_nullable_to_non_nullable
+as int?,totalCount: freezed == totalCount ? _self.totalCount : totalCount // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -154,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'features')  List<EpiFeature>? features)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'features')  List<EpiFeature>? features, @JsonKey(name: 'epi_center_count')  int? epiCenterCount, @JsonKey(name: 'total_count')  int? totalCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EpiCenterCoordsResponse() when $default != null:
-return $default(_that.type,_that.features);case _:
+return $default(_that.type,_that.features,_that.epiCenterCount,_that.totalCount);case _:
   return orElse();
 
 }
@@ -175,10 +177,10 @@ return $default(_that.type,_that.features);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'features')  List<EpiFeature>? features)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'features')  List<EpiFeature>? features, @JsonKey(name: 'epi_center_count')  int? epiCenterCount, @JsonKey(name: 'total_count')  int? totalCount)  $default,) {final _that = this;
 switch (_that) {
 case _EpiCenterCoordsResponse():
-return $default(_that.type,_that.features);case _:
+return $default(_that.type,_that.features,_that.epiCenterCount,_that.totalCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +197,10 @@ return $default(_that.type,_that.features);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'features')  List<EpiFeature>? features)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'type')  String? type, @JsonKey(name: 'features')  List<EpiFeature>? features, @JsonKey(name: 'epi_center_count')  int? epiCenterCount, @JsonKey(name: 'total_count')  int? totalCount)?  $default,) {final _that = this;
 switch (_that) {
 case _EpiCenterCoordsResponse() when $default != null:
-return $default(_that.type,_that.features);case _:
+return $default(_that.type,_that.features,_that.epiCenterCount,_that.totalCount);case _:
   return null;
 
 }
@@ -210,7 +212,7 @@ return $default(_that.type,_that.features);case _:
 @JsonSerializable()
 
 class _EpiCenterCoordsResponse implements EpiCenterCoordsResponse {
-  const _EpiCenterCoordsResponse({@JsonKey(name: 'type') this.type, @JsonKey(name: 'features') final  List<EpiFeature>? features}): _features = features;
+  const _EpiCenterCoordsResponse({@JsonKey(name: 'type') this.type, @JsonKey(name: 'features') final  List<EpiFeature>? features, @JsonKey(name: 'epi_center_count') this.epiCenterCount, @JsonKey(name: 'total_count') this.totalCount}): _features = features;
   factory _EpiCenterCoordsResponse.fromJson(Map<String, dynamic> json) => _$EpiCenterCoordsResponseFromJson(json);
 
 @override@JsonKey(name: 'type') final  String? type;
@@ -223,6 +225,8 @@ class _EpiCenterCoordsResponse implements EpiCenterCoordsResponse {
   return EqualUnmodifiableListView(value);
 }
 
+@override@JsonKey(name: 'epi_center_count') final  int? epiCenterCount;
+@override@JsonKey(name: 'total_count') final  int? totalCount;
 
 /// Create a copy of EpiCenterCoordsResponse
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EpiCenterCoordsResponse&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other._features, _features));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EpiCenterCoordsResponse&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other._features, _features)&&(identical(other.epiCenterCount, epiCenterCount) || other.epiCenterCount == epiCenterCount)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,const DeepCollectionEquality().hash(_features));
+int get hashCode => Object.hash(runtimeType,type,const DeepCollectionEquality().hash(_features),epiCenterCount,totalCount);
 
 @override
 String toString() {
-  return 'EpiCenterCoordsResponse(type: $type, features: $features)';
+  return 'EpiCenterCoordsResponse(type: $type, features: $features, epiCenterCount: $epiCenterCount, totalCount: $totalCount)';
 }
 
 
@@ -257,7 +261,7 @@ abstract mixin class _$EpiCenterCoordsResponseCopyWith<$Res> implements $EpiCent
   factory _$EpiCenterCoordsResponseCopyWith(_EpiCenterCoordsResponse value, $Res Function(_EpiCenterCoordsResponse) _then) = __$EpiCenterCoordsResponseCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'type') String? type,@JsonKey(name: 'features') List<EpiFeature>? features
+@JsonKey(name: 'type') String? type,@JsonKey(name: 'features') List<EpiFeature>? features,@JsonKey(name: 'epi_center_count') int? epiCenterCount,@JsonKey(name: 'total_count') int? totalCount
 });
 
 
@@ -274,11 +278,13 @@ class __$EpiCenterCoordsResponseCopyWithImpl<$Res>
 
 /// Create a copy of EpiCenterCoordsResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = freezed,Object? features = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = freezed,Object? features = freezed,Object? epiCenterCount = freezed,Object? totalCount = freezed,}) {
   return _then(_EpiCenterCoordsResponse(
 type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String?,features: freezed == features ? _self._features : features // ignore: cast_nullable_to_non_nullable
-as List<EpiFeature>?,
+as List<EpiFeature>?,epiCenterCount: freezed == epiCenterCount ? _self.epiCenterCount : epiCenterCount // ignore: cast_nullable_to_non_nullable
+as int?,totalCount: freezed == totalCount ? _self.totalCount : totalCount // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

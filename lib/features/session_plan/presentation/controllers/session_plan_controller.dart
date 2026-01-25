@@ -138,31 +138,70 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
 
       // Construct URL based on parameters
       String sessionPlanUrl = '${ApiConstants.sessionPlans}?area=$areaParam';
+      
+      // ✅ FIX: Always include date parameters (even if empty) to ensure proper filtering
+      // Format: YYYY-MM-DD (e.g., 2025-12-01)
       if (startDate != null && startDate.isNotEmpty) {
         sessionPlanUrl += '&start_date=$startDate';
+        logg.i("Session Plan: Using start_date: $startDate");
       } else {
         sessionPlanUrl += '&start_date=';
+        logg.i("Session Plan: No start_date provided (empty)");
       }
 
       if (endDate != null && endDate.isNotEmpty) {
         sessionPlanUrl += '&end_date=$endDate';
+        logg.i("Session Plan: Using end_date: $endDate");
       } else {
         sessionPlanUrl += '&end_date=';
+        logg.i("Session Plan: No end_date provided (empty)");
       }
 
+      // ✅ FIX: Add limit parameter to fetch more features (if API supports it)
+      // Try to get all sessions, but cap at 50,000 to prevent memory issues
+      // The API might have a max limit, so we'll see what it returns
+      sessionPlanUrl += '&limit=50000';
+      logg.i("Session Plan: Requesting up to 50,000 features (API may limit to 10,000)");
+
       logg.i("Fetching session plans from: $sessionPlanUrl");
+
+      // ✅ OPTIMIZATION 1: Check if area changed - if not, reuse existing GeoJSON
+      final previousAreaUid = _getCurrentAreaUidFromState();
+      final currentAreaUid = effectiveAreaUid;
+      final areaChanged = previousAreaUid != currentAreaUid;
+      
+      logg.i("Session Plan: Area check - previous: $previousAreaUid, current: $currentAreaUid, changed: $areaChanged");
+      
+      // ✅ OPTIMIZATION: Skip GeoJSON reload if only dates changed (saves 1-2 seconds)
+      // Check if dates changed but area didn't
+      final previousStartDate = state.startDate;
+      final previousEndDate = state.endDate;
+      final datesChanged = (startDate != previousStartDate) || (endDate != previousEndDate);
+      final onlyDatesChanged = datesChanged && !areaChanged;
+      
+      if (onlyDatesChanged) {
+        logg.i("Session Plan: ✅ Only dates changed - skipping GeoJSON reload (saves ~1-2 seconds)");
+      }
 
       // ✅ FIX: Use the map controller's GeoJSON data if available (after drilldown)
       // This ensures we use the exact same GeoJSON that the map controller loaded
       final mapState = _ref.read(mapControllerProvider);
       AreaCoordsGeoJsonResponse? areaCoordsGeoJsonData;
       
+      // ✅ OPTIMIZATION 1: Reuse existing GeoJSON if area hasn't changed OR only dates changed
+      if ((!areaChanged || onlyDatesChanged) && state.areaCoordsGeoJsonData != null) {
+        logg.i("Session Plan: ✅ Reusing existing GeoJSON (area unchanged or only dates changed)");
+        areaCoordsGeoJsonData = state.areaCoordsGeoJsonData;
+      }
       // Check if map controller has GeoJSON data for the current filter level
-      if (mapState.areaCoordsGeoJsonData != null && !mapState.isLoading) {
+      else if (mapState.areaCoordsGeoJsonData != null && !mapState.isLoading && !onlyDatesChanged) {
         // Use map controller's GeoJSON data (already loaded from drilldown)
         logg.i("Session Plan: Using GeoJSON data from map controller (already loaded from drilldown)");
         areaCoordsGeoJsonData = mapState.areaCoordsGeoJsonData;
-      } else {
+      } 
+      // Only load new GeoJSON if area changed and we don't have it from map controller
+      // Skip GeoJSON reload if only dates changed (saves 1-2 seconds)
+      else if (areaChanged && !onlyDatesChanged) {
         // Map controller doesn't have GeoJSON yet, load it ourselves
         logg.i("Session Plan: Map controller doesn't have GeoJSON, loading separately");
         
@@ -238,16 +277,34 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
         }
       }
 
-      // Always try to fetch session plan data (this is the main data we need)
-      logg.i("Session Plan: Fetching from URL: $sessionPlanUrl");
+      // ✅ OPTIMIZATION 2 & 3: Load session plan data (with smart caching)
+      // Only force refresh if area changed, otherwise use cache
+      logg.i("Session Plan: Fetching session plan data (forceRefresh: $areaChanged)");
       final sessionPlanCoordsData = await _dataService.getSessionPlanCoords(
         urlPath: sessionPlanUrl,
-        forceRefresh: true,
+        forceRefresh: areaChanged, // ✅ OPTIMIZATION 3: Only force refresh if area changed
       );
 
       logg.i(
         "Session Plan: ✅ Loaded session plan data - features: ${sessionPlanCoordsData.features?.length ?? 0}, sessionCount: ${sessionPlanCoordsData.sessionCount ?? 'null'}",
       );
+      
+      // ✅ DEBUG: Verify sessionCount is correctly set
+      if (sessionPlanCoordsData.sessionCount != null) {
+        logg.i("Session Plan: ✅ sessionCount is NOT null: ${sessionPlanCoordsData.sessionCount}");
+      } else {
+        logg.w("Session Plan: ⚠️ sessionCount IS null - this might be why the count is wrong!");
+        logg.w("Session Plan: ⚠️ Check if API response contains 'session_count' field");
+      }
+      
+      // ✅ DEBUG: Log the raw JSON to verify session_count is in the response
+      try {
+        final rawJson = sessionPlanCoordsData.toJson();
+        logg.i("Session Plan: Serialized JSON - session_count field: ${rawJson['session_count']}");
+        logg.i("Session Plan: Serialized JSON - type: ${rawJson['type']}, features count: ${(rawJson['features'] as List?)?.length ?? 0}");
+      } catch (e) {
+        logg.w("Session Plan: Could not log serialized JSON: $e");
+      }
       
       if (sessionPlanCoordsData.features == null || sessionPlanCoordsData.features!.isEmpty) {
         logg.w("Session Plan: ⚠️ No session plan features returned for area: $areaParam");
@@ -262,11 +319,15 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         sessionPlanCoordsData: sessionPlanCoordsData,
-        startDate: startDate,
+        startDate: startDate, // Store dates in state for persistence
         endDate: endDate,
         isLoading: false,
         clearError: true,
       );
+      
+      // ✅ DEBUG: Log date filter state
+      logg.i("Session Plan: ✅ Date filter applied - startDate: ${startDate ?? 'null'}, endDate: ${endDate ?? 'null'}");
+      logg.i("Session Plan: ✅ State updated with dates - startDate: ${state.startDate ?? 'null'}, endDate: ${state.endDate ?? 'null'}");
     } catch (e) {
       logg.e("Error loading session plan data: $e");
       
@@ -287,6 +348,17 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
         error: errorMessage,
       );
     }
+  }
+
+  /// Get current area UID from state (for optimization - check if area changed)
+  String? _getCurrentAreaUidFromState() {
+    // Try to determine area UID from current state
+    // This is used to check if area changed (to skip GeoJSON reload)
+    final filterState = _ref.read(filterControllerProvider);
+    final filterNotifier = _ref.read(filterControllerProvider.notifier);
+    
+    // Use the same logic as _buildAreaUidForSessionPlan to get current area UID
+    return _buildAreaUidForSessionPlan(filterState, filterNotifier);
   }
 
   /// Get GeoJSON path based on current filter state

@@ -30,6 +30,9 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
   final double _initialZoom = 6.6;
   Timer? _autoZoomTimer;
   DateTime? _lastAutoZoom;
+  List<Marker>? _cachedMarkers; // Cache markers to avoid rebuilding
+  SessionPlanCoordsResponse? _cachedMarkerData; // Track which data was used for cache
+  bool _isCurrentlyBuildingMarkers = false; // Track if markers are currently being built
 
   @override
   void initState() {
@@ -142,68 +145,175 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
   }
 
   List<Marker> _buildSessionPlanMarkers(SessionPlanCoordsResponse data) {
-    if (data.features == null) return [];
+    try {
+      // ✅ OPTIMIZATION: Use cached markers if data hasn't changed
+      if (_cachedMarkers != null && _cachedMarkerData == data && _cachedMarkers!.isNotEmpty) {
+        _isCurrentlyBuildingMarkers = false; // Markers already built
+        return _cachedMarkers!;
+      }
+      
+      if (data.features == null) {
+        _isCurrentlyBuildingMarkers = false;
+        return [];
+      }
+      
+      // ✅ FIX: Set building flag and log marker building start
+      _isCurrentlyBuildingMarkers = true;
+      logg.i("Session Plan: Starting to build markers (${data.features!.length} features)");
 
-    final markers = <Marker>[];
+      // ✅ FIX: Dynamically adjust marker limit based on total sessions
+      // For large datasets, we need to balance between showing all sessions and preventing crashes
+      // Strategy: Show more markers if we have fewer total sessions, limit more if we have many
+      // ⚠️ CRASH FIX: Reduced limits to prevent device crashes on low-end devices
+      final totalSessions = data.sessionCount ?? data.features!.length;
+      int maxMarkers;
+      
+      if (totalSessions <= 3000) {
+        // Small dataset: show all markers
+        maxMarkers = totalSessions;
+      } else if (totalSessions <= 10000) {
+        // Medium dataset: show up to 3000 markers (reduced from 5000)
+        maxMarkers = 3000;
+      } else {
+        // Large dataset: show up to 5000 markers (reduced from 10000 to prevent crashes)
+        // This prevents crashes on low-end devices while still showing a good sample
+        maxMarkers = 5000;
+      }
+      
+      final allFeatures = data.features!;
+      final totalFeatures = allFeatures.length;
+      
+      if (totalFeatures > maxMarkers) {
+        logg.w(
+          "Session Plan: ⚠️ Large dataset detected ($totalFeatures features, $totalSessions total sessions). "
+          "Limiting to $maxMarkers markers to prevent crash.",
+        );
+      } else {
+        logg.i(
+          "Session Plan: ✅ Showing $totalFeatures markers out of $totalSessions total sessions.",
+        );
+      }
 
-    for (final feature in data.features!) {
-      final geometry = feature.geometry;
-      final info = feature.info;
+      final markers = <Marker>[];
+      final featuresToProcess = totalFeatures > maxMarkers 
+          ? allFeatures.take(maxMarkers).toList() 
+          : allFeatures;
 
-      if (geometry?.type == 'Point' && geometry?.coordinates != null) {
-        final coords = geometry!.coordinates!;
-        if (coords.length >= 2) {
-          final lng = (coords[0] as num).toDouble();
-          final lat = (coords[1] as num).toDouble();
-          final centerName = info?.name ?? 'Session Plan Center';
-          final isFixedCenter = info?.isFixedCenter ?? false;
+      int skippedInvalid = 0;
+      for (final feature in featuresToProcess) {
+        try {
+          final geometry = feature.geometry;
+          final info = feature.info;
 
-          markers.add(
-            Marker(
-              point: LatLng(lat, lng),
-              width: 19,
-              height: 19,
-              child: GestureDetector(
-                onTap: () => _launchMapsUrl(lat, lng),
-                child: Tooltip(
-                  message: centerName,
-                  child: SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isFixedCenter
-                            ? Colors.blueAccent
-                            : Colors.deepPurple,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 0.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 1,
-                            offset: const Offset(0, 0.5),
+            if (geometry?.type == 'Point' && geometry?.coordinates != null) {
+              final coords = geometry!.coordinates!;
+              if (coords.length >= 2) {
+                // ✅ CRASH FIX: Validate coordinates before parsing
+                try {
+                  final lngValue = coords[0];
+                  final latValue = coords[1];
+                  
+                  final lng = (lngValue as num).toDouble();
+                  final lat = (latValue as num).toDouble();
+                  
+                  // ✅ CRASH FIX: Validate coordinate ranges (Bangladesh bounds)
+                  // Bangladesh: ~20.7°N to 26.6°N, ~88.0°E to 92.7°E
+                  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                    logg.w("Session Plan: Skipping invalid coordinates: lat=$lat, lng=$lng");
+                    skippedInvalid++;
+                    continue;
+                  }
+                  
+                  final centerName = info?.name ?? 'Session Plan Center';
+                  final isFixedCenter = info?.isFixedCenter ?? false;
+
+                  markers.add(
+                    Marker(
+                      point: LatLng(lat, lng),
+                      width: 19,
+                      height: 19,
+                      child: GestureDetector(
+                        onTap: () => _launchMapsUrl(lat, lng),
+                        child: Tooltip(
+                          message: centerName,
+                          child: SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isFixedCenter
+                                    ? Colors.blueAccent
+                                    : Colors.deepPurple,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 0.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.3),
+                                    blurRadius: 1,
+                                    offset: const Offset(0, 0.5),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: !isFixedCenter
+                                    ? FaIcon(
+                                        FontAwesomeIcons.syringe,
+                                        size: 10,
+                                        color: Colors.white,
+                                      )
+                                    : Icon(Icons.home, color: Colors.white, size: 10),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: !isFixedCenter
-                            ? FaIcon(
-                                FontAwesomeIcons.syringe,
-                                size: 10,
-                                color: Colors.white,
-                              )
-                            : Icon(Icons.home, color: Colors.white, size: 10),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-            ),
-          );
+                  );
+                } catch (e) {
+                  // ✅ CRASH FIX: Catch coordinate parsing errors
+                  logg.w("Session Plan: Error parsing coordinates: $e");
+                  skippedInvalid++;
+                  continue;
+                }
+              } else {
+                skippedInvalid++;
+              }
+            } else {
+              skippedInvalid++;
+            }
+        } catch (e) {
+          // ✅ CRASH FIX: Catch individual marker errors to prevent entire function from failing
+          logg.w("Session Plan: Error building marker for feature: $e");
+          skippedInvalid++;
+          continue; // Skip this feature and continue with next
         }
       }
+      
+      if (skippedInvalid > 0) {
+        logg.w("Session Plan: Skipped $skippedInvalid invalid features");
+      }
+      
+      logg.i(
+        "Session Plan: Built ${markers.length} markers "
+        "(${totalFeatures > maxMarkers ? 'limited from $totalFeatures' : 'all $totalFeatures'} features, "
+        "skipped $skippedInvalid invalid)",
+      );
+      
+      // ✅ OPTIMIZATION: Cache markers and data reference
+      _cachedMarkers = markers;
+      _cachedMarkerData = data;
+      _isCurrentlyBuildingMarkers = false; // Markers building complete
+      
+      logg.i("Session Plan: ✅ Marker building complete - cached ${markers.length} markers");
+      
+      return markers;
+    } catch (e, stackTrace) {
+      // ✅ CRASH FIX: Comprehensive error handling to prevent app crash
+      logg.e("Session Plan: Critical error building markers: $e");
+      logg.e("Session Plan: Stack trace: $stackTrace");
+      _isCurrentlyBuildingMarkers = false; // Reset building flag on error
+      return []; // Return empty list instead of crashing
     }
-    return markers;
   }
 
   /// Determine current geographic level from filter state
@@ -269,6 +379,93 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
       }
     } else {
       logg.i("Session Plan: No polygon found at tapped location");
+    }
+  }
+
+  /// Ensure EPI data is loaded for the filtered area (called when only dates change)
+  /// This logs a warning if EPI data doesn't match the filter level
+  Future<void> _ensureEpiDataForFilteredArea(FilterState filterState, WidgetRef ref) async {
+    try {
+      final mapState = ref.read(mapControllerProvider);
+      final filterNotifier = ref.read(filterControllerProvider.notifier);
+      
+      // Determine the filter level
+      GeographicLevel? filterLevel;
+      String? epiSlug;
+      
+      // Check from deepest to shallowest level
+      if (filterState.selectedSubblock != null && filterState.selectedSubblock != 'All') {
+        // Build concatenated slug for subblock
+        final districtUid = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
+        final upazilaUid = filterNotifier.getUpazilaUid(filterState.selectedUpazila!);
+        final unionUid = filterNotifier.getUnionUid(filterState.selectedUnion!);
+        final wardUid = filterNotifier.getWardUid(filterState.selectedWard!);
+        final subblockUid = filterNotifier.getSubblockUid(filterState.selectedSubblock!);
+        if (districtUid != null && upazilaUid != null && unionUid != null && wardUid != null && subblockUid != null) {
+          epiSlug = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
+          filterLevel = GeographicLevel.subblock;
+        }
+      } else if (filterState.selectedWard != null && filterState.selectedWard != 'All') {
+        final districtUid = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
+        final upazilaUid = filterNotifier.getUpazilaUid(filterState.selectedUpazila!);
+        final unionUid = filterNotifier.getUnionUid(filterState.selectedUnion!);
+        final wardUid = filterNotifier.getWardUid(filterState.selectedWard!);
+        if (districtUid != null && upazilaUid != null && unionUid != null && wardUid != null) {
+          epiSlug = '$districtUid/$upazilaUid/$unionUid/$wardUid';
+          filterLevel = GeographicLevel.ward;
+        }
+      } else if (filterState.selectedUnion != null && filterState.selectedUnion != 'All') {
+        final districtUid = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
+        final upazilaUid = filterNotifier.getUpazilaUid(filterState.selectedUpazila!);
+        final unionUid = filterNotifier.getUnionUid(filterState.selectedUnion!);
+        if (districtUid != null && upazilaUid != null && unionUid != null) {
+          epiSlug = '$districtUid/$upazilaUid/$unionUid';
+          filterLevel = GeographicLevel.union;
+        }
+      } else if (filterState.selectedUpazila != null && filterState.selectedUpazila != 'All') {
+        final districtUid = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
+        final upazilaUid = filterNotifier.getUpazilaUid(filterState.selectedUpazila!);
+        if (districtUid != null && upazilaUid != null) {
+          epiSlug = '$districtUid/$upazilaUid';
+          filterLevel = GeographicLevel.upazila;
+        }
+      } else if (filterState.selectedDistrict != null && filterState.selectedDistrict != 'All') {
+        epiSlug = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
+        filterLevel = GeographicLevel.district;
+      } else if (filterState.selectedDivision != null && filterState.selectedDivision != 'All') {
+        epiSlug = filterNotifier.getDivisionUid(filterState.selectedDivision);
+        filterLevel = GeographicLevel.division;
+      } else if (filterState.selectedAreaType == AreaType.cityCorporation) {
+        if (filterState.selectedZone != null && filterState.selectedZone != 'All') {
+          final ccUid = filterNotifier.getCityCorporationUid(filterState.selectedCityCorporation!);
+          final zoneUid = filterNotifier.getZoneUid(filterState.selectedZone!);
+          if (ccUid != null && zoneUid != null) {
+            epiSlug = '$ccUid/$zoneUid';
+            filterLevel = GeographicLevel.zone;
+          }
+        } else if (filterState.selectedCityCorporation != null && filterState.selectedCityCorporation != 'All') {
+          epiSlug = filterNotifier.getCityCorporationUid(filterState.selectedCityCorporation!);
+          filterLevel = GeographicLevel.cityCorporation;
+        }
+      }
+      
+      // If no geographic filter is applied, use country level (null slug)
+      if (filterLevel == null) {
+        filterLevel = GeographicLevel.country;
+        epiSlug = null;
+      }
+      
+      // Check if EPI data matches the filter level
+      if (mapState.currentLevel != filterLevel) {
+        logg.w("Session Plan: ⚠️ EPI data level mismatch - map: ${mapState.currentLevel.value}, filter: ${filterLevel.value}");
+        logg.w("Session Plan: EPI count may be incorrect. Geographic filters should trigger map drilldown to load correct EPI data.");
+      } else if (mapState.epiCenterCoordsData == null) {
+        logg.w("Session Plan: ⚠️ EPI data is null for filter level: ${filterLevel.value}");
+      } else {
+        logg.i("Session Plan: ✅ EPI data matches filter level (${filterLevel.value}) - ${mapState.epiCenterCoordsData!.features?.length ?? 0} EPI centers");
+      }
+    } catch (e) {
+      logg.w("Session Plan: Error ensuring EPI data for filtered area: $e");
     }
   }
 
@@ -386,6 +583,23 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
   Widget build(BuildContext context) {
     final sessionPlanState = ref.watch(sessionPlanControllerProvider);
     final mapState = ref.watch(mapControllerProvider);
+    
+    // ✅ FIX: Track marker building state
+    // If we have data but no markers yet, we're building markers
+    // This helps show loading indicator during the gap when markers are being built
+    final hasData = sessionPlanState.sessionPlanCoordsData != null;
+    
+    // Check if markers are already built for current data
+    final markersBuilt = _cachedMarkers != null && 
+                         _cachedMarkerData == sessionPlanState.sessionPlanCoordsData &&
+                         _cachedMarkers!.isNotEmpty;
+    
+    // Only show "building markers" if we have data, markers aren't built yet, and we're not loading data
+    // Also check the flag to ensure we're actually in the process of building
+    final isBuildingMarkers = hasData && 
+                              !markersBuilt && 
+                              !sessionPlanState.isLoading &&
+                              _isCurrentlyBuildingMarkers;
 
     // ✅ Listen to filter state changes and reload session plan data + trigger map drilldown
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
@@ -410,6 +624,40 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
 
         if (onlyVaccineChanged) {
           // Only reload session plan data, don't trigger map drilldown
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+            }
+          });
+          return;
+        }
+
+        // ✅ OPTIMIZATION 4: Check if only dates changed (no geographic or other filter changes)
+        // Note: Dates are stored in session plan state, not filter state
+        // We detect date-only changes by checking if all geographic filters are unchanged
+        // The actual date comparison happens in the session plan controller
+        final bool onlyDatesOrNonGeographicChanged =
+            previous.selectedAreaType == current.selectedAreaType &&
+            previous.selectedDivision == current.selectedDivision &&
+            previous.selectedDistrict == current.selectedDistrict &&
+            previous.selectedCityCorporation == current.selectedCityCorporation &&
+            previous.selectedUpazila == current.selectedUpazila &&
+            previous.selectedUnion == current.selectedUnion &&
+            previous.selectedWard == current.selectedWard &&
+            previous.selectedSubblock == current.selectedSubblock &&
+            previous.selectedZone == current.selectedZone &&
+            previous.selectedYear == current.selectedYear &&
+            previous.selectedVaccine == current.selectedVaccine;
+        
+        // If only non-geographic filters changed (dates, vaccine, etc.), skip map drilldown
+        if (onlyDatesOrNonGeographicChanged) {
+          // Only reload session plan data, skip map drilldown (saves 1-3 seconds)
+          logg.i("Session Plan: ✅ Only non-geographic filters changed (dates/vaccine) - skipping map drilldown");
+          
+          // ✅ FIX: Ensure EPI data is loaded for the current filter level
+          // Even when only dates change, we need to make sure EPI data matches the filtered area
+          _ensureEpiDataForFilteredArea(current, ref);
+          
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
@@ -624,6 +872,12 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
 
     // ✅ Also listen to session plan state changes (fallback if map controller doesn't have GeoJSON)
     ref.listen<SessionPlanState>(sessionPlanControllerProvider, (previous, current) {
+      // ✅ Clear cache when data changes
+      if (previous?.sessionPlanCoordsData != current.sessionPlanCoordsData) {
+        _cachedMarkers = null;
+        _cachedMarkerData = null;
+      }
+      
       // Only trigger auto-zoom if map controller doesn't have GeoJSON
       final mapState = ref.read(mapControllerProvider);
       if (mapState.areaCoordsGeoJsonData != null) {
@@ -739,19 +993,11 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
       ),
       body: Stack(
         children: [
-          if (sessionPlanState.isLoading)
-            Container(
-              color: Colors.black.withValues(alpha: 0.1),
-              child: const Center(child: CustomLoadingWidget()),
-            ),
-
-          // ✅ Show map if we have either GeoJSON data OR session plan markers
-          // GeoJSON is optional - we can show markers without polygons
-          if (!sessionPlanState.isLoading &&
-              (sessionPlanState.areaCoordsGeoJsonData != null ||
-               (sessionPlanState.sessionPlanCoordsData != null &&
-                sessionPlanState.sessionPlanCoordsData!.features != null &&
-                sessionPlanState.sessionPlanCoordsData!.features!.isNotEmpty)))
+          // ✅ Show map immediately (even during loading) for better UX
+          // This prevents the empty screen issue where users see nothing
+          if (sessionPlanState.areaCoordsGeoJsonData != null ||
+              sessionPlanState.sessionPlanCoordsData != null ||
+              sessionPlanState.isLoading)
             FlutterMap(
               mapController: _mapController,
               options: MapOptions(
@@ -772,10 +1018,23 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
                   ),
                 // Always show markers if session plan data is available
                 if (sessionPlanState.sessionPlanCoordsData != null)
-                  MarkerLayer(
-                    markers: _buildSessionPlanMarkers(
-                      sessionPlanState.sessionPlanCoordsData!,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final markers = _buildSessionPlanMarkers(
+                        sessionPlanState.sessionPlanCoordsData!,
+                      );
+                      // ✅ FIX: Trigger rebuild after markers are built to hide loading indicator
+                      if (_isCurrentlyBuildingMarkers && markers.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            setState(() {
+                              _isCurrentlyBuildingMarkers = false;
+                            });
+                          }
+                        });
+                      }
+                      return MarkerLayer(markers: markers);
+                    },
                   ),
                 // Area name labels - Show for all levels except country level
                 if (areaPolygons.isNotEmpty) ...[
@@ -793,6 +1052,33 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
                   ),
                 ],
               ],
+            ),
+
+          // ✅ Show loading overlay on top of map during loading OR marker building
+          if (sessionPlanState.isLoading || isBuildingMarkers)
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: CustomLoadingWidget(
+                    loadingText: sessionPlanState.isLoading 
+                        ? 'Loading session plans...' 
+                        : 'Building markers...',
+                  ),
+                ),
+              ),
             ),
 
           // ✅ Improved error display

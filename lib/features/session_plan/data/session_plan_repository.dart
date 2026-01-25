@@ -38,7 +38,30 @@ class SessionPlanRepository {
       logg.i("Fetching session plan coords from $urlPath");
       final response = await _client.get(urlPath);
 
-      return SessionPlanCoordsResponse.fromJson(response.data);
+      // ✅ DEBUG: Log raw API response to verify session_count field exists
+      if (response.data is Map<String, dynamic>) {
+        final rawData = response.data as Map<String, dynamic>;
+        logg.i("Session Plan API: Raw response keys: ${rawData.keys.toList()}");
+        if (rawData.containsKey('session_count')) {
+          logg.i("Session Plan API: ✅ session_count field found: ${rawData['session_count']} (type: ${rawData['session_count'].runtimeType})");
+        } else {
+          logg.w("Session Plan API: ⚠️ session_count field NOT found in response!");
+          logg.w("Session Plan API: Available fields: ${rawData.keys.toList()}");
+        }
+        if (rawData.containsKey('features')) {
+          final features = rawData['features'];
+          if (features is List) {
+            logg.i("Session Plan API: features count: ${features.length}");
+          }
+        }
+      }
+
+      final parsedResponse = SessionPlanCoordsResponse.fromJson(response.data);
+      
+      // ✅ DEBUG: Log parsed response to verify sessionCount is correctly parsed
+      logg.i("Session Plan API: Parsed response - sessionCount: ${parsedResponse.sessionCount}, features: ${parsedResponse.features?.length ?? 0}");
+      
+      return parsedResponse;
     } on DioException catch (e) {
       logg.e("Dio error fetching session plans: $e");
       throw NetworkErrorHandler.handleDioError(e);

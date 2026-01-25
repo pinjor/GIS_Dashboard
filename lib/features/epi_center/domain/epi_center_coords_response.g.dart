@@ -13,11 +13,18 @@ _EpiCenterCoordsResponse _$EpiCenterCoordsResponseFromJson(
   features: (json['features'] as List<dynamic>?)
       ?.map((e) => EpiFeature.fromJson(e as Map<String, dynamic>))
       .toList(),
+  epiCenterCount: (json['epi_center_count'] as num?)?.toInt(),
+  totalCount: (json['total_count'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$EpiCenterCoordsResponseToJson(
   _EpiCenterCoordsResponse instance,
-) => <String, dynamic>{'type': instance.type, 'features': instance.features};
+) => <String, dynamic>{
+  'type': instance.type,
+  'features': instance.features,
+  'epi_center_count': instance.epiCenterCount,
+  'total_count': instance.totalCount,
+};
 
 _EpiFeature _$EpiFeatureFromJson(Map<String, dynamic> json) => _EpiFeature(
   type: json['type'] as String?,

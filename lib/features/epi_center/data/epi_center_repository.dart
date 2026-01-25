@@ -93,6 +93,24 @@ class EpiCenterRepository {
       // }
 
       logg.i('Successfully received EPI data: $epiData');
+      
+      // ✅ DEBUG: Check if raw response has metadata or total count
+      if (epiData is Map<String, dynamic>) {
+        logg.i('EPI Response keys: ${epiData.keys.toList()}');
+        if (epiData.containsKey('metadata')) {
+          logg.i('EPI Response has metadata: ${epiData['metadata']}');
+        }
+        if (epiData.containsKey('total_count') || epiData.containsKey('epi_center_count')) {
+          logg.i('EPI Response has total count field: ${epiData['total_count'] ?? epiData['epi_center_count']}');
+        }
+        if (epiData.containsKey('features')) {
+          final features = epiData['features'];
+          if (features is List) {
+            logg.i('EPI Response features count: ${features.length}');
+          }
+        }
+      }
+      
       return EpiCenterCoordsResponse.fromJson(epiData as Map<String, dynamic>);
     } on DioException catch (e) {
       logg.e("Dio error fetching EPI data: $e");

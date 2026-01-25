@@ -6,7 +6,6 @@ import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 
 import '../../../features/summary/presentation/controllers/summary_controller.dart';
-import '../../../features/map/presentation/controllers/map_controller.dart';
 import '../../utils/utils.dart';
 
 class HeaderTitleIconFilterWidget extends ConsumerWidget {
@@ -18,27 +17,8 @@ class HeaderTitleIconFilterWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filterState = ref.watch(filterControllerProvider);
     final summaryState = ref.watch(summaryControllerProvider);
-    final mapState = ref.watch(mapControllerProvider);
     final generatedAt = summaryState.coverageData?.metadata?.generatedAt;
     final generatedAtTime = formatDateTime(generatedAt);
-    
-    // ✅ FIX: Get EPI center count from map controller's EPI data
-    // EPI data is loaded based on current filter level, so this count reflects the filtered area
-    final epiCenterCount = mapState.epiCenterCoordsData?.features?.length ?? 0;
-    
-    // ✅ FIX: Always show count if EPI data has been loaded (even if 0)
-    // This matches web behavior where count is always displayed
-    final shouldShowCount = mapState.epiCenterCoordsData != null;
-    
-    // Debug logging to help troubleshoot EPI center count issues
-    if (epiCenterCount == 0 && !mapState.isLoading && shouldShowCount) {
-      logg.w('Header: EPI center count is 0 - epiCenterCoordsData: ${mapState.epiCenterCoordsData != null}, features: ${mapState.epiCenterCoordsData?.features?.length ?? 0}');
-      logg.w('Header: Current level: ${mapState.currentLevel.value}, area: ${mapState.currentAreaName ?? "none"}');
-    } else if (epiCenterCount > 0) {
-      logg.i('Header: EPI center count: $epiCenterCount (level: ${mapState.currentLevel.value})');
-    } else if (!shouldShowCount && !mapState.isLoading) {
-      logg.w('Header: EPI data not loaded yet - epiCenterCoordsData is null');
-    }
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,16 +44,6 @@ class HeaderTitleIconFilterWidget extends ConsumerWidget {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                // ✅ FIX: Display EPI center count (always show if EPI data has been loaded)
-                if (shouldShowCount)
-                  Text(
-                    "$epiCenterCount EPI ${epiCenterCount == 1 ? 'Center' : 'Centers'}",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
               ],
             ),
             IconButton(

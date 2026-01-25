@@ -11,6 +11,8 @@ abstract class EpiCenterCoordsResponse with _$EpiCenterCoordsResponse {
   const factory EpiCenterCoordsResponse({
     @JsonKey(name: 'type') String? type,
     @JsonKey(name: 'features') List<EpiFeature>? features,
+    @JsonKey(name: 'epi_center_count') int? epiCenterCount,
+    @JsonKey(name: 'total_count') int? totalCount,
   }) = _EpiCenterCoordsResponse;
 
   factory EpiCenterCoordsResponse.fromJson(Map<String, dynamic> json) =>
