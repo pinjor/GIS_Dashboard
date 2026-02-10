@@ -315,6 +315,55 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
+  /// Auto-navigate to EPI center details when subblock filter is applied
+  void _navigateToEpiCenterDetailsForSubblock(
+    BuildContext context,
+    WidgetRef ref,
+    String subblockName,
+  ) {
+    // ✅ Check if we're already on EPI details screen to prevent duplicate navigation
+    final currentRoute = ModalRoute.of(context);
+    if (currentRoute?.settings.name?.contains('EpiCenterDetails') == true) {
+      logg.i("⚠️ Already on EPI center details screen, skipping auto-navigation");
+      return;
+    }
+    
+    logg.i("🚀 Auto-navigating to EPI center details for subblock: $subblockName");
+    
+    final filterState = ref.read(filterControllerProvider);
+    final filterNotifier = ref.read(filterControllerProvider.notifier);
+    final summaryState = ref.read(summaryControllerProvider);
+    
+    // Get subblock UID
+    final subblockUid = filterNotifier.getSubblockUid(subblockName);
+    
+    if (subblockUid == null) {
+      logg.w("⚠️ Could not get subblock UID for $subblockName, skipping auto-navigation");
+      return;
+    }
+    
+    logg.i("   > Subblock UID: $subblockUid");
+    logg.i("   > Coverage data available: ${summaryState.coverageData != null}");
+    logg.i("   > Selected vaccine UID: ${filterState.selectedVaccine}");
+    
+    // Get coverage data and selected vaccine
+    final coverageData = summaryState.coverageData;
+    final selectedVaccineUid = filterState.selectedVaccine;
+    
+    // Navigate to EPI center details screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EpiCenterDetailsScreen(
+          epiUid: subblockUid,
+          isOrgUidRequest: true,
+          coverageData: coverageData,
+          selectedVaccineUid: selectedVaccineUid,
+        ),
+      ),
+    );
+  }
+
   /// Handle subblock tap - find EPI center in subblock and navigate to it
   void _handleSubblockTapForEpiNavigation(AreaPolygon subblockPolygon) {
     logg.i("Subblock tapped: ${subblockPolygon.areaName}");
@@ -853,9 +902,30 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               }
               
               // Try to load - getSubblockUid will handle fuzzy matching
-              ref
+              await ref
                   .read(mapControllerProvider.notifier)
                   .loadSubblockData(subblockName: subblockName);
+              
+              // ✅ FIX: Auto-navigate to EPI center details when subblock filter is applied
+              // Wait a bit for map state to update, then check if data loaded successfully
+              await Future.delayed(const Duration(milliseconds: 500));
+              
+              if (mounted) {
+                // Check if data loaded successfully (no error, not loading)
+                final mapState = ref.read(mapControllerProvider);
+                if (!mapState.isLoading && mapState.error == null) {
+                  logg.i("✅ Subblock data loaded successfully, auto-navigating to EPI center details");
+                  _navigateToEpiCenterDetailsForSubblock(
+                    context,
+                    ref,
+                    subblockName,
+                  );
+                } else {
+                  logg.w(
+                    "⚠️ Skipping auto-navigation - map state: isLoading=${mapState.isLoading}, error=${mapState.error}",
+                  );
+                }
+              }
             }
           });
         } else if (wardFilterApplied) {

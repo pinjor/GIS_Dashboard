@@ -406,7 +406,13 @@ class _EpiCenterDetailsScreenState
 
           // City corporation info (if available)
           // EpiCenterCityCorporationInfo(epiData: epiCenterData),
-          _buildTargetCard(epiCenterData, selectedYear, widget.coverageData, widget.selectedVaccineUid),
+          _buildTargetCard(
+            epiCenterData,
+            selectedYear,
+            widget.coverageData,
+            widget.selectedVaccineUid,
+            ref,
+          ),
           const SizedBox(height: 16),
 
           // Coverage tables
@@ -445,19 +451,38 @@ class _EpiCenterDetailsScreenState
     String selectedYear,
     VaccineCoverageResponse? coverageData, // ✅ Coverage data for consistent calculation
     String? selectedVaccineUid, // ✅ Selected vaccine UID
+    WidgetRef ref, // ✅ Add ref to access filter state
   ) {
     int? calcTarget;
+    
+    // ✅ FIX: Get subblock UID/name from filter state for subblock-level filtering
+    final filterState = ref.read(filterControllerProvider);
+    String? subblockUid;
+    String? subblockName;
+    
+    if (filterState.selectedSubblock != null &&
+        filterState.selectedSubblock != 'All') {
+      subblockName = filterState.selectedSubblock;
+      final filterNotifier = ref.read(filterControllerProvider.notifier);
+      subblockUid = filterNotifier.getSubblockUid(subblockName!);
+      logg.i(
+        'EPI Target Card: Subblock filter detected - name: $subblockName, UID: $subblockUid',
+      );
+    }
 
     // ✅ PRIORITY 1: Use coverage data (same source as Summary card) for consistency
+    // ✅ FIX: Pass subblock UID/name to filter coverage data for subblock level
     if (coverageData != null) {
       final targetData = TargetCalculator.getTargetData(
         coverageData,
         selectedVaccineUid,
+        areaUid: subblockUid, // ✅ Pass subblock UID to filter by subblock
+        areaName: subblockUid == null ? subblockName : null, // ✅ Fallback to name if UID not available
       );
       if (targetData != null && targetData.total > 0) {
         calcTarget = targetData.total;
         logg.i(
-          'EPI Target Card: Using coverage data - total: ${targetData.total}, '
+          'EPI Target Card: Using coverage data (${subblockUid != null || subblockName != null ? "filtered by subblock" : "unfiltered"}) - total: ${targetData.total}, '
           'male: ${targetData.male}, female: ${targetData.female}',
         );
       }

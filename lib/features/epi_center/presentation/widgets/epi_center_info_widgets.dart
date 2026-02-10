@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gis_dashboard/features/filter/filter.dart';
 
 /// Collection of EPI Center information widgets
-class EpiCenterLocationBreadcrumb extends StatelessWidget {
+class EpiCenterLocationBreadcrumb extends ConsumerWidget {
   final dynamic epiData;
 
   const EpiCenterLocationBreadcrumb({super.key, required this.epiData});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final breadcrumbs = <String>[];
+    final filterState = ref.watch(filterControllerProvider);
 
     if (epiData.divisionName != null && epiData.divisionName.isNotEmpty) {
       breadcrumbs.add(epiData.divisionName);
@@ -24,6 +27,14 @@ class EpiCenterLocationBreadcrumb extends StatelessWidget {
     }
     if (epiData.wardName != null && epiData.wardName.isNotEmpty) {
       breadcrumbs.add(epiData.wardName);
+    }
+    // ✅ FIX: Add subblock name to breadcrumb - check API data first, then filter state as fallback
+    if (epiData.subBlockName != null && epiData.subBlockName.isNotEmpty) {
+      breadcrumbs.add(epiData.subBlockName);
+    } else if (filterState.selectedSubblock != null &&
+        filterState.selectedSubblock != 'All') {
+      // Fallback to filter state if API doesn't provide subBlockName
+      breadcrumbs.add(filterState.selectedSubblock!);
     }
 
     if (breadcrumbs.isEmpty) return const SizedBox.shrink();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:math' as math;
 import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../../domain/epi_center_details_response.dart';
 
@@ -144,23 +143,20 @@ class CoverageTableWidget extends ConsumerWidget {
       Map<String, int> monthData = {};
 
       if (isDropout) {
-        // For dropout calculation: use monthlyTarget - coverage
+        // ✅ FIX: Use API dropout data directly instead of calculating
         if (isFutureMonth) {
           // Future months: show 0 for all dropouts
           for (final vaccineName in vaccineNames) {
             monthData[vaccineName] = 0;
           }
         } else {
-          // Current & past months: calculate dropout
-          final monthlyTarget = yearlyTarget > 0
-              ? (yearlyTarget / 12).round()
-              : 0;
-          final coverageData =
-              epiCenterDetailsData?.coverageTableData?.months[month]?.coverages ??
+          // Current & past months: use API dropout data
+          final dropoutData =
+              epiCenterDetailsData?.coverageTableData?.months[month]?.dropouts ??
               {};
 
           for (final vaccineName in vaccineNames) {
-            final rawValue = coverageData[vaccineName];
+            final rawValue = dropoutData[vaccineName];
             int value = 0;
             if (rawValue is num) {
               value = rawValue.toInt();
@@ -168,10 +164,9 @@ class CoverageTableWidget extends ConsumerWidget {
               value = int.tryParse(rawValue) ?? 0;
             }
 
-            final dropout = math.max(0, monthlyTarget - value);
-            monthData[vaccineName] = dropout;
+            monthData[vaccineName] = value;
             totalVaccines[vaccineName] =
-                (totalVaccines[vaccineName] ?? 0) + dropout;
+                (totalVaccines[vaccineName] ?? 0) + value;
           }
         }
       } else {

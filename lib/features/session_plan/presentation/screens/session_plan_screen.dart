@@ -60,7 +60,12 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
       if (hasFiltersApplied) {
         // Filters are already applied - load with current filter state
         logg.i("Session Plan: Filters detected on init - loading with filter state");
-        ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+        // ✅ CRITICAL FIX: Use dates from session plan state if available
+        final sessionPlanState = ref.read(sessionPlanControllerProvider);
+        ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
+          startDate: sessionPlanState.startDate,
+          endDate: sessionPlanState.endDate,
+        );
       } else {
         // No filters applied - load country level data
         logg.i("Session Plan: No filters detected on init - loading country level data");
@@ -391,7 +396,6 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
       
       // Determine the filter level
       GeographicLevel? filterLevel;
-      String? epiSlug;
       
       // Check from deepest to shallowest level
       if (filterState.selectedSubblock != null && filterState.selectedSubblock != 'All') {
@@ -402,7 +406,6 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
         final wardUid = filterNotifier.getWardUid(filterState.selectedWard!);
         final subblockUid = filterNotifier.getSubblockUid(filterState.selectedSubblock!);
         if (districtUid != null && upazilaUid != null && unionUid != null && wardUid != null && subblockUid != null) {
-          epiSlug = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
           filterLevel = GeographicLevel.subblock;
         }
       } else if (filterState.selectedWard != null && filterState.selectedWard != 'All') {
@@ -411,7 +414,6 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
         final unionUid = filterNotifier.getUnionUid(filterState.selectedUnion!);
         final wardUid = filterNotifier.getWardUid(filterState.selectedWard!);
         if (districtUid != null && upazilaUid != null && unionUid != null && wardUid != null) {
-          epiSlug = '$districtUid/$upazilaUid/$unionUid/$wardUid';
           filterLevel = GeographicLevel.ward;
         }
       } else if (filterState.selectedUnion != null && filterState.selectedUnion != 'All') {
@@ -419,40 +421,33 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
         final upazilaUid = filterNotifier.getUpazilaUid(filterState.selectedUpazila!);
         final unionUid = filterNotifier.getUnionUid(filterState.selectedUnion!);
         if (districtUid != null && upazilaUid != null && unionUid != null) {
-          epiSlug = '$districtUid/$upazilaUid/$unionUid';
           filterLevel = GeographicLevel.union;
         }
       } else if (filterState.selectedUpazila != null && filterState.selectedUpazila != 'All') {
         final districtUid = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
         final upazilaUid = filterNotifier.getUpazilaUid(filterState.selectedUpazila!);
         if (districtUid != null && upazilaUid != null) {
-          epiSlug = '$districtUid/$upazilaUid';
           filterLevel = GeographicLevel.upazila;
         }
       } else if (filterState.selectedDistrict != null && filterState.selectedDistrict != 'All') {
-        epiSlug = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
         filterLevel = GeographicLevel.district;
-      } else if (filterState.selectedDivision != null && filterState.selectedDivision != 'All') {
-        epiSlug = filterNotifier.getDivisionUid(filterState.selectedDivision);
+      } else if (filterState.selectedDivision != 'All') {
         filterLevel = GeographicLevel.division;
       } else if (filterState.selectedAreaType == AreaType.cityCorporation) {
         if (filterState.selectedZone != null && filterState.selectedZone != 'All') {
           final ccUid = filterNotifier.getCityCorporationUid(filterState.selectedCityCorporation!);
           final zoneUid = filterNotifier.getZoneUid(filterState.selectedZone!);
           if (ccUid != null && zoneUid != null) {
-            epiSlug = '$ccUid/$zoneUid';
             filterLevel = GeographicLevel.zone;
           }
         } else if (filterState.selectedCityCorporation != null && filterState.selectedCityCorporation != 'All') {
-          epiSlug = filterNotifier.getCityCorporationUid(filterState.selectedCityCorporation!);
           filterLevel = GeographicLevel.cityCorporation;
         }
       }
       
-      // If no geographic filter is applied, use country level (null slug)
+      // If no geographic filter is applied, use country level
       if (filterLevel == null) {
         filterLevel = GeographicLevel.country;
-        epiSlug = null;
       }
       
       // Check if EPI data matches the filter level
@@ -512,7 +507,17 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
         if (!currentMapState.isLoading) {
           logg.i("Session Plan: Map controller finished loading after drilldown, reloading session plan data");
           if (mounted) {
-            ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+            // ✅ CRITICAL FIX: Use dates from session plan state to preserve user's date filter
+            final sessionPlanState = ref.read(sessionPlanControllerProvider);
+            final startDate = sessionPlanState.startDate;
+            final endDate = sessionPlanState.endDate;
+            
+            logg.i("Session Plan: 🔍 Using dates from state - startDate: ${startDate ?? 'null'}, endDate: ${endDate ?? 'null'}");
+            
+            ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
+              startDate: startDate,
+              endDate: endDate,
+            );
           }
           break;
         }
@@ -608,6 +613,12 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
           previous.lastAppliedTimestamp != current.lastAppliedTimestamp) {
         logg.i("Session Plan: Filter applied - reloading session plan data and triggering map drilldown");
         
+        // ✅ FIX: Clear marker cache when filter changes to ensure markers update
+        _cachedMarkers = null;
+        _cachedMarkerData = null;
+        _isCurrentlyBuildingMarkers = false;
+        logg.i("Session Plan: Cleared marker cache due to filter change");
+        
         // Check if only vaccine changed (no geographic filter changes)
         final bool onlyVaccineChanged =
             previous.selectedAreaType == current.selectedAreaType &&
@@ -626,7 +637,12 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
           // Only reload session plan data, don't trigger map drilldown
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+              // ✅ CRITICAL FIX: Use dates from session plan state to preserve user's date filter
+              final sessionPlanState = ref.read(sessionPlanControllerProvider);
+              ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
+                startDate: sessionPlanState.startDate,
+                endDate: sessionPlanState.endDate,
+              );
             }
           });
           return;
@@ -660,7 +676,12 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
           
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+              // ✅ CRITICAL FIX: Use dates from session plan state to preserve user's date filter
+              final sessionPlanState = ref.read(sessionPlanControllerProvider);
+              ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
+                startDate: sessionPlanState.startDate,
+                endDate: sessionPlanState.endDate,
+              );
             }
           });
           return;
@@ -696,7 +717,8 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
             current.selectedDistrict != 'All' &&
             current.selectedUpazila != null &&
             current.selectedUpazila != 'All' &&
-            (current.selectedUnion == null || current.selectedUnion == 'All');
+            (current.selectedUnion == null || current.selectedUnion == 'All') &&
+            (current.selectedWard == null || current.selectedWard == 'All');
         final bool districtFilterApplied =
             current.selectedAreaType == AreaType.district &&
             current.selectedDistrict != null &&
@@ -818,9 +840,30 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
             }
           }
 
-          // Reload session plan data after map drilldown completes (or immediately if no drilldown)
+          // ✅ FIX: Reload session plan data after map drilldown completes (or immediately if no drilldown)
+          // Ensure we wait a bit more for filter state to be fully updated
+          // ✅ CRITICAL: Use dates from session plan state to preserve user's date filter
           if (mounted) {
-            ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+            await Future.delayed(const Duration(milliseconds: 200)); // Give filter state time to update
+            
+            // ✅ CRITICAL FIX: Get dates from session plan state to preserve user's date filter
+            final sessionPlanState = ref.read(sessionPlanControllerProvider);
+            final startDate = sessionPlanState.startDate;
+            final endDate = sessionPlanState.endDate;
+            
+            logg.i("Session Plan: 🔍🔍🔍 Reloading session plan data after map drilldown");
+            logg.i("Session Plan: 🔍 Using dates from state - startDate: ${startDate ?? 'null'}, endDate: ${endDate ?? 'null'}");
+            
+            // ✅ CRITICAL: Get current filter state to verify it's correct
+            final currentFilterState = ref.read(filterControllerProvider);
+            logg.i("Session Plan: 🔍 Current filter state - Division: ${currentFilterState.selectedDivision}, District: ${currentFilterState.selectedDistrict}, Upazila: ${currentFilterState.selectedUpazila}, Union: ${currentFilterState.selectedUnion}");
+            logg.i("Session Plan: 🔍 Upazilas list size: ${currentFilterState.upazilas.length}, Districts list size: ${currentFilterState.districts.length}");
+            
+            await ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
+              startDate: startDate,
+              endDate: endDate,
+            );
+            logg.i("Session Plan: ✅ Session plan data reload completed");
           }
         });
       }
@@ -1020,9 +1063,26 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
                 if (sessionPlanState.sessionPlanCoordsData != null)
                   Builder(
                     builder: (context) {
-                      final markers = _buildSessionPlanMarkers(
-                        sessionPlanState.sessionPlanCoordsData!,
-                      );
+                      final data = sessionPlanState.sessionPlanCoordsData!;
+                      
+                      // ✅ FIX: Clear cache if data changed (different object reference)
+                      // This ensures markers update when new data is loaded
+                      if (_cachedMarkerData != data) {
+                        logg.i("Session Plan: Data changed, clearing cache and rebuilding markers");
+                        _cachedMarkers = null;
+                        _cachedMarkerData = null;
+                      }
+                      
+                      final markers = _buildSessionPlanMarkers(data);
+                      
+                      // ✅ FIX: Log marker count for debugging
+                      if (markers.isEmpty && data.features != null && data.features!.isNotEmpty) {
+                        logg.w("Session Plan: ⚠️ No markers built despite ${data.features!.length} features available");
+                        logg.w("Session Plan: Check marker building logic - features might be invalid");
+                      } else if (markers.isNotEmpty) {
+                        logg.i("Session Plan: ✅ Displaying ${markers.length} markers on map");
+                      }
+                      
                       // ✅ FIX: Trigger rebuild after markers are built to hide loading indicator
                       if (_isCurrentlyBuildingMarkers && markers.isNotEmpty) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1106,7 +1166,12 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: () {
-                        ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter();
+                        // ✅ CRITICAL FIX: Use dates from session plan state to preserve user's date filter
+                        final sessionPlanState = ref.read(sessionPlanControllerProvider);
+                        ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
+                          startDate: sessionPlanState.startDate,
+                          endDate: sessionPlanState.endDate,
+                        );
                       },
                       icon: const Icon(Icons.refresh),
                       label: const Text('Retry'),

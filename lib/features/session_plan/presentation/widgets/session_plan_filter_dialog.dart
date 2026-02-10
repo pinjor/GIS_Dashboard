@@ -46,6 +46,29 @@ class _SessionPlanFilterDialogState
   void initState() {
     super.initState();
     _initializeFilterState();
+
+    // ✅ FIX: Load unions if upazila is already selected but unions list is empty
+    // This ensures the dropdown is populated when the dialog reopens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final filterState = ref.read(filterControllerProvider);
+      final filterNotifier = ref.read(filterControllerProvider.notifier);
+
+      if (_selectedUpazila != null &&
+          _selectedUpazila != 'Select Upazila' &&
+          filterState.unions.isEmpty) {
+        logg.i(
+          'Session Plan Filter: Upazila selected but unions empty, loading unions...',
+        );
+        final upazilaUid = filterNotifier.getUpazilaUid(_selectedUpazila!);
+        if (upazilaUid != null) {
+          filterNotifier.loadUnionsByUpazila(upazilaUid).then((_) {
+            if (mounted) {
+              setState(() {}); // Rebuild to show unions in dropdown
+            }
+          });
+        }
+      }
+    });
   }
 
   void _initializeFilterState() {
@@ -77,26 +100,49 @@ class _SessionPlanFilterDialogState
     }
 
     // Initialize dates from session plan state if available, otherwise default to today
-    if (sessionPlanState.startDate != null && sessionPlanState.startDate!.isNotEmpty) {
+    logg.i('Session Plan Filter: 🔍 Initializing dates from state');
+    logg.i(
+      'Session Plan Filter:   - startDate from state: ${sessionPlanState.startDate}',
+    );
+    logg.i(
+      'Session Plan Filter:   - endDate from state: ${sessionPlanState.endDate}',
+    );
+
+    if (sessionPlanState.startDate != null &&
+        sessionPlanState.startDate!.isNotEmpty) {
       try {
         _fromDate = DateFormat('yyyy-MM-dd').parse(sessionPlanState.startDate!);
+        logg.i('Session Plan Filter: ✅ Parsed startDate: $_fromDate');
       } catch (e) {
+        logg.w(
+          'Session Plan Filter: ⚠️ Error parsing startDate: $e, using today',
+        );
         _fromDate = DateTime.now();
       }
     } else {
+      logg.w('Session Plan Filter: ⚠️ No startDate in state, using today');
       _fromDate = DateTime.now();
     }
 
-    if (sessionPlanState.endDate != null && sessionPlanState.endDate!.isNotEmpty) {
+    if (sessionPlanState.endDate != null &&
+        sessionPlanState.endDate!.isNotEmpty) {
       try {
         _toDate = DateFormat('yyyy-MM-dd').parse(sessionPlanState.endDate!);
+        logg.i('Session Plan Filter: ✅ Parsed endDate: $_toDate');
       } catch (e) {
+        logg.w(
+          'Session Plan Filter: ⚠️ Error parsing endDate: $e, using today',
+        );
         _toDate = DateTime.now();
       }
     } else {
+      logg.w('Session Plan Filter: ⚠️ No endDate in state, using today');
       _toDate = DateTime.now();
     }
 
+    logg.i(
+      'Session Plan Filter: ✅ Final initialized dates - from: $_fromDate, to: $_toDate',
+    );
   }
 
   Future<void> _selectFromDate(BuildContext context) async {
@@ -129,8 +175,9 @@ class _SessionPlanFilterDialogState
 
   void _applyFilters() async {
     final filterNotifier = ref.read(filterControllerProvider.notifier);
-    final sessionPlanNotifier =
-        ref.read(sessionPlanControllerProvider.notifier);
+    final sessionPlanNotifier = ref.read(
+      sessionPlanControllerProvider.notifier,
+    );
     final currentFilter = ref.read(filterControllerProvider);
 
     // ✅ VALIDATION: Validate date range
@@ -154,7 +201,9 @@ class _SessionPlanFilterDialogState
         if (_selectedDistrict == null || _selectedUpazila == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Please select District and Upazila before selecting Union'),
+              content: Text(
+                'Please select District and Upazila before selecting Union',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -164,12 +213,14 @@ class _SessionPlanFilterDialogState
 
       // Validate ward selection requires district, upazila, and union
       if (_selectedWard != null && _selectedWard != 'Select Ward') {
-        if (_selectedDistrict == null || 
-            _selectedUpazila == null || 
+        if (_selectedDistrict == null ||
+            _selectedUpazila == null ||
             _selectedUnion == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Please select District, Upazila, and Union before selecting Ward'),
+              content: Text(
+                'Please select District, Upazila, and Union before selecting Ward',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -177,12 +228,14 @@ class _SessionPlanFilterDialogState
         }
       }
 
-      // Validate upazila selection requires district
+      // Validate upazila selection requires district (not null and not 'All')
       if (_selectedUpazila != null && _selectedUpazila != 'Select Upazila') {
-        if (_selectedDistrict == null) {
+        if (_selectedDistrict == null || _selectedDistrict == 'All') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Please select District before selecting Upazila'),
+              content: Text(
+                'Please select a specific District before selecting Upazila',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -198,7 +251,9 @@ class _SessionPlanFilterDialogState
         if (_selectedCityCorporation == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Please select City Corporation before selecting Zone'),
+              content: Text(
+                'Please select City Corporation before selecting Zone',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -207,7 +262,51 @@ class _SessionPlanFilterDialogState
       }
     }
 
-    // Apply area filters first
+    // ✅ CRITICAL FIX: Format dates FIRST, before any filter updates
+    // This ensures dates are stored in state BEFORE the filter state listener fires
+    final startDate = _fromDate != null
+        ? DateFormat('yyyy-MM-dd').format(_fromDate!)
+        : null;
+    final endDate = _toDate != null
+        ? DateFormat('yyyy-MM-dd').format(_toDate!)
+        : null;
+
+    logg.i(
+      'Session Plan Filter: 🔍🔍🔍 Applying filters with dates - startDate: $startDate, endDate: $endDate',
+    );
+    logg.i(
+      'Session Plan Filter: 🔍 Raw dates - _fromDate: $_fromDate, _toDate: $_toDate',
+    );
+
+    if (startDate == null || endDate == null) {
+      logg.e('Session Plan Filter: ❌❌❌ CRITICAL ERROR - Dates are null!');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select both start and end dates'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Close dialog first
+    Navigator.of(context).pop();
+
+    // ✅ CRITICAL FIX: Store dates in state FIRST by calling loadDataWithFilter
+    // This MUST happen BEFORE triggering filter update, so dates are available when listener fires
+    // loadDataWithFilter stores dates IMMEDIATELY at the start, before any async operations
+    logg.i(
+      'Session Plan Filter: 🔍🔍🔍 Storing dates in state FIRST - startDate: $startDate, endDate: $endDate',
+    );
+    await sessionPlanNotifier.loadDataWithFilter(
+      startDate: startDate,
+      endDate: endDate,
+    );
+    logg.i(
+      'Session Plan Filter: ✅ Dates stored in state, now triggering filter update',
+    );
+
+    // Apply area filters AFTER dates are stored
     filterNotifier.updateAreaType(_selectedAreaType);
     filterNotifier.updateDivision(_selectedDivision);
 
@@ -228,6 +327,7 @@ class _SessionPlanFilterDialogState
     }
 
     // Apply filters and trigger timestamp update
+    // Now when the filter state listener fires, dates are already in state
     filterNotifier.applyFiltersWithInitialValues(
       areaType: _selectedAreaType,
       division: _selectedDivision,
@@ -251,52 +351,10 @@ class _SessionPlanFilterDialogState
       forceTimestampUpdate: true,
     );
 
-    // Format dates as YYYY-MM-DD for API
-    final startDate = _fromDate != null
-        ? DateFormat('yyyy-MM-dd').format(_fromDate!)
-        : null;
-    final endDate =
-        _toDate != null ? DateFormat('yyyy-MM-dd').format(_toDate!) : null;
-
-    // Close dialog first
-    Navigator.of(context).pop();
-    
-    // ✅ FIX: Set loading state IMMEDIATELY after closing dialog
-    // This ensures the loading overlay appears right away
-    // We trigger loadDataWithFilter which sets isLoading: true
-
-    // ✅ OPTIMIZATION 5: Reduced delay - filter state updates faster
-    // The filter state listener in session_plan_screen will trigger a reload,
-    // but we need to ensure the filter state is updated first
-    await Future.delayed(const Duration(milliseconds: 50)); // Reduced from 200ms
-    
-    // Wait for upazilas to load if upazila is selected
-    if (_selectedUpazila != null && _selectedUpazila != 'Select Upazila') {
-      final currentFilterState = ref.read(filterControllerProvider);
-      if (currentFilterState.upazilas.isEmpty && _selectedDistrict != null) {
-        logg.i('Session Plan Filter: Waiting for upazilas to load...');
-        int retries = 0;
-        const maxRetries = 30; // 3 seconds max wait
-        
-        while (retries < maxRetries) {
-          await Future.delayed(const Duration(milliseconds: 100));
-          final updatedFilterState = ref.read(filterControllerProvider);
-          if (updatedFilterState.upazilas.isNotEmpty) {
-            logg.i('Session Plan Filter: Upazilas loaded (${updatedFilterState.upazilas.length} items)');
-            break;
-          }
-          retries++;
-        }
-      }
-    }
-    
-    // Load session plan data with date filters
-    // The filter state listener in session_plan_screen will also trigger a reload,
-    // but we call it here explicitly with the date filters to ensure it happens
-    logg.i('Session Plan Filter: Loading data with dates - start: $startDate, end: $endDate');
-    await sessionPlanNotifier.loadDataWithFilter(
-      startDate: startDate,
-      endDate: endDate,
+    // ✅ NOTE: Filter state listener will trigger another loadDataWithFilter call,
+    // but it will use dates from state (which we just stored above)
+    logg.i(
+      'Session Plan Filter: ✅ Filter update triggered - listener will use dates from state',
     );
   }
 
@@ -305,7 +363,7 @@ class _SessionPlanFilterDialogState
     // Reset local dialog state to defaults
     final filterState = ref.read(filterControllerProvider);
     final today = DateTime.now();
-    
+
     setState(() {
       // Reset to default area type (district) and country view
       _selectedAreaType = filterState.selectedAreaType; // Keep area type
@@ -323,7 +381,9 @@ class _SessionPlanFilterDialogState
 
     // Reset filter controller to defaults (country view)
     final filterNotifier = ref.read(filterControllerProvider.notifier);
-    final sessionPlanNotifier = ref.read(sessionPlanControllerProvider.notifier);
+    final sessionPlanNotifier = ref.read(
+      sessionPlanControllerProvider.notifier,
+    );
 
     // Use the filter controller's resetFilters method which properly resets based on area type
     filterNotifier.resetFilters();
@@ -333,7 +393,7 @@ class _SessionPlanFilterDialogState
 
     // Wait a bit for filter state to update
     await Future.delayed(const Duration(milliseconds: 150));
-    
+
     // Load session plan data with reset filters (country level, today's dates)
     await sessionPlanNotifier.loadDataWithFilter(
       startDate: DateFormat('yyyy-MM-dd').format(today),
@@ -351,13 +411,13 @@ class _SessionPlanFilterDialogState
   int _getTotalSessions() {
     final sessionPlanState = ref.watch(sessionPlanControllerProvider);
     final data = sessionPlanState.sessionPlanCoordsData;
-    
+
     // ✅ FIX: Always prioritize sessionCount from API (this is the total count, not limited by features)
     // sessionCount is the actual total from the API (e.g., 39,727)
     // features.length is limited (e.g., 10,000 max from API pagination or marker limit)
     // Only use features.length as fallback if sessionCount is truly null/0
     int count = 0;
-    
+
     // ✅ DEBUG: Log all relevant data to understand what's happening
     logg.i('Session Plan Filter: _getTotalSessions called');
     logg.i('  - data is null: ${data == null}');
@@ -365,7 +425,7 @@ class _SessionPlanFilterDialogState
     logg.i('  - features length: ${data?.features?.length}');
     logg.i('  - isLoading: ${sessionPlanState.isLoading}');
     logg.i('  - error: ${sessionPlanState.error}');
-    
+
     if (data != null) {
       if (data.sessionCount != null && data.sessionCount! > 0) {
         // ✅ Use sessionCount from API - this is the correct total (e.g., 39,727)
@@ -374,19 +434,27 @@ class _SessionPlanFilterDialogState
       } else if (data.features != null && data.features!.isNotEmpty) {
         // Fallback to features.length only if sessionCount is null/0
         count = data.features!.length;
-        logg.w('Session Plan Filter: ⚠️ sessionCount is null/0 (${data.sessionCount}), using features.length as fallback: $count');
+        logg.w(
+          'Session Plan Filter: ⚠️ sessionCount is null/0 (${data.sessionCount}), using features.length as fallback: $count',
+        );
       } else {
-        logg.w('Session Plan Filter: ⚠️ Both sessionCount and features are null/empty');
+        logg.w(
+          'Session Plan Filter: ⚠️ Both sessionCount and features are null/empty',
+        );
       }
     } else {
       logg.w('Session Plan Filter: ⚠️ sessionPlanCoordsData is null');
     }
-    
+
     // Debug logging to help troubleshoot session count issues
-    if (count == 0 && !sessionPlanState.isLoading && sessionPlanState.error == null) {
-      logg.w('Session Plan Filter: Total sessions is 0 - sessionCount: ${data?.sessionCount}, features length: ${data?.features?.length}');
+    if (count == 0 &&
+        !sessionPlanState.isLoading &&
+        sessionPlanState.error == null) {
+      logg.w(
+        'Session Plan Filter: Total sessions is 0 - sessionCount: ${data?.sessionCount}, features length: ${data?.features?.length}',
+      );
     }
-    
+
     logg.i('Session Plan Filter: Returning total sessions count: $count');
     return count;
   }
@@ -395,6 +463,26 @@ class _SessionPlanFilterDialogState
   Widget build(BuildContext context) {
     final filterState = ref.watch(filterControllerProvider);
     final filterNotifier = ref.read(filterControllerProvider.notifier);
+
+    // ✅ FIX: Load unions if upazila is selected but unions list is empty (reactive)
+    // This ensures the dropdown is populated when the dialog rebuilds
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_selectedUpazila != null &&
+          _selectedUpazila != 'Select Upazila' &&
+          filterState.unions.isEmpty) {
+        logg.i(
+          'Session Plan Filter: Upazila selected but unions empty, loading unions...',
+        );
+        final upazilaUid = filterNotifier.getUpazilaUid(_selectedUpazila!);
+        if (upazilaUid != null) {
+          filterNotifier.loadUnionsByUpazila(upazilaUid).then((_) {
+            if (mounted) {
+              setState(() {}); // Rebuild to show unions in dropdown
+            }
+          });
+        }
+      }
+    });
 
     return Dialog(
       backgroundColor: Color(Constants.cardColor),
@@ -490,15 +578,45 @@ class _SessionPlanFilterDialogState
             Builder(
               builder: (context) {
                 // ✅ Use Builder to ensure reactive updates when session plan state changes
-                final sessionPlanState = ref.watch(sessionPlanControllerProvider);
-                final currentTotalSessions = _getTotalSessions();
-                
-                // ✅ Format number with commas to match web version (e.g., 39,727)
-                final formattedCount = currentTotalSessions.toString().replaceAllMapped(
-                  RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                  (Match m) => '${m[1]},',
+                final sessionPlanState = ref.watch(
+                  sessionPlanControllerProvider,
                 );
-                
+
+                // ✅ CRITICAL: Log state when button rebuilds
+                logg.i(
+                  'Session Plan Filter: 🔍🔍🔍 Total Session Button rebuilding',
+                );
+                logg.i(
+                  'Session Plan Filter:   - isLoading: ${sessionPlanState.isLoading}',
+                );
+                logg.i(
+                  'Session Plan Filter:   - hasData: ${sessionPlanState.sessionPlanCoordsData != null}',
+                );
+                logg.i(
+                  'Session Plan Filter:   - sessionCount: ${sessionPlanState.sessionPlanCoordsData?.sessionCount}',
+                );
+                logg.i(
+                  'Session Plan Filter:   - features length: ${sessionPlanState.sessionPlanCoordsData?.features?.length}',
+                );
+
+                final currentTotalSessions = _getTotalSessions();
+
+                logg.i(
+                  'Session Plan Filter:   - _getTotalSessions returned: $currentTotalSessions',
+                );
+
+                // ✅ Format number with commas to match web version (e.g., 39,727)
+                final formattedCount = currentTotalSessions
+                    .toString()
+                    .replaceAllMapped(
+                      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                      (Match m) => '${m[1]},',
+                    );
+
+                logg.i(
+                  'Session Plan Filter:   - Formatted count: $formattedCount',
+                );
+
                 return Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -525,10 +643,7 @@ class _SessionPlanFilterDialogState
             // Date Range Filter
             const Text(
               'Date Range',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             Row(
@@ -644,7 +759,7 @@ class _SessionPlanFilterDialogState
                 label: 'Upazila',
                 value: _selectedUpazila ?? 'Select Upazila',
                 items: _buildUpazilaItems(filterState),
-                onChanged: (value) {
+                onChanged: (value) async {
                   setState(() {
                     _selectedUpazila = value == 'Select Upazila' ? null : value;
                     _selectedUnion = null;
@@ -652,6 +767,42 @@ class _SessionPlanFilterDialogState
                   });
                   if (value != null && value != 'Select Upazila') {
                     filterNotifier.updateUpazila(value);
+
+                    // ✅ FIX: Explicitly load unions for the selected upazila
+                    final upazilaUid = filterNotifier.getUpazilaUid(value);
+                    if (upazilaUid != null) {
+                      logg.i(
+                        'Session Plan Filter: Loading unions for upazila: $value (UID: $upazilaUid)',
+                      );
+                      await filterNotifier.loadUnionsByUpazila(upazilaUid);
+
+                      // Wait for unions to load (polling mechanism)
+                      int retries = 0;
+                      const maxRetries = 30; // 3 seconds max wait
+
+                      while (retries < maxRetries) {
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        final currentFilterState = ref.read(
+                          filterControllerProvider,
+                        );
+                        if (currentFilterState.unions.isNotEmpty) {
+                          logg.i(
+                            'Session Plan Filter: Unions loaded (${currentFilterState.unions.length} items)',
+                          );
+                          if (mounted) {
+                            setState(
+                              () {},
+                            ); // Rebuild to show unions in dropdown
+                          }
+                          break;
+                        }
+                        retries++;
+                      }
+                    } else {
+                      logg.w(
+                        'Session Plan Filter: Could not get upazila UID for: $value',
+                      );
+                    }
                   }
                 },
               ),
@@ -789,7 +940,7 @@ class _SessionPlanFilterDialogState
         .where((n) => n.isNotEmpty)
         .toSet() // Use Set to remove duplicates
         .toList();
-    
+
     // Ensure "All" is only added once and is the first item
     if (divisionNames.contains('All')) {
       divisionNames.remove('All');
@@ -803,7 +954,7 @@ class _SessionPlanFilterDialogState
         .where((n) => n.isNotEmpty)
         .toSet() // Use Set to remove duplicates
         .toList();
-    
+
     // Ensure "All" is only added once and is the first item
     if (districtNames.contains('All')) {
       districtNames.remove('All');
@@ -817,7 +968,7 @@ class _SessionPlanFilterDialogState
         .where((n) => n.isNotEmpty)
         .toSet() // Use Set to remove duplicates
         .toList();
-    
+
     // Ensure "All" is only added once and is the first item
     if (ccNames.contains('All')) {
       ccNames.remove('All');
@@ -831,7 +982,7 @@ class _SessionPlanFilterDialogState
         .where((n) => n.isNotEmpty)
         .toSet() // Use Set to remove duplicates
         .toList();
-    
+
     // Ensure "Select Upazila" is only added once and is the first item
     if (upazilaNames.contains('Select Upazila')) {
       upazilaNames.remove('Select Upazila');
@@ -845,7 +996,7 @@ class _SessionPlanFilterDialogState
         .where((n) => n.isNotEmpty)
         .toSet() // Use Set to remove duplicates
         .toList();
-    
+
     // Ensure "Select Union" is only added once and is the first item
     if (unionNames.contains('Select Union')) {
       unionNames.remove('Select Union');
@@ -859,7 +1010,7 @@ class _SessionPlanFilterDialogState
         .where((n) => n.isNotEmpty)
         .toSet() // Use Set to remove duplicates
         .toList();
-    
+
     // Ensure "Select Ward" is only added once and is the first item
     if (wardNames.contains('Select Ward')) {
       wardNames.remove('Select Ward');
@@ -873,7 +1024,7 @@ class _SessionPlanFilterDialogState
         .where((n) => n.isNotEmpty)
         .toSet() // Use Set to remove duplicates
         .toList();
-    
+
     // Ensure "Select Zone" is only added once and is the first item
     if (zoneNames.contains('Select Zone')) {
       zoneNames.remove('Select Zone');
@@ -888,16 +1039,15 @@ class _SessionPlanFilterDialogState
     required ValueChanged<String?> onChanged,
   }) {
     // Ensure the value exists in items, otherwise use null or first item
-    final validValue = items.contains(value) ? value : (items.isNotEmpty ? items.first : null);
+    final validValue = items.contains(value)
+        ? value
+        : (items.isNotEmpty ? items.first : null);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
@@ -908,18 +1058,12 @@ class _SessionPlanFilterDialogState
               horizontal: 12,
               vertical: 14,
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
           ),
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Text(
-                item,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
+              child: Text(item, overflow: TextOverflow.ellipsis, maxLines: 1),
             );
           }).toList(),
           selectedItemBuilder: (BuildContext context) {

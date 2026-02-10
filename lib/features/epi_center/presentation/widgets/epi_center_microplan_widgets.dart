@@ -89,57 +89,67 @@ class MicroplanTable extends ConsumerWidget {
     String child0To11Female = '-';
     
     logg.i('🔍 [0-11m DEBUG] EpiCenterMicroplanSection: Calculating Child (0-11) values');
+    logg.i('   > EPI data: ${epiData != null ? "present" : "null"}');
     logg.i('   > Coverage data: ${coverageData != null ? "present" : "null"}');
     logg.i('   > Selected vaccine UID: $selectedVaccineUid');
     logg.i('   > Year demographics: ${yearDemographics != null ? "present" : "null"}');
     logg.i('   > Filter state: Ward=${filterState.selectedWard}, Subblock=${filterState.selectedSubblock}');
     
-    // ✅ FIX: Get area UID/name for ward/subblock level filtering
-    String? areaUid;
-    String? areaName;
-    final filterController = ref.read(filterControllerProvider.notifier);
-    
-    if (filterState.selectedSubblock != null && filterState.selectedSubblock != 'All') {
-      // For subblock level, use subblock UID
-      areaUid = filterController.getSubblockUid(filterState.selectedSubblock!);
-      areaName = filterState.selectedSubblock;
-      logg.i('   > Filtering by subblock: $areaName (UID: $areaUid)');
-    } else if (filterState.selectedWard != null && filterState.selectedWard != 'All') {
-      // For ward level, use ward UID
-      areaUid = filterController.getWardUid(filterState.selectedWard!);
-      areaName = filterState.selectedWard;
-      logg.i('   > Filtering by ward: $areaName (UID: $areaUid)');
+    // ✅ FIX: Get subblock UID/name from filter state for subblock-level filtering (same as target card)
+    String? subblockUid;
+    String? subblockName;
+    if (filterState.selectedSubblock != null &&
+        filterState.selectedSubblock != 'All') {
+      subblockName = filterState.selectedSubblock;
+      final filterNotifier = ref.read(filterControllerProvider.notifier);
+      subblockUid = filterNotifier.getSubblockUid(subblockName!);
+      logg.i(
+        'Microplan Table: Subblock filter detected - name: $subblockName, UID: $subblockUid',
+      );
     }
     
+    // ✅ FIX: Use EXACT same priority order as Target Card to ensure consistency
+    // Priority 1: Use coverage data (same source as Summary card) - filter by subblock if available
     if (coverageData != null) {
       final targetData = TargetCalculator.getTargetData(
         coverageData,
         selectedVaccineUid,
-        areaUid: areaUid,
-        areaName: areaName,
+        areaUid: subblockUid, // ✅ Pass subblock UID to filter by subblock (same as target card)
+        areaName: subblockUid == null ? subblockName : null, // ✅ Fallback to name if UID not available
       );
       if (targetData != null && targetData.total > 0) {
         child0To11Male = formatCount(targetData.male);
         child0To11Female = formatCount(targetData.female);
         logg.i(
-          'Microplan Table: ✅ Using coverage data for Child (0-11) - '
+          'Microplan Table: ✅ Using coverage data for Child (0-11) (matching target card) - '
           'total: ${targetData.total}, male: ${targetData.male} (displayed: $child0To11Male), female: ${targetData.female} (displayed: $child0To11Female)',
         );
-      } else {
-        // Fallback to demographics if coverage data is not available
-        final child0To11Month = yearDemographics?.child0To11Month;
-        child0To11Male = formatCount(child0To11Month?.male);
-        child0To11Female = formatCount(child0To11Month?.female);
-        logg.w('Microplan Table: ⚠️ TargetCalculator returned null/zero, using demographics fallback for Child (0-11)');
-        logg.w('   > Demographics - male: ${child0To11Month?.male}, female: ${child0To11Month?.female}');
-        logg.w('   > Displayed - male: $child0To11Male, female: $child0To11Female');
       }
-    } else {
-      // Fallback to demographics if coverage data is not provided
+    }
+    
+    // ✅ FIX: Priority 2 - Use EPI area vaccine target (same as target card fallback)
+    if (child0To11Male == '-' && child0To11Female == '-') {
+      final vaccineTarget = epiData?.area?.vaccineTarget?.child0To11Month[currentYear];
+      if (vaccineTarget != null) {
+        final male = vaccineTarget.male?.toInt() ?? 0;
+        final female = vaccineTarget.female?.toInt() ?? 0;
+        if (male > 0 || female > 0) {
+          child0To11Male = formatCount(male);
+          child0To11Female = formatCount(female);
+          logg.i(
+            'Microplan Table: ✅ Using EPI area vaccine target for Child (0-11) (matching target card) - '
+            'male: $male (displayed: $child0To11Male), female: $female (displayed: $child0To11Female)',
+          );
+        }
+      }
+    }
+    
+    // ✅ FIX: Priority 3 - Fallback to demographics (same as target card fallback)
+    if (child0To11Male == '-' && child0To11Female == '-') {
       final child0To11Month = yearDemographics?.child0To11Month;
       child0To11Male = formatCount(child0To11Month?.male);
       child0To11Female = formatCount(child0To11Month?.female);
-      logg.w('Microplan Table: ⚠️ Coverage data not available, using demographics for Child (0-11)');
+      logg.w('Microplan Table: ⚠️ Using demographics fallback for Child (0-11) (matching target card)');
       logg.w('   > Demographics - male: ${child0To11Month?.male}, female: ${child0To11Month?.female}');
       logg.w('   > Displayed - male: $child0To11Male, female: $child0To11Female');
     }

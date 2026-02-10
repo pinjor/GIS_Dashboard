@@ -281,7 +281,12 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     }
   }
 
-  /// Load upazilas by district UID
+  /// Load upazilas by district UID (public method for dialog initialization)
+  Future<void> loadUpazilasByDistrict(String districtUid) async {
+    await _loadUpazilasByDistrict(districtUid);
+  }
+
+  /// Load upazilas by district UID (private method)
   Future<void> _loadUpazilasByDistrict(String districtUid) async {
     try {
       print('FilterProvider: Loading upazilas for district UID: $districtUid');

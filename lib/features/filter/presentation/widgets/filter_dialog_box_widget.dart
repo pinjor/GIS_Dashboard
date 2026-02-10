@@ -155,10 +155,22 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
 
     // Initialize extended hierarchical selections (for both EPI context and main screen filtering)
     // ✅ FIX: Allow hierarchical selections in non-EPI context for upazila-level filtering
+    // ✅ FIX: Preserve upazila selection even if upazilas list isn't loaded yet
+    // This prevents the upazila value from being lost when the filter dialog opens
     final availableUpazilas = filterNotifier.upazilaDropdownItems;
-    if (currentFilter.selectedUpazila != null &&
-        availableUpazilas.contains(currentFilter.selectedUpazila)) {
-      _selectedUpazila = currentFilter.selectedUpazila;
+    if (currentFilter.selectedUpazila != null) {
+      if (availableUpazilas.contains(currentFilter.selectedUpazila)) {
+        _selectedUpazila = currentFilter.selectedUpazila;
+      } else if (currentFilter.upazilas.isEmpty) {
+        // If upazilas list is empty, preserve the selected upazila value
+        // It will be validated later when upazilas are loaded
+        _selectedUpazila = currentFilter.selectedUpazila;
+        logg.i('Preserving upazila selection "${currentFilter.selectedUpazila}" even though upazilas list is empty');
+      } else {
+        // Upazilas list is loaded but doesn't contain the selected upazila
+        _selectedUpazila = null;
+        logg.w('Upazila "${currentFilter.selectedUpazila}" not found in available upazilas: $availableUpazilas');
+      }
     } else {
       _selectedUpazila = null;
     }
@@ -229,6 +241,39 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
     _initialWard = _selectedWard;
     _initialSubblock = _selectedSubblock;
 
+    // ✅ FIX: Reload upazilas if district is selected but upazilas list is empty
+    // This must happen BEFORE trying to reload unions/wards/subblocks
+    if (_selectedDistrict != null &&
+        _selectedDistrict != 'All' &&
+        currentFilter.upazilas.isEmpty) {
+      logg.i(
+        "🔄 District selected but upazilas list empty, reloading upazilas for: $_selectedDistrict",
+      );
+      final districtUid = filterNotifier.getDistrictUid(_selectedDistrict!);
+      if (districtUid != null) {
+        // Load upazilas by calling updateDistrict which will trigger loading
+        // But we need to preserve the current state first
+        await filterNotifier.loadUpazilasByDistrict(districtUid);
+        // Refresh currentFilter after loading upazilas
+        final updatedFilter = ref.read(filterControllerProvider);
+        // Update _selectedUpazila if it was preserved
+        if (_selectedUpazila != null && updatedFilter.upazilas.isNotEmpty) {
+          final upazilaExists = updatedFilter.upazilas.any((u) => u.name == _selectedUpazila);
+          if (!upazilaExists) {
+            logg.w('Preserved upazila "$_selectedUpazila" not found in loaded upazilas');
+            _selectedUpazila = null;
+          }
+        }
+        // Trigger rebuild to update dropdowns with loaded data
+        if (mounted) {
+          setState(() {});
+        }
+      } else {
+        logg.w(
+          "⚠️ Could not get district UID for $_selectedDistrict to reload upazilas",
+        );
+      }
+    }
 
     // ✅ FIX: Reload unions if upazila is selected but unions list is empty
     // This must happen BEFORE trying to reload wards
@@ -250,6 +295,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
             logg.w('Preserved union "$_selectedUnion" not found in loaded unions');
             _selectedUnion = null;
           }
+        }
+        // Trigger rebuild to update dropdowns with loaded data
+        if (mounted) {
+          setState(() {});
         }
       } else {
         logg.w(
@@ -278,6 +327,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
             logg.w('Preserved ward "$_selectedWard" not found in loaded wards');
             _selectedWard = null;
           }
+        }
+        // Trigger rebuild to update dropdowns with loaded data
+        if (mounted) {
+          setState(() {});
         }
       } else {
         logg.w(
@@ -308,6 +361,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
             logg.w('Preserved subblock "$_selectedSubblock" not found in loaded subblocks');
             _selectedSubblock = null;
           }
+        }
+        // Trigger rebuild to update dropdowns with loaded data
+        if (mounted) {
+          setState(() {});
         }
       } else {
         logg.w(

@@ -35,23 +35,49 @@ class SessionPlanRepository {
         );
       }
 
-      logg.i("Fetching session plan coords from $urlPath");
+      logg.i("Session Plan Repository: 🔍🔍🔍 Fetching from FULL URL: $urlPath");
+      logg.i("Session Plan Repository: 🔍 Making GET request...");
       final response = await _client.get(urlPath);
+      logg.i("Session Plan Repository: ✅ Response received - Status: ${response.statusCode}");
+      
+      // ✅ CRITICAL: Log response size to check if we got data
+      if (response.data != null) {
+        if (response.data is Map) {
+          final dataMap = response.data as Map;
+          logg.i("Session Plan Repository: 🔍 Response data type: Map with ${dataMap.length} keys");
+          logg.i("Session Plan Repository: 🔍 Response keys: ${dataMap.keys.toList()}");
+        } else {
+          logg.w("Session Plan Repository: ⚠️ Response data is not a Map: ${response.data.runtimeType}");
+        }
+      } else {
+        logg.e("Session Plan Repository: ❌❌❌ Response data is NULL!");
+      }
 
-      // ✅ DEBUG: Log raw API response to verify session_count field exists
+      // ✅ CRITICAL DEBUG: Log raw API response to verify session_count field exists
       if (response.data is Map<String, dynamic>) {
         final rawData = response.data as Map<String, dynamic>;
-        logg.i("Session Plan API: Raw response keys: ${rawData.keys.toList()}");
+        logg.i("Session Plan API: 🔍🔍🔍 Raw response keys: ${rawData.keys.toList()}");
         if (rawData.containsKey('session_count')) {
-          logg.i("Session Plan API: ✅ session_count field found: ${rawData['session_count']} (type: ${rawData['session_count'].runtimeType})");
+          final sessionCountValue = rawData['session_count'];
+          logg.i("Session Plan API: ✅✅✅ session_count field found: $sessionCountValue (type: ${sessionCountValue.runtimeType})");
+          if (sessionCountValue == 0) {
+            logg.e("Session Plan API: ❌❌❌ session_count is 0 - API returned no sessions!");
+            logg.e("Session Plan API: ❌ This means either:");
+            logg.e("Session Plan API: ❌   1. The area parameter is wrong");
+            logg.e("Session Plan API: ❌   2. The date range has no sessions");
+            logg.e("Session Plan API: ❌   3. The API endpoint is incorrect");
+          }
         } else {
-          logg.w("Session Plan API: ⚠️ session_count field NOT found in response!");
-          logg.w("Session Plan API: Available fields: ${rawData.keys.toList()}");
+          logg.e("Session Plan API: ❌❌❌ session_count field NOT found in response!");
+          logg.e("Session Plan API: Available fields: ${rawData.keys.toList()}");
         }
         if (rawData.containsKey('features')) {
           final features = rawData['features'];
           if (features is List) {
             logg.i("Session Plan API: features count: ${features.length}");
+            if (features.isEmpty) {
+              logg.w("Session Plan API: ⚠️ features array is empty - no session plan markers to display");
+            }
           }
         }
       }
