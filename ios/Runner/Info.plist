@@ -47,5 +47,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>This app needs location access to find nearby EPI centers.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>This app needs location access to find nearby EPI centers.</string>
 	</dict>
 </plist>

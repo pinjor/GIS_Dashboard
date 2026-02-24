@@ -62,6 +62,7 @@ class _ZeroDoseDashboardScreenState
         }).toList();
 
         // Sort by zero dose count (target - coverage) in descending order
+        // ✅ Allow negative values - they show areas where coverage exceeded target
         areasWithZeroDose.sort((a, b) {
           final zeroDoseA = (a.target ?? 0) - (a.coverage ?? 0);
           final zeroDoseB = (b.target ?? 0) - (b.coverage ?? 0);
@@ -120,11 +121,15 @@ class _ZeroDoseDashboardScreenState
             )
           : Column(
               children: [
+                // Total Zero Dose Children summary card
+                _buildTotalZeroDoseCard(coverageData),
+                
                 // Bar chart showing top 5 zero dose areas
                 Expanded(
                   child: ZeroDoseBarChartWidget(
                     topAreas: topZeroDoseAreas,
                     locationName: locationName,
+                    filterState: ref.read(filterControllerProvider),
                   ),
                 ),
 
@@ -137,6 +142,83 @@ class _ZeroDoseDashboardScreenState
                 // ),
               ],
             ),
+    );
+  }
+
+  /// Build the total zero dose children summary card
+  Widget _buildTotalZeroDoseCard(VaccineCoverageResponse? coverageData) {
+    int totalZeroDoseCount = 0;
+
+    if (coverageData?.vaccines != null) {
+      // Find Penta-1 vaccine
+      final pentaVaccine = coverageData!.vaccines!.firstWhere(
+        (vaccine) => vaccine.vaccineUid == VaccineType.penta1.uid,
+        orElse: () => const Vaccine(),
+      );
+
+      // Calculate total zero dose: totalTarget - totalCoverage
+      // ✅ Allow negative values to show when coverage exceeds target
+      if (pentaVaccine.totalTarget != null && pentaVaccine.totalCoverage != null) {
+        totalZeroDoseCount = (pentaVaccine.totalTarget ?? 0) - (pentaVaccine.totalCoverage ?? 0);
+        // Negative values are allowed - they indicate coverage exceeded target
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2196F3), // Blue color matching the bar chart
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Text section
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Total Zero Dose Children',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    totalZeroDoseCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Icons section
+            Row(
+              children: [
+                const Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.child_care,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

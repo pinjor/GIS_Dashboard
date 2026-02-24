@@ -5,6 +5,7 @@ import 'package:gis_dashboard/features/gis_methodology/presentation/screens/gis_
 import 'package:gis_dashboard/features/micro_plan/presentation/screens/micro_plan_screen.dart';
 import 'package:gis_dashboard/features/session_plan/presentation/screens/session_plan_screen.dart';
 import 'package:gis_dashboard/features/zero_dose_dashboard/presentation/screens/zero_dose_dashboard_screen.dart';
+import 'package:gis_dashboard/features/epi_center_finder/presentation/screens/epi_center_finder_screen.dart';
 
 class DrawerWidget extends ConsumerStatefulWidget {
   const DrawerWidget({super.key});
@@ -90,6 +91,13 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
             isSelected: _currentScreen == 'Zero Dose Dashboard',
             primaryColor: primaryColor,
             onTap: () => _navigateToScreen(const ZeroDoseDashboardScreen()),
+          ),
+          _buildDrawerItem(
+            icon: Icons.location_searching,
+            title: 'EPI Center Finder',
+            isSelected: _currentScreen == 'EPI Center Finder',
+            primaryColor: primaryColor,
+            onTap: () => _navigateToScreen(const EpiCenterFinderScreen()),
           ),
         ],
       ),
