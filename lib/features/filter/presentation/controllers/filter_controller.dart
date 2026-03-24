@@ -770,6 +770,23 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         orElse: () => const AreaResponseModel(),
       );
     }
+
+    // Final fallback: normalized token match (handles "Ward 1" vs "Ward 1-Ward"/"WARD-1")
+    if (ward.uid == null) {
+      String normalize(String value) =>
+          value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+      final normalizedTarget = normalize(normalizedSearchName);
+      ward = state.wards.firstWhere(
+        (item) {
+          final name = item.name ?? '';
+          final normalizedItem = normalize(name);
+          return normalizedItem == normalizedTarget ||
+              normalizedItem.contains(normalizedTarget) ||
+              normalizedTarget.contains(normalizedItem);
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
     
     return ward.uid;
   }
@@ -993,6 +1010,23 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         (ward) {
           final wardBaseName = ward.name?.split(' (')[0].trim() ?? '';
           return wardBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+
+    // Final fallback: normalized token match (handles "Ward 1" vs "Ward 1-Ward"/"WARD-1")
+    if (ward.uid == null) {
+      String normalize(String value) =>
+          value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+      final normalizedTarget = normalize(normalizedSearchName);
+      ward = state.wards.firstWhere(
+        (item) {
+          final name = item.name ?? '';
+          final normalizedItem = normalize(name);
+          return normalizedItem == normalizedTarget ||
+              normalizedItem.contains(normalizedTarget) ||
+              normalizedTarget.contains(normalizedItem);
         },
         orElse: () => const AreaResponseModel(),
       );

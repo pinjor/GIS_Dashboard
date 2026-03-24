@@ -162,16 +162,39 @@ class EpiCenterFinderController
         }
       }
 
+      // ✅ FIX: Deduplicate EPI centers - same center may have multiple sessions in date range
+      // Use a Map to track unique centers by orgUid (or coordinates if orgUid is missing)
+      final uniqueResults = <String, EpiCenterResult>{};
+      
+      for (final result in allResults) {
+        // Create a unique key: prefer orgUid, fallback to coordinates
+        final uniqueKey = result.orgUid ?? '${result.lat}_${result.lng}';
+        
+        // If this center already exists, keep the one with the earliest session date
+        if (uniqueResults.containsKey(uniqueKey)) {
+          final existing = uniqueResults[uniqueKey]!;
+          // Keep the result with earlier session date (or keep existing if same date)
+          if (result.sessionDate.isBefore(existing.sessionDate)) {
+            uniqueResults[uniqueKey] = result;
+          }
+        } else {
+          uniqueResults[uniqueKey] = result;
+        }
+      }
+      
+      // Convert back to list
+      final deduplicatedResults = uniqueResults.values.toList();
+
       // Sort by distance (nearest first)
-      allResults.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+      deduplicatedResults.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
 
       logg.i(
-        "EPI Center Finder: Found ${allResults.length} centers within 5km",
+        "EPI Center Finder: Found ${allResults.length} session plans within 5km, ${deduplicatedResults.length} unique EPI centers",
       );
 
       state = state.copyWith(
         isLoading: false,
-        results: allResults,
+        results: deduplicatedResults,
         error: null,
       );
     } catch (e) {

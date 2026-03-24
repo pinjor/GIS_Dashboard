@@ -6,6 +6,8 @@ import '../../../../core/utils/utils.dart';
 import '../../../summary/presentation/controllers/summary_controller.dart';
 import '../../../summary/domain/vaccine_coverage_response.dart';
 import '../../../filter/filter.dart';
+import '../../../map/presentation/screen/map_screen.dart';
+import '../../../map/presentation/controllers/map_controller.dart';
 import '../widgets/zero_dose_bar_chart_widget.dart';
 
 class ZeroDoseDashboardScreen extends ConsumerStatefulWidget {
@@ -29,7 +31,10 @@ class _ZeroDoseDashboardScreenState
           borderRadius: BorderRadius.all(Radius.circular(5)),
         ),
         insetPadding: const EdgeInsets.symmetric(horizontal: 16),
-        child: const FilterDialogBoxWidget(isEpiContext: false),
+        child: const FilterDialogBoxWidget(
+          isEpiContext: false,
+          hideSubblock: true, // Hide subblock field in Zero Dose Dashboard
+        ),
       ),
     );
   }
@@ -74,12 +79,26 @@ class _ZeroDoseDashboardScreenState
       }
     }
 
+    // ✅ Watch map controller and filter state to track changes
+    final mapState = ref.watch(mapControllerProvider);
+    final filterState = ref.watch(filterControllerProvider);
+
     // ✅ Listen to filter state changes - data will automatically update via summary controller
+    // Also ensure map controller is aware of filter changes (it listens independently)
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
       if (previous != null &&
           current.lastAppliedTimestamp != null &&
           previous.lastAppliedTimestamp != current.lastAppliedTimestamp) {
         logg.i("Zero Dose Dashboard: Filter applied - data will update via summary controller");
+        logg.i("Zero Dose Dashboard: Map will reflect new filters when opened");
+        logg.i("Zero Dose Dashboard: Current filters - Division: ${current.selectedDivision}, District: ${current.selectedDistrict}, Upazila: ${current.selectedUpazila}");
+        
+        // ✅ Ensure map controller is aware of filter changes
+        // The map controller has its own listener, but we can trigger a refresh if needed
+        // when user opens the map, it will automatically use the current filter state
+        if (!mapState.isLoading) {
+          logg.i("Zero Dose Dashboard: Map controller is ready - filters will be applied when map is opened");
+        }
       }
     });
 
@@ -133,13 +152,134 @@ class _ZeroDoseDashboardScreenState
                   ),
                 ),
 
-                // Placeholder for coverage visualizer (to be implemented later)
-                // const Padding(
-                //   padding: EdgeInsets.all(16.0),
-                //   child: MapCoverageVisualizerCardWidget(
-                //     currentLevel: GeographicLevel.country,
-                //   ),
-                // ),
+                // Map visualization section - shows current filter status and links to map
+                Container(
+                  height: 300,
+                  margin: const EdgeInsets.all(16.0),
+                  child: Card(
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        // Map header with filter status
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.map, size: 20),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Zero Dose Coverage Map',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  // Navigate to full map button
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      // Navigate to map screen - it will automatically use current filters
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const MapScreen(),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.open_in_new, size: 16),
+                                    label: const Text('View Full Map'),
+                                  ),
+                                ],
+                              ),
+                              // ✅ Filter status indicator
+                              const SizedBox(height: 8),
+                              _buildFilterStatusIndicator(filterState),
+                            ],
+                          ),
+                        ),
+                        // Map placeholder with filter-aware message
+                        Expanded(
+                          child: Container(
+                            color: Colors.grey[100],
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // ✅ Show map loading state if map is loading
+                                  if (mapState.isLoading)
+                                    Column(
+                                      children: [
+                                        const CircularProgressIndicator(),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Map is updating with new filters...',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  else
+                                    Column(
+                                      children: [
+                                        Icon(
+                                          Icons.map_outlined,
+                                          size: 64,
+                                          color: Colors.grey[400],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Map reflects current filters',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Map automatically reflects current filters',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Open map to see coverage visualization',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const MapScreen(),
+                                              ),
+                                            );
+                                          },
+                                          icon: const Icon(Icons.map, size: 18),
+                                          label: const Text('Open Map'),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
     );
@@ -218,6 +358,89 @@ class _ZeroDoseDashboardScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Build filter status indicator showing current active filters
+  Widget _buildFilterStatusIndicator(FilterState filterState) {
+    final activeFilters = <String>[];
+    
+    if (filterState.selectedDivision != 'All') {
+      activeFilters.add('Division: ${filterState.selectedDivision}');
+    }
+    if (filterState.selectedDistrict != null && filterState.selectedDistrict != 'All') {
+      activeFilters.add('District: ${filterState.selectedDistrict}');
+    }
+    if (filterState.selectedUpazila != null && filterState.selectedUpazila != 'All') {
+      activeFilters.add('Upazila: ${filterState.selectedUpazila}');
+    }
+    if (filterState.selectedUnion != null && filterState.selectedUnion != 'All') {
+      activeFilters.add('Union: ${filterState.selectedUnion}');
+    }
+    if (filterState.selectedWard != null && filterState.selectedWard != 'All') {
+      activeFilters.add('Ward: ${filterState.selectedWard}');
+    }
+    if (filterState.selectedCityCorporation != null && filterState.selectedCityCorporation != 'All') {
+      activeFilters.add('CC: ${filterState.selectedCityCorporation}');
+    }
+    if (filterState.selectedZone != null && filterState.selectedZone != 'All') {
+      activeFilters.add('Zone: ${filterState.selectedZone}');
+    }
+    if (filterState.selectedYear != '2025') {
+      activeFilters.add('Year: ${filterState.selectedYear}');
+    }
+
+    if (activeFilters.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.blue[50],
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.blue[200]!),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.info_outline, size: 14, color: Colors.blue[700]),
+            const SizedBox(width: 4),
+            Text(
+              'Showing country-level data',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.blue[700],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.green[50],
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: Colors.green[200]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.filter_alt, size: 14, color: Colors.green[700]),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              activeFilters.length > 2 
+                ? '${activeFilters.take(2).join(', ')} +${activeFilters.length - 2} more'
+                : activeFilters.join(', '),
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.green[700],
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

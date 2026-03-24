@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  gis-dashboard-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: gis-dashboard-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - gis-dashboard-network
+
+networks:
+  gis-dashboard-network:
+    driver: bridge

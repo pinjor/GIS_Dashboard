@@ -328,6 +328,51 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       return;
     }
     
+    // ✅ FIX: Check if we're on Micro Plan screen - don't auto-navigate from there
+    // The Micro Plan screen should handle its own data loading without navigation
+    // Check the Navigator's current route to see what screen is actually visible
+    try {
+      // Get the current route settings
+      final currentRouteSettings = currentRoute?.settings;
+      
+      // Check route name
+      final routeName = currentRouteSettings?.name ?? '';
+      if (routeName.contains('MicroPlan') || 
+          routeName.contains('microplan') ||
+          routeName.contains('Micro_Plan')) {
+        logg.i("⚠️ On Micro Plan screen (route: $routeName) - skipping auto-navigation to EPI center details");
+        logg.i("   > Micro Plan screen will handle subblock filter independently");
+        return;
+      }
+      
+      // ✅ Additional check: Only auto-navigate if we're actually on the MapScreen
+      // Check if the current route's builder would return a MapScreen
+      // If route name is empty or contains Map/Home, we're likely on MapScreen
+      final isOnMapScreen = routeName.isEmpty || // Empty route often means initial screen (MapScreen in Home)
+                            routeName.contains('Map') ||
+                            routeName.contains('map') ||
+                            routeName.contains('Home');
+      
+      // If we have a specific route name that's not Map/Home, we're probably on a different screen
+      if (!isOnMapScreen && routeName.isNotEmpty) {
+        logg.i("⚠️ Not on Map screen (route: $routeName) - skipping auto-navigation");
+        logg.i("   > Auto-navigation only happens when on MapScreen");
+        return;
+      }
+      
+      // ✅ Final check: Verify MapScreen is actually mounted and visible
+      // If MapScreen is not mounted, we shouldn't navigate
+      if (!mounted) {
+        logg.i("⚠️ MapScreen not mounted - skipping auto-navigation");
+        return;
+      }
+    } catch (e) {
+      logg.w("⚠️ Error checking current screen context: $e");
+      // If we can't determine the context, be conservative and skip navigation
+      logg.w("   > Skipping auto-navigation to be safe");
+      return;
+    }
+    
     logg.i("🚀 Auto-navigating to EPI center details for subblock: $subblockName");
     
     final filterState = ref.read(filterControllerProvider);

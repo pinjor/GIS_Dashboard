@@ -1052,7 +1052,7 @@ class _SessionPlanFilterDialogState
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
           isExpanded: true,
-          value: validValue,
+          initialValue: validValue,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,

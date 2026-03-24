@@ -37,7 +37,7 @@ class SessionPlanRepository {
 
       logg.i("Session Plan Repository: 🔍🔍🔍 Fetching from FULL URL: $urlPath");
       logg.i("Session Plan Repository: 🔍 Making GET request...");
-      final response = await _client.get(urlPath);
+      final response = await _fetchWithAdaptiveLimit(urlPath);
       logg.i("Session Plan Repository: ✅ Response received - Status: ${response.statusCode}");
       
       // ✅ CRITICAL: Log response size to check if we got data
@@ -95,5 +95,39 @@ class SessionPlanRepository {
       logg.e("Error fetching session plans: $e");
       throw NetworkErrorHandler.handleGenericError(e);
     }
+  }
+
+  Future<Response<dynamic>> _fetchWithAdaptiveLimit(String urlPath) async {
+    try {
+      return await _client.get(urlPath);
+    } on DioException catch (e) {
+      if (!_isRecoverableConnectionClose(e) || !urlPath.contains('limit=')) {
+        rethrow;
+      }
+
+      // Some backend responses fail for very large limits with:
+      // "Connection closed before full header was received".
+      // Retry with smaller limits to keep data loading reliable.
+      const fallbackLimits = <int>[20000, 10000, 5000];
+      for (final fallbackLimit in fallbackLimits) {
+        final retryUrl = urlPath.replaceAll(RegExp(r'limit=\d+'), 'limit=$fallbackLimit');
+        logg.w('Session Plan Repository: Retrying with reduced limit=$fallbackLimit');
+        try {
+          return await _client.get(retryUrl);
+        } on DioException catch (retryError) {
+          if (!_isRecoverableConnectionClose(retryError)) {
+            rethrow;
+          }
+        }
+      }
+      rethrow;
+    }
+  }
+
+  bool _isRecoverableConnectionClose(DioException e) {
+    final msg = (e.message ?? '').toLowerCase();
+    return msg.contains('connection closed before full header was received') ||
+        msg.contains('connection closed') ||
+        msg.contains('httpexception');
   }
 }

@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 
 class ProcessingHeaderSection extends StatelessWidget {
-  const ProcessingHeaderSection({super.key});
+  final VoidCallback? onTapEpiCenterCollection;
+  final VoidCallback? onTapCrowdMapping;
+  final VoidCallback? onTapGisDataPreparation;
+  final VoidCallback? onTapDashboardDevelopment;
+  final VoidCallback? onTapEtlProcessing;
+
+  const ProcessingHeaderSection({
+    super.key,
+    this.onTapEpiCenterCollection,
+    this.onTapCrowdMapping,
+    this.onTapGisDataPreparation,
+    this.onTapDashboardDevelopment,
+    this.onTapEtlProcessing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,24 +69,37 @@ class ProcessingHeaderSection extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              children: const [
+              children: [
                 FeatureCard(
                   icon: Icons.location_on_outlined,
                   title: 'EPI Center Geo-data\nCollection',
+                  onTap: onTapEpiCenterCollection,
                 ),
-                SizedBox(height: 20),
-                FeatureCard(icon: Icons.map_outlined, title: 'Crowd Mapping'),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
+                FeatureCard(
+                  icon: Icons.map_outlined,
+                  title: 'Crowd Mapping',
+                  onTap: onTapCrowdMapping,
+                ),
+                const SizedBox(height: 20),
                 FeatureCard(
                   icon: Icons.storage_rounded,
                   title: 'GIS Data Preparation',
+                  onTap: onTapGisDataPreparation,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 FeatureCard(
                   icon: Icons.bar_chart_rounded,
                   title: 'Dashboard\nDevelopment',
+                  onTap: onTapDashboardDevelopment,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
+                FeatureCard(
+                  icon: Icons.settings_applications_rounded,
+                  title: 'ETL Processing',
+                  onTap: onTapEtlProcessing,
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -86,34 +112,38 @@ class ProcessingHeaderSection extends StatelessWidget {
 class FeatureCard extends StatelessWidget {
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
 
-  const FeatureCard({super.key, required this.icon, required this.title});
+  const FeatureCard({super.key, required this.icon, required this.title, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(20),
-        // backdropFilter:  ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Glassmorphism effect
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 56, color: Colors.white),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              height: 1.3,
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.18),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 56, color: Colors.white),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                height: 1.3,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/core/common/constants/api_constants.dart';
 import 'package:gis_dashboard/core/network/interceptors/logging_interceptor.dart';
-import 'package:gis_dashboard/core/network/staging_ssl_adapter.dart';
+import 'package:gis_dashboard/core/network/ssl_adapter_config.dart';
 
 // ===========================================================================
 // Dio HTTP Client Provider
@@ -40,7 +40,7 @@ final dioClientProvider = Provider<Dio>((ref) {
   //
   // TODO: Remove this line once the staging SSL certificate is renewed.
   // ---------------------------------------------------------------------------
-  StagingSslAdapter.configureForDio(dio);
+  configureStagingSslIfNeeded(dio);
 
   // Add logging interceptor for request/response debugging
   dio.interceptors.add(LoggingInterceptor());
@@ -60,7 +60,7 @@ final apiClientProvider = Provider<Dio>((ref) {
     ),
   );
 
-  StagingSslAdapter.configureForDio(dio);
+  configureStagingSslIfNeeded(dio);
   dio.interceptors.add(LoggingInterceptor());
 
   return dio;

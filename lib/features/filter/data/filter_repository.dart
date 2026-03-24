@@ -170,7 +170,14 @@ class FilterRepository {
       ).toString();
 
       print('FilterRepository: Fetching areas by parent UID from: $uri');
-      final response = await _client.get(uri);
+      final response = await _getWithRetry(
+        uri,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 45),
+          sendTimeout: const Duration(seconds: 30),
+        ),
+        maxAttempts: 3,
+      );
       print(
         'FilterRepository: Areas by parent UID response: ${response.statusCode}',
       );
@@ -203,7 +210,14 @@ class FilterRepository {
       ).toString();
 
       print('FilterRepository: Fetching zones from: $uri');
-      final response = await _client.get(uri);
+      final response = await _getWithRetry(
+        uri,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 45),
+          sendTimeout: const Duration(seconds: 30),
+        ),
+        maxAttempts: 3,
+      );
 
       // Handle the response which wraps data in 'data' field
       if (response.data != null && response.data['data'] != null) {
@@ -216,5 +230,42 @@ class FilterRepository {
       print('FilterRepository: Error fetching zones: $e');
       return Future.error('Failed to fetch zones: $e');
     }
+  }
+
+  Future<Response<dynamic>> _getWithRetry(
+    String uri, {
+    Options? options,
+    int maxAttempts = 2,
+  }) async {
+    DioException? lastDioError;
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await _client.get(uri, options: options);
+      } on DioException catch (e) {
+        lastDioError = e;
+        final isRetryable =
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.unknown;
+
+        if (!isRetryable || attempt == maxAttempts) {
+          rethrow;
+        }
+
+        final delayMs = 500 * attempt;
+        print(
+          'FilterRepository: Retryable error on attempt $attempt/$maxAttempts for $uri. Retrying in ${delayMs}ms...',
+        );
+        await Future.delayed(Duration(milliseconds: delayMs));
+      }
+    }
+
+    throw lastDioError ??
+        DioException(
+          requestOptions: RequestOptions(path: uri),
+          type: DioExceptionType.unknown,
+          message: 'Unknown network error while fetching $uri',
+        );
   }
 }

@@ -189,6 +189,32 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
           logg.e('Session Plan: Unions still not loaded after waiting - proceeding anyway');
         }
       }
+
+      // ✅ FIX: Wait for wards to be loaded if ward is selected but list is empty
+      // This prevents ward filter from silently falling back to union-level area UID.
+      if (filterState.selectedWard != null &&
+          filterState.selectedWard != 'All' &&
+          filterState.wards.isEmpty &&
+          filterState.selectedUnion != null &&
+          filterState.selectedUnion != 'All') {
+        logg.w('Session Plan: Wards list is empty, waiting for them to load...');
+        int retries = 0;
+        const maxRetries = 40; // 4 seconds max wait
+
+        while (retries < maxRetries) {
+          await Future.delayed(const Duration(milliseconds: 100));
+          final currentFilterState = _ref.read(filterControllerProvider);
+          if (currentFilterState.wards.isNotEmpty) {
+            logg.i('Session Plan: Wards loaded (${currentFilterState.wards.length} items)');
+            break;
+          }
+          retries++;
+        }
+
+        if (_ref.read(filterControllerProvider).wards.isEmpty) {
+          logg.e('Session Plan: Wards still not loaded after waiting - ward filter may fallback');
+        }
+      }
       
       // ✅ FIX: Build correct area UID based on filter hierarchy
       // For union/ward levels, we need concatenated paths like district/upazila/union or district/upazila/union/ward
@@ -204,39 +230,77 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
         effectiveAreaUid = await _buildAreaUidForSessionPlan(filterState, filterNotifier);
         logg.i("Session Plan: 🔍 Built area UID: ${effectiveAreaUid ?? 'null'}");
         
-        // Fallback to map controller's focalAreaUid if we couldn't build one
-        if (effectiveAreaUid == null) {
-          logg.w("Session Plan: ⚠️ Could not build area UID from filter state, trying map controller focalAreaUid...");
+        // ✅ CRITICAL FIX: If we couldn't build area UID, try fallback strategies
+        if (effectiveAreaUid == null || effectiveAreaUid.isEmpty) {
+          logg.w("Session Plan: ⚠️ Could not build area UID from filter state, trying fallback strategies...");
+          
+          // Strategy 1: Try map controller's focalAreaUid
           effectiveAreaUid = mapNotifier.focalAreaUid;
-          logg.i("Session Plan: 🔍 Map controller focalAreaUid: ${effectiveAreaUid ?? 'null'}");
+          if (effectiveAreaUid != null && effectiveAreaUid.isNotEmpty) {
+            logg.i("Session Plan: ✅ Using map controller focalAreaUid: $effectiveAreaUid");
+          } else {
+            // Strategy 2: Try to use district UID as fallback if district is selected
+            if (filterState.selectedDistrict != null && filterState.selectedDistrict != 'All') {
+              final districtUid = filterNotifier.getDistrictUid(filterState.selectedDistrict!);
+              if (districtUid != null && districtUid.isNotEmpty) {
+                logg.w("Session Plan: ⚠️ Using district UID as fallback: $districtUid");
+                effectiveAreaUid = districtUid;
+              }
+            }
+            
+            // Strategy 3: If still null, use division UID as last resort
+            if ((effectiveAreaUid == null || effectiveAreaUid.isEmpty) && 
+                filterState.selectedDivision != 'All') {
+              final divisionUid = filterNotifier.getDivisionUid(filterState.selectedDivision);
+              if (divisionUid != null && divisionUid.isNotEmpty) {
+                logg.w("Session Plan: ⚠️ Using division UID as last resort: $divisionUid");
+                effectiveAreaUid = divisionUid;
+              }
+            }
+          }
         }
       } else {
         logg.i("Session Plan: 🔍 Using provided areaUid parameter: $effectiveAreaUid");
       }
       
-      final areaParam = effectiveAreaUid ?? 'undefined';
+      // ✅ CRITICAL FIX: Validate area parameter before using it
+      // Never use 'undefined' - it will cause API to return 0 results
+      String areaParam;
+      if (effectiveAreaUid == null || effectiveAreaUid.isEmpty) {
+        logg.e("Session Plan: ❌❌❌ CRITICAL ERROR - area UID is null, empty, or undefined!");
+        logg.e("Session Plan: This will cause API to return 0 results");
+        logg.e("Session Plan: Filter hierarchy - Division: ${filterState.selectedDivision}, District: ${filterState.selectedDistrict}, Upazila: ${filterState.selectedUpazila}, Union: ${filterState.selectedUnion}");
+        logg.e("Session Plan: Upazilas list: ${filterState.upazilas.map((u) => '${u.name} (${u.uid})').toList()}");
+        logg.e("Session Plan: Districts list: ${filterState.districts.map((d) => '${d.name} (${d.uid})').toList()}");
+        
+        // ✅ FIX: Don't use 'undefined' - omit area parameter or use empty string
+        // Some APIs might accept empty area parameter for country-level data
+        // But for session plans, we need a valid area, so we'll log an error and proceed
+        // The API will return 0 results, but at least we won't crash
+        areaParam = ''; // Empty string instead of 'undefined'
+        logg.e("Session Plan: ⚠️ Using empty area parameter - API may return 0 results");
+      } else {
+        areaParam = effectiveAreaUid;
+        logg.i("Session Plan: ✅✅✅ Area UID is valid: $effectiveAreaUid");
+      }
       
       logg.i("Session Plan: 🔍🔍🔍 Final area parameter: $areaParam");
       logg.i("Session Plan: Filter state - District: ${filterState.selectedDistrict}, Upazila: ${filterState.selectedUpazila}, Union: ${filterState.selectedUnion}");
-      
-      // ✅ DEBUG: Log the full filter hierarchy for debugging
-      if (effectiveAreaUid == null || effectiveAreaUid == 'undefined') {
-        logg.e("Session Plan: ❌❌❌ CRITICAL ERROR - area UID is null or undefined!");
-        logg.e("Session Plan: This will cause API to return 0 results");
-        logg.e("Session Plan: Filter hierarchy - Division: ${filterState.selectedDivision}, District: ${filterState.selectedDistrict}, Upazila: ${filterState.selectedUpazila}, Union: ${filterState.selectedUnion}");
-        logg.e("Session Plan: Upazilas list: ${filterState.upazilas.map((u) => u.name).toList()}");
-        logg.e("Session Plan: Districts list: ${filterState.districts.map((d) => d.name).toList()}");
-      } else {
-        logg.i("Session Plan: ✅✅✅ Area UID is valid: $effectiveAreaUid");
-      }
 
-      // Construct URL based on parameters
-      String sessionPlanUrl = '${ApiConstants.sessionPlans}?area=$areaParam';
+      // ✅ FIX: Construct URL based on parameters
+      // Only include area parameter if it's not empty
+      String sessionPlanUrl = ApiConstants.sessionPlans;
+      if (areaParam.isNotEmpty) {
+        sessionPlanUrl += '?area=$areaParam';
+      } else {
+        // If area parameter is empty, start with ? for date parameters
+        sessionPlanUrl += '?';
+      }
       
       // ✅ FIX: Always include date parameters (even if empty) to ensure proper filtering
       // Format: YYYY-MM-DD (e.g., 2025-12-01)
-      // ⚠️ CRITICAL: If dates are null or empty, use today's date as default
-      // This prevents API from returning 0 results when dates are not provided
+      // ⚠️ CRITICAL: If dates are null or empty, avoid single-day default.
+      // Use current month range to reduce false "0 sessions" responses.
       // Note: startDate and endDate have already been updated from state if they were null
       String finalStartDate;
       String finalEndDate;
@@ -244,26 +308,35 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
       if (startDate != null && startDate.isNotEmpty) {
         finalStartDate = startDate;
       } else {
-        finalStartDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-        logg.w("Session Plan: ⚠️ No start_date provided (not in state either), using today: $finalStartDate");
+        final now = DateTime.now();
+        final monthStart = DateTime(now.year, now.month, 1);
+        finalStartDate = DateFormat('yyyy-MM-dd').format(monthStart);
+        logg.w("Session Plan: ⚠️ No start_date provided (not in state either), using month start: $finalStartDate");
       }
       
       if (endDate != null && endDate.isNotEmpty) {
         finalEndDate = endDate;
       } else {
-        finalEndDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-        logg.w("Session Plan: ⚠️ No end_date provided (not in state either), using today: $finalEndDate");
+        final now = DateTime.now();
+        final monthEnd = DateTime(now.year, now.month + 1, 0);
+        finalEndDate = DateFormat('yyyy-MM-dd').format(monthEnd);
+        logg.w("Session Plan: ⚠️ No end_date provided (not in state either), using month end: $finalEndDate");
       }
       
-      sessionPlanUrl += '&start_date=$finalStartDate';
-      sessionPlanUrl += '&end_date=$finalEndDate';
+      // ✅ FIX: Add date parameters (use & if area param exists, otherwise these are first params)
+      if (areaParam.isNotEmpty) {
+        sessionPlanUrl += '&start_date=$finalStartDate';
+        sessionPlanUrl += '&end_date=$finalEndDate';
+      } else {
+        sessionPlanUrl += 'start_date=$finalStartDate';
+        sessionPlanUrl += '&end_date=$finalEndDate';
+      }
       logg.i("Session Plan: 🔍 Final date parameters - start_date: $finalStartDate, end_date: $finalEndDate");
 
-      // ✅ FIX: Add limit parameter to fetch more features (if API supports it)
-      // Try to get all sessions, but cap at 50,000 to prevent memory issues
-      // The API might have a max limit, so we'll see what it returns
-      sessionPlanUrl += '&limit=50000';
-      logg.i("Session Plan: Requesting up to 50,000 features (API may limit to 10,000)");
+      // ✅ FIX: Use safer limit for unfiltered country-level requests to reduce timeout risks.
+      final limit = areaParam.isEmpty ? 10000 : 50000;
+      sessionPlanUrl += '&limit=$limit';
+      logg.i("Session Plan: Requesting up to $limit features");
 
       // ✅ CRITICAL: Log the FULL API URL for debugging
       logg.i("Session Plan: 🔍🔍🔍 FULL API URL: $sessionPlanUrl");
@@ -391,13 +464,51 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
       logg.i("Session Plan: 🔍 Area parameter: $areaParam");
       logg.i("Session Plan: 🔍 Start date: $finalStartDate, End date: $finalEndDate");
       
-      final sessionPlanCoordsData = await _dataService.getSessionPlanCoords(
+      var sessionPlanCoordsData = await _dataService.getSessionPlanCoords(
         urlPath: sessionPlanUrl,
         forceRefresh: areaChanged, // ✅ OPTIMIZATION 3: Only force refresh if area changed
       );
       logg.i("Session Plan: ✅✅✅ API call completed - received data");
       logg.i("Session Plan: ✅ Features count: ${sessionPlanCoordsData.features?.length ?? 0}");
       logg.i("Session Plan: ✅ Session count: ${sessionPlanCoordsData.sessionCount ?? 'null'}");
+
+      // Fallback for division-level session plan fetch if primary area parameter yields no data.
+      final isDivisionOnlySelection =
+          filterState.selectedDivision != 'All' &&
+          (filterState.selectedDistrict == null || filterState.selectedDistrict == 'All') &&
+          (filterState.selectedUpazila == null || filterState.selectedUpazila == 'All') &&
+          (filterState.selectedUnion == null || filterState.selectedUnion == 'All') &&
+          (filterState.selectedWard == null || filterState.selectedWard == 'All') &&
+          (filterState.selectedSubblock == null || filterState.selectedSubblock == 'All') &&
+          (filterState.selectedCityCorporation == null || filterState.selectedCityCorporation == 'All') &&
+          (filterState.selectedZone == null || filterState.selectedZone == 'All');
+
+      if ((sessionPlanCoordsData.features == null || sessionPlanCoordsData.features!.isEmpty) &&
+          isDivisionOnlySelection) {
+        final divisionSlug = ApiConstants.divisionNameToSlug(filterState.selectedDivision);
+        final fallbackCandidates = <String>[
+          if (mapNotifier.focalAreaUid != null && mapNotifier.focalAreaUid!.isNotEmpty)
+            mapNotifier.focalAreaUid!,
+          divisionSlug,
+        ].where((c) => c.isNotEmpty && c != areaParam).toList();
+
+        for (final candidateArea in fallbackCandidates) {
+          final fallbackUrl =
+              '${ApiConstants.sessionPlans}?area=$candidateArea&start_date=$finalStartDate&end_date=$finalEndDate&limit=50000';
+          logg.w('Session Plan: ⚠️ Division fallback attempt with area=$candidateArea');
+          final fallbackData = await _dataService.getSessionPlanCoords(
+            urlPath: fallbackUrl,
+            forceRefresh: true,
+          );
+          final fallbackCount = fallbackData.features?.length ?? 0;
+          logg.i('Session Plan: Division fallback features count: $fallbackCount');
+          if (fallbackCount > 0) {
+            sessionPlanCoordsData = fallbackData;
+            logg.i('Session Plan: ✅ Division fallback succeeded with area=$candidateArea');
+            break;
+          }
+        }
+      }
 
       logg.i(
         "Session Plan: ✅ Loaded session plan data - features: ${sessionPlanCoordsData.features?.length ?? 0}, sessionCount: ${sessionPlanCoordsData.sessionCount ?? 'null'}",
@@ -562,7 +673,8 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
   }
 
   /// Build correct area UID for session plan API based on filter hierarchy
-  /// This ensures union/ward levels use concatenated paths (district/upazila/union or district/upazila/union/ward)
+  /// Session plan API expects the deepest selected area UID.
+  /// Prefer single UID (ward/union/upazila) over concatenated hierarchy paths.
   Future<String?> _buildAreaUidForSessionPlan(
     FilterState filterState,
     FilterControllerNotifier filterNotifier,
@@ -570,73 +682,49 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
     // Use a local variable that can be updated if filter state changes during async operations
     FilterState currentFilterState = filterState;
     // Check from deepest to shallowest level (matching map controller logic)
-    // ✅ FIX: For union level, build concatenated path: district/upazila/union
-    if (currentFilterState.selectedUnion != null && currentFilterState.selectedUnion != 'All') {
-      // Union requires district and upazila to be selected (hierarchical dependency)
-      if (currentFilterState.selectedDistrict != null && 
-          currentFilterState.selectedDistrict != 'All' &&
-          currentFilterState.selectedUpazila != null && 
-          currentFilterState.selectedUpazila != 'All') {
-        final districtUid = filterNotifier.getDistrictUid(currentFilterState.selectedDistrict!);
-        final upazilaUid = filterNotifier.getUpazilaUid(currentFilterState.selectedUpazila!);
+    // For ward level, use ward UID directly
+    if (currentFilterState.selectedWard != null && currentFilterState.selectedWard != 'All') {
+      String? wardUid = filterNotifier.getWardUid(currentFilterState.selectedWard!);
+
+      // If ward UID is not immediately available, force-load wards from selected union and retry.
+      if ((wardUid == null || wardUid.isEmpty) &&
+          currentFilterState.selectedUnion != null &&
+          currentFilterState.selectedUnion != 'All') {
         final unionUid = filterNotifier.getUnionUid(currentFilterState.selectedUnion!);
-        
-        if (districtUid != null && upazilaUid != null && unionUid != null) {
-          // ✅ CRITICAL FIX: Convert to lowercase for API (session plan API expects lowercase slugs for concatenated paths)
-          final concatenatedPath = '${districtUid.toLowerCase()}/${upazilaUid.toLowerCase()}/${unionUid.toLowerCase()}';
-          logg.i('Session Plan: Built concatenated union path: $concatenatedPath');
-          return concatenatedPath;
-        } else {
-          logg.w('Session Plan: Could not build concatenated union path - missing UIDs');
-          logg.w('  districtUid: $districtUid, upazilaUid: $upazilaUid, unionUid: $unionUid');
-          // Fallback to union UID only
-          return unionUid;
+        if (unionUid != null && unionUid.isNotEmpty) {
+          try {
+            await filterNotifier.loadWardsByUnion(unionUid);
+          } catch (_) {}
         }
-      } else {
-        // Fallback to union UID only if district/upazila not selected
-        final unionUid = filterNotifier.getUnionUid(currentFilterState.selectedUnion!);
-        logg.w('Session Plan: Using union UID only (district/upazila not selected): $unionUid');
+
+        int retries = 0;
+        const maxRetries = 30; // 3 seconds max wait
+        while (retries < maxRetries && (wardUid == null || wardUid.isEmpty)) {
+          await Future.delayed(const Duration(milliseconds: 100));
+          wardUid = filterNotifier.getWardUid(currentFilterState.selectedWard!);
+          if (wardUid != null && wardUid.isNotEmpty) {
+            break;
+          }
+          retries++;
+        }
+      }
+
+      if (wardUid != null && wardUid.isNotEmpty) {
+        logg.i('Session Plan: Using ward UID: $wardUid');
+        return wardUid;
+      }
+    }
+
+    // For union level, use union UID directly
+    if (currentFilterState.selectedUnion != null && currentFilterState.selectedUnion != 'All') {
+      final unionUid = filterNotifier.getUnionUid(currentFilterState.selectedUnion!);
+      if (unionUid != null && unionUid.isNotEmpty) {
+        logg.i('Session Plan: Using union UID: $unionUid');
         return unionUid;
       }
     }
     
-    // ✅ FIX: For ward level, build concatenated path: district/upazila/union/ward
-    if (currentFilterState.selectedWard != null && currentFilterState.selectedWard != 'All') {
-      final wardUid = filterNotifier.getWardUid(currentFilterState.selectedWard!);
-      
-      // Ward requires union, upazila, and district to be selected for full concatenated path
-      if (currentFilterState.selectedUnion != null && 
-          currentFilterState.selectedUnion != 'All' &&
-          currentFilterState.selectedUpazila != null && 
-          currentFilterState.selectedUpazila != 'All' &&
-          currentFilterState.selectedDistrict != null && 
-          currentFilterState.selectedDistrict != 'All') {
-        final districtUid = filterNotifier.getDistrictUid(currentFilterState.selectedDistrict!);
-        final upazilaUid = filterNotifier.getUpazilaUid(currentFilterState.selectedUpazila!);
-        final unionUid = filterNotifier.getUnionUid(currentFilterState.selectedUnion!);
-        
-        if (districtUid != null && 
-            upazilaUid != null && 
-            unionUid != null && 
-            wardUid != null) {
-          // ✅ CRITICAL FIX: Convert to lowercase for API (session plan API expects lowercase slugs for concatenated paths)
-          final concatenatedPath = '${districtUid.toLowerCase()}/${upazilaUid.toLowerCase()}/${unionUid.toLowerCase()}/${wardUid.toLowerCase()}';
-          logg.i('Session Plan: Built concatenated ward path: $concatenatedPath');
-          return concatenatedPath;
-        } else {
-          logg.w('Session Plan: Could not build concatenated ward path - missing UIDs');
-          logg.w('  districtUid: $districtUid, upazilaUid: $upazilaUid, unionUid: $unionUid, wardUid: $wardUid');
-        }
-      }
-      
-      // Fallback to ward UID only if we don't have full context
-      if (wardUid != null) {
-        logg.w('Session Plan: Using ward UID only (incomplete hierarchy context): $wardUid');
-        return wardUid;
-      }
-    }
-    
-    // ✅ FIX: For upazila level, build concatenated path: district/upazila
+    // For upazila level, use upazila UID directly
     if (currentFilterState.selectedUpazila != null && currentFilterState.selectedUpazila != 'All') {
       logg.i('Session Plan: 🔍 Building upazila path - District: ${currentFilterState.selectedDistrict}, Upazila: ${currentFilterState.selectedUpazila}');
       logg.i('Session Plan: 🔍 Upazilas list size: ${currentFilterState.upazilas.length}');
@@ -670,36 +758,27 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
         }
       }
       
-      // Upazila requires district to be selected (hierarchical dependency)
       if (currentFilterState.selectedDistrict != null && 
           currentFilterState.selectedDistrict != 'All') {
-        var districtUid = filterNotifier.getDistrictUid(currentFilterState.selectedDistrict!);
         var upazilaUid = filterNotifier.getUpazilaUid(currentFilterState.selectedUpazila!);
         
-        logg.i('Session Plan: 🔍 UID lookup results - districtUid: $districtUid, upazilaUid: $upazilaUid');
+        logg.i('Session Plan: 🔍 UID lookup result - upazilaUid: $upazilaUid');
         
-        // ✅ CRITICAL FIX: If UIDs are null, wait for data to load and retry
-        if (districtUid == null || upazilaUid == null) {
-          logg.w('Session Plan: ⚠️ Could not build concatenated upazila path - missing UIDs, waiting and retrying...');
-          logg.w('  District: ${filterState.selectedDistrict}, districtUid: $districtUid');
+        // If UID is null, wait for data to load and retry
+        if (upazilaUid == null) {
+          logg.w('Session Plan: ⚠️ Could not get upazila UID, waiting and retrying...');
           logg.w('  Upazila: ${filterState.selectedUpazila}, upazilaUid: $upazilaUid');
           logg.w('  Upazilas list size: ${filterState.upazilas.length}');
-          logg.w('  Districts list size: ${filterState.districts.length}');
           
           // ✅ FIX: Wait for upazilas/districts to load and retry
           int retries = 0;
-          const maxRetries = 50; // 5 seconds max wait
-          while (retries < maxRetries && (districtUid == null || upazilaUid == null)) {
+          const maxRetries = 50;
+          while (retries < maxRetries && upazilaUid == null) {
             await Future.delayed(const Duration(milliseconds: 100));
             final updatedFilterState = _ref.read(filterControllerProvider);
             
-            // Retry getting UIDs
-            if (districtUid == null) {
-              districtUid = filterNotifier.getDistrictUid(currentFilterState.selectedDistrict!);
-            }
-            // ✅ CRITICAL: Check if the specific upazila is in the list, not just that the list is non-empty
+            // Retry getting UID
             if (upazilaUid == null && updatedFilterState.upazilas.isNotEmpty) {
-              // Check if the selected upazila exists in the list
               final upazilaExists = updatedFilterState.upazilas.any(
                 (u) => u.name?.trim() == currentFilterState.selectedUpazila!.trim() ||
                        u.name?.trim().toLowerCase() == currentFilterState.selectedUpazila!.trim().toLowerCase(),
@@ -712,15 +791,15 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
               }
             }
             
-            if (districtUid != null && upazilaUid != null) {
-              logg.i('Session Plan: ✅ Retry successful - got UIDs after waiting (retry $retries)');
+            if (upazilaUid != null) {
+              logg.i('Session Plan: ✅ Retry successful - got upazila UID after waiting (retry $retries)');
               break;
             }
             retries++;
           }
           
-          if (districtUid == null || upazilaUid == null) {
-            logg.e('Session Plan: ❌ Still missing UIDs after waiting - districtUid: $districtUid, upazilaUid: $upazilaUid');
+          if (upazilaUid == null) {
+            logg.e('Session Plan: ❌ Still missing upazila UID after waiting');
             final currentFilterState = _ref.read(filterControllerProvider);
             logg.e('  Current upazilas list size: ${currentFilterState.upazilas.length}');
             if (currentFilterState.upazilas.isNotEmpty) {
@@ -730,21 +809,26 @@ class SessionPlanController extends StateNotifier<SessionPlanState> {
           }
         }
         
-        if (districtUid != null && upazilaUid != null) {
-          // ✅ CRITICAL FIX: Convert to lowercase for API (session plan API expects lowercase slugs for concatenated paths)
-          // District level uses uppercase UID, but concatenated paths (upazila/union) need lowercase
-          final concatenatedPath = '${districtUid.toLowerCase()}/${upazilaUid.toLowerCase()}';
-          logg.i('Session Plan: ✅✅✅ Built concatenated upazila path: $concatenatedPath');
-          return concatenatedPath;
+        if (upazilaUid != null && upazilaUid.isNotEmpty) {
+          logg.i('Session Plan: ✅ Using upazila UID: $upazilaUid');
+          return upazilaUid;
         } else {
-          // Fallback to upazila UID only
-          logg.w('Session Plan: ⚠️ Falling back to upazila UID only: $upazilaUid');
-          if (upazilaUid != null) {
-            return upazilaUid;
-          } else {
-            logg.e('Session Plan: ❌❌❌ CRITICAL: Cannot build upazila path - all UIDs are null!');
-            return null;
+          // Fallback: use district UID if available
+          final districtUid = filterNotifier.getDistrictUid(currentFilterState.selectedDistrict!);
+          if (districtUid != null && districtUid.isNotEmpty) {
+            logg.w('Session Plan: ⚠️ Falling back to district UID (upazila UID missing): $districtUid');
+            return districtUid;
           }
+          
+          // Final fallback: return null (handled by caller)
+          logg.e('Session Plan: ❌❌❌ CRITICAL: Cannot build upazila area UID');
+          logg.e('Session Plan: District: ${currentFilterState.selectedDistrict}');
+          logg.e('Session Plan: Upazila: ${currentFilterState.selectedUpazila}, upazilaUid: $upazilaUid');
+          logg.e('Session Plan: Upazilas list size: ${currentFilterState.upazilas.length}');
+          if (currentFilterState.upazilas.isNotEmpty) {
+            logg.e('Session Plan: Available upazilas: ${currentFilterState.upazilas.map((u) => '${u.name} (${u.uid})').toList()}');
+          }
+          return null;
         }
       } else {
         // ✅ FIX: District is null or "All" - try to find district from upazilla's parentUid

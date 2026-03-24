@@ -12,11 +12,13 @@ import '../../../epi_center/presentation/controllers/epi_center_controller.dart'
 class FilterDialogBoxWidget extends ConsumerStatefulWidget {
   final bool isEpiContext;
   final bool isMicroplanContext;
+  final bool hideSubblock;
 
   const FilterDialogBoxWidget({
     super.key,
     this.isEpiContext = false,
     this.isMicroplanContext = false,
+    this.hideSubblock = false,
   });
 
   @override
@@ -1269,8 +1271,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
                       },
                     ),
 
-                    // ✅ Subblock Dropdown (shown when ward is selected, not just EPI context)
-                    if (_selectedWard != null && _selectedWard != 'All') ...[
+                    // ✅ Subblock Dropdown (shown when ward is selected, not just EPI context, and not hidden)
+                    if (_selectedWard != null && 
+                        _selectedWard != 'All' && 
+                        !widget.hideSubblock) ...[
                       16.h,
                       const Text(
                         'Subblock',

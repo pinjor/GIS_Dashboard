@@ -446,9 +446,7 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
       }
       
       // If no geographic filter is applied, use country level
-      if (filterLevel == null) {
-        filterLevel = GeographicLevel.country;
-      }
+      filterLevel ??= GeographicLevel.country;
       
       // Check if EPI data matches the filter level
       if (mapState.currentLevel != filterLevel) {

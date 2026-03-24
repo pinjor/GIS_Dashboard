@@ -71,17 +71,31 @@ class _VaccinePerformanceGraphWidgetState
   }
 
   // Calculate dynamic interval based on maxY
+  // ✅ FIX: Ensure we get enough tick marks (at least 4-5) for proper Y-axis labeling
   double _calculateInterval(double maxY) {
-    if (maxY < 10000) {
-      return 1000.0; // 1K intervals for small values
+    // Calculate interval to get approximately 4-6 tick marks
+    final targetTicks = 5.0;
+    final baseInterval = maxY / targetTicks;
+    
+    // Round to nice numbers based on magnitude
+    if (maxY < 1000) {
+      // For very small values (< 1K), use 100 or 200 intervals
+      return (baseInterval / 100).ceil() * 100.0;
+    } else if (maxY < 10000) {
+      // For values < 10K, round to nearest 500 or 1000
+      return (baseInterval / 500).ceil() * 500.0;
     } else if (maxY < 100000) {
-      return 10000.0; // 10K intervals
+      // For values < 100K, round to nearest 5K or 10K
+      return (baseInterval / 5000).ceil() * 5000.0;
     } else if (maxY < 500000) {
-      return 50000.0; // 50K intervals
+      // For values < 500K, round to nearest 25K or 50K
+      return (baseInterval / 25000).ceil() * 25000.0;
     } else if (maxY < 1000000) {
-      return 100000.0; // 100K intervals
+      // For values < 1M, round to nearest 50K or 100K
+      return (baseInterval / 50000).ceil() * 50000.0;
     } else {
-      return 200000.0; // 200K intervals for large values
+      // For values >= 1M, round to nearest 100K or 200K
+      return (baseInterval / 100000).ceil() * 100000.0;
     }
   }
 
@@ -506,23 +520,71 @@ Last Spot: ${coverageSpots.isNotEmpty ? '(${coverageSpots.last.x}, ${coverageSpo
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   reservedSize: 80,
-                                  getTitlesWidget: (value, _) {
-                                    // Don't show label for maxY to prevent overlap
-                                    if (value >= maxY) {
+                                  getTitlesWidget: (value, meta) {
+                                    // ✅ FIX: Show labels for all values within the valid range
+                                    // Only hide if value is significantly above maxY (to handle floating point issues)
+                                    if (value > maxY * 1.01 || value < 0) {
                                       return const SizedBox.shrink();
                                     }
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 8.0,
-                                      ),
-                                      child: Text(
-                                        _formatYAxisLabel(value),
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.black87,
+                                    
+                                    // ✅ FIX: Always show label for 0
+                                    if (value == 0) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
                                         ),
-                                      ),
-                                    );
+                                        child: Text(
+                                          _formatYAxisLabel(value),
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    
+                                    // ✅ FIX: Show labels for values that are multiples of the interval
+                                    // Use tolerance to handle floating point precision issues
+                                    final tolerance = horizontalInterval * 0.05; // 5% tolerance for floating point
+                                    final remainder = (value % horizontalInterval).abs();
+                                    final isMultiple = remainder < tolerance || 
+                                                       (horizontalInterval - remainder) < tolerance;
+                                    
+                                    // Show label if it's close to an interval mark
+                                    if (isMultiple) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                        ),
+                                        child: Text(
+                                          _formatYAxisLabel(value),
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    
+                                    // ✅ FIX: For very small intervals or when no labels would show,
+                                    // show labels at regular intervals (every 2nd or 3rd interval)
+                                    // This ensures we always see some Y-axis labels
+                                    if (horizontalInterval < 1000 && value % (horizontalInterval * 2) < tolerance) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                        ),
+                                        child: Text(
+                                          _formatYAxisLabel(value),
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    
+                                    return const SizedBox.shrink();
                                   },
                                   interval: horizontalInterval,
                                 ),

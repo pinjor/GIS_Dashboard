@@ -131,8 +131,8 @@ class ZeroDoseBarChartWidget extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             // Bar value text (above bar for positive, below for negative)
                             if (!isNegative)
@@ -144,13 +144,14 @@ class ZeroDoseBarChartWidget extends StatelessWidget {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
 
                             // Bar container with zero line
-                            Flexible(
+                            Expanded(
                               child: SizedBox(
-                                height: availableBarHeight,
+                                width: double.infinity,
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
@@ -199,23 +200,28 @@ class ZeroDoseBarChartWidget extends StatelessWidget {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
 
                             const SizedBox(height: 8),
 
-                            // Area name - reduced height
+                            // Area name - fixed height with proper alignment
                             SizedBox(
-                              height: 80,
-                              child: Transform.rotate(
-                                angle: -math.pi / 4,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    area.name ?? 'Unknown',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
+                              height: 60,
+                              width: double.infinity,
+                              child: Center(
+                                child: Transform.rotate(
+                                  angle: -math.pi / 4,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      area.name ?? 'Unknown',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ),
