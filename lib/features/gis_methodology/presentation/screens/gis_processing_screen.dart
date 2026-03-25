@@ -7,6 +7,7 @@ import 'package:gis_dashboard/features/gis_methodology/presentation/widgets/proc
 import '../../../../core/common/constants/app_sizes.dart';
 import '../widgets/dashboard_feature_overview.dart';
 import '../widgets/e_stir_dashboard_widget.dart';
+import '../widgets/etl_processing_widget.dart';
 import '../widgets/gis_database_preparation_widget.dart';
 import '../widgets/gis_mapping_process_tabs_widget.dart';
 import '../widgets/gis_processing_data_collection_widget.dart';
@@ -39,16 +40,17 @@ class GisProcessingScreen extends StatelessWidget {
               const ProcessingHeaderSection(),
               const SizedBox(height: Sizes.p16),
               const GisProcessingDataCollectionWidget(),
-              const SizedBox(height: Sizes.p16),
               const GisDataPreparationWidget(),
               const SizedBox(height: Sizes.p32),
               const CrowdMappingWidget(),
               const SizedBox(height: Sizes.p32),
               const GisMappingProcessTabsWidget(),
               const SizedBox(height: Sizes.p32),
+              // Move full data preparation (database prep) directly under the 3 tabs
               const GisDatabasePreparationWidget(),
               const SizedBox(height: Sizes.p32),
-
+              const EtlProcessingWidget(),
+              const SizedBox(height: Sizes.p32),
               const DashboardFeatureOverview(),
               const SizedBox(height: Sizes.p32),
               const EStirDashboardWidget(),
@@ -58,6 +60,7 @@ class GisProcessingScreen extends StatelessWidget {
               const OutputGisDashboardWidget(),
               const SizedBox(height: Sizes.p32),
               const ImpactSectionWidget(),
+              const SizedBox(height: Sizes.p32),
             ],
           ),
         ),

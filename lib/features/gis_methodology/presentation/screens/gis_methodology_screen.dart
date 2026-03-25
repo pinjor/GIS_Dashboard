@@ -30,6 +30,7 @@ class _GisMethodologyScreenState extends State<GisMethodologyScreen> {
   final GlobalKey _epiCollectionKey = GlobalKey();
   final GlobalKey _crowdMappingKey = GlobalKey();
   final GlobalKey _gisDataPrepKey = GlobalKey();
+  final GlobalKey _gisDatabasePrepKey = GlobalKey();
   final GlobalKey _etlKey = GlobalKey();
   final GlobalKey _dashboardKey = GlobalKey();
 
@@ -76,7 +77,7 @@ class _GisMethodologyScreenState extends State<GisMethodologyScreen> {
               ProcessingHeaderSection(
                 onTapEpiCenterCollection: () => _scrollTo(_epiCollectionKey),
                 onTapCrowdMapping: () => _scrollTo(_crowdMappingKey),
-                onTapGisDataPreparation: () => _scrollTo(_gisDataPrepKey),
+                onTapGisDataPreparation: () => _scrollTo(_gisDatabasePrepKey),
                 onTapDashboardDevelopment: () => _scrollTo(_dashboardKey),
                 onTapEtlProcessing: () => _scrollTo(_etlKey),
               ),
@@ -85,15 +86,9 @@ class _GisMethodologyScreenState extends State<GisMethodologyScreen> {
                 key: _epiCollectionKey,
                 child: const GisProcessingDataCollectionWidget(),
               ),
-              const SizedBox(height: Sizes.p16),
               KeyedSubtree(
                 key: _gisDataPrepKey,
                 child: const GisDataPreparationWidget(),
-              ),
-              const SizedBox(height: Sizes.p32),
-              KeyedSubtree(
-                key: _etlKey,
-                child: const EtlProcessingWidget(),
               ),
               const SizedBox(height: Sizes.p32),
               KeyedSubtree(
@@ -103,9 +98,17 @@ class _GisMethodologyScreenState extends State<GisMethodologyScreen> {
               const SizedBox(height: Sizes.p32),
               const GisMappingProcessTabsWidget(),
               const SizedBox(height: Sizes.p32),
-              const GisDatabasePreparationWidget(),
+              // Move full data preparation (database prep) directly under the 3 tabs
+              KeyedSubtree(
+                key: _gisDatabasePrepKey,
+                child: const GisDatabasePreparationWidget(),
+              ),
               const SizedBox(height: Sizes.p32),
-
+              KeyedSubtree(
+                key: _etlKey,
+                child: const EtlProcessingWidget(),
+              ),
+              const SizedBox(height: Sizes.p32),
               KeyedSubtree(
                 key: _dashboardKey,
                 child: const DashboardFeatureOverview(),
@@ -118,6 +121,7 @@ class _GisMethodologyScreenState extends State<GisMethodologyScreen> {
               const OutputGisDashboardWidget(),
               const SizedBox(height: Sizes.p32),
               const ImpactSectionWidget(),
+              const SizedBox(height: Sizes.p32),
             ],
           ),
         ),

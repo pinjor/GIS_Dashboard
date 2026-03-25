@@ -89,15 +89,15 @@ class ProcessingHeaderSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 FeatureCard(
-                  icon: Icons.bar_chart_rounded,
-                  title: 'Dashboard\nDevelopment',
-                  onTap: onTapDashboardDevelopment,
-                ),
-                const SizedBox(height: 20),
-                FeatureCard(
                   icon: Icons.settings_applications_rounded,
                   title: 'ETL Processing',
                   onTap: onTapEtlProcessing,
+                ),
+                const SizedBox(height: 20),
+                FeatureCard(
+                  icon: Icons.bar_chart_rounded,
+                  title: 'Dashboard\nDevelopment',
+                  onTap: onTapDashboardDevelopment,
                 ),
                 const SizedBox(height: 20),
               ],
