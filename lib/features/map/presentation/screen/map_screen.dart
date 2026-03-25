@@ -315,100 +315,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
-  /// Auto-navigate to EPI center details when subblock filter is applied
-  void _navigateToEpiCenterDetailsForSubblock(
-    BuildContext context,
-    WidgetRef ref,
-    String subblockName,
-  ) {
-    // ✅ Check if we're already on EPI details screen to prevent duplicate navigation
-    final currentRoute = ModalRoute.of(context);
-    if (currentRoute?.settings.name?.contains('EpiCenterDetails') == true) {
-      logg.i("⚠️ Already on EPI center details screen, skipping auto-navigation");
-      return;
-    }
-    
-    // ✅ FIX: Check if we're on Micro Plan screen - don't auto-navigate from there
-    // The Micro Plan screen should handle its own data loading without navigation
-    // Check the Navigator's current route to see what screen is actually visible
-    try {
-      // Get the current route settings
-      final currentRouteSettings = currentRoute?.settings;
-      
-      // Check route name
-      final routeName = currentRouteSettings?.name ?? '';
-      if (routeName.contains('MicroPlan') || 
-          routeName.contains('microplan') ||
-          routeName.contains('Micro_Plan')) {
-        logg.i("⚠️ On Micro Plan screen (route: $routeName) - skipping auto-navigation to EPI center details");
-        logg.i("   > Micro Plan screen will handle subblock filter independently");
-        return;
-      }
-      
-      // ✅ Additional check: Only auto-navigate if we're actually on the MapScreen
-      // Check if the current route's builder would return a MapScreen
-      // If route name is empty or contains Map/Home, we're likely on MapScreen
-      final isOnMapScreen = routeName.isEmpty || // Empty route often means initial screen (MapScreen in Home)
-                            routeName.contains('Map') ||
-                            routeName.contains('map') ||
-                            routeName.contains('Home');
-      
-      // If we have a specific route name that's not Map/Home, we're probably on a different screen
-      if (!isOnMapScreen && routeName.isNotEmpty) {
-        logg.i("⚠️ Not on Map screen (route: $routeName) - skipping auto-navigation");
-        logg.i("   > Auto-navigation only happens when on MapScreen");
-        return;
-      }
-      
-      // ✅ Final check: Verify MapScreen is actually mounted and visible
-      // If MapScreen is not mounted, we shouldn't navigate
-      if (!mounted) {
-        logg.i("⚠️ MapScreen not mounted - skipping auto-navigation");
-        return;
-      }
-    } catch (e) {
-      logg.w("⚠️ Error checking current screen context: $e");
-      // If we can't determine the context, be conservative and skip navigation
-      logg.w("   > Skipping auto-navigation to be safe");
-      return;
-    }
-    
-    logg.i("🚀 Auto-navigating to EPI center details for subblock: $subblockName");
-    
-    final filterState = ref.read(filterControllerProvider);
-    final filterNotifier = ref.read(filterControllerProvider.notifier);
-    final summaryState = ref.read(summaryControllerProvider);
-    
-    // Get subblock UID
-    final subblockUid = filterNotifier.getSubblockUid(subblockName);
-    
-    if (subblockUid == null) {
-      logg.w("⚠️ Could not get subblock UID for $subblockName, skipping auto-navigation");
-      return;
-    }
-    
-    logg.i("   > Subblock UID: $subblockUid");
-    logg.i("   > Coverage data available: ${summaryState.coverageData != null}");
-    logg.i("   > Selected vaccine UID: ${filterState.selectedVaccine}");
-    
-    // Get coverage data and selected vaccine
-    final coverageData = summaryState.coverageData;
-    final selectedVaccineUid = filterState.selectedVaccine;
-    
-    // Navigate to EPI center details screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EpiCenterDetailsScreen(
-          epiUid: subblockUid,
-          isOrgUidRequest: true,
-          coverageData: coverageData,
-          selectedVaccineUid: selectedVaccineUid,
-        ),
-      ),
-    );
-  }
-
   /// Handle subblock tap - find EPI center in subblock and navigate to it
   void _handleSubblockTapForEpiNavigation(AreaPolygon subblockPolygon) {
     logg.i("Subblock tapped: ${subblockPolygon.areaName}");
@@ -951,26 +857,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   .read(mapControllerProvider.notifier)
                   .loadSubblockData(subblockName: subblockName);
               
-              // ✅ FIX: Auto-navigate to EPI center details when subblock filter is applied
-              // Wait a bit for map state to update, then check if data loaded successfully
-              await Future.delayed(const Duration(milliseconds: 500));
-              
-              if (mounted) {
-                // Check if data loaded successfully (no error, not loading)
-                final mapState = ref.read(mapControllerProvider);
-                if (!mapState.isLoading && mapState.error == null) {
-                  logg.i("✅ Subblock data loaded successfully, auto-navigating to EPI center details");
-                  _navigateToEpiCenterDetailsForSubblock(
-                    context,
-                    ref,
-                    subblockName,
-                  );
-                } else {
-                  logg.w(
-                    "⚠️ Skipping auto-navigation - map state: isLoading=${mapState.isLoading}, error=${mapState.error}",
-                  );
-                }
-              }
+              // Keep user on Microplan/Map after subblock filtering.
+              // Do not auto-navigate to EPI details; navigation remains manual via marker tap.
+              logg.i(
+                "✅ Subblock data loaded; auto-navigation to EPI details is disabled",
+              );
             }
           });
         } else if (wardFilterApplied) {
