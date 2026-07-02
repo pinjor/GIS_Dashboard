@@ -26,11 +26,12 @@ class EpiCenterFinderRepository {
   })  : _client = client,
         _connectivityService = connectivityService;
 
-  /// Fetch session plans for a date range (country-wide, no area filter)
-  Future<SessionPlanCoordsResponse> fetchSessionPlansByDateRange(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
+  /// Fetch session plans for a date range, optionally scoped to a geographic area.
+  Future<SessionPlanCoordsResponse> fetchSessionPlans({
+    required DateTime startDate,
+    required DateTime endDate,
+    String? areaParam,
+  }) async {
     try {
       final hasInternet = await _connectivityService.hasInternetConnection();
       if (!hasInternet) {
@@ -40,15 +41,18 @@ class EpiCenterFinderRepository {
         );
       }
 
-      // Format dates as YYYY-MM-DD
       final startDateStr = DateFormat('yyyy-MM-dd').format(startDate);
       final endDateStr = DateFormat('yyyy-MM-dd').format(endDate);
 
-      // Build URL: /session-plans?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
-      // No area parameter = country-wide search
-      final urlPath = '${ApiConstants.sessionPlans}?start_date=$startDateStr&end_date=$endDateStr&limit=50000';
+      var urlPath = '${ApiConstants.sessionPlans}?';
+      if (areaParam != null && areaParam.isNotEmpty) {
+        urlPath += 'area=$areaParam&';
+      }
+      urlPath += 'start_date=$startDateStr&end_date=$endDateStr&limit=50000';
 
-      logg.i("EPI Center Finder: Fetching session plans for date range: $startDateStr to $endDateStr");
+      logg.i(
+        "EPI Center Finder: Fetching session plans - area: ${areaParam ?? 'country'}, dates: $startDateStr to $endDateStr",
+      );
       logg.i("EPI Center Finder: URL: $urlPath");
 
       final response = await _client.get(urlPath);

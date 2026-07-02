@@ -51,15 +51,40 @@ abstract class EpiCenterDetailsResponse with _$EpiCenterDetailsResponse {
   /// 1. First tries: area.additionalData.demographics (EPI center level)
   /// 2. Falls back to: additionalData.demographics (country level)
   Map<String, YearDemographics> getDemographics() {
-    // Try area first (EPI center level)
-    if (area?.additionalData?.demographics != null) {
-      return area!.additionalData!.demographics;
+    // Sub-block chart responses store scoped demographics at root level.
+    if ((subblockId?.isNotEmpty ?? false) ||
+        (subBlockName?.isNotEmpty ?? false)) {
+      if (additionalData?.demographics.isNotEmpty == true) {
+        return additionalData!.demographics;
+      }
     }
-    // Fallback to root level (country level)
-    if (additionalData?.demographics != null) {
-      return additionalData!.demographics;
+
+    final rootDemo = additionalData?.demographics;
+    final areaDemo = area?.additionalData?.demographics;
+
+    // When both exist, prefer the smaller (more local) population aggregate.
+    if (rootDemo != null &&
+        rootDemo.isNotEmpty &&
+        areaDemo != null &&
+        areaDemo.isNotEmpty) {
+      final rootYear = rootDemo.values.first;
+      final areaYear = areaDemo.values.first;
+      final rootPop =
+          (rootYear.population?.male ?? 0) + (rootYear.population?.female ?? 0);
+      final areaPop =
+          (areaYear.population?.male ?? 0) + (areaYear.population?.female ?? 0);
+      if (rootPop > 0 && areaPop > 0 && rootPop < areaPop) {
+        return rootDemo;
+      }
+      return areaDemo;
     }
-    // Return empty map if neither exists
+
+    if (areaDemo != null && areaDemo.isNotEmpty) {
+      return areaDemo;
+    }
+    if (rootDemo != null && rootDemo.isNotEmpty) {
+      return rootDemo;
+    }
     return {};
   }
 

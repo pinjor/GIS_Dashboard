@@ -5,18 +5,25 @@ import 'package:gis_dashboard/core/common/constants/constants.dart';
 import 'package:gis_dashboard/features/map/utils/map_enums.dart';
 import 'package:gis_dashboard/features/filter/presentation/controllers/filter_controller.dart';
 import 'package:gis_dashboard/features/filter/presentation/widgets/geographic_filter_form.dart';
-import 'package:gis_dashboard/features/session_plan/presentation/controllers/session_plan_controller.dart';
+import '../controllers/epi_center_finder_controller.dart';
 
-class SessionPlanFilterDialog extends ConsumerStatefulWidget {
-  const SessionPlanFilterDialog({super.key});
+class EpiCenterFinderFilterDialog extends ConsumerStatefulWidget {
+  const EpiCenterFinderFilterDialog({
+    super.key,
+    required this.onApplied,
+    required this.onReset,
+  });
+
+  final Future<void> Function() onApplied;
+  final Future<void> Function() onReset;
 
   @override
-  ConsumerState<SessionPlanFilterDialog> createState() =>
-      _SessionPlanFilterDialogState();
+  ConsumerState<EpiCenterFinderFilterDialog> createState() =>
+      _EpiCenterFinderFilterDialogState();
 }
 
-class _SessionPlanFilterDialogState
-    extends ConsumerState<SessionPlanFilterDialog> {
+class _EpiCenterFinderFilterDialogState
+    extends ConsumerState<EpiCenterFinderFilterDialog> {
   DateTime? _fromDate;
   DateTime? _toDate;
 
@@ -49,29 +56,11 @@ class _SessionPlanFilterDialogState
   }
 
   void _initializeDates() {
-    final sessionPlanState = ref.read(sessionPlanControllerProvider);
+    final finderState = ref.read(epiCenterFinderControllerProvider);
+    final today = DateTime.now();
 
-    if (sessionPlanState.startDate != null &&
-        sessionPlanState.startDate!.isNotEmpty) {
-      try {
-        _fromDate = DateFormat('yyyy-MM-dd').parse(sessionPlanState.startDate!);
-      } catch (_) {
-        _fromDate = DateTime.now();
-      }
-    } else {
-      _fromDate = DateTime.now();
-    }
-
-    if (sessionPlanState.endDate != null &&
-        sessionPlanState.endDate!.isNotEmpty) {
-      try {
-        _toDate = DateFormat('yyyy-MM-dd').parse(sessionPlanState.endDate!);
-      } catch (_) {
-        _toDate = DateTime.now();
-      }
-    } else {
-      _toDate = DateTime.now();
-    }
+    _fromDate = finderState.startDate ?? today;
+    _toDate = finderState.endDate ?? today;
   }
 
   Future<void> _selectFromDate(BuildContext context) async {
@@ -109,13 +98,7 @@ class _SessionPlanFilterDialogState
       return;
     }
 
-    final startDate = _fromDate != null
-        ? DateFormat('yyyy-MM-dd').format(_fromDate!)
-        : null;
-    final endDate =
-        _toDate != null ? DateFormat('yyyy-MM-dd').format(_toDate!) : null;
-
-    if (startDate == null || endDate == null) {
+    if (_fromDate == null || _toDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select both start and end dates'),
@@ -125,9 +108,9 @@ class _SessionPlanFilterDialogState
       return;
     }
 
-    ref.read(sessionPlanControllerProvider.notifier).setDateRange(
-          startDate,
-          endDate,
+    ref.read(epiCenterFinderControllerProvider.notifier).setDateRange(
+          _fromDate!,
+          _toDate!,
         );
 
     applyGeographicFilterToController(
@@ -144,11 +127,7 @@ class _SessionPlanFilterDialogState
     );
 
     if (mounted) Navigator.of(context).pop();
-
-    await ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
-          startDate: startDate,
-          endDate: endDate,
-        );
+    await widget.onApplied();
   }
 
   Future<void> _onGeographicReset() async {
@@ -158,32 +137,30 @@ class _SessionPlanFilterDialogState
       _toDate = today;
     });
 
-    ref.read(filterControllerProvider.notifier).resetFilters();
-    if (mounted) Navigator.of(context).pop();
-
-    await Future.delayed(const Duration(milliseconds: 150));
-    await ref.read(sessionPlanControllerProvider.notifier).loadDataWithFilter(
-          startDate: DateFormat('yyyy-MM-dd').format(today),
-          endDate: DateFormat('yyyy-MM-dd').format(today),
+    ref.read(epiCenterFinderControllerProvider.notifier).setDateRange(
+          today,
+          today,
         );
+    ref.read(filterControllerProvider.notifier).resetFilters();
+
+    if (mounted) Navigator.of(context).pop();
+    await widget.onReset();
   }
 
   int _getTotalSessions() {
-    final sessionPlanState = ref.watch(sessionPlanControllerProvider);
-    final data = sessionPlanState.sessionPlanCoordsData;
-
-    if (data?.sessionCount != null && data!.sessionCount! > 0) {
-      return data.sessionCount!;
+    final finderState = ref.watch(epiCenterFinderControllerProvider);
+    if (finderState.isLoading) {
+      return finderState.sessionCount ?? finderState.results.length;
     }
-    if (data?.features != null && data!.features!.isNotEmpty) {
-      return data.features!.length;
+    if (finderState.results.isNotEmpty) {
+      return finderState.results.length;
     }
-    return 0;
+    return finderState.sessionCount ?? 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    final sessionPlanState = ref.watch(sessionPlanControllerProvider);
+    final finderState = ref.watch(epiCenterFinderControllerProvider);
     final totalSessions = _getTotalSessions();
     final formattedCount = totalSessions.toString().replaceAllMapped(
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -210,7 +187,7 @@ class _SessionPlanFilterDialogState
                 borderRadius: BorderRadius.circular(5),
               ),
               child: Text(
-                sessionPlanState.isLoading
+                finderState.isLoading
                     ? 'Loading sessions...'
                     : 'Total Session: $formattedCount',
                 textAlign: TextAlign.center,

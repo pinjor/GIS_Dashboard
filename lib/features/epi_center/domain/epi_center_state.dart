@@ -27,12 +27,15 @@ class EpiCenterState {
     String? currentEpiUid,
     String? currentCcUid,
     int? selectedYear,
+    bool clearEpiCenterData = false,
+    bool clearError = false,
   }) {
     return EpiCenterState(
       isLoading: isLoading ?? this.isLoading,
-      hasError: hasError ?? this.hasError,
-      errorMessage: errorMessage ?? this.errorMessage,
-      epiCenterData: epiCenterData ?? this.epiCenterData,
+      hasError: clearError ? false : (hasError ?? this.hasError),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      epiCenterData:
+          clearEpiCenterData ? null : (epiCenterData ?? this.epiCenterData),
       currentEpiUid: currentEpiUid ?? this.currentEpiUid,
       currentCcUid: currentCcUid ?? this.currentCcUid,
       selectedYear: selectedYear ?? this.selectedYear,

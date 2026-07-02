@@ -8,7 +8,7 @@ import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_resp
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_center_about_details_widget.dart';
 import 'package:gis_dashboard/features/epi_center/presentation/widgets/epi_yearly_session_personnel_widget.dart';
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
-import 'package:gis_dashboard/core/utils/target_calculator.dart';
+import 'package:gis_dashboard/features/epi_center/utils/epi_details_helpers.dart';
 
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/utils/utils.dart';
@@ -17,7 +17,7 @@ import '../controllers/epi_center_controller.dart';
 import '../../domain/epi_center_state.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../../../filter/domain/filter_state.dart';
-import '../../../map/utils/map_enums.dart';
+import '../../../map/presentation/controllers/map_controller.dart';
 import '../widgets/epi_center_widgets.dart';
 
 class EpiCenterDetailsScreen extends ConsumerStatefulWidget {
@@ -82,118 +82,48 @@ class _EpiCenterDetailsScreenState
 
   Future<void> _performEpiReload(String selectedYear) async {
     final filterState = ref.read(filterControllerProvider);
+    final filterController = ref.read(filterControllerProvider.notifier);
+    final epiController = ref.read(epiCenterControllerProvider.notifier);
+    final currentEpiData = ref.read(epiCenterControllerProvider).epiCenterData;
 
     logg.i('🔔 EPI Filter Change Detected');
     logg.i('isEpiDetailsContext: ${filterState.isEpiDetailsContext}');
-
     logg.i('🔄 EPI Filter Applied - Reloading data for year #$selectedYear');
 
-    // For district area type, handle hierarchical filtering at any level
-    if (filterState.selectedAreaType == AreaType.district) {
-      final filterController = ref.read(filterControllerProvider.notifier);
-      final epiController = ref.read(epiCenterControllerProvider.notifier);
+    // Allow hierarchical list loads to finish after applyFilters updates.
+    await Future.delayed(const Duration(milliseconds: 300));
 
-      // ✅ PLAN A: Hierarchical data (unions, wards, subblocks) is instantly
-      // available from cached lists - no need to load or wait for API calls!
+    final mapNotifier = ref.read(mapControllerProvider.notifier);
+    final chartUid = await EpiDetailsHelpers.resolveChartUidAsync(
+      filterNotifier: filterController,
+      getFilterState: () => ref.read(filterControllerProvider),
+      currentEpiData: currentEpiData,
+      orgUid: mapNotifier.focalAreaUid,
+    );
 
-      String? targetUid;
-      String? targetName;
-      final selectedSubblock = filterState.selectedSubblock;
+    if (chartUid == null || chartUid.isEmpty) {
+      logg.w('🚫 Could not resolve chart UID from filter - keeping current data');
+      return;
+    }
 
-      logg.i('🔍 Determining target level from filter state:');
-      logg.i('   Selected Subblock: $selectedSubblock');
-      logg.i('   Selected Ward: ${filterState.selectedWard}');
-      logg.i('   Selected Union: ${filterState.selectedUnion}');
-      logg.i('   Selected Upazila: ${filterState.selectedUpazila}');
+    logg.i('📍 Loading EPI chart data for UID: $chartUid');
 
-      // Determine the most specific level selected (bottom-up approach)
-      // Bottom-up hierarchical selection (most specific first)
-      if (filterState.selectedSubblock != null &&
-          filterState.selectedSubblock != 'All') {
-        // ✅ FIX: For subblock, use concatenated slug path (like zone)
-        // This ensures EPI center details can fetch data correctly
-        final districtUid = filterController.getDistrictUid(
-          filterState.selectedDistrict!,
-        );
-        final upazilaUid = filterController.getUpazilaUid(
-          filterState.selectedUpazila!,
-        );
-        final unionUid = filterController.getUnionUid(
-          filterState.selectedUnion!,
-        );
-        final wardUid = filterController.getWardUid(
-          filterState.selectedWard!,
-        );
-        final subblockUid = filterController.getSubblockUid(selectedSubblock!);
-        
-        if (districtUid != null &&
-            upazilaUid != null &&
-            unionUid != null &&
-            wardUid != null &&
-            subblockUid != null) {
-          targetUid = '$districtUid/$upazilaUid/$unionUid/$wardUid/$subblockUid';
-          logg.i('🎯 Target level: SUBBLOCK ($targetName, Concatenated UID: $targetUid)');
-        } else {
-          logg.w('🎯 Target level: SUBBLOCK ($targetName) - Could not build concatenated path, using subblock UID only');
-          targetUid = subblockUid;
-        }
-        targetName = filterState.selectedSubblock;
-      } else if (filterState.selectedWard != null &&
-          filterState.selectedWard != 'All') {
-        targetUid = filterController.getWardUid(filterState.selectedWard!);
-        targetName = filterState.selectedWard;
-        logg.i('🎯 Target level: WARD ($targetName, UID: $targetUid)');
-      } else if (filterState.selectedUnion != null &&
-          filterState.selectedUnion != 'All') {
-        targetUid = filterController.getUnionUid(filterState.selectedUnion!);
-        targetName = filterState.selectedUnion;
-        logg.i('🎯 Target level: UNION ($targetName, UID: $targetUid)');
-      } else if (filterState.selectedUpazila != null &&
-          filterState.selectedUpazila != 'All') {
-        targetUid = filterController.getUpazilaUid(
-          filterState.selectedUpazila!,
-        );
-        targetName = filterState.selectedUpazila;
-        logg.i('🎯 Target level: UPAZILA ($targetName, UID: $targetUid)');
-      }
-
-      if (targetUid != null && targetName != null) {
-        logg.i('📍 Loading EPI data for: $targetName (UID: $targetUid)');
-
-        try {
-          await epiController.fetchEpiCenterData(
-            epiUid: targetUid,
-            year: int.tryParse(selectedYear) ?? DateTime.now().year,
-            ccUid: null,
-          );
-          logg.i('✅ Successfully reloaded EPI data for filter change');
-        } catch (e) {
-          logg.e('❌ Failed to reload EPI data: $e');
-          // Handle error appropriately
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to load EPI data: ${e.toString()}'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      } else {
-        logg.w(
-          '🚫 targetUid is NULL - this indicates hierarchical data is not loaded yet or selection is invalid',
-        );
-        logg.w(
-          '   This should be fixed by ensuring hierarchical data is loaded first',
-        );
-        logg.i(
-          '📍 No specific hierarchical level selected - keeping current EPI data',
-        );
-      }
-    } else {
-      logg.i(
-        '   Area type is not district - no hierarchical filtering applied',
+    try {
+      await epiController.fetchEpiCenterDataByOrgUid(
+        orgUid: chartUid,
+        year: selectedYear,
       );
+      logg.i('✅ Successfully reloaded EPI data for filter change');
+    } catch (e) {
+      logg.e('❌ Failed to reload EPI data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load EPI data: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -340,7 +270,12 @@ class _EpiCenterDetailsScreenState
               )
             : epiState.hasError || epiState.epiCenterData == null
             ? EpiCenterEmptyStateWidget()
-            : _buildContent(epiState.epiCenterData!, selectedYear, updatedAt),
+            : _buildContent(
+                epiState.epiCenterData!,
+                selectedYear,
+                updatedAt,
+                filterState,
+              ),
       ),
     );
   }
@@ -349,6 +284,7 @@ class _EpiCenterDetailsScreenState
     EpiCenterDetailsResponse? epiCenterData,
     String selectedYear,
     String? updatedAt,
+    FilterState filterState,
   ) {
     final updatedAtTime = formatDateTime(updatedAt);
     return SingleChildScrollView(
@@ -428,19 +364,19 @@ class _EpiCenterDetailsScreenState
           // Microplan section
           EpiCenterMicroplanSection(
             epiCenterDetailsData: epiCenterData,
-            coverageData: widget.coverageData, // ✅ Pass coverage data
-            selectedVaccineUid: widget.selectedVaccineUid, // ✅ Pass selected vaccine
           ),
           const SizedBox(height: 24),
-          EpiCenterAboutDetailsWidget(
-            epiCenterDetailsData: epiCenterData,
-            selectedYear: selectedYear,
-          ),
-          SizedBox(height: 10),
-          EpiYearlySessionPersonnelWidget(
-            epiCenterDetailsData: epiCenterData,
-            selectedYear: selectedYear,
-          ),
+          if (EpiDetailsHelpers.shouldShowSubblockOnlySections(filterState)) ...[
+            EpiCenterAboutDetailsWidget(
+              epiCenterDetailsData: epiCenterData,
+              selectedYear: selectedYear,
+            ),
+            const SizedBox(height: 10),
+            EpiYearlySessionPersonnelWidget(
+              epiCenterDetailsData: epiCenterData,
+              selectedYear: selectedYear,
+            ),
+          ],
         ],
       ),
     );
@@ -449,67 +385,21 @@ class _EpiCenterDetailsScreenState
   Widget _buildTargetCard(
     EpiCenterDetailsResponse? epiCenterData,
     String selectedYear,
-    VaccineCoverageResponse? coverageData, // ✅ Coverage data for consistent calculation
-    String? selectedVaccineUid, // ✅ Selected vaccine UID
-    WidgetRef ref, // ✅ Add ref to access filter state
+    VaccineCoverageResponse? coverageData,
+    String? selectedVaccineUid,
+    WidgetRef ref,
   ) {
-    int? calcTarget;
-    
-    // ✅ FIX: Get subblock UID/name from filter state for subblock-level filtering
     final filterState = ref.read(filterControllerProvider);
-    String? subblockUid;
-    String? subblockName;
-    
-    if (filterState.selectedSubblock != null &&
-        filterState.selectedSubblock != 'All') {
-      subblockName = filterState.selectedSubblock;
-      final filterNotifier = ref.read(filterControllerProvider.notifier);
-      subblockUid = filterNotifier.getSubblockUid(subblockName!);
-      logg.i(
-        'EPI Target Card: Subblock filter detected - name: $subblockName, UID: $subblockUid',
-      );
-    }
+    final filterNotifier = ref.read(filterControllerProvider.notifier);
 
-    // ✅ PRIORITY 1: Use coverage data (same source as Summary card) for consistency
-    // ✅ FIX: Pass subblock UID/name to filter coverage data for subblock level
-    if (coverageData != null) {
-      final targetData = TargetCalculator.getTargetData(
-        coverageData,
-        selectedVaccineUid,
-        areaUid: subblockUid, // ✅ Pass subblock UID to filter by subblock
-        areaName: subblockUid == null ? subblockName : null, // ✅ Fallback to name if UID not available
-      );
-      if (targetData != null && targetData.total > 0) {
-        calcTarget = targetData.total;
-        logg.i(
-          'EPI Target Card: Using coverage data (${subblockUid != null || subblockName != null ? "filtered by subblock" : "unfiltered"}) - total: ${targetData.total}, '
-          'male: ${targetData.male}, female: ${targetData.female}',
-        );
-      }
-    }
-
-    // ✅ FALLBACK 2: Try Area-specific target from EPI details
-    if (calcTarget == null || calcTarget == 0) {
-      final vaccineTarget =
-          epiCenterData?.area?.vaccineTarget?.child0To11Month[selectedYear];
-
-      if (vaccineTarget != null) {
-        calcTarget =
-            (vaccineTarget.male?.toInt() ?? 0) +
-            (vaccineTarget.female?.toInt() ?? 0);
-        logg.i('EPI Target Card: Using EPI area vaccine target: $calcTarget');
-      }
-    }
-
-    // ✅ FALLBACK 3: Use Demographics (Country/Area level)
-    if (calcTarget == null || calcTarget == 0) {
-      final demographics = epiCenterData?.getDemographicsForYear(selectedYear);
-      final childData = demographics?.child0To11Month;
-      if (childData != null) {
-        calcTarget = (childData.male ?? 0) + (childData.female ?? 0);
-        logg.i('EPI Target Card: Using demographics data: $calcTarget');
-      }
-    }
+    final calcTarget = EpiDetailsHelpers.resolveTargetValue(
+      epiData: epiCenterData,
+      filterState: filterState,
+      filterNotifier: filterNotifier,
+      coverageData: coverageData,
+      selectedVaccineUid: selectedVaccineUid,
+      selectedYear: selectedYear,
+    );
 
     final targetValue = calcTarget != null ? calcTarget.toString() : 'N/A';
 

@@ -596,9 +596,10 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       return;
     }
 
-    // For microplan context, always apply filters (even if no changes detected)
-    // This ensures data reload happens when filter button is clicked
-    final shouldApplyFilters = widget.isMicroplanContext || _hasValuesChanged();
+    // For microplan/EPI context, always apply filters when Filter is clicked
+    final shouldApplyFilters = widget.isMicroplanContext ||
+        widget.isEpiContext ||
+        _hasValuesChanged();
     
     if (!shouldApplyFilters) {
       logg.i('🔄 No filter changes detected - closing dialog');
@@ -741,11 +742,13 @@ class _FilterDialogBoxWidgetState extends ConsumerState<FilterDialogBoxWidget> {
       initialUnion: _initialUnion,
       initialWard: _initialWard,
       initialSubblock: _initialSubblock,
-      forceTimestampUpdate: widget.isMicroplanContext, // ✅ Force timestamp update for microplan context
+      forceTimestampUpdate:
+          widget.isMicroplanContext || widget.isEpiContext,
+      fromEpiContext: isEpiContext,
     );
     
-    if (widget.isMicroplanContext) {
-      logg.i('✅ Microplan Filter: Filters applied with forced timestamp update');
+    if (widget.isMicroplanContext || widget.isEpiContext) {
+      logg.i('✅ Context Filter: Filters applied with forced timestamp update');
     }
 
     Navigator.of(context).pop();

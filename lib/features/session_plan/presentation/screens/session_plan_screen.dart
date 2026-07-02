@@ -122,6 +122,15 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
     autoZoomToPolygons(areaPolygons, currentLevel, _mapController);
   }
 
+  void _autoZoomToCountryView() {
+    try {
+      _mapController.move(const LatLng(23.6850, 90.3563), _initialZoom);
+      logg.i("Session Plan: Auto-zoomed to country view for date-only filter");
+    } catch (e) {
+      logg.w("Session Plan: Country auto-zoom failed: $e");
+    }
+  }
+
   /// Show filter dialog
   void _showFilterDialog() {
     showDialog(
@@ -919,7 +928,24 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
         _cachedMarkerData = null;
       }
       
-      // Only trigger auto-zoom if map controller doesn't have GeoJSON
+      if (previous?.isLoading == true &&
+          current.isLoading == false &&
+          current.error == null &&
+          current.sessionPlanCoordsData != null) {
+        final filterState = ref.read(filterControllerProvider);
+        final currentLevel = _getCurrentGeographicLevel(filterState);
+
+        if (currentLevel == GeographicLevel.country) {
+          _autoZoomTimer?.cancel();
+          _autoZoomTimer = Timer(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              _autoZoomToCountryView();
+            }
+          });
+        }
+      }
+
+      // Only trigger polygon auto-zoom if map controller doesn't have GeoJSON
       final mapState = ref.read(mapControllerProvider);
       if (mapState.areaCoordsGeoJsonData != null) {
         // Map controller has GeoJSON, skip session plan auto-zoom
@@ -971,13 +997,17 @@ class _SessionPlanScreenState extends ConsumerState<SessionPlanScreen> {
     // ✅ FIX: Use map controller's GeoJSON if available (from drilldown), otherwise use session plan's GeoJSON
     // This ensures we show the correct drilldown polygons
     List<AreaPolygon> areaPolygons = [];
-    final geoJsonData = mapState.areaCoordsGeoJsonData ?? sessionPlanState.areaCoordsGeoJsonData;
+    final filterState = ref.read(filterControllerProvider);
+    final currentLevel = _getCurrentGeographicLevel(filterState);
+    final geoJsonData = currentLevel == GeographicLevel.country
+        ? (sessionPlanState.areaCoordsGeoJsonData ??
+              mapState.areaCoordsGeoJsonData)
+        : (mapState.areaCoordsGeoJsonData ??
+              sessionPlanState.areaCoordsGeoJsonData);
     if (geoJsonData != null) {
       final rawPolygons = parseGeoJsonToPolygonsSimple(geoJsonData);
       
       // ✅ FIX: Determine drilldown capability based on current geographic level
-      final filterState = ref.read(filterControllerProvider);
-      final currentLevel = _getCurrentGeographicLevel(filterState);
       final nextLevel = currentLevel.nextLevel;
       
       // Update canDrillDown for each polygon based on current level

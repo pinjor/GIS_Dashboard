@@ -10,8 +10,13 @@ import '../../utils/utils.dart';
 
 class HeaderTitleIconFilterWidget extends ConsumerWidget {
   final VoidCallback? onFilterTap;
+  final String? areaLabel;
 
-  const HeaderTitleIconFilterWidget({super.key, this.onFilterTap});
+  const HeaderTitleIconFilterWidget({
+    super.key,
+    this.onFilterTap,
+    this.areaLabel,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,7 +36,7 @@ class HeaderTitleIconFilterWidget extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Bangladesh, ${filterState.selectedYear}",
+                  areaLabel ?? "Bangladesh, ${filterState.selectedYear}",
                   style: TextStyle(fontSize: 15, color: Colors.grey[700]),
                 ),
                 Text(

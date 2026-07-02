@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
-import '../../../features/home/presentation/screen/home_screen.dart';
+import 'entry_selection_screen.dart';
 import '../constants/constants.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -23,7 +23,9 @@ class _SplashScreenState extends State<SplashScreen> {
         Timer(const Duration(milliseconds: 2500), () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(
+              builder: (context) => const EntrySelectionScreen(),
+            ),
           );
         });
       });

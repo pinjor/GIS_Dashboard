@@ -1,41 +1,69 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../../core/service/data_service.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../epi_center/domain/epi_center_details_response.dart';
 import '../../domain/epi_center_finder_state.dart';
 import '../../domain/epi_center_result.dart';
 import '../../data/epi_center_finder_repository.dart';
+import '../../../filter/presentation/controllers/filter_controller.dart';
+import '../../../map/utils/map_enums.dart';
+import '../../../session_plan/utils/session_plan_area_param_builder.dart';
 
 final epiCenterFinderControllerProvider =
     StateNotifierProvider<EpiCenterFinderController, EpiCenterFinderState>(
         (ref) {
   return EpiCenterFinderController(
     repository: ref.read(epiCenterFinderRepositoryProvider),
+    ref: ref,
   );
 });
 
 class EpiCenterFinderController
     extends StateNotifier<EpiCenterFinderState> {
   final EpiCenterFinderRepository _repository;
+  final Ref _ref;
+  final Map<String, EpiCenterDetailsResponse> _detailsCache = {};
 
   EpiCenterFinderController({
     required EpiCenterFinderRepository repository,
+    required Ref ref,
   })  : _repository = repository,
+        _ref = ref,
         super(EpiCenterFinderState(
           startDate: DateTime.now(),
           endDate: DateTime.now(),
         ));
 
-  /// Update selected date range without searching
-  void updateDateRange(DateTime startDate, DateTime endDate) {
-    state = state.copyWith(
-      startDate: startDate,
-      endDate: endDate,
-    );
+  void setDateRange(DateTime startDate, DateTime endDate) {
+    state = state.copyWith(startDate: startDate, endDate: endDate);
   }
 
-  /// Request location permission and get current location
-  Future<void> requestLocationAndSearch(DateTime startDate, DateTime endDate) async {
+  /// Search EPI centers using the selected date range and geographic filters.
+  Future<void> searchWithCurrentFilters() async {
+    final start = state.startDate ?? DateTime.now();
+    final end = state.endDate ?? DateTime.now();
+    await requestLocationAndSearch(start, end);
+  }
+
+  String? _resolveAreaParam() {
+    final filterState = _ref.read(filterControllerProvider);
+    final filterNotifier = _ref.read(filterControllerProvider.notifier);
+
+    if (filterState.selectedAreaType == AreaType.cityCorporation &&
+        SessionPlanAreaParamBuilder.isCityCorporationUnselected(filterState)) {
+      return null;
+    }
+
+    return SessionPlanAreaParamBuilder.build(filterState, filterNotifier);
+  }
+
+  /// Request location permission and get current location, then search.
+  Future<void> requestLocationAndSearch(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     try {
       state = state.copyWith(
         isLoading: true,
@@ -45,9 +73,8 @@ class EpiCenterFinderController
         endDate: endDate,
       );
 
-      // Request location permission
       final permissionStatus = await Permission.location.request();
-      
+
       if (permissionStatus.isDenied || permissionStatus.isPermanentlyDenied) {
         logg.w("EPI Center Finder: Location permission denied");
         state = state.copyWith(
@@ -60,7 +87,6 @@ class EpiCenterFinderController
         return;
       }
 
-      // Check if location services are enabled
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         logg.w("EPI Center Finder: Location services disabled");
@@ -72,7 +98,6 @@ class EpiCenterFinderController
         return;
       }
 
-      // Get current location
       logg.i("EPI Center Finder: Getting current location...");
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -89,8 +114,12 @@ class EpiCenterFinderController
         clearLocationError: true,
       );
 
-      // Now search for EPI centers
-      await searchNearbyCenters(startDate, endDate, position.latitude, position.longitude);
+      await searchNearbyCenters(
+        startDate,
+        endDate,
+        position.latitude,
+        position.longitude,
+      );
     } catch (e) {
       logg.e("EPI Center Finder: Error getting location: $e");
       state = state.copyWith(
@@ -100,7 +129,7 @@ class EpiCenterFinderController
     }
   }
 
-  /// Search for EPI centers near user location
+  /// Search for EPI centers near user location within filtered session plans.
   Future<void> searchNearbyCenters(
     DateTime startDate,
     DateTime endDate,
@@ -117,19 +146,29 @@ class EpiCenterFinderController
         userLng: userLng,
       );
 
+      final areaParam = _resolveAreaParam();
+
       logg.i(
-        "EPI Center Finder: Searching for centers near ($userLat, $userLng) from ${startDate.toString().split(' ')[0]} to ${endDate.toString().split(' ')[0]}",
+        "EPI Center Finder: Searching near ($userLat, $userLng), area: ${areaParam ?? 'country'}, date: ${startDate.toString().split(' ')[0]}",
       );
 
-      // Fetch session plans for the selected date range
-      final sessionPlanData = await _repository.fetchSessionPlansByDateRange(startDate, endDate);
+      final sessionPlanData = await _repository.fetchSessionPlans(
+        startDate: startDate,
+        endDate: endDate,
+        areaParam: areaParam,
+      );
 
       if (sessionPlanData.features == null ||
           sessionPlanData.features!.isEmpty) {
-        logg.i("EPI Center Finder: No session plans found for date range");
+        logg.i("EPI Center Finder: No session plans found for filters");
+        _detailsCache.clear();
         state = state.copyWith(
           isLoading: false,
           results: [],
+          sessionCount: 0,
+          selectedCenterId: null,
+          clearSelectedCenterDetails: true,
+          clearDetailsError: true,
           error: null,
         );
         return;
@@ -139,41 +178,30 @@ class EpiCenterFinderController
         "EPI Center Finder: Found ${sessionPlanData.features!.length} session plan features",
       );
 
-      // Convert to EpiCenterResult and filter by distance (5km)
       final allResults = <EpiCenterResult>[];
       for (final feature in sessionPlanData.features!) {
         try {
-          // Use start date for distance calculation (or parse from sessionDates if available)
           final result = EpiCenterResult.fromSessionPlanFeature(
             feature,
             userLat,
             userLng,
-            startDate, // Use start date as reference
+            startDate,
           );
 
-          // Filter: only include centers within 5km
-          if (result.distanceKm <= 5.0) {
-            allResults.add(result);
-          }
+          allResults.add(result);
         } catch (e) {
           logg.w("EPI Center Finder: Error processing feature: $e");
-          // Skip invalid features
           continue;
         }
       }
 
-      // ✅ FIX: Deduplicate EPI centers - same center may have multiple sessions in date range
-      // Use a Map to track unique centers by orgUid (or coordinates if orgUid is missing)
       final uniqueResults = <String, EpiCenterResult>{};
-      
+
       for (final result in allResults) {
-        // Create a unique key: prefer orgUid, fallback to coordinates
         final uniqueKey = result.orgUid ?? '${result.lat}_${result.lng}';
-        
-        // If this center already exists, keep the one with the earliest session date
+
         if (uniqueResults.containsKey(uniqueKey)) {
           final existing = uniqueResults[uniqueKey]!;
-          // Keep the result with earlier session date (or keep existing if same date)
           if (result.sessionDate.isBefore(existing.sessionDate)) {
             uniqueResults[uniqueKey] = result;
           }
@@ -181,43 +209,113 @@ class EpiCenterFinderController
           uniqueResults[uniqueKey] = result;
         }
       }
-      
-      // Convert back to list
-      final deduplicatedResults = uniqueResults.values.toList();
 
-      // Sort by distance (nearest first)
-      deduplicatedResults.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+      final deduplicatedResults = uniqueResults.values.toList()
+        ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
 
+      final visibleCount = deduplicatedResults.length;
       logg.i(
-        "EPI Center Finder: Found ${allResults.length} session plans within 5km, ${deduplicatedResults.length} unique EPI centers",
+        "EPI Center Finder: $visibleCount centers to display "
+        "(API session_count: ${sessionPlanData.sessionCount ?? 'null'}, "
+        'features: ${sessionPlanData.features!.length})',
       );
+
+      _detailsCache.clear();
+      final firstId =
+          deduplicatedResults.isNotEmpty ? deduplicatedResults.first.id : null;
 
       state = state.copyWith(
         isLoading: false,
         results: deduplicatedResults,
+        sessionCount: visibleCount,
+        selectedCenterId: firstId,
+        clearSelectedCenterDetails: true,
+        clearDetailsError: true,
         error: null,
       );
+
+      if (deduplicatedResults.isNotEmpty) {
+        await loadCenterDetails(deduplicatedResults.first);
+      }
     } catch (e) {
       logg.e("EPI Center Finder: Error searching centers: $e");
+      _detailsCache.clear();
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to search EPI centers: ${e.toString()}',
         results: [],
+        sessionCount: 0,
+        selectedCenterId: null,
+        clearSelectedCenterDetails: true,
       );
     }
   }
 
-  /// Select a center (for highlighting on map/table)
+  EpiCenterResult? resultById(String id) {
+    for (final result in state.results) {
+      if (result.id == id) return result;
+    }
+    return null;
+  }
+
+  Future<void> loadCenterDetails(EpiCenterResult result) async {
+    state = state.copyWith(
+      selectedCenterId: result.id,
+      clearDetailsError: true,
+    );
+
+    final orgUid = result.orgUid;
+    if (orgUid == null || orgUid.isEmpty) {
+      state = state.copyWith(
+        isLoadingDetails: false,
+        clearSelectedCenterDetails: true,
+        detailsError: 'EPI center details are not available for this session.',
+      );
+      return;
+    }
+
+    if (_detailsCache.containsKey(orgUid)) {
+      state = state.copyWith(
+        isLoadingDetails: false,
+        selectedCenterDetails: _detailsCache[orgUid],
+        clearDetailsError: true,
+      );
+      return;
+    }
+
+    state = state.copyWith(isLoadingDetails: true, clearDetailsError: true);
+
+    try {
+      final year = _ref.read(filterControllerProvider).selectedYear;
+      final details = await _ref.read(dataServiceProvider).getEpiCenterDetailsByOrgUid(
+            orgUid: orgUid,
+            year: year,
+          );
+      _detailsCache[orgUid] = details;
+      state = state.copyWith(
+        isLoadingDetails: false,
+        selectedCenterDetails: details,
+        clearDetailsError: true,
+      );
+      logg.i('EPI Center Finder: Loaded details for ${result.name} ($orgUid)');
+    } catch (e) {
+      logg.e('EPI Center Finder: Failed to load details for $orgUid: $e');
+      state = state.copyWith(
+        isLoadingDetails: false,
+        clearSelectedCenterDetails: true,
+        detailsError: 'Failed to load EPI center details.',
+      );
+    }
+  }
+
   void selectCenter(String? centerId) {
     state = state.copyWith(selectedCenterId: centerId);
   }
 
-  /// Clear selection
   void clearSelection() {
     state = state.copyWith(selectedCenterId: null);
   }
 
-  /// Open app settings for location permission
   Future<void> openAppSettingsForPermission() async {
     await openAppSettings();
   }

@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gis_dashboard/core/common/enums/vaccine_type.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../epi_center/domain/epi_center_coords_response.dart';
+import '../../../epi_center/presentation/screen/epi_center_details_screen.dart';
 import '../../../summary/presentation/controllers/summary_controller.dart';
 import '../../../summary/domain/vaccine_coverage_response.dart';
 import '../../../filter/filter.dart';
@@ -307,6 +310,13 @@ class _ZeroDoseDashboardScreenState
                       PolygonLayer(
                         polygons: areaPolygons.map((p) => p.polygon).toList(),
                       ),
+                      if (mapState.currentLevel.hasEpiData &&
+                          mapState.epiCenterCoordsData != null)
+                        MarkerLayer(
+                          markers: _buildEpiMarkers(
+                            mapState.epiCenterCoordsData,
+                          ),
+                        ),
                       MarkerLayer(markers: _buildAreaNameMarkers(areaPolygons)),
                     ],
                   )
@@ -357,6 +367,126 @@ class _ZeroDoseDashboardScreenState
         ),
       );
     }).toList();
+  }
+
+  List<Marker> _buildEpiMarkers(EpiCenterCoordsResponse? epiCenterCoordsData) {
+    if (epiCenterCoordsData == null) return [];
+
+    try {
+      final features = epiCenterCoordsData.features;
+      if (features == null || features.isEmpty) return [];
+
+      return features
+          .map<Marker>((feature) {
+            final geometry = feature.geometry;
+            final info = feature.info;
+
+            if (geometry?.type == 'Point' && geometry?.coordinates != null) {
+              final coords = geometry!.coordinates!;
+              if (coords.length < 2) {
+                return Marker(
+                  point: const LatLng(0, 0),
+                  child: const SizedBox.shrink(),
+                );
+              }
+
+              final lng = coords[0];
+              final lat = coords[1];
+              final centerName = info?.name ?? 'EPI Center';
+              final isFixedCenter = info?.isFixedCenter ?? false;
+
+              return Marker(
+                point: LatLng(lat, lng),
+                width: 19,
+                height: 19,
+                child: GestureDetector(
+                  onTap: () => _onEpiMarkerTap(info?.orgUid ?? ''),
+                  child: Tooltip(
+                    message: centerName,
+                    child: SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isFixedCenter
+                              ? Colors.blueAccent
+                              : Colors.deepPurple,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 0.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 1,
+                              offset: const Offset(0, 0.5),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: !isFixedCenter
+                              ? const FaIcon(
+                                  FontAwesomeIcons.syringe,
+                                  size: 10,
+                                  color: Colors.white,
+                                )
+                              : const Icon(
+                                  Icons.home,
+                                  color: Colors.white,
+                                  size: 10,
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Marker(
+              point: const LatLng(0, 0),
+              child: const SizedBox.shrink(),
+            );
+          })
+          .where(
+            (marker) =>
+                marker.point.latitude != 0 || marker.point.longitude != 0,
+          )
+          .toList();
+    } catch (e) {
+      logg.e('Zero Dose Dashboard: Error building EPI markers: $e');
+      return [];
+    }
+  }
+
+  void _onEpiMarkerTap(String epiUid) {
+    if (epiUid.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('EPI center details not available'),
+          backgroundColor: Colors.orangeAccent.shade200,
+        ),
+      );
+      return;
+    }
+
+    final filterState = ref.read(filterControllerProvider);
+    final summaryState = ref.read(summaryControllerProvider);
+    String? ccUid;
+    if (filterState.selectedAreaType == AreaType.cityCorporation) {
+      ccUid = filterState.selectedCityCorporation;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EpiCenterDetailsScreen(
+          epiUid: epiUid,
+          ccUid: ccUid,
+          currentLevel: null,
+          coverageData: summaryState.coverageData,
+          selectedVaccineUid: filterState.selectedVaccine,
+        ),
+      ),
+    );
   }
 
   void _fitMapToPolygons(List<AreaPolygon> polygons) {

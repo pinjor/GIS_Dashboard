@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gis_dashboard/features/epi_center/domain/epi_center_details_response.dart';
-import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
-import 'package:gis_dashboard/core/utils/target_calculator.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
 
 /// Collection of microplan and population related widgets for EPI Center Details
 class EpiCenterMicroplanSection extends ConsumerWidget {
   final EpiCenterDetailsResponse? epiCenterDetailsData;
-  final VaccineCoverageResponse? coverageData; // ✅ Coverage data for consistent calculation
-  final String? selectedVaccineUid; // ✅ Selected vaccine UID
 
   const EpiCenterMicroplanSection({
     super.key,
     required this.epiCenterDetailsData,
-    this.coverageData, // ✅ Optional coverage data
-    this.selectedVaccineUid, // ✅ Optional selected vaccine UID
   });
 
   @override
@@ -39,11 +33,7 @@ class EpiCenterMicroplanSection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            MicroplanTable(
-              epiData: epiCenterDetailsData,
-              coverageData: coverageData, // ✅ Pass coverage data
-              selectedVaccineUid: selectedVaccineUid, // ✅ Pass selected vaccine
-            ),
+            MicroplanTable(epiData: epiCenterDetailsData),
           ],
         ),
       ),
@@ -53,14 +43,10 @@ class EpiCenterMicroplanSection extends ConsumerWidget {
 
 class MicroplanTable extends ConsumerWidget {
   final EpiCenterDetailsResponse? epiData;
-  final VaccineCoverageResponse? coverageData; // ✅ Coverage data for consistent calculation
-  final String? selectedVaccineUid; // ✅ Selected vaccine UID
 
   const MicroplanTable({
     super.key,
     required this.epiData,
-    this.coverageData, // ✅ Optional coverage data
-    this.selectedVaccineUid, // ✅ Optional selected vaccine UID
   });
 
   String formatCount(dynamic value) {
@@ -72,90 +58,26 @@ class MicroplanTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get the current year from filter
     final filterState = ref.read(filterControllerProvider);
     final currentYear = filterState.selectedYear;
     if (currentYear == "") {
       return const Text('No year selected in filter.');
     }
-    // ✅ Use helper method that handles both country-level and EPI-level data
+
     final yearDemographics = epiData?.getDemographicsForYear(currentYear);
     final population = yearDemographics?.population;
     final child0To15Month = yearDemographics?.child0To15Month;
     final women15To49 = yearDemographics?.women15To49;
-    
-    // ✅ PRIORITY: Use coverage data for "Child (0-11)" to match Summary card
-    String child0To11Male = '-';
-    String child0To11Female = '-';
-    
-    logg.i('🔍 [0-11m DEBUG] EpiCenterMicroplanSection: Calculating Child (0-11) values');
-    logg.i('   > EPI data: ${epiData != null ? "present" : "null"}');
-    logg.i('   > Coverage data: ${coverageData != null ? "present" : "null"}');
-    logg.i('   > Selected vaccine UID: $selectedVaccineUid');
-    logg.i('   > Year demographics: ${yearDemographics != null ? "present" : "null"}');
-    logg.i('   > Filter state: Ward=${filterState.selectedWard}, Subblock=${filterState.selectedSubblock}');
-    
-    // ✅ FIX: Get subblock UID/name from filter state for subblock-level filtering (same as target card)
-    String? subblockUid;
-    String? subblockName;
-    if (filterState.selectedSubblock != null &&
-        filterState.selectedSubblock != 'All') {
-      subblockName = filterState.selectedSubblock;
-      final filterNotifier = ref.read(filterControllerProvider.notifier);
-      subblockUid = filterNotifier.getSubblockUid(subblockName!);
-      logg.i(
-        'Microplan Table: Subblock filter detected - name: $subblockName, UID: $subblockUid',
-      );
-    }
-    
-    // ✅ FIX: Use EXACT same priority order as Target Card to ensure consistency
-    // Priority 1: Use coverage data (same source as Summary card) - filter by subblock if available
-    if (coverageData != null) {
-      final targetData = TargetCalculator.getTargetData(
-        coverageData,
-        selectedVaccineUid,
-        areaUid: subblockUid, // ✅ Pass subblock UID to filter by subblock (same as target card)
-        areaName: subblockUid == null ? subblockName : null, // ✅ Fallback to name if UID not available
-      );
-      if (targetData != null && targetData.total > 0) {
-        child0To11Male = formatCount(targetData.male);
-        child0To11Female = formatCount(targetData.female);
-        logg.i(
-          'Microplan Table: ✅ Using coverage data for Child (0-11) (matching target card) - '
-          'total: ${targetData.total}, male: ${targetData.male} (displayed: $child0To11Male), female: ${targetData.female} (displayed: $child0To11Female)',
-        );
-      }
-    }
-    
-    // ✅ FIX: Priority 2 - Use EPI area vaccine target (same as target card fallback)
-    if (child0To11Male == '-' && child0To11Female == '-') {
-      final vaccineTarget = epiData?.area?.vaccineTarget?.child0To11Month[currentYear];
-      if (vaccineTarget != null) {
-        final male = vaccineTarget.male?.toInt() ?? 0;
-        final female = vaccineTarget.female?.toInt() ?? 0;
-        if (male > 0 || female > 0) {
-          child0To11Male = formatCount(male);
-          child0To11Female = formatCount(female);
-          logg.i(
-            'Microplan Table: ✅ Using EPI area vaccine target for Child (0-11) (matching target card) - '
-            'male: $male (displayed: $child0To11Male), female: $female (displayed: $child0To11Female)',
-          );
-        }
-      }
-    }
-    
-    // ✅ FIX: Priority 3 - Fallback to demographics (same as target card fallback)
-    if (child0To11Male == '-' && child0To11Female == '-') {
-      final child0To11Month = yearDemographics?.child0To11Month;
-      child0To11Male = formatCount(child0To11Month?.male);
-      child0To11Female = formatCount(child0To11Month?.female);
-      logg.w('Microplan Table: ⚠️ Using demographics fallback for Child (0-11) (matching target card)');
-      logg.w('   > Demographics - male: ${child0To11Month?.male}, female: ${child0To11Month?.female}');
-      logg.w('   > Displayed - male: $child0To11Male, female: $child0To11Female');
-    }
-    
-    logg.i('🔍 [0-11m DEBUG] Final Child (0-11) values: male=$child0To11Male, female=$child0To11Female');
-    
+
+    // Web microplan table uses demographics child_0_11_month, not vaccine_target.
+    final child0To11Month = yearDemographics?.child0To11Month;
+    final child0To11Male = formatCount(child0To11Month?.male);
+    final child0To11Female = formatCount(child0To11Month?.female);
+    logg.i(
+      'Microplan Table: Child (0-11) from demographics - '
+      'male: ${child0To11Month?.male}, female: ${child0To11Month?.female}',
+    );
+
     return Column(
       children: [
         PopulationCard(
@@ -164,12 +86,11 @@ class MicroplanTable extends ConsumerWidget {
           male: formatCount(population?.male),
           female: formatCount(population?.female),
         ),
-
         PopulationCard(
           category: "0-11",
           title: "Child (0-11)",
-          male: child0To11Male, // ✅ Use coverage data
-          female: child0To11Female, // ✅ Use coverage data
+          male: child0To11Male,
+          female: child0To11Female,
         ),
         PopulationCard(
           category: "0-15",
@@ -282,20 +203,6 @@ class PopulationCard extends StatelessWidget {
               ),
             ],
           ],
-
-          // if (progress > 0) ...[
-          //   const SizedBox(height: 12),
-          //   LinearProgressIndicator(
-          //     value: progress > 1 ? 1 : progress,
-          //     backgroundColor: Colors.grey[300],
-          //     color: categoryColor,
-          //   ),
-          //   const SizedBox(height: 4),
-          //   Text(
-          //     '${(progress * 100).toStringAsFixed(1)}% of total population',
-          //     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          //   ),
-          // ],
         ),
       ),
     );

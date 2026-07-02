@@ -10,6 +10,7 @@ import '../../domain/area_coords_geo_json_response.dart';
 import 'map_state.dart';
 import '../../../summary/domain/vaccine_coverage_response.dart';
 import '../../../../core/utils/vaccine_data_calculator.dart';
+import '../../utils/map_filter_loader.dart';
 
 final mapControllerProvider =
     StateNotifierProvider<MapControllerNotifier, MapState>((ref) {
@@ -18,10 +19,32 @@ final mapControllerProvider =
         filterNotifier: ref.read(filterControllerProvider.notifier),
       );
 
-      // Listen to filter state mainly for months
       ref.listen<FilterState>(filterControllerProvider, (previous, next) {
-        if (previous?.selectedMonths != next.selectedMonths) {
+        if (previous == null) return;
+
+        if (previous.selectedMonths != next.selectedMonths) {
           controller.applyMonthFilter(next.selectedMonths);
+        }
+
+        if (previous.selectedYear != next.selectedYear) {
+          controller.refreshCoverageForYearChange();
+        }
+
+        if (next.isEpiDetailsContext) return;
+
+        if (next.lastAppliedTimestamp != null &&
+            previous.lastAppliedTimestamp != next.lastAppliedTimestamp) {
+          if (MapFilterLoader.onlyVaccineChanged(previous, next)) {
+            logg.i('MapController: Vaccine-only change — map polygons will re-render');
+            return;
+          }
+
+          logg.i('MapController: Filter applied — reloading map data');
+          MapFilterLoader.reloadForFilters(
+            mapNotifier: controller,
+            filterNotifier: ref.read(filterControllerProvider.notifier),
+            filterState: next,
+          );
         }
       });
 
@@ -971,14 +994,38 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         currentFilter.selectedMonths,
       );
 
+      // Fetch EPI data for upazila level
+      EpiCenterCoordsResponse? epiCenterCoordsData;
+      try {
+        final epiPath = ApiConstants.getEpiPath(slug: concatenatedSlug);
+        logg.i(
+          "Fetching EPI data from: $epiPath (using concatenated slug: $concatenatedSlug)",
+        );
+        epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
+          urlPath: epiPath,
+          forceRefresh: true,
+        );
+        logg.i(
+          "Successfully fetched EPI data for $upazilaName "
+          "(${epiCenterCoordsData.features?.length ?? 0} EPI centers)",
+        );
+      } catch (e) {
+        logg.w(
+          "EPI data not available for $upazilaName - continuing without EPI data: $e",
+        );
+        epiCenterCoordsData = null;
+      }
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: filteredData,
+        epiCenterCoordsData: epiCenterCoordsData,
         currentLevel: GeographicLevel.upazila,
         navigationStack: newNavigationStack,
         currentAreaName: upazilaName,
         isLoading: false,
         clearError: true,
+        clearEpiData: epiCenterCoordsData == null,
       );
 
       logg.i("✅ Successfully loaded upazila data for $upazilaName");
@@ -1130,14 +1177,38 @@ class MapControllerNotifier extends StateNotifier<MapState> {
         currentFilter.selectedMonths,
       );
 
+      // Fetch EPI data for union level
+      EpiCenterCoordsResponse? epiCenterCoordsData;
+      try {
+        final epiPath = ApiConstants.getEpiPath(slug: concatenatedSlug);
+        logg.i(
+          "Fetching EPI data from: $epiPath (using concatenated slug: $concatenatedSlug)",
+        );
+        epiCenterCoordsData = await _dataService.getEpiCenterCoordsData(
+          urlPath: epiPath,
+          forceRefresh: true,
+        );
+        logg.i(
+          "Successfully fetched EPI data for $unionName "
+          "(${epiCenterCoordsData.features?.length ?? 0} EPI centers)",
+        );
+      } catch (e) {
+        logg.w(
+          "EPI data not available for $unionName - continuing without EPI data: $e",
+        );
+        epiCenterCoordsData = null;
+      }
+
       state = state.copyWith(
         areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         coverageData: filteredData,
+        epiCenterCoordsData: epiCenterCoordsData,
         currentLevel: GeographicLevel.union,
         navigationStack: newNavigationStack,
         currentAreaName: unionName,
         isLoading: false,
         clearError: true,
+        clearEpiData: epiCenterCoordsData == null,
       );
 
       logg.i("✅ Successfully loaded union data for $unionName");
@@ -1836,8 +1907,20 @@ class MapControllerNotifier extends StateNotifier<MapState> {
           logg.w('focalAreaUid: Could not build city corporation ward path - using ward UID only');
         }
       } else {
-        // District ward or city corporation ward without zone
+        // District ward: chart/microplan APIs need a single ward UID
         filterUid = _filterNotifier.getWardUid(filterState.selectedWard!);
+        if (filterUid == null && state.navigationStack.isNotEmpty) {
+          final navSlug = state.navigationStack.last.slug;
+          if (navSlug != null && navSlug.contains('/')) {
+            final slugSegments = navSlug.split('/');
+            if (slugSegments.length == 4 || slugSegments.length == 5) {
+              filterUid = slugSegments.last;
+              logg.w(
+                'focalAreaUid: Ward UID lookup failed - using last segment from navigation slug: $filterUid',
+              );
+            }
+          }
+        }
         logg.i('focalAreaUid: Using ward UID: $filterUid');
       }
     } else if (filterState.selectedUnion != null &&

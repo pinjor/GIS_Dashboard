@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,6 +10,10 @@ import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../map/presentation/widget/map_tile_layer.dart';
 import '../../domain/epi_center_result.dart';
+import '../../../filter/presentation/controllers/filter_controller.dart';
+import '../../../filter/presentation/widgets/geographic_filter_form.dart';
+import '../widgets/epi_center_finder_filter_dialog.dart';
+import '../widgets/epi_center_finder_details_panel.dart';
 import '../../domain/epi_center_finder_state.dart';
 import '../controllers/epi_center_finder_controller.dart';
 
@@ -29,92 +32,70 @@ class _EpiCenterFinderScreenState
   int _selectedTabIndex = 0; // 0 = Map, 1 = Table
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _runSearch();
+    });
+  }
+
+  @override
   void dispose() {
     _mapController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectStartDate(BuildContext context) async {
-    final state = ref.read(epiCenterFinderControllerProvider);
-    final initialDate = state.startDate ?? DateTime.now();
-    final endDate = state.endDate ?? DateTime.now();
-    
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: endDate, // Can't be after end date
-    );
-
-    if (pickedDate != null) {
-      // Ensure start date is not after end date
-      final finalEndDate = endDate.isBefore(pickedDate) ? pickedDate : endDate;
-      ref.read(epiCenterFinderControllerProvider.notifier).updateDateRange(
-        pickedDate,
-        finalEndDate,
-      );
-    }
-  }
-
-  Future<void> _selectEndDate(BuildContext context) async {
-    final state = ref.read(epiCenterFinderControllerProvider);
-    final startDate = state.startDate ?? DateTime.now();
-    final initialDate = state.endDate ?? DateTime.now();
-    
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: startDate, // Can't be before start date
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-
-    if (pickedDate != null) {
-      // Ensure end date is not before start date
-      final finalStartDate = startDate.isAfter(pickedDate) ? pickedDate : startDate;
-      ref.read(epiCenterFinderControllerProvider.notifier).updateDateRange(
-        finalStartDate,
-        pickedDate,
-      );
-    }
-  }
-
-  Future<void> _searchCenters() async {
-    final state = ref.read(epiCenterFinderControllerProvider);
-    final startDate = state.startDate ?? DateTime.now();
-    final endDate = state.endDate ?? DateTime.now();
-    
-    // Validate date range
-    if (startDate.isAfter(endDate)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Start date cannot be after end date.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-    
+  Future<void> _runSearch() async {
     await ref
         .read(epiCenterFinderControllerProvider.notifier)
-        .requestLocationAndSearch(startDate, endDate);
-    
-    // Auto-zoom to show user location and markers after search
+        .searchWithCurrentFilters();
+
     if (mounted) {
       _fitBoundsToResults();
     }
   }
 
+  void _showFilterDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (_) => EpiCenterFinderFilterDialog(
+        onApplied: _runSearch,
+        onReset: _runSearch,
+      ),
+    );
+  }
+
+  String _buildFilterSummary(EpiCenterFinderState state, String areaSummary) {
+    final start = state.startDate;
+    final end = state.endDate;
+    if (start == null || end == null) {
+      return areaSummary;
+    }
+
+    final dateFormat = DateFormat('MM/dd/yyyy');
+    final startStr = dateFormat.format(start);
+    final endStr = dateFormat.format(end);
+    final dateSummary =
+        startStr == endStr ? startStr : '$startStr – $endStr';
+
+    return '$dateSummary · $areaSummary';
+  }
+
   void _fitBoundsToResults() {
     final state = ref.read(epiCenterFinderControllerProvider);
-    
-    if (state.userLat == null || state.userLng == null) return;
     if (state.results.isEmpty) return;
 
-    // Calculate bounds to include user location and all markers
-    double minLat = state.userLat!;
-    double maxLat = state.userLat!;
-    double minLng = state.userLng!;
-    double maxLng = state.userLng!;
+    double minLat = state.results.first.lat;
+    double maxLat = state.results.first.lat;
+    double minLng = state.results.first.lng;
+    double maxLng = state.results.first.lng;
+
+    if (state.userLat != null && state.userLng != null) {
+      minLat = minLat < state.userLat! ? minLat : state.userLat!;
+      maxLat = maxLat > state.userLat! ? maxLat : state.userLat!;
+      minLng = minLng < state.userLng! ? minLng : state.userLng!;
+      maxLng = maxLng > state.userLng! ? maxLng : state.userLng!;
+    }
 
     for (final result in state.results) {
       minLat = minLat < result.lat ? minLat : result.lat;
@@ -123,61 +104,42 @@ class _EpiCenterFinderScreenState
       maxLng = maxLng > result.lng ? maxLng : result.lng;
     }
 
-    // Add padding
-    final latPadding = (maxLat - minLat) * 0.2;
-    final lngPadding = (maxLng - minLng) * 0.2;
+    final latSpan = (maxLat - minLat).abs();
+    final lngSpan = (maxLng - minLng).abs();
+    final latPadding = latSpan > 0.01 ? latSpan * 0.15 : 0.05;
+    final lngPadding = lngSpan > 0.01 ? lngSpan * 0.15 : 0.05;
 
     final bounds = LatLngBounds(
       LatLng(minLat - latPadding, minLng - lngPadding),
       LatLng(maxLat + latPadding, maxLng + lngPadding),
     );
 
-    // Fit bounds with animation
     _mapController.fitCamera(
       CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50)),
     );
   }
 
-  Future<void> _launchGoogleMapsNavigation(double lat, double lng) async {
-    final googleMapsUrl = Uri.parse(
-      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
-    );
-    
-    if (await canLaunchUrl(googleMapsUrl)) {
-      await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open Google Maps.')),
-        );
-      }
-    }
-  }
-
   void _onMarkerTap(EpiCenterResult result) {
-    // Select center and sync with table
-    ref.read(epiCenterFinderControllerProvider.notifier).selectCenter(result.id);
-    
-    // Switch to table view if on map view
-    if (_selectedTabIndex == 0) {
-      setState(() {
-        _selectedTabIndex = 1;
-      });
-    }
+    ref
+        .read(epiCenterFinderControllerProvider.notifier)
+        .loadCenterDetails(result);
+
+    setState(() {
+      _selectedTabIndex = 1;
+    });
   }
 
-  void _onTableRowTap(EpiCenterResult result) {
-    // Select center and sync with map
-    ref.read(epiCenterFinderControllerProvider.notifier).selectCenter(result.id);
-    
-    // Center map on selected marker
-    _mapController.move(LatLng(result.lat, result.lng), _mapController.camera.zoom);
-    
-    // Switch to map view if on table view
-    if (_selectedTabIndex == 1) {
-      setState(() {
-        _selectedTabIndex = 0;
-      });
+  void _ensureDetailsForTableTab() {
+    final state = ref.read(epiCenterFinderControllerProvider);
+    if (state.results.isEmpty) return;
+
+    final notifier = ref.read(epiCenterFinderControllerProvider.notifier);
+    final selectedId = state.selectedCenterId ?? state.results.first.id;
+    final selectedResult =
+        notifier.resultById(selectedId) ?? state.results.first;
+
+    if (state.selectedCenterDetails == null && !state.isLoadingDetails) {
+      notifier.loadCenterDetails(selectedResult);
     }
   }
 
@@ -268,10 +230,31 @@ class _EpiCenterFinderScreenState
     return markers;
   }
 
+  String _emptyStateMessage(EpiCenterFinderState state) {
+    final start = state.startDate;
+    final end = state.endDate;
+    if (start == null || end == null) {
+      return 'No EPI centers found for the selected date range and area.';
+    }
+
+    final dateFormat = DateFormat('MM/dd/yyyy');
+    final startStr = dateFormat.format(start);
+    final endStr = dateFormat.format(end);
+    if (startStr == endStr) {
+      return 'No EPI centers found for sessions on $startStr in the selected area.';
+    }
+    return 'No EPI centers found for sessions from $startStr to $endStr in the selected area.';
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(epiCenterFinderControllerProvider);
+    final filterState = ref.watch(filterControllerProvider);
     final primaryColor = Color(Constants.primaryColor);
+    final filterSummary = _buildFilterSummary(
+      state,
+      buildGeographicFilterSummary(filterState),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -284,121 +267,39 @@ class _EpiCenterFinderScreenState
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list, color: Colors.white),
+            tooltip: 'Filter',
+            onPressed: _showFilterDialog,
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // Date range pickers and search button
           Container(
-            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             color: Colors.grey.shade100,
-            child: Column(
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _selectStartDate(context),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 20),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Start Date',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      state.startDate != null
-                                          ? DateFormat('yyyy-MM-dd').format(state.startDate!)
-                                          : 'Select Start Date',
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                Icon(Icons.place_outlined, color: primaryColor, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    filterSummary,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _selectEndDate(context),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 20),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'End Date',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      state.endDate != null
-                                          ? DateFormat('yyyy-MM-dd').format(state.endDate!)
-                                          : 'Select End Date',
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: state.isLoading ? null : _searchCenters,
-                    icon: const Icon(Icons.search),
-                    label: const Text('Search'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
+                TextButton(
+                  onPressed: _showFilterDialog,
+                  child: Text(
+                    'Change',
+                    style: TextStyle(color: primaryColor),
                   ),
                 ),
               ],
@@ -479,7 +380,7 @@ class _EpiCenterFinderScreenState
                               ),
                               const SizedBox(height: 24),
                               ElevatedButton.icon(
-                                onPressed: _searchCenters,
+                                onPressed: _runSearch,
                                 icon: const Icon(Icons.refresh),
                                 label: const Text('Retry'),
                               ),
@@ -498,9 +399,7 @@ class _EpiCenterFinderScreenState
                                       size: 64, color: Colors.grey[400]),
                                   const SizedBox(height: 16),
                                   Text(
-                                    state.startDate != null && state.endDate != null
-                                        ? 'No EPI centers found within 5 km for the selected date range.'
-                                        : 'No EPI centers found within 5 km for this date range.',
+                                    _emptyStateMessage(state),
                                     style: const TextStyle(fontSize: 16),
                                     textAlign: TextAlign.center,
                                   ),
@@ -525,7 +424,12 @@ class _EpiCenterFinderScreenState
     Color primaryColor,
   ) {
     return InkWell(
-      onTap: () => setState(() => _selectedTabIndex = index),
+      onTap: () {
+        setState(() => _selectedTabIndex = index);
+        if (index == 1) {
+          _ensureDetailsForTableTab();
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
@@ -578,106 +482,52 @@ class _EpiCenterFinderScreenState
   }
 
   Widget _buildTableView(EpiCenterFinderState state) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: state.results.length,
-      itemBuilder: (context, index) {
-        final result = state.results[index];
-        final isSelected = result.id == state.selectedCenterId;
+    final notifier = ref.read(epiCenterFinderControllerProvider.notifier);
+    final selectedId = state.selectedCenterId ?? state.results.first.id;
+    final selectedResult =
+        notifier.resultById(selectedId) ?? state.results.first;
+    final primaryColor = Color(Constants.primaryColor);
 
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          elevation: isSelected ? 4 : 1,
-          color: isSelected ? Colors.blue.shade50 : Colors.white,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: (result.isFixedCenter ?? false)
-                  ? Colors.blueAccent
-                  : Colors.deepPurple,
-              child: Icon(
-                (result.isFixedCenter ?? false) ? Icons.home : Icons.local_hospital,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            title: Text(
-              result.name,
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                // Show zone/ward information prominently if available
-                if (result.cityCorporationName != null || result.zoneName != null || result.wardName != null) ...[
-                  if (result.cityCorporationName != null)
-                    Row(
-                      children: [
-                        Icon(Icons.location_city, size: 14, color: Colors.blue.shade700),
-                        const SizedBox(width: 4),
-                        Text(
-                          result.cityCorporationName!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  if (result.zoneName != null)
-                    Row(
-                      children: [
-                        Icon(Icons.map, size: 14, color: Colors.orange.shade700),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Zone: ${result.zoneName}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.orange.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  if (result.wardName != null)
-                    Row(
-                      children: [
-                        Icon(Icons.location_on, size: 14, color: Colors.green.shade700),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Ward: ${result.wardName}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: 6),
-                ],
-                Text('Date: ${DateFormat('yyyy-MM-dd').format(result.sessionDate)}'),
-                Text('Distance: ${result.distanceKm.toStringAsFixed(2)} km'),
-                if (result.typeName != null) 
-                  Text(
-                    'Type: ${result.typeName}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (state.results.length > 1)
+          SizedBox(
+            height: 52,
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              scrollDirection: Axis.horizontal,
+              itemCount: state.results.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final result = state.results[index];
+                final isSelected = result.id == selectedId;
+                return ChoiceChip(
+                  label: Text(
+                    result.name,
+                    overflow: TextOverflow.ellipsis,
                   ),
-              ],
+                  selected: isSelected,
+                  selectedColor: primaryColor.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: isSelected ? primaryColor : Colors.black87,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                  onSelected: (_) {
+                    notifier.loadCenterDetails(result);
+                  },
+                );
+              },
             ),
-            trailing: IconButton(
-              icon: const Icon(Icons.navigation),
-              color: Color(Constants.primaryColor),
-              onPressed: () => _launchGoogleMapsNavigation(result.lat, result.lng),
-              tooltip: 'Navigate',
-            ),
-            onTap: () => _onTableRowTap(result),
           ),
-        );
-      },
+        Expanded(
+          child: EpiCenterFinderDetailsPanel(
+            state: state,
+            selectedResult: selectedResult,
+          ),
+        ),
+      ],
     );
   }
 }

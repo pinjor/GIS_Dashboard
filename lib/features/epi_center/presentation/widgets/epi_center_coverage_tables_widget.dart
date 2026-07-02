@@ -109,15 +109,33 @@ class CoverageTableWidget extends ConsumerWidget {
     final filterState = ref.read(filterControllerProvider);
     final selectedYear = filterState.selectedYear;
 
-    // Get yearly target from area.vaccineTarget
+    // Get yearly target for computed fallback (when API percentages are absent)
     final vaccineTarget = epiCenterDetailsData
         ?.area
         ?.vaccineTarget
         ?.child0To11Month[selectedYear];
-    final yearlyTarget = vaccineTarget != null
+    var yearlyTarget = vaccineTarget != null
         ? ((vaccineTarget.male?.toInt() ?? 0) +
               (vaccineTarget.female?.toInt() ?? 0))
         : 0;
+
+    if (yearlyTarget == 0) {
+      yearlyTarget =
+          epiCenterDetailsData?.coverageTableData?.targets?.year ?? 0;
+    }
+
+    if (yearlyTarget == 0) {
+      final demographics =
+          epiCenterDetailsData?.getDemographicsForYear(selectedYear);
+      final childData = demographics?.child0To11Month;
+      if (childData != null) {
+        yearlyTarget = (childData.male ?? 0) + (childData.female ?? 0);
+      }
+    }
+
+    // Prefer API-provided cumulative coverage percentages (available at ward+ levels)
+    final apiCoveragePercentages =
+        epiCenterDetailsData?.coverageTableData?.coveragePercentages ?? {};
 
     // Get dynamic vaccine names from API
     final vaccineNames =
@@ -211,14 +229,36 @@ class CoverageTableWidget extends ConsumerWidget {
 
     // Calculate cumulative coverage percentages (only for coverage, not dropout)
     Map<String, double> cumulativeCoverage = {};
-    if (!isDropout && yearlyTarget > 0) {
+    final hasApiPercentages =
+        !isDropout && apiCoveragePercentages.isNotEmpty;
+
+    if (hasApiPercentages) {
+      cumulativeCoverage.addAll(apiCoveragePercentages);
+    } else if (!isDropout && yearlyTarget > 0) {
       for (final vaccineName in vaccineNames) {
         final total = totalVaccines[vaccineName] ?? 0;
         cumulativeCoverage[vaccineName] = (total / yearlyTarget * 100);
       }
-      // Calculate total percentage (grand total / yearly target * 100)
       cumulativeCoverage['_total'] = (grandTotal / yearlyTarget * 100);
     }
+
+    double? lookupCoveragePercent(String vaccineName) {
+      if (cumulativeCoverage.containsKey(vaccineName)) {
+        return cumulativeCoverage[vaccineName];
+      }
+
+      for (final entry in cumulativeCoverage.entries) {
+        if (entry.key == '_total') continue;
+        if (entry.key.toLowerCase().contains(vaccineName.toLowerCase()) ||
+            vaccineName.toLowerCase().contains(entry.key.toLowerCase())) {
+          return entry.value;
+        }
+      }
+      return null;
+    }
+
+    final showCumulativeRow = !isDropout &&
+        (hasApiPercentages || yearlyTarget > 0);
 
     // Build table using DataTable
     return SingleChildScrollView(
@@ -313,7 +353,7 @@ class CoverageTableWidget extends ConsumerWidget {
             ],
           ),
           // Cumulative Coverage (%) row (only for coverage, not dropout)
-          if (!isDropout && yearlyTarget > 0)
+          if (showCumulativeRow)
             DataRow(
               color: WidgetStateProperty.all<Color>(Colors.grey[50]!),
               cells: [
@@ -323,15 +363,15 @@ class CoverageTableWidget extends ConsumerWidget {
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),
-                ...vaccineNames.map((vaccineName) => DataCell(
-                      Text(
-                        cumulativeCoverage[vaccineName] != null
-                            ? cumulativeCoverage[vaccineName]!
-                                .toStringAsFixed(2)
-                            : '0.00',
-                        textAlign: TextAlign.center,
-                      ),
-                    )),
+                ...vaccineNames.map((vaccineName) {
+                  final percent = lookupCoveragePercent(vaccineName);
+                  return DataCell(
+                    Text(
+                      percent != null ? percent.toStringAsFixed(2) : '0.00',
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }),
                 DataCell(
                   Text(
                     cumulativeCoverage['_total'] != null

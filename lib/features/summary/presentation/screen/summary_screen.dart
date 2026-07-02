@@ -4,6 +4,7 @@ import 'package:gis_dashboard/core/common/widgets/network_error_widget.dart';
 import 'package:gis_dashboard/features/filter/filter.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 import 'package:gis_dashboard/core/utils/target_calculator.dart';
+import 'package:gis_dashboard/features/epi_center/utils/epi_details_helpers.dart';
 
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
@@ -26,7 +27,6 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data when screen is first shown
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(summaryControllerProvider.notifier).loadSummaryData();
     });
@@ -36,107 +36,46 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
   Widget build(BuildContext context) {
     final summaryState = ref.watch(summaryControllerProvider);
     final filterState = ref.watch(filterControllerProvider);
-    final isMapLoading = ref.watch(mapControllerProvider).isLoading;
+    final filterNotifier = ref.read(filterControllerProvider.notifier);
+    final mapState = ref.watch(mapControllerProvider);
+    final isMapLoading = mapState.isLoading;
 
-    // Find the selected vaccine data
-    final vaccines = summaryState.coverageData?.vaccines ?? [];
-    
-    // 🔍 DEBUG: Log vaccine data structure
-    if (vaccines.isNotEmpty) {
-      logg.i(
-        'Summary Screen: Found ${vaccines.length} vaccines. '
-        'Selected vaccine UID: ${filterState.selectedVaccine}',
-      );
-      for (var vaccine in vaccines) {
-        logg.i(
-          'Vaccine: ${vaccine.vaccineName} (UID: ${vaccine.vaccineUid}), '
-          'totalTarget: ${vaccine.totalTarget}, '
-          'totalTargetMale: ${vaccine.totalTargetMale}, '
-          'totalTargetFemale: ${vaccine.totalTargetFemale}, '
-          'totalCoverage: ${vaccine.totalCoverage}, '
-          'totalCoverageMale: ${vaccine.totalCoverageMale}, '
-          'totalCoverageFemale: ${vaccine.totalCoverageFemale}',
-        );
-      }
-    }
-    
-    final selectedVaccineData = vaccines.isNotEmpty
-        ? vaccines.firstWhere(
-            (vaccine) => vaccine.vaccineUid == filterState.selectedVaccine,
-            orElse: () => vaccines.first,
-          )
-        : null;
-    
-    // ✅ Use TargetCalculator utility for consistent calculation across all sections
+    final areaFilter = isMapLoading
+        ? (uid: null, name: null)
+        : EpiDetailsHelpers.resolveCoverageAreaFilter(
+            filterState,
+            filterNotifier,
+            currentLevel: summaryState.currentLevel,
+            currentAreaName: summaryState.currentAreaName,
+          );
+
     final targetData = TargetCalculator.getTargetData(
       summaryState.coverageData,
       filterState.selectedVaccine,
+      areaUid: areaFilter.uid,
+      areaName: areaFilter.uid == null ? areaFilter.name : null,
     );
-    
-    // Calculate coverage (still need to handle this separately as it's not in TargetCalculator)
-    int selectedVaccineTotalTarget;
-    int selectedVaccineTotalCoverage;
-    int targetMale;
-    int targetFemale;
-    int coverageMale;
-    int coverageFemale;
-    
-    if (targetData != null) {
-      // Use target data from utility
-      targetMale = targetData.male;
-      targetFemale = targetData.female;
-      selectedVaccineTotalTarget = targetData.total;
-      
-      logg.i(
-        'Summary Screen: Using TargetCalculator - '
-        'total: $selectedVaccineTotalTarget, male: $targetMale, female: $targetFemale',
-      );
-    } else {
-      // Fallback if TargetCalculator returns null
-      targetMale = 0;
-      targetFemale = 0;
-      selectedVaccineTotalTarget = 0;
-      logg.w('Summary Screen: TargetCalculator returned null, using fallback values');
-    }
-    
-    // Calculate coverage separately (coverage calculation logic)
-    if (selectedVaccineData != null) {
-      coverageMale = selectedVaccineData.totalCoverageMale ?? 0;
-      coverageFemale = selectedVaccineData.totalCoverageFemale ?? 0;
-      
-      // If top-level coverage fields are 0, try to sum from areas array
-      if ((coverageMale == 0 && coverageFemale == 0) && 
-          selectedVaccineData.areas != null && 
-          selectedVaccineData.areas!.isNotEmpty) {
-        logg.i(
-          'Summary Screen: Top-level coverage fields are 0, calculating from areas array (${selectedVaccineData.areas!.length} areas)',
-        );
-        coverageMale = selectedVaccineData.areas!
-            .map((area) => area.coverageMale ?? 0)
-            .fold(0, (sum, value) => sum + value);
-        coverageFemale = selectedVaccineData.areas!
-            .map((area) => area.coverageFemale ?? 0)
-            .fold(0, (sum, value) => sum + value);
-      }
-      
-      selectedVaccineTotalCoverage = coverageMale + coverageFemale;
-    } else {
-      selectedVaccineTotalCoverage = 0;
-      coverageMale = 0;
-      coverageFemale = 0;
-    }
-    
-    // 🔍 DEBUG: Log calculated values
+
+    final coverageData = TargetCalculator.getCoverageData(
+      summaryState.coverageData,
+      filterState.selectedVaccine,
+      areaUid: areaFilter.uid,
+      areaName: areaFilter.uid == null ? areaFilter.name : null,
+    );
+
+    final targetMale = targetData?.male ?? 0;
+    final targetFemale = targetData?.female ?? 0;
+    final selectedVaccineTotalTarget = targetData?.total ?? 0;
+
+    final coverageMale = coverageData?.male ?? 0;
+    final coverageFemale = coverageData?.female ?? 0;
+    final selectedVaccineTotalCoverage = coverageData?.total ?? 0;
+
     logg.i(
-      'Summary Screen: Selected vaccine data - '
-      'totalTarget: $selectedVaccineTotalTarget, '
-      'totalCoverage: $selectedVaccineTotalCoverage, '
-      'targetMale: $targetMale, '
-      'targetFemale: $targetFemale, '
-      'coverageMale: $coverageMale, '
-      'coverageFemale: $coverageFemale, '
-      'areas count: ${selectedVaccineData?.areas?.length ?? 0}',
+      'Summary Screen: area=${areaFilter.name ?? areaFilter.uid ?? summaryState.currentAreaName} '
+      'target=$selectedVaccineTotalTarget coverage=$selectedVaccineTotalCoverage',
     );
+
     return Scaffold(
       backgroundColor: Color(Constants.scaffoldBackgroundColor),
       body: summaryState.isLoading
@@ -164,7 +103,10 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  HeaderTitleIconFilterWidget(),
+                  HeaderTitleIconFilterWidget(
+                    areaLabel:
+                        '${summaryState.currentAreaName}, ${filterState.selectedYear}',
+                  ),
                   const SizedBox(height: 16),
                   Column(
                     children: [
@@ -186,11 +128,8 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                   ),
                   16.h,
                   const VaccineCoveragePerformanceTableWidget(),
-                  // 16.h,
-                  // const VaccinePerformanceGraphWidget(),
                   16.h,
                   const VaccinePerformanceGraphWidget(),
-
                   16.h,
                   const ViewDetailsButtonWidget(),
                 ],

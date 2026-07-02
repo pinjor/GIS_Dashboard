@@ -27,8 +27,8 @@ class EpiCenterController extends StateNotifier<EpiCenterState> {
 
     state = state.copyWith(
       isLoading: true,
-      hasError: false,
-      errorMessage: null,
+      clearError: true,
+      clearEpiCenterData: true,
       currentEpiUid: orgUid,
       currentCcUid: null, // Not applicable for org_uid requests
       selectedYear: int.tryParse(year) ?? DateTime.now().year,

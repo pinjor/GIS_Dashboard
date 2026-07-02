@@ -1,7 +1,7 @@
 import 'package:gis_dashboard/features/summary/domain/vaccine_coverage_response.dart';
 import 'package:gis_dashboard/core/utils/utils.dart';
 
-/// Result structure for target data
+/// Result structure for target or coverage data
 class TargetData {
   final int total;
   final int male;
@@ -14,173 +14,190 @@ class TargetData {
   });
 }
 
-/// Utility class to extract "Total Children (0-11 m)" target data from VaccineCoverageResponse
-/// This ensures consistency across Summary, EPI Details, and Microplan sections
+/// Utility class to extract "Total Children (0-11 m)" and coverage stats
+/// from VaccineCoverageResponse consistently across Summary and EPI Details.
 class TargetCalculator {
+  /// Find a matching area entry without falling back to the first item.
+  static Area? findMatchingArea(
+    List<Area> areas, {
+    String? areaUid,
+    String? areaName,
+  }) {
+    if (areas.isEmpty) return null;
 
-  /// Extract target data from VaccineCoverageResponse for a specific vaccine
-  /// Optionally filter by a specific area UID or name (for ward/subblock level filtering)
-  /// Returns null if no data is available
+    if (areaUid != null && areaUid.isNotEmpty) {
+      for (final area in areas) {
+        if (area.uid == areaUid) return area;
+      }
+      final lowerUid = areaUid.toLowerCase();
+      for (final area in areas) {
+        if (area.uid?.toLowerCase() == lowerUid) return area;
+      }
+    }
+
+    if (areaName != null && areaName.isNotEmpty) {
+      final lowerName = areaName.toLowerCase();
+      for (final area in areas) {
+        if (area.name?.toLowerCase() == lowerName) return area;
+      }
+      for (final area in areas) {
+        final name = area.name?.toLowerCase() ?? '';
+        if (name.contains(lowerName) || lowerName.contains(name)) {
+          return area;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  static Vaccine? _selectVaccine(
+    VaccineCoverageResponse? coverageData,
+    String? vaccineUid,
+  ) {
+    if (coverageData == null || coverageData.vaccines == null) {
+      return null;
+    }
+
+    try {
+      return coverageData.vaccines!.firstWhere(
+        (vaccine) => vaccine.vaccineUid == vaccineUid,
+      );
+    } catch (_) {
+      if (coverageData.vaccines!.isNotEmpty) {
+        logg.w(
+          'TargetCalculator: Vaccine UID $vaccineUid not found, using first vaccine',
+        );
+        return coverageData.vaccines!.first;
+      }
+    }
+    return null;
+  }
+
+  static TargetData _fromArea(Area area, {required bool isCoverage}) {
+    if (isCoverage) {
+      final male = area.coverageMale ?? 0;
+      final female = area.coverageFemale ?? 0;
+      return TargetData(total: male + female, male: male, female: female);
+    }
+
+    final male = area.targetMale ?? 0;
+    final female = area.targetFemale ?? 0;
+    return TargetData(total: male + female, male: male, female: female);
+  }
+
+  static TargetData _fromVaccineTopLevel(
+    Vaccine vaccine, {
+    required bool isCoverage,
+  }) {
+    if (isCoverage) {
+      final male = vaccine.totalCoverageMale ?? 0;
+      final female = vaccine.totalCoverageFemale ?? 0;
+      return TargetData(total: male + female, male: male, female: female);
+    }
+
+    final male = vaccine.totalTargetMale ?? 0;
+    final female = vaccine.totalTargetFemale ?? 0;
+    return TargetData(total: male + female, male: male, female: female);
+  }
+
+  static TargetData? _resolveStats(
+    VaccineCoverageResponse? coverageData,
+    String? vaccineUid, {
+    String? areaUid,
+    String? areaName,
+    required bool isCoverage,
+  }) {
+    final selectedVaccine = _selectVaccine(coverageData, vaccineUid);
+    if (selectedVaccine == null) return null;
+
+    final hasAreaFilter =
+        (areaUid != null && areaUid.isNotEmpty) ||
+        (areaName != null && areaName.isNotEmpty);
+
+    if (hasAreaFilter &&
+        selectedVaccine.areas != null &&
+        selectedVaccine.areas!.isNotEmpty) {
+      final match = findMatchingArea(
+        selectedVaccine.areas!,
+        areaUid: areaUid,
+        areaName: areaName,
+      );
+      if (match != null) {
+        logg.i(
+          'TargetCalculator: Using matched area ${match.name ?? match.uid} '
+          'for ${isCoverage ? "coverage" : "target"}',
+        );
+        return _fromArea(match, isCoverage: isCoverage);
+      }
+
+      logg.w(
+        'TargetCalculator: No area match for uid=$areaUid name=$areaName — '
+        'using top-level ${isCoverage ? "coverage" : "target"} values',
+      );
+    }
+
+    final topLevel = _fromVaccineTopLevel(
+      selectedVaccine,
+      isCoverage: isCoverage,
+    );
+
+    if ((topLevel.male > 0 || topLevel.female > 0) || !hasAreaFilter) {
+      return topLevel;
+    }
+
+    // Only sum child areas when top-level is empty and no specific area filter.
+    if (selectedVaccine.areas != null && selectedVaccine.areas!.isNotEmpty) {
+      final male = selectedVaccine.areas!
+          .map((area) => isCoverage ? (area.coverageMale ?? 0) : (area.targetMale ?? 0))
+          .fold(0, (sum, value) => sum + value);
+      final female = selectedVaccine.areas!
+          .map((area) => isCoverage ? (area.coverageFemale ?? 0) : (area.targetFemale ?? 0))
+          .fold(0, (sum, value) => sum + value);
+      return TargetData(total: male + female, male: male, female: female);
+    }
+
+    return topLevel;
+  }
+
+  /// Extract target (0-11 m children) from coverage response.
   static TargetData? getTargetData(
     VaccineCoverageResponse? coverageData,
     String? vaccineUid, {
     String? areaUid,
     String? areaName,
   }) {
-    logg.i('🔍 [0-11m DEBUG] TargetCalculator.getTargetData called');
-    logg.i('   > Coverage data: ${coverageData != null ? "present" : "null"}');
-    logg.i('   > Vaccine UID: $vaccineUid');
-    
-    if (coverageData == null || coverageData.vaccines == null) {
-      logg.w('TargetCalculator: Coverage data is null or has no vaccines');
-      return null;
-    }
-
-    logg.i('   > Available vaccines: ${coverageData.vaccines!.length}');
-    for (var i = 0; i < coverageData.vaccines!.length; i++) {
-      final v = coverageData.vaccines![i];
-      logg.i('      [$i] ${v.vaccineName} (UID: ${v.vaccineUid}) - targets: M=${v.totalTargetMale ?? 0}, F=${v.totalTargetFemale ?? 0}, areas=${v.areas?.length ?? 0}');
-    }
-
-    // Find the selected vaccine
-    Vaccine? selectedVaccine;
-    try {
-      selectedVaccine = coverageData.vaccines!.firstWhere(
-        (vaccine) => vaccine.vaccineUid == vaccineUid,
-      );
-      logg.i('   ✅ Found selected vaccine: ${selectedVaccine.vaccineName} (UID: ${selectedVaccine.vaccineUid})');
-    } catch (e) {
-      // If not found, use first available vaccine
-      if (coverageData.vaccines!.isNotEmpty) {
-        selectedVaccine = coverageData.vaccines!.first;
-        logg.w('TargetCalculator: Vaccine UID $vaccineUid not found, using first available vaccine: ${selectedVaccine.vaccineName}');
-      } else {
-        logg.w('TargetCalculator: No vaccines available in coverage data');
-        return null;
-      }
-    }
-
-    // Try top-level fields first
-    int targetMale = selectedVaccine.totalTargetMale ?? 0;
-    int targetFemale = selectedVaccine.totalTargetFemale ?? 0;
-    
-    logg.i('   > Top-level target fields: male=$targetMale, female=$targetFemale');
-    logg.i('   > Areas array: ${selectedVaccine.areas != null ? "${selectedVaccine.areas!.length} areas" : "null"}');
-    logg.i('   > Filter by area: ${areaUid != null ? "UID=$areaUid" : areaName != null ? "Name=$areaName" : "none"}');
-
-    // ✅ FIX: If filtering by specific area (ward/subblock), find and use that area's data
-    if ((areaUid != null || areaName != null) &&
-        selectedVaccine.areas != null &&
-        selectedVaccine.areas!.isNotEmpty) {
-      logg.i('   > Filtering to specific area (ward/subblock level)');
-      
-      Area? matchingArea;
-      final areas = selectedVaccine.areas!;
-      
-      if (areaUid != null) {
-        try {
-          matchingArea = areas.firstWhere(
-            (area) => area.uid == areaUid,
-          );
-          logg.i('   > Found area by UID (exact match): ${matchingArea.name ?? matchingArea.uid}');
-        } catch (e) {
-          try {
-            matchingArea = areas.firstWhere(
-              (area) => area.uid?.toLowerCase() == areaUid.toLowerCase(),
-            );
-            logg.i('   > Found area by UID (case-insensitive): ${matchingArea.name ?? matchingArea.uid}');
-          } catch (e2) {
-            logg.w('   > Could not find area by UID: $areaUid');
-            if (areas.isNotEmpty) {
-              matchingArea = areas.first; // Fallback to first if not found
-              logg.w('   > Using first area as fallback: ${matchingArea.name ?? matchingArea.uid}');
-            }
-          }
-        }
-      } else if (areaName != null) {
-        try {
-          matchingArea = areas.firstWhere(
-            (area) => area.name?.toLowerCase() == areaName.toLowerCase(),
-          );
-          logg.i('   > Found area by name (exact match): ${matchingArea.name ?? matchingArea.uid}');
-        } catch (e) {
-          try {
-            matchingArea = areas.firstWhere(
-              (area) => area.name?.toLowerCase().contains(areaName.toLowerCase()) == true,
-            );
-            logg.i('   > Found area by name (contains match): ${matchingArea.name ?? matchingArea.uid}');
-          } catch (e2) {
-            logg.w('   > Could not find area by name: $areaName');
-            if (areas.isNotEmpty) {
-              matchingArea = areas.first; // Fallback to first if not found
-              logg.w('   > Using first area as fallback: ${matchingArea.name ?? matchingArea.uid}');
-            }
-          }
-        }
-      }
-      
-      if (matchingArea != null) {
-        targetMale = matchingArea.targetMale ?? 0;
-        targetFemale = matchingArea.targetFemale ?? 0;
-        logg.i('   ✅ Using filtered area data: male=$targetMale, female=$targetFemale');
-      } else {
-        logg.w('   ⚠️ Could not find matching area, using top-level or sum of all areas');
-      }
-    }
-    
-    // If top-level fields are 0 or null, and we haven't found a specific area, try to sum from areas array
-    if ((targetMale == 0 && targetFemale == 0) &&
-        selectedVaccine.areas != null &&
-        selectedVaccine.areas!.isNotEmpty &&
-        areaUid == null && areaName == null) {
-      logg.i(
-        'TargetCalculator: Top-level target fields are 0, calculating from areas array '
-        '(${selectedVaccine.areas!.length} areas)',
-      );
-      
-      // ✅ DEBUG: Log each area's contribution
-      int areaIndex = 0;
-      for (var area in selectedVaccine.areas!) {
-        final areaMale = area.targetMale ?? 0;
-        final areaFemale = area.targetFemale ?? 0;
-        logg.d('      Area[$areaIndex]: ${area.name ?? area.uid ?? "unnamed"} - M=$areaMale, F=$areaFemale');
-        areaIndex++;
-      }
-      
-      targetMale = selectedVaccine.areas!
-          .map((area) => area.targetMale ?? 0)
-          .fold(0, (sum, value) => sum + value);
-      targetFemale = selectedVaccine.areas!
-          .map((area) => area.targetFemale ?? 0)
-          .fold(0, (sum, value) => sum + value);
-      
-      logg.i('   > Calculated from areas: male=$targetMale, female=$targetFemale');
-    } else if (targetMale > 0 || targetFemale > 0) {
-      if (areaUid == null && areaName == null) {
-        logg.i('   ✅ Using top-level target fields (not summing from areas)');
-      }
-    }
-
-    final total = targetMale + targetFemale;
-
-    logg.i(
-      'TargetCalculator: Extracted target data - '
-      'total: $total, male: $targetMale, female: $targetFemale',
-    );
-
-    return TargetData(
-      total: total,
-      male: targetMale,
-      female: targetFemale,
+    return _resolveStats(
+      coverageData,
+      vaccineUid,
+      areaUid: areaUid,
+      areaName: areaName,
+      isCoverage: false,
     );
   }
 
-  /// Extract target data using the first available vaccine (for cases where vaccine UID is not specified)
+  /// Extract vaccinated children stats using the same area resolution as targets.
+  static TargetData? getCoverageData(
+    VaccineCoverageResponse? coverageData,
+    String? vaccineUid, {
+    String? areaUid,
+    String? areaName,
+  }) {
+    return _resolveStats(
+      coverageData,
+      vaccineUid,
+      areaUid: areaUid,
+      areaName: areaName,
+      isCoverage: true,
+    );
+  }
+
   static TargetData? getTargetDataFromFirstVaccine(
     VaccineCoverageResponse? coverageData,
   ) {
-    if (coverageData == null || coverageData.vaccines == null || coverageData.vaccines!.isEmpty) {
-      logg.w('TargetCalculator: No vaccines available in coverage data');
+    if (coverageData == null ||
+        coverageData.vaccines == null ||
+        coverageData.vaccines!.isEmpty) {
       return null;
     }
 

@@ -38,7 +38,7 @@ class EpiCenterAboutDetailsWidget extends StatelessWidget {
         'value': demographicsData?.timeToReachEpiCenter ?? 'N/A',
       },
       {'label': 'Porter Name', 'value': demographicsData?.porterName ?? 'N/A'},
-      {'label': 'Porter Phone', 'value': 'N/A'},
+      {'label': 'Porter Phone', 'value': demographicsData?.porterMobile ?? 'N/A'},
       {
         'label': 'Center Type',
         'value': demographicsData?.epiCenterType ?? 'N/A',

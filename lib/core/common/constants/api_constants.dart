@@ -180,13 +180,19 @@ class ApiConstants {
   /// Convert division name to slug format
   /// Example: "Rangpur Division" -> "rangpur-division"
   static String divisionNameToSlug(String divisionName) {
-    return divisionName.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
+    return areaNameToSlug(divisionName);
+  }
+
+  /// Convert any area name to slug format used by session plan API
+  /// Example: "Gazipur Sadar" -> "gazipur-sadar"
+  static String areaNameToSlug(String name) {
+    return name.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
   }
 
   /// Convert city corporation name to slug format
   /// Example: "Narayanganj CC" -> "narayanganj-cc"
   static String cityCorporationNameToSlug(String ccName) {
-    return ccName.toLowerCase().replaceAll(' ', '-').replaceAll('\'', '');
+    return areaNameToSlug(ccName);
   }
 
   /// Generate EPI details URL based on org_uid (for city corporation wards)

@@ -1,3 +1,4 @@
+import '../../epi_center/domain/epi_center_details_response.dart';
 import 'epi_center_result.dart';
 
 /// State for EPI Center Finder
@@ -11,7 +12,11 @@ class EpiCenterFinderState {
   final String? locationError;
   final DateTime? startDate;
   final DateTime? endDate;
-  final String? selectedCenterId; // For highlighting selected center
+  final int? sessionCount;
+  final String? selectedCenterId;
+  final bool isLoadingDetails;
+  final String? detailsError;
+  final EpiCenterDetailsResponse? selectedCenterDetails;
 
   EpiCenterFinderState({
     this.isLoading = false,
@@ -23,7 +28,11 @@ class EpiCenterFinderState {
     this.locationError,
     this.startDate,
     this.endDate,
+    this.sessionCount,
     this.selectedCenterId,
+    this.isLoadingDetails = false,
+    this.detailsError,
+    this.selectedCenterDetails,
   });
 
   EpiCenterFinderState copyWith({
@@ -36,9 +45,15 @@ class EpiCenterFinderState {
     String? locationError,
     DateTime? startDate,
     DateTime? endDate,
+    int? sessionCount,
     String? selectedCenterId,
+    bool? isLoadingDetails,
+    String? detailsError,
+    EpiCenterDetailsResponse? selectedCenterDetails,
     bool clearError = false,
     bool clearLocationError = false,
+    bool clearDetailsError = false,
+    bool clearSelectedCenterDetails = false,
   }) {
     return EpiCenterFinderState(
       isLoading: isLoading ?? this.isLoading,
@@ -53,7 +68,15 @@ class EpiCenterFinderState {
           : (locationError ?? this.locationError),
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      sessionCount: sessionCount ?? this.sessionCount,
       selectedCenterId: selectedCenterId ?? this.selectedCenterId,
+      isLoadingDetails: isLoadingDetails ?? this.isLoadingDetails,
+      detailsError: clearDetailsError
+          ? null
+          : (detailsError ?? this.detailsError),
+      selectedCenterDetails: clearSelectedCenterDetails
+          ? null
+          : (selectedCenterDetails ?? this.selectedCenterDetails),
     );
   }
 }

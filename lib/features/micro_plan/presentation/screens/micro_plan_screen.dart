@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../epi_center/utils/chart_area_uid_resolver.dart';
+import '../../../epi_center/utils/epi_details_helpers.dart';
 import '../../../epi_center/presentation/controllers/epi_center_controller.dart';
 import '../../../epi_center/presentation/widgets/epi_center_about_details_widget.dart';
 import '../../../epi_center/presentation/widgets/epi_center_microplan_widgets.dart';
@@ -11,8 +13,6 @@ import '../../../epi_center/presentation/widgets/epi_yearly_session_personnel_wi
 import '../../../filter/filter.dart';
 import '../../../map/presentation/controllers/map_controller.dart';
 import '../../../map/utils/map_enums.dart';
-import '../../../summary/presentation/controllers/summary_controller.dart';
-import '../../../summary/domain/vaccine_coverage_response.dart';
 
 class MicroPlanScreen extends ConsumerStatefulWidget {
   const MicroPlanScreen({super.key});
@@ -25,6 +25,7 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
   // ✅ Add debouncing and cancellation support
   Timer? _loadDebounceTimer;
   bool _isLoading = false;
+  bool _pendingReload = false;
 
   @override
   void initState() {
@@ -129,11 +130,29 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
     }
   }
 
+  Future<String?> _resolveChartUid() async {
+    final filterNotifier = ref.read(filterControllerProvider.notifier);
+    await filterNotifier.ensureHierarchyListsLoaded();
+    final filterState = ref.read(filterControllerProvider);
+    final orgUid = ref.read(mapControllerProvider.notifier).focalAreaUid;
+    final epiData = ref.read(epiCenterControllerProvider).epiCenterData;
+
+    final chartUid = ChartAreaUidResolver.resolveChartUid(
+      filterState: filterState,
+      filterNotifier: filterNotifier,
+      orgUid: orgUid,
+      currentEpiData: epiData,
+    );
+
+    logg.i('Micro Plan: Resolved chart UID → $chartUid');
+    return chartUid;
+  }
+
   Future<void> _loadMicroPlanData() async {
-    // ✅ Prevent multiple simultaneous loads
     if (_isLoading) {
+      _pendingReload = true;
       logg.d(
-        "Micro Plan: Load already in progress, skipping duplicate request",
+        "Micro Plan: Load already in progress, queuing another reload",
       );
       return;
     }
@@ -141,6 +160,16 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
     _isLoading = true;
 
     try {
+      do {
+        _pendingReload = false;
+        await _loadMicroPlanDataOnce();
+      } while (_pendingReload && mounted);
+    } finally {
+      _isLoading = false;
+    }
+  }
+
+  Future<void> _loadMicroPlanDataOnce() async {
       // ✅ Ensure UI updates immediately by yielding control
       await Future.delayed(Duration.zero);
 
@@ -194,11 +223,19 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
       // ✅ Additional check: If orgUid is a short UID (likely division), also block it
       // Division UIDs are typically short (10-15 chars) and don't contain slashes
       if (orgUid != null && orgUid.length < 20 && !orgUid.contains('/')) {
-        // Check if it's actually a division by verifying no lower-level filters are set
-        if (isDivisionLevel || 
-            (filterState.selectedDivision != 'All' &&
-             filterState.selectedDistrict == null &&
-             filterState.selectedCityCorporation == null)) {
+        final hasDeepSelection =
+            !ChartAreaUidResolver.isPlaceholder(filterState.selectedSubblock) ||
+            !ChartAreaUidResolver.isPlaceholder(filterState.selectedWard) ||
+            !ChartAreaUidResolver.isPlaceholder(filterState.selectedUnion) ||
+            !ChartAreaUidResolver.isPlaceholder(filterState.selectedUpazila) ||
+            !ChartAreaUidResolver.isPlaceholder(filterState.selectedDistrict) ||
+            !ChartAreaUidResolver.isPlaceholder(filterState.selectedZone);
+
+        if (!hasDeepSelection &&
+            (isDivisionLevel ||
+                (filterState.selectedDivision != 'All' &&
+                    filterState.selectedDistrict == null &&
+                    filterState.selectedCityCorporation == null))) {
           logg.w("⚠️ Short UID detected (likely division) - blocking request");
           logg.w("   > UID: $orgUid (length: ${orgUid.length})");
           _setDivisionLevelError(epiController);
@@ -206,218 +243,21 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
         }
       }
 
-      // ✅ Check if no area is selected (orgUid is null)
-      // This happens when area type is selected but no specific area is chosen
-      if (orgUid == null) {
+      if (orgUid == null &&
+          ChartAreaUidResolver.isPlaceholder(filterState.selectedDistrict) &&
+          ChartAreaUidResolver.isPlaceholder(filterState.selectedCityCorporation)) {
         logg.w("⚠️ No area selected - focalAreaUid returned null");
-        logg.w("   > Please select a specific area (district, upazila, union, ward, subblock, city corporation, or zone)");
-        
         epiController.setErrorState(
           'Please select an area in the filter to view microplan data. Select a district, upazila, union, ward, subblock, city corporation, or zone.',
         );
         return;
       }
 
-      // ✅ FIX: The /chart/ endpoint requires single UIDs, not concatenated paths
-      // The concatenated path format works for /epi/ endpoint but not for /chart/ endpoint
-      // For city corporation hierarchy:
-      // - Zone level: ccUid/zoneUid (2 segments) -> extract zoneUid
-      // - Ward level: ccUid/zoneUid/wardUid (3 segments) -> extract wardUid
-      // - Subblock level: ccUid/zoneUid/wardUid/subblockUid (4 segments) -> extract subblockUid
-      // For district hierarchy:
-      // - Subblock level: district/upazila/union/ward/subblock (5 segments) -> extract subblockUid
-      String effectiveUid;
+      final effectiveUid = await _resolveChartUid();
+      logg.i('Micro Plan: effective chart UID=$effectiveUid');
 
-      final isCityCorporation =
-          filterState.selectedAreaType == AreaType.cityCorporation;
-      final pathSegments = orgUid.contains('/')
-          ? orgUid.split('/').length
-          : 0;
-
-      logg.i(
-        "   > Area type: ${filterState.selectedAreaType}, isCityCorporation: $isCityCorporation",
-      );
-      logg.i(
-        "   > Path segments: $pathSegments, orgUid: $orgUid",
-      );
-
-      // ✅ Handle city corporation hierarchy
-      if (isCityCorporation) {
-        final filterController = ref.read(filterControllerProvider.notifier);
-        
-        // Check for subblock level (4 segments: ccUid/zoneUid/wardUid/subblockUid)
-        if (pathSegments == 4 || 
-            (filterState.selectedSubblock != null &&
-             filterState.selectedSubblock != 'All')) {
-          String? subblockUid;
-          
-          if (filterState.selectedSubblock != null &&
-              filterState.selectedSubblock != 'All') {
-            subblockUid = filterController.getSubblockUid(
-              filterState.selectedSubblock!,
-            );
-            logg.i(
-              "   > Subblock filter found: ${filterState.selectedSubblock}, UID: $subblockUid",
-            );
-          }
-          
-          // Fallback: extract from path
-          if (subblockUid == null && pathSegments == 4) {
-            subblockUid = orgUid.split('/').last;
-            logg.i(
-              "   > Subblock detected from path (4 segments) - extracted UID: $subblockUid",
-            );
-          }
-          
-          if (subblockUid != null) {
-            effectiveUid = subblockUid;
-            logg.i(
-              "   > ✅ City Corporation Subblock - using subblock UID only: $effectiveUid",
-            );
-          } else {
-            effectiveUid = orgUid;
-            logg.w(
-              "   > ⚠️ Could not extract subblock UID, using orgUid as-is: $effectiveUid",
-            );
-          }
-        }
-        // Check for ward level (3 segments: ccUid/zoneUid/wardUid)
-        else if (pathSegments == 3 ||
-                 (filterState.selectedWard != null &&
-                  filterState.selectedWard != 'All' &&
-                  (filterState.selectedSubblock == null ||
-                   filterState.selectedSubblock == 'All'))) {
-          String? wardUid;
-          
-          if (filterState.selectedWard != null &&
-              filterState.selectedWard != 'All') {
-            wardUid = filterController.getWardUid(
-              filterState.selectedWard!,
-            );
-            logg.i(
-              "   > Ward filter found: ${filterState.selectedWard}, UID: $wardUid",
-            );
-          }
-          
-          // Fallback: extract from path
-          if (wardUid == null && pathSegments == 3) {
-            wardUid = orgUid.split('/').last;
-            logg.i(
-              "   > Ward detected from path (3 segments) - extracted UID: $wardUid",
-            );
-          }
-          
-          if (wardUid != null) {
-            effectiveUid = wardUid;
-            logg.i(
-              "   > ✅ City Corporation Ward - using ward UID only: $effectiveUid",
-            );
-          } else {
-            effectiveUid = orgUid;
-            logg.w(
-              "   > ⚠️ Could not extract ward UID, using orgUid as-is: $effectiveUid",
-            );
-          }
-        }
-        // Check for zone level (2 segments: ccUid/zoneUid)
-        else if (pathSegments == 2 ||
-                 (filterState.selectedZone != null &&
-                  filterState.selectedZone != 'All' &&
-                  (filterState.selectedWard == null ||
-                   filterState.selectedWard == 'All'))) {
-          String? zoneUid;
-          
-          if (filterState.selectedZone != null &&
-              filterState.selectedZone != 'All') {
-            zoneUid = filterController.getZoneUid(
-              filterState.selectedZone!,
-            );
-            logg.i(
-              "   > Zone filter found: ${filterState.selectedZone}, UID: $zoneUid",
-            );
-          }
-          
-          // Fallback: extract from path
-          if (zoneUid == null && pathSegments == 2) {
-            zoneUid = orgUid.split('/').last;
-            logg.i(
-              "   > Zone detected from path (2 segments) - extracted UID: $zoneUid",
-            );
-          }
-          
-          if (zoneUid != null) {
-            effectiveUid = zoneUid;
-            logg.i(
-              "   > ✅ City Corporation Zone - using zone UID only: $effectiveUid",
-            );
-          } else {
-            effectiveUid = orgUid;
-            logg.w(
-              "   > ⚠️ Could not extract zone UID, using orgUid as-is: $effectiveUid",
-            );
-          }
-        }
-        // City corporation level (1 segment: ccUid) - use as-is
-        else {
-          effectiveUid = orgUid;
-          logg.i("   > City Corporation level - using orgUid as-is: $effectiveUid");
-        }
-      }
-      // ✅ Handle district hierarchy
-      else {
-        // Check for subblock level (5 segments: district/upazila/union/ward/subblock)
-        final isSubblockPath = pathSegments == 5;
-        final hasSubblockFilter =
-            filterState.selectedSubblock != null &&
-            filterState.selectedSubblock != 'All';
-
-        if (isSubblockPath || hasSubblockFilter) {
-          String? subblockUid;
-
-          if (hasSubblockFilter) {
-            final filterController = ref.read(filterControllerProvider.notifier);
-            subblockUid = filterController.getSubblockUid(
-              filterState.selectedSubblock!,
-            );
-            logg.i(
-              "   > Subblock filter found: ${filterState.selectedSubblock}, UID: $subblockUid",
-            );
-          }
-
-          // Fallback: extract from path
-          if (subblockUid == null && isSubblockPath) {
-            subblockUid = orgUid.split('/').last;
-            logg.i(
-              "   > Subblock detected from path (5 segments) - extracted UID: $subblockUid",
-            );
-          }
-
-          if (subblockUid != null) {
-            effectiveUid = subblockUid;
-            logg.i(
-              "   > ✅ District Subblock - using subblock UID only: $effectiveUid",
-            );
-          } else {
-            effectiveUid = orgUid;
-            logg.w(
-              "   > ⚠️ Could not extract subblock UID, using orgUid as-is: $effectiveUid",
-            );
-          }
-        } else {
-          // For other district levels (ward, union, upazila, district), use orgUid as-is
-          effectiveUid = orgUid.isNotEmpty ? orgUid : 'null';
-          logg.i("   > District level (not subblock) - using orgUid as-is: $effectiveUid");
-        }
-      }
-
-      logg.i("   > Effective UID for API: $effectiveUid");
-
-      // ✅ Validate UID before making API call
-      if (effectiveUid.isEmpty || effectiveUid == 'null') {
+      if (effectiveUid == null || effectiveUid.isEmpty || effectiveUid == 'null') {
         logg.w("⚠️ Invalid or missing UID - cannot fetch microplan data");
-        logg.w("   > Effective UID: '$effectiveUid'");
-        logg.w("   > Please ensure a valid area is selected in the filter");
-        
         epiController.setErrorState(
           'No area selected. Please select a district, upazila, union, ward, subblock, city corporation, or zone in the filter.',
         );
@@ -430,89 +270,17 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
         orgUid: effectiveUid,
         year: year,
       );
-    } finally {
-      _isLoading = false;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final epiState = ref.watch(epiCenterControllerProvider);
     final filterState = ref.watch(filterControllerProvider);
-    final mapState = ref.watch(mapControllerProvider);
-    final summaryState = ref.watch(summaryControllerProvider);
 
     final epiCenterData = epiState.epiCenterData;
     final selectedYear = filterState.selectedYear;
-
-    // ✅ Optimize coverage data access - only read when needed (lazy evaluation)
-    // This prevents expensive reads on every build
-    VaccineCoverageResponse? coverageData;
-    String? selectedVaccineUid;
-    String? coverageDataSource; // ✅ DEBUG: Track which source is used
-
-    // ✅ DEBUG: Always log coverage data check, even if EPI data is null
-    logg.i('🔍 [0-11m DEBUG] Checking coverage data sources for microplan:');
-    logg.i(
-      '   > EPI Center Data: ${epiCenterData != null ? "present" : "null"}',
-    );
-    logg.i(
-      '   > Filter: ${filterState.selectedAreaType}, ${filterState.selectedDivision}, ${filterState.selectedDistrict}, ${filterState.selectedUpazila}, ${filterState.selectedUnion}, ${filterState.selectedWard}, ${filterState.selectedSubblock}',
-    );
-    logg.i(
-      '   > Map state level: ${mapState.currentLevel}, area: ${mapState.currentAreaName}',
-    );
-
-    // Only fetch coverage data if we have EPI data (avoid unnecessary work)
-    if (epiCenterData != null) {
-      final mapNotifier = ref.read(mapControllerProvider.notifier);
-
-      if (mapNotifier.unfilteredCoverageData != null) {
-        coverageData = mapNotifier.unfilteredCoverageData;
-        coverageDataSource = 'unfilteredCoverageData (map controller)';
-        logg.i('   ✅ Using unfilteredCoverageData from map controller');
-        logg.i(
-          '      > Vaccines count: ${coverageData?.vaccines?.length ?? 0}',
-        );
-        if (coverageData?.vaccines != null &&
-            coverageData!.vaccines!.isNotEmpty) {
-          final firstVaccine = coverageData.vaccines!.first;
-          logg.i(
-            '      > First vaccine: ${firstVaccine.vaccineName} (UID: ${firstVaccine.vaccineUid})',
-          );
-          logg.i(
-            '      > First vaccine targets: totalMale=${firstVaccine.totalTargetMale}, totalFemale=${firstVaccine.totalTargetFemale}',
-          );
-          logg.i(
-            '      > First vaccine areas count: ${firstVaccine.areas?.length ?? 0}',
-          );
-        }
-      } else if (summaryState.coverageData != null) {
-        coverageData = summaryState.coverageData;
-        coverageDataSource = 'coverageData (summary controller)';
-        logg.i('   ✅ Using coverageData from summary controller');
-        logg.i(
-          '      > Vaccines count: ${coverageData?.vaccines?.length ?? 0}',
-        );
-      } else if (mapState.coverageData != null) {
-        coverageData = mapState.coverageData;
-        coverageDataSource = 'coverageData (map state)';
-        logg.i('   ✅ Using coverageData from map state');
-        logg.i(
-          '      > Vaccines count: ${coverageData?.vaccines?.length ?? 0}',
-        );
-      } else {
-        logg.w('   ⚠️ No coverage data available from any source');
-      }
-
-      selectedVaccineUid = filterState.selectedVaccine;
-      logg.i('   > Selected vaccine UID: $selectedVaccineUid');
-      logg.i('   > Coverage data source: $coverageDataSource');
-    } else {
-      logg.w(
-        '🔍 [0-11m DEBUG] No EPI center data available, skipping coverage data lookup',
-      );
-    }
+    final showSubblockSections =
+        EpiDetailsHelpers.shouldShowSubblockOnlySections(filterState);
 
     // ✅ Listen to filter state changes and reload microplan data
     ref.listen<FilterState>(filterControllerProvider, (previous, current) {
@@ -541,9 +309,12 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
             "🔄 Micro Plan: Filter applied - scheduling reload (year: ${current.selectedYear}, area: ${current.selectedAreaType})",
           );
 
-          // ✅ Use debounced loading to prevent rapid successive loads
-          // This prevents ANR when filters change quickly
-          _scheduleLoadMicroPlanData();
+          final needsImmediateReload =
+              previous.selectedSubblock != current.selectedSubblock ||
+              previous.selectedWard != current.selectedWard ||
+              previous.selectedUnion != current.selectedUnion;
+
+          _scheduleLoadMicroPlanData(immediate: needsImmediateReload);
         }
       }
     });
@@ -663,21 +434,19 @@ class _MicroPlanScreenState extends ConsumerState<MicroPlanScreen> {
                         // Microplan section
                         EpiCenterMicroplanSection(
                           epiCenterDetailsData: epiCenterData,
-                          coverageData:
-                              coverageData, // ✅ Pass coverage data for consistent calculation
-                          selectedVaccineUid:
-                              selectedVaccineUid, // ✅ Pass selected vaccine UID
                         ),
-                        const SizedBox(height: 24),
-                        EpiCenterAboutDetailsWidget(
-                          epiCenterDetailsData: epiCenterData,
-                          selectedYear: selectedYear,
-                        ),
-                        const SizedBox(height: 10),
-                        EpiYearlySessionPersonnelWidget(
-                          epiCenterDetailsData: epiCenterData,
-                          selectedYear: selectedYear,
-                        ),
+                        if (showSubblockSections) ...[
+                          const SizedBox(height: 24),
+                          EpiCenterAboutDetailsWidget(
+                            epiCenterDetailsData: epiCenterData,
+                            selectedYear: selectedYear,
+                          ),
+                          const SizedBox(height: 10),
+                          EpiYearlySessionPersonnelWidget(
+                            epiCenterDetailsData: epiCenterData,
+                            selectedYear: selectedYear,
+                          ),
+                        ],
                       ],
                     ),
                   ),

@@ -5,6 +5,7 @@ import '../../domain/area_response_model.dart';
 import '../../data/filter_repository.dart';
 import '../../../map/utils/map_enums.dart';
 import '../../../epi_center/presentation/controllers/epi_center_controller.dart';
+import '../../../epi_center/utils/chart_area_uid_resolver.dart';
 
 /// Global filter state provider
 final filterControllerProvider =
@@ -647,6 +648,106 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     await _loadSubblocksByWard(wardUid);
   }
 
+  Future<void> _waitForHierarchyList(
+    bool Function() isReady, {
+    int maxRetries = 50,
+  }) async {
+    var retries = 0;
+    while (retries < maxRetries && !isReady()) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      retries++;
+    }
+  }
+
+  /// Load upazila→union→ward→subblock lists (top-down) so chart UID lookup succeeds.
+  Future<void> ensureHierarchyListsLoaded() async {
+    if (state.selectedAreaType == AreaType.cityCorporation) {
+      await _ensureCityCorporationHierarchyLoaded();
+      return;
+    }
+    await _ensureDistrictHierarchyLoaded();
+  }
+
+  Future<void> _ensureDistrictHierarchyLoaded() async {
+    if (!ChartAreaUidResolver.isPlaceholder(state.selectedUpazila) &&
+        state.upazilas.isEmpty &&
+        !ChartAreaUidResolver.isPlaceholder(state.selectedDistrict)) {
+      final districtUid = getDistrictUid(state.selectedDistrict!);
+      if (districtUid != null) {
+        await loadUpazilasByDistrict(districtUid);
+      }
+      await _waitForHierarchyList(() => state.upazilas.isNotEmpty);
+    }
+
+    if (!ChartAreaUidResolver.isPlaceholder(state.selectedUnion) &&
+        state.unions.isEmpty &&
+        !ChartAreaUidResolver.isPlaceholder(state.selectedUpazila)) {
+      final upazilaUid = getUpazilaUid(state.selectedUpazila!);
+      if (upazilaUid != null) {
+        await loadUnionsByUpazila(upazilaUid);
+      }
+      await _waitForHierarchyList(() => state.unions.isNotEmpty);
+    }
+
+    if (!ChartAreaUidResolver.isPlaceholder(state.selectedWard) &&
+        state.wards.isEmpty &&
+        !ChartAreaUidResolver.isPlaceholder(state.selectedUnion)) {
+      final unionUid = getUnionUid(state.selectedUnion!);
+      if (unionUid != null) {
+        await loadWardsByUnion(unionUid);
+      }
+      await _waitForHierarchyList(() => state.wards.isNotEmpty);
+    }
+
+    if (!ChartAreaUidResolver.isPlaceholder(state.selectedSubblock) &&
+        state.subblocks.isEmpty &&
+        !ChartAreaUidResolver.isPlaceholder(state.selectedWard)) {
+      final wardUid = getWardUid(state.selectedWard!);
+      if (wardUid != null) {
+        await loadSubblocksByWard(wardUid);
+      }
+      await _waitForHierarchyList(() => state.subblocks.isNotEmpty);
+    }
+  }
+
+  Future<void> _ensureCityCorporationHierarchyLoaded() async {
+    if (!ChartAreaUidResolver.isPlaceholder(state.selectedZone) &&
+        state.zones.isEmpty &&
+        state.selectedCityCorporation != null &&
+        state.selectedCityCorporation != 'All') {
+      final ccUid = getCityCorporationUid(state.selectedCityCorporation!);
+      if (ccUid != null) {
+        await loadZonesByCityCorporation(ccUid);
+      }
+      await _waitForHierarchyList(() => state.zones.isNotEmpty);
+    }
+
+    if (!ChartAreaUidResolver.isPlaceholder(state.selectedWard) &&
+        state.wards.isEmpty &&
+        !ChartAreaUidResolver.isPlaceholder(state.selectedZone)) {
+      final zoneUid = getZoneUid(state.selectedZone!);
+      if (zoneUid != null) {
+        try {
+          final wards = await _repository.fetchAreasByParentUid(zoneUid);
+          state = state.copyWith(wards: wards);
+        } catch (e) {
+          logg.e('FilterProvider: Error loading wards for zone $zoneUid: $e');
+        }
+      }
+      await _waitForHierarchyList(() => state.wards.isNotEmpty);
+    }
+
+    if (!ChartAreaUidResolver.isPlaceholder(state.selectedSubblock) &&
+        state.subblocks.isEmpty &&
+        !ChartAreaUidResolver.isPlaceholder(state.selectedWard)) {
+      final wardUid = getWardUid(state.selectedWard!);
+      if (wardUid != null) {
+        await loadSubblocksByWard(wardUid);
+      }
+      await _waitForHierarchyList(() => state.subblocks.isNotEmpty);
+    }
+  }
+
   /// Load subblocks by ward UID (internal method)
   Future<void> _loadSubblocksByWard(String wardUid) async {
     try {
@@ -872,6 +973,23 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
         (subblock) {
           final subblockBaseName = subblock.name?.split(' (')[0].trim() ?? '';
           return subblockBaseName.toLowerCase() == baseName.toLowerCase();
+        },
+        orElse: () => const AreaResponseModel(),
+      );
+    }
+
+    // Normalized token match (handles "GA1" vs "GA 1")
+    if (subblock.uid == null) {
+      String normalize(String value) =>
+          value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+      final normalizedTarget = normalize(normalizedSearchName);
+      subblock = state.subblocks.firstWhere(
+        (item) {
+          final name = item.name ?? '';
+          final normalizedItem = normalize(name);
+          return normalizedItem == normalizedTarget ||
+              normalizedItem.contains(normalizedTarget) ||
+              normalizedTarget.contains(normalizedItem);
         },
         orElse: () => const AreaResponseModel(),
       );
@@ -1561,8 +1679,17 @@ class FilterControllerNotifier extends StateNotifier<FilterState> {
     String? initialSubblock,
     required List<String> initialMonths,
     bool forceTimestampUpdate = false, // Force timestamp update (e.g., for microplan context)
+    bool fromEpiContext = false,
   }) {
     logg.i('🔍 FilterProvider: Comparing current vs initial values:');
+
+    // Stale EPI context blocks map reload from Summary/Home filters.
+    if (!fromEpiContext && state.isEpiDetailsContext) {
+      logg.w(
+        'FilterProvider: Clearing stale EPI context before applying main-app filters',
+      );
+      clearEpiDetailsContext();
+    }
 
     // Compare current values with initial values to detect changes
     // Check if months list content changed (order matters or length matters)
