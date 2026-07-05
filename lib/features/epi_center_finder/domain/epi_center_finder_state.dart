@@ -1,4 +1,5 @@
 import '../../epi_center/domain/epi_center_details_response.dart';
+import '../../map/domain/area_coords_geo_json_response.dart';
 import 'epi_center_result.dart';
 
 /// State for EPI Center Finder
@@ -17,6 +18,7 @@ class EpiCenterFinderState {
   final bool isLoadingDetails;
   final String? detailsError;
   final EpiCenterDetailsResponse? selectedCenterDetails;
+  final AreaCoordsGeoJsonResponse? areaCoordsGeoJsonData;
 
   EpiCenterFinderState({
     this.isLoading = false,
@@ -33,6 +35,7 @@ class EpiCenterFinderState {
     this.isLoadingDetails = false,
     this.detailsError,
     this.selectedCenterDetails,
+    this.areaCoordsGeoJsonData,
   });
 
   EpiCenterFinderState copyWith({
@@ -50,6 +53,7 @@ class EpiCenterFinderState {
     bool? isLoadingDetails,
     String? detailsError,
     EpiCenterDetailsResponse? selectedCenterDetails,
+    AreaCoordsGeoJsonResponse? areaCoordsGeoJsonData,
     bool clearError = false,
     bool clearLocationError = false,
     bool clearDetailsError = false,
@@ -77,6 +81,8 @@ class EpiCenterFinderState {
       selectedCenterDetails: clearSelectedCenterDetails
           ? null
           : (selectedCenterDetails ?? this.selectedCenterDetails),
+      areaCoordsGeoJsonData:
+          areaCoordsGeoJsonData ?? this.areaCoordsGeoJsonData,
     );
   }
 }

@@ -6,9 +6,15 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/common/constants/constants.dart';
 import '../../../../core/common/widgets/custom_loading_widget.dart';
 import '../../../map/presentation/widget/map_tile_layer.dart';
+import '../../../map/domain/area_polygon.dart';
+import '../../../map/utils/map_enums.dart';
+import '../../../map/utils/map_utils.dart';
+import '../../../filter/domain/filter_state.dart';
+import '../../../session_plan/utils/session_plan_area_param_builder.dart';
 import '../../domain/epi_center_result.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
 import '../../../filter/presentation/widgets/geographic_filter_form.dart';
@@ -51,7 +57,7 @@ class _EpiCenterFinderScreenState
         .searchWithCurrentFilters();
 
     if (mounted) {
-      _fitBoundsToResults();
+      _fitMapToContent();
     }
   }
 
@@ -79,6 +85,82 @@ class _EpiCenterFinderScreenState
         startStr == endStr ? startStr : '$startStr – $endStr';
 
     return '$dateSummary · $areaSummary';
+  }
+
+  GeographicLevel _getCurrentGeographicLevel(FilterState filterState) {
+    if (!SessionPlanAreaParamBuilder.isPlaceholder(filterState.selectedSubblock)) {
+      return GeographicLevel.subblock;
+    }
+    if (!SessionPlanAreaParamBuilder.isPlaceholder(filterState.selectedWard)) {
+      return GeographicLevel.ward;
+    }
+    if (!SessionPlanAreaParamBuilder.isPlaceholder(filterState.selectedUnion)) {
+      return GeographicLevel.union;
+    }
+    if (!SessionPlanAreaParamBuilder.isPlaceholder(filterState.selectedUpazila)) {
+      return GeographicLevel.upazila;
+    }
+    if (!SessionPlanAreaParamBuilder.isPlaceholder(filterState.selectedDistrict)) {
+      return GeographicLevel.district;
+    }
+    if (filterState.selectedDivision != 'All') {
+      return GeographicLevel.division;
+    }
+    if (filterState.selectedAreaType == AreaType.cityCorporation) {
+      if (!SessionPlanAreaParamBuilder.isPlaceholder(filterState.selectedZone)) {
+        return GeographicLevel.zone;
+      }
+      if (!SessionPlanAreaParamBuilder.isCityCorporationUnselected(filterState)) {
+        return GeographicLevel.cityCorporation;
+      }
+    }
+    return GeographicLevel.country;
+  }
+
+  List<AreaPolygon> _parseAreaPolygons(EpiCenterFinderState state) {
+    final geoJsonData = state.areaCoordsGeoJsonData;
+    if (geoJsonData == null) return const [];
+    return parseGeoJsonToPolygonsSimple(geoJsonData);
+  }
+
+  List<Marker> _buildAreaNameMarkers(List<AreaPolygon> areaPolygons) {
+    final mainAreaPolygons = areaPolygons
+        .where((polygon) => !polygon.areaName.contains('(Part '))
+        .toList();
+
+    if (mainAreaPolygons.length > 150) {
+      return const [];
+    }
+
+    return mainAreaPolygons.map((areaPolygon) {
+      final centroid = calculatePolygonCentroid(areaPolygon.polygon.points);
+      var displayName = areaPolygon.areaName;
+      if (displayName.contains('(Part 1)')) {
+        displayName = displayName.replaceFirst(' (Part 1)', '');
+      }
+
+      return Marker(
+        point: centroid,
+        child: FittedBox(
+          fit: BoxFit.none,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(3),
+              border: Border.all(color: Colors.black38, width: 0.3),
+            ),
+            child: Text(
+              displayName,
+              style: const TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      );
+    }).toList();
   }
 
   void _fitBoundsToResults() {
@@ -119,14 +201,50 @@ class _EpiCenterFinderScreenState
     );
   }
 
+  void _fitMapToContent() {
+    final state = ref.read(epiCenterFinderControllerProvider);
+    final filterState = ref.read(filterControllerProvider);
+    final areaPolygons = _parseAreaPolygons(state);
+
+    if (areaPolygons.isNotEmpty) {
+      final currentLevel = _getCurrentGeographicLevel(filterState);
+      autoZoomToPolygons(areaPolygons, currentLevel, _mapController);
+      return;
+    }
+
+    _fitBoundsToResults();
+  }
+
+  Future<void> _launchGoogleMapsNavigation(double lat, double lng) async {
+    final googleMapsUrl = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
+    );
+
+    try {
+      final launched = await launchUrl(
+        googleMapsUrl,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open Google Maps.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open Google Maps.')),
+        );
+      }
+    }
+  }
+
   void _onMarkerTap(EpiCenterResult result) {
     ref
         .read(epiCenterFinderControllerProvider.notifier)
         .loadCenterDetails(result);
 
-    setState(() {
-      _selectedTabIndex = 1;
-    });
+    _launchGoogleMapsNavigation(result.lat, result.lng);
   }
 
   void _ensureDetailsForTableTab() {
@@ -388,7 +506,8 @@ class _EpiCenterFinderScreenState
                           ),
                         ),
                       )
-                    : state.results.isEmpty
+                    : state.results.isEmpty &&
+                            state.areaCoordsGeoJsonData == null
                         ? Center(
                             child: Padding(
                               padding: const EdgeInsets.all(24.0),
@@ -462,7 +581,10 @@ class _EpiCenterFinderScreenState
   Widget _buildMapView(EpiCenterFinderState state) {
     final userLocation = state.userLat != null && state.userLng != null
         ? LatLng(state.userLat!, state.userLng!)
-        : const LatLng(23.6850, 90.3563); // Default to Bangladesh center
+        : const LatLng(23.6850, 90.3563);
+    final filterState = ref.watch(filterControllerProvider);
+    final areaPolygons = _parseAreaPolygons(state);
+    final currentLevel = _getCurrentGeographicLevel(filterState);
 
     return FlutterMap(
       mapController: _mapController,
@@ -474,14 +596,35 @@ class _EpiCenterFinderScreenState
       ),
       children: [
         MapTileLayer(),
+        if (areaPolygons.isNotEmpty)
+          PolygonLayer(
+            polygons: areaPolygons.map((polygon) => polygon.polygon).toList(),
+          ),
         MarkerLayer(
           markers: _buildMarkers(state.results, state.selectedCenterId),
         ),
+        if (areaPolygons.isNotEmpty && currentLevel.shouldShowAreaLabels)
+          MarkerLayer(
+            markers: _buildAreaNameMarkers(areaPolygons),
+          ),
       ],
     );
   }
 
   Widget _buildTableView(EpiCenterFinderState state) {
+    if (state.results.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            _emptyStateMessage(state),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+      );
+    }
+
     final notifier = ref.read(epiCenterFinderControllerProvider.notifier);
     final selectedId = state.selectedCenterId ?? state.results.first.id;
     final selectedResult =

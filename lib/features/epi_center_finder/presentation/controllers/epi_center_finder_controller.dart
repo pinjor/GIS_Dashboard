@@ -8,6 +8,9 @@ import '../../domain/epi_center_finder_state.dart';
 import '../../domain/epi_center_result.dart';
 import '../../data/epi_center_finder_repository.dart';
 import '../../../filter/presentation/controllers/filter_controller.dart';
+import '../../../map/domain/area_coords_geo_json_response.dart';
+import '../../../map/presentation/controllers/map_controller.dart';
+import '../../../map/utils/map_filter_loader.dart';
 import '../../../map/utils/map_enums.dart';
 import '../../../session_plan/utils/session_plan_area_param_builder.dart';
 
@@ -60,6 +63,24 @@ class EpiCenterFinderController
 
     final currentState = _ref.read(filterControllerProvider);
     return SessionPlanAreaParamBuilder.build(currentState, filterNotifier);
+  }
+
+  Future<AreaCoordsGeoJsonResponse?> _loadAreaBoundaries() async {
+    final filterState = _ref.read(filterControllerProvider);
+    final filterNotifier = _ref.read(filterControllerProvider.notifier);
+    final mapNotifier = _ref.read(mapControllerProvider.notifier);
+
+    try {
+      await MapFilterLoader.reloadForFilters(
+        mapNotifier: mapNotifier,
+        filterNotifier: filterNotifier,
+        filterState: filterState,
+      );
+      return _ref.read(mapControllerProvider).areaCoordsGeoJsonData;
+    } catch (e) {
+      logg.w('EPI Center Finder: Failed to load area boundaries: $e');
+      return null;
+    }
   }
 
   /// Request location permission and get current location, then search.
@@ -150,6 +171,7 @@ class EpiCenterFinderController
       );
 
       final areaParam = await _resolveAreaParam();
+      final boundariesFuture = _loadAreaBoundaries();
 
       logg.i(
         "EPI Center Finder: Searching near ($userLat, $userLng), area: ${areaParam ?? 'country'}, date: ${startDate.toString().split(' ')[0]}",
@@ -160,6 +182,7 @@ class EpiCenterFinderController
         endDate: endDate,
         areaParam: areaParam,
       );
+      final areaCoordsGeoJsonData = await boundariesFuture;
 
       if (sessionPlanData.features == null ||
           sessionPlanData.features!.isEmpty) {
@@ -169,6 +192,7 @@ class EpiCenterFinderController
           isLoading: false,
           results: [],
           sessionCount: 0,
+          areaCoordsGeoJsonData: areaCoordsGeoJsonData,
           selectedCenterId: null,
           clearSelectedCenterDetails: true,
           clearDetailsError: true,
@@ -232,6 +256,7 @@ class EpiCenterFinderController
         isLoading: false,
         results: deduplicatedResults,
         sessionCount: apiSessionCount,
+        areaCoordsGeoJsonData: areaCoordsGeoJsonData,
         selectedCenterId: firstId,
         clearSelectedCenterDetails: true,
         clearDetailsError: true,
@@ -249,6 +274,7 @@ class EpiCenterFinderController
         error: 'Failed to search EPI centers: ${e.toString()}',
         results: [],
         sessionCount: 0,
+        areaCoordsGeoJsonData: null,
         selectedCenterId: null,
         clearSelectedCenterDetails: true,
       );
