@@ -112,6 +112,10 @@ class EpiCenterFinderDetailsPanel extends ConsumerWidget {
                     ),
                   ],
                   rows: rows.map((row) {
+                    final canDial = row.dialNumber != null &&
+                        row.dialNumber!.length >= 6 &&
+                        row.displayValue != 'N/A';
+
                     return DataRow(
                       cells: [
                         DataCell(
@@ -126,8 +130,11 @@ class EpiCenterFinderDetailsPanel extends ConsumerWidget {
                         DataCell(
                           _DetailValueCell(
                             displayValue: row.displayValue,
-                            dialNumber: row.dialNumber,
+                            showAsLink: canDial,
                           ),
+                          onTap: canDial
+                              ? () => launchPhoneDialer(context, row.dialNumber!)
+                              : null,
                         ),
                       ],
                     );
@@ -214,6 +221,28 @@ class EpiCenterFinderDetailsPanel extends ConsumerWidget {
   }
 }
 
+Future<void> launchPhoneDialer(BuildContext context, String number) async {
+  final uri = Uri(scheme: 'tel', path: number);
+
+  try {
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the phone dialer.')),
+      );
+    }
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the phone dialer.')),
+      );
+    }
+  }
+}
+
 class _DetailRowData {
   const _DetailRowData({
     required this.label,
@@ -229,32 +258,15 @@ class _DetailRowData {
 class _DetailValueCell extends StatelessWidget {
   const _DetailValueCell({
     required this.displayValue,
-    this.dialNumber,
+    this.showAsLink = false,
   });
 
   final String displayValue;
-  final String? dialNumber;
-
-  Future<void> _launchDialer(BuildContext context, String number) async {
-    final uri = Uri.parse('tel:$number');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-      return;
-    }
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the phone dialer.')),
-      );
-    }
-  }
+  final bool showAsLink;
 
   @override
   Widget build(BuildContext context) {
-    final canDial =
-        dialNumber != null && dialNumber!.length >= 6 && displayValue != 'N/A';
-
-    if (!canDial) {
+    if (!showAsLink) {
       return SizedBox(
         width: 220,
         child: Text(displayValue),
@@ -263,27 +275,24 @@ class _DetailValueCell extends StatelessWidget {
 
     return SizedBox(
       width: 220,
-      child: InkWell(
-        onTap: () => _launchDialer(context, dialNumber!),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                displayValue,
-                style: TextStyle(
-                  color: Color(Constants.primaryColor),
-                  decoration: TextDecoration.underline,
-                  fontWeight: FontWeight.w500,
-                ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              displayValue,
+              style: TextStyle(
+                color: Color(Constants.primaryColor),
+                decoration: TextDecoration.underline,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            Icon(
-              Icons.phone,
-              size: 18,
-              color: Color(Constants.primaryColor),
-            ),
-          ],
-        ),
+          ),
+          Icon(
+            Icons.phone,
+            size: 18,
+            color: Color(Constants.primaryColor),
+          ),
+        ],
       ),
     );
   }

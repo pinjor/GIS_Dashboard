@@ -47,7 +47,7 @@ class EpiCenterFinderController
     await requestLocationAndSearch(start, end);
   }
 
-  String? _resolveAreaParam() {
+  Future<String?> _resolveAreaParam() async {
     final filterState = _ref.read(filterControllerProvider);
     final filterNotifier = _ref.read(filterControllerProvider.notifier);
 
@@ -56,7 +56,10 @@ class EpiCenterFinderController
       return null;
     }
 
-    return SessionPlanAreaParamBuilder.build(filterState, filterNotifier);
+    await filterNotifier.ensureHierarchyListsLoaded();
+
+    final currentState = _ref.read(filterControllerProvider);
+    return SessionPlanAreaParamBuilder.build(currentState, filterNotifier);
   }
 
   /// Request location permission and get current location, then search.
@@ -146,7 +149,7 @@ class EpiCenterFinderController
         userLng: userLng,
       );
 
-      final areaParam = _resolveAreaParam();
+      final areaParam = await _resolveAreaParam();
 
       logg.i(
         "EPI Center Finder: Searching near ($userLat, $userLng), area: ${areaParam ?? 'country'}, date: ${startDate.toString().split(' ')[0]}",
@@ -214,9 +217,10 @@ class EpiCenterFinderController
         ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
 
       final visibleCount = deduplicatedResults.length;
+      final apiSessionCount = sessionPlanData.sessionCount ?? 0;
       logg.i(
         "EPI Center Finder: $visibleCount centers to display "
-        "(API session_count: ${sessionPlanData.sessionCount ?? 'null'}, "
+        "(API session_count: $apiSessionCount, "
         'features: ${sessionPlanData.features!.length})',
       );
 
@@ -227,7 +231,7 @@ class EpiCenterFinderController
       state = state.copyWith(
         isLoading: false,
         results: deduplicatedResults,
-        sessionCount: visibleCount,
+        sessionCount: apiSessionCount,
         selectedCenterId: firstId,
         clearSelectedCenterDetails: true,
         clearDetailsError: true,

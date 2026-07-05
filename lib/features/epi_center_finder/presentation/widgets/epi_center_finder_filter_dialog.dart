@@ -149,12 +149,6 @@ class _EpiCenterFinderFilterDialogState
 
   int _getTotalSessions() {
     final finderState = ref.watch(epiCenterFinderControllerProvider);
-    if (finderState.isLoading) {
-      return finderState.sessionCount ?? finderState.results.length;
-    }
-    if (finderState.results.isNotEmpty) {
-      return finderState.results.length;
-    }
     return finderState.sessionCount ?? 0;
   }
 
